@@ -9,6 +9,28 @@ import java.util.TreeMap;
  * @author neop
  */
 public class Layer {
+
+    /**
+     * This exception will be thrown, if a place doesn't exist at a certain position
+     * 
+     */
+    public static class PlaceNotFoundException extends Exception {
+        int x, y;
+        
+        /**
+         * Constructs an exception
+         * @param _x x coordinate of the place
+         * @param _y y coordinate of the place
+         */
+        public PlaceNotFoundException(int _x, int _y) {
+            x = _x; y = _y;
+        }
+        
+        @Override
+        public String toString(){
+            return "Element at position " + x + ", " + y + " doesn't exist";
+        }
+    }
     
     TreeMap<Integer, TreeMap<Integer, LayerElement>> elements;
     
@@ -45,8 +67,8 @@ public class Layer {
      * @param y y coordinate
      * @return element at that position
      */
-    public LayerElement get(int x, int y) throws RuntimeException{
-        if(!exist(x, y)) throw new RuntimeException("Element at position " + x + ", " + y + " doesn't exist");
+    public LayerElement get(int x, int y) throws PlaceNotFoundException{
+        if(!exist(x, y)) throw new PlaceNotFoundException(x, y);
         return elements.get(x).get(y);
     }
     
@@ -54,7 +76,7 @@ public class Layer {
      * Removes an element from the layer
      * @param element 
      */
-    public void remove(LayerElement element) throws RuntimeException{
+    public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException{
         if(element.get_layer() != this) throw new RuntimeException("Element not in this layer");
         if(get(element.get_x(), element.get_y()) != element) throw new RuntimeException("Element location mismatch (" + element.get_x() + ", " + element.get_y() + ")");
         elements.get(element.get_x()).remove(element.get_y());

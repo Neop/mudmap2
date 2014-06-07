@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import mudmap2.backend.ExitDirection;
 import mudmap2.backend.Layer;
+import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -303,34 +304,44 @@ class WorldTab extends JPanel {
          * * @param max_lines maximum number of lines
          * @return a list of strings
          */
-        private List<String> fit_line_width(String str, FontMetrics fm, int max_length, int max_lines){
-            List<String> ret;
+        private Deque<String> fit_line_width(String str, FontMetrics fm, int max_length, int max_lines){
+            Deque<String> ret;
             if(fm.stringWidth(str) <= max_length){ // string isn't too long, return it
                 ret = new LinkedList<String>();
                 ret.add(str);
             } else { // string is too long
-                // TODO: hier ist ein Fehler drin
-                int strlen = str.length();
-                while(fm.stringWidth(str.substring(0, strlen / 2)) > max_length) strlen /= 2;
-                
-                // note, now: strlen / 2 <= max_length <= strlen
-                if(str.indexOf(' ') <= strlen / 2){ // check if there is a ' ' before max_length
-                    // the string will be cut at the last ' ' before max_length
-                    strlen = str.substring(strlen).lastIndexOf(' ');
-                    while(fm.stringWidth(str.substring(0, strlen)) > max_length) strlen = str.substring(strlen).lastIndexOf(' ');
-                } else { // just cut the string if there is no ' '
-                    strlen /= 2;
+                // roughly fit the string
+                int strlen = Math.min(str.length(), max_length / fm.charWidth('.'));
+
+                // find last ' ' before max_length, if there is no ' ' cut the
+                // string at max_length 
+                while(fm.stringWidth(str.substring(0, strlen)) > max_length){
+                    int whitespace = str.substring(0, strlen).lastIndexOf(' ');
+                    if(whitespace != -1){
+                        strlen = whitespace;
+                    } else {
+                        int lenpx = fm.stringWidth(str.substring(0, strlen / 2));
+                        while(lenpx > max_length){
+                            strlen /= 2;
+                            lenpx = fm.stringWidth(str.substring(0, strlen));
+                            if(lenpx < max_length) strlen *= 1.5;
+                        } 
+                        break;
+                    }
                 }
                 
-                // cut the next part and return it, abbreviate the stringif the max line number is reached
+                // cut the next part and return it, abbreviate the string if the max line number is reached
                 if(max_lines > 0){
                     ret = fit_line_width(str.substring(strlen), fm, max_length, max_lines - 1);
-                    ret.add(str.substring(0, strlen));
+                    ret.addFirst(str.substring(0, strlen));
+                    System.out.println("a " + strlen);
                 } else {
                     ret = new LinkedList<String>();
                     ret.add(str.substring(0, strlen - 3) + "...");
+                    System.out.println("b " + strlen);
                 }
             }
+            System.out.println(ret.size());
             return ret;
         }
         
@@ -405,7 +416,7 @@ class WorldTab extends JPanel {
                             g.setColor(Color.BLACK);
                             FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
                             // fit the string into the tile
-                            List<String> line = fit_line_width(cur_place.get_name(), fm, (int) (get_tile_size() - 2 * get_tile_border_risk_level() - risk_level_stroke_width), (int) Math.floor(get_tile_size() / fm.getHeight()) - 1);
+                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (get_tile_size() - 2 * get_tile_border_risk_level() - risk_level_stroke_width), (int) Math.floor(get_tile_size() / fm.getHeight()) - 1);
                             int line_num = 0;
                             for(String str: line){
                                 g.drawString(str, place_x_px + get_tile_border_risk_level() + (int) Math.ceil(risk_level_stroke_width), place_y_px + get_tile_border_risk_level() + fm.getHeight() * (1 + line_num));
@@ -418,7 +429,8 @@ class WorldTab extends JPanel {
                         // TODO: draw flags
                         
                     } catch (RuntimeException e) {
-                        //System.out.println(e); // only for debug purposes, exceptions are normal
+                        System.out.println(e);
+                    } catch (PlaceNotFoundException e){ // TODO: only for debug purposes, exceptions are normal
                     }
                     
                 }
