@@ -90,7 +90,8 @@ public class World {
                 while((line = reader.readLine()) != null){
                     line = line.trim();
 
-                    if(line.startsWith("ver")){ // world file version
+                    if(line.startsWith("//") || line.startsWith("#")) continue; // comments
+                    else if(line.startsWith("ver")){ // world file version
                         /* note: the version number should only vary if the
                          * world file structure changed. Before mudmap 1.4.60 the
                          * file version was always equal to the program version
@@ -162,7 +163,7 @@ public class World {
                         String local_exit = config_get_text(2, line);
                         
                         // TODO: neue verbindung erstellen, wenn im anderen Ort noch keine ist
-                        //if(places.containsKey(other_place_id) && places.get(other_place_id))
+                        // if(places.containsKey(other_place_id) && places.get(other_place_id))
                     } else if(line.startsWith("pp")){ // place to place (path) connection
                         
                     } else if(line.startsWith("pchi")){ // place child
@@ -235,6 +236,70 @@ public class World {
      */
     public RiskLevel get_risk_level(int id){
         return risk_levels.get(id);
+    }
+    
+    /**
+     * Gets the world name
+     * @return world name
+     */
+    public String get_name(){
+        return name;
+    }
+    
+    /**
+     * Sets the world name
+     * @param n new world name
+     */
+    public void set_name(String n){
+        name = n;
+    }
+    
+    /**
+     * Gets the world file
+     * @return world file string
+     */
+    public String get_file(){
+        return file;
+    }
+    
+    /**
+     * Gets the layer of the home position
+     * @return home layer
+     */
+    public int get_home_layer(){
+        return home_layer;
+    }
+    
+    /**
+     * Gets the x coordinate of the home position
+     * @return x coordinate
+     */
+    public double get_home_x(){
+        return home_x;
+    }
+    
+    /**
+     * Gets the y coordinate of the home position
+     * @return y coordinate
+     */
+    public double get_home_y(){
+        return home_y;
+    }
+    
+    /**
+     * Gets the path color
+     * @return path color
+     */
+    public Color get_path_color(){
+        return path_color;
+    }
+    
+    /**
+     * Gets the color for paths that aren't predefined
+     * @return path color
+     */
+    public Color get_path_color_nstd(){
+        return path_color_nstd;
     }
 
 }

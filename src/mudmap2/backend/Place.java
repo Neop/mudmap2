@@ -194,6 +194,14 @@ public class Place extends LayerElement {
     }
     
     /**
+     * Gets all paths
+     * @return all paths
+     */
+    public TreeSet<Path> get_paths(){
+        return connected_places;
+    }
+    
+    /**
      * Gets a flag value
      * @param key flag name
      * @return flag value

@@ -30,6 +30,14 @@ public class ExitDirection {
      * Gets the way direcion String
      * @return Way direction String
      */
+    public String get_name(){
+        return toString();
+    }
+    
+    /**
+     * Gets the way direcion String
+     * @return Way direction String
+     */
     @Override
     public String toString(){
         return dir;
