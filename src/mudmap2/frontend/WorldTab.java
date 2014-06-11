@@ -6,17 +6,20 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,6 +62,9 @@ class WorldTab extends JPanel {
     boolean show_place_selection;
     int place_selected_x, place_selected_y;
     
+    final int meta_file_ver_major = 1;
+    final int meta_file_ver_minor = 0;
+    
     /**
      * Describes the tile size / zoom
      */
@@ -72,7 +78,7 @@ class WorldTab extends JPanel {
      * @param _world_name name of the world
      */
     public WorldTab(String _world_name){
-        positions = new LinkedList<WorldCoordinate>() {};
+        positions = new LinkedList<WorldCoordinate>();
         tile_size = TileSize.MEDIUM;
         
         world_name = _world_name;
@@ -95,7 +101,6 @@ class WorldTab extends JPanel {
         
         // open / get the world
         world = WorldManager.get_world(WorldManager.get_world_file(world_name));
-        goto_home();
         load_meta();
         
         show_place_selection = true; // TODO: default false, read state from file
@@ -159,7 +164,6 @@ class WorldTab extends JPanel {
      */
     public void redraw(){
         worldpanel.repaint();
-        // TODO: implement this
     }
     
     /**
@@ -191,10 +195,13 @@ class WorldTab extends JPanel {
                     } else if(line.startsWith("pcv")){ // previously shown places
                         String[] tmp = line.split(" ");
                         int tmp_layer_id = Integer.parseInt(tmp[1]);
+                        
                         // the x coordinate has to be negated for backward compatibility to mudmap 1.x
                         double tmp_pos_x = -Double.parseDouble(tmp[2]);
                         double tmp_pos_y = Double.parseDouble(tmp[3]);
-                        push_position(new WorldCoordinate(tmp_layer_id, tmp_pos_x, tmp_pos_y));
+                        
+                        WorldCoordinate newcoord = new WorldCoordinate(tmp_layer_id, tmp_pos_x, tmp_pos_y);
+                        if(positions.size() == 0 || !get_cur_position().equals(newcoord)) push_position(newcoord);
                     }
                 }
             } catch (IOException ex) {
@@ -213,7 +220,26 @@ class WorldTab extends JPanel {
      * Saves the world meta file
      */
     private void write_meta(){
-        // TODO: implement this
+        try {
+            // open file
+            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(world.get_file() + "_meta")));
+
+            outstream.println("# MUD Map (v2) world meta data file");
+            outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
+            
+            // write current position and position history
+            outstream.println("lp " + get_cur_position().get_meta_String());
+            
+            for(Iterator<WorldCoordinate> wcit = positions.descendingIterator(); wcit.hasNext();){
+                WorldCoordinate next = wcit.next();
+                if(next != get_cur_position()) outstream.println("pcv " + next.get_meta_String());
+            }
+            
+            outstream.close();
+        } catch (IOException ex) {
+            System.out.printf("Couldn't write world meta file " + world.get_file() + "_meta");
+            Logger.getLogger(WorldTab.class.getName()).log(Level.WARNING, null, ex);
+        }
     }
     
     private static class WorldPanel extends JPanel {
@@ -234,6 +260,8 @@ class WorldTab extends JPanel {
         final int tile_big_size = 180;
         final int tile_big_border_area = 10;
         final int tile_big_border_risk_level = 10;
+        
+        double screen_width, screen_height;
         
         WorldTab parent;
 
@@ -341,9 +369,8 @@ class WorldTab extends JPanel {
                 // string at max_length 
                 while(fm.stringWidth(str.substring(0, strlen)) > max_length){
                     int whitespace = str.substring(0, strlen).lastIndexOf(' ');
-                    if(whitespace != -1){
-                        strlen = whitespace;
-                    } else {
+                    if(whitespace != -1) strlen = whitespace;
+                    else {
                         int lenpx = fm.stringWidth(str.substring(0, strlen / 2));
                         while(lenpx > max_length){
                             strlen /= 2;
@@ -367,6 +394,31 @@ class WorldTab extends JPanel {
         }
         
         /**
+         * Converts mouse / screen coordinates to world coordinates
+         * @param mouse_x a screen coordinate (x-axis)
+         * @return world coordinate x
+         */
+        private int get_tile_pos_x(int mouse_x){
+            int tile_size = get_tile_size();
+            //return (int) -Math.round((double) (mouse_x - screen_width / 2) / tile_size - parent.get_cur_position().get_x());
+            return (int) (mouse_x / tile_size + screen_width / 2 + parent.get_cur_position().get_x() - Math.round(screen_width / 2) + Math.round(parent.get_cur_position().get_x()));
+            // TODO: Formel verbessern
+            
+            //tile_x = (place_x_px / tile_size) + screen_center_x + cur_pos.get_x() - Math.round(screen_center_x) - Math.round(cur_pos.get_x());
+            
+        }
+        
+        /**
+         * Converts mouse / screen coordinates to world coordinates
+         * @param mouse_y a screen coordinate (y-axis)
+         * @return world coordinate y
+         */
+        private int get_tile_pos_y(int mouse_y){
+            int tile_size = get_tile_size();
+            return (int) -Math.round((double) (mouse_y - screen_height / 2) / tile_size - parent.get_cur_position().get_y());
+        }
+        
+        /**
          * Draws the map to the screen
          * @param g 
          */
@@ -377,8 +429,8 @@ class WorldTab extends JPanel {
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
             
             // screen size
-            double screen_width = g.getClipBounds().getWidth();
-            double screen_height = g.getClipBounds().getHeight();
+            screen_width = g.getClipBounds().getWidth();
+            screen_height = g.getClipBounds().getHeight();
             
             // screen center in world coordinates
             double screen_center_x = ((double) screen_width / get_tile_size()) / 2; // note: wdtwd2
@@ -443,7 +495,9 @@ class WorldTab extends JPanel {
                             for(String str: line){
                                 g.drawString(str, place_x_px + get_tile_border_risk_level() + (int) Math.ceil(risk_level_stroke_width), place_y_px + get_tile_border_risk_level() + fm.getHeight() * (1 + line_num));
                                 line_num++;
-                            }                            
+                            }
+                            
+                            g.drawString(place_x + " " + place_y, place_x_px, place_y_px + get_tile_size() / 2);
                         }
                         
                         // TODO: draw flags
@@ -483,6 +537,15 @@ class WorldTab extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent arg0) {
+                int x = get_tile_pos_x(arg0.getX());
+                int y = get_tile_pos_y(arg0.getY());
+                
+                System.out.println("pl " + x + " " + y);
+                /*try {
+                    System.out.println("- " + ((Place) parent.world.get_layer(parent.get_cur_position().get_layer()).get(x, y)).get_name());
+                } catch (PlaceNotFoundException ex) {
+                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                }*/
             }
 
             @Override
@@ -594,6 +657,27 @@ class WorldTab extends JPanel {
             x += dx;
             y += dy;
             redraw();
+        }
+        
+        /**
+         * Gets the position data in String format
+         * @return 
+         */
+        @Override
+        public String toString(){
+            return layer + " " + x + " " + y;
+        }
+        
+        /**
+         * Gets the position data in String format for meta files
+         * @return 
+         */
+        public String get_meta_String(){
+            return layer + " " + -x + " " + y;
+        }
+        
+        public boolean equals(WorldCoordinate c){
+            return layer == c.layer && x == c.x && y == c.y;
         }
     }
 }
