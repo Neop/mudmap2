@@ -92,9 +92,10 @@ class WorldTab extends JPanel {
         
         worldpanel = new WorldPanel(this);
         add(worldpanel, BorderLayout.CENTER);
-        worldpanel.addMouseListener(worldpanel.new TabMouseListener());
+        /**worldpanel.addMouseListener(worldpanel.new TabMouseListener());
         worldpanel.addMouseMotionListener(worldpanel.new TabMouseMotionListener());
         worldpanel.addKeyListener(worldpanel.new TabKeyListener());
+        */
         
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
@@ -130,6 +131,75 @@ class WorldTab extends JPanel {
      */
     private WorldCoordinate get_cur_position(){
         return positions.getFirst();
+    }
+    
+    /**
+     * Gets the x coordinate of the selected place
+     * @return x coordinate
+     */
+    private int get_place_selection_x(){
+        return place_selected_x;
+    }
+    
+    /**
+     * Gets the y coordinate of the selected place 
+     * @return y coordinate
+     */
+    private int get_place_selection_y(){
+        return place_selected_y;
+    }
+    
+    /**
+     * Sets the coordinates of the selected place
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    private void set_place_selection(int x, int y){
+        place_selected_x = x;
+        place_selected_y = y;
+        move_screen_to_place_selection();
+        redraw();
+    }
+    
+    /**
+     * Moves the place selection coordinates
+     * @param dx x movement
+     * @param dy y movement
+     */
+    private void move_place_selection(int dx, int dy){
+        place_selected_x += dx;
+        place_selected_y += dy;
+        move_screen_to_place_selection();
+        redraw();
+    }
+    
+    /**
+     * moves the shown places so the slection is on the screen
+     */
+    private void move_screen_to_place_selection(){    
+        // screen center in world coordinates
+        /*double screen_center_x = ((double) worldpanel.screen_width / worldpanel.get_tile_size()) / 2; // note: wdtwd2
+        double screen_center_y = ((double) worldpanel.screen_height / worldpanel.get_tile_size()) / 2;
+
+        int place_x_offset = (int) (Math.round((float) get_cur_position().get_x()) - Math.floor(screen_center_x));
+        int place_y_offset = (int) (Math.round((float) get_cur_position().get_y()) - Math.floor(screen_center_y));
+
+        // place position on the map
+        int place_x_min = place_x_offset;
+        int place_y_min = place_y_offset + (int)(worldpanel.screen_height / worldpanel.get_tile_size());
+        
+        int place_x_max = place_x_min + (int) (worldpanel.screen_width / worldpanel.get_tile_size());
+        int place_y_max = place_y_min + (int) (worldpanel.screen_height / worldpanel.get_tile_size());
+        
+        double ofs_x = 1 - ((worldpanel.screen_width / worldpanel.get_tile_size()) + place_x_min - place_x_max - get_cur_position().get_x() + Math.floor(get_cur_position().get_x()));
+        double dx_left = -screen_center_x - get_cur_position().get_x() + Math.round(screen_center_x) + Math.round(get_cur_position().get_x());
+        double dx_right = dx_left + worldpanel.screen_width / worldpanel.get_tile_size() - Math.floor(worldpanel.screen_width / worldpanel.get_tile_size());
+        
+        System.out.println(dx_left + " " + dx_right);
+        
+        if(place_selected_x > place_x_max) get_cur_position().move(place_selected_x - place_x_max, 0);
+        else if(place_selected_x < place_x_min + 1) get_cur_position().move(place_selected_x - place_x_min + dx_left, 0); // ok
+        */
     }
     
     /**
@@ -271,6 +341,10 @@ class WorldTab extends JPanel {
          */
         public WorldPanel(WorldTab _parent) {
             parent = _parent;
+            setFocusable(true);
+            addKeyListener(new TabKeyListener());
+            addMouseListener(new TabMouseListener());
+            addMouseMotionListener(new TabMouseMotionListener());
         }
         
         /**
@@ -546,6 +620,8 @@ class WorldTab extends JPanel {
                 } catch (PlaceNotFoundException ex) {
                     Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
                 }*/
+                
+                // TODO: if doubleclick: set place selection to coordinates
             }
 
             @Override
@@ -593,13 +669,26 @@ class WorldTab extends JPanel {
 
             @Override
             public void keyTyped(KeyEvent arg0) {
-                System.out.println("Dcdvdded");
+                // TODO: warum funktionieren keine Keycodes?
+                switch(Character.toLowerCase(arg0.getKeyChar())){
+                    // Shift place selection - wasd
+                    case 'w':
+                        parent.move_place_selection(0, +1);
+                        break;
+                    case 'a':
+                        parent.move_place_selection(-1, 0);
+                        break;
+                    case 's':
+                        parent.move_place_selection(0, -1);
+                        break;
+                    case 'd':
+                        parent.move_place_selection(+1, 0);
+                        break;
+                } 
             }
 
             @Override
-            public void keyPressed(KeyEvent arg0) {
-                System.out.println("dsvdv");
-            }
+            public void keyPressed(KeyEvent arg0) {}
 
             @Override
             public void keyReleased(KeyEvent arg0) {}
@@ -646,6 +735,22 @@ class WorldTab extends JPanel {
          */
         public double get_y(){
             return y;
+        }
+        
+        /**
+         * Sets the x coordinate
+         * @param _x new x coordinate
+         */
+        public void set_x(double _x){
+            x = _x;
+        }
+        
+        /**
+         * Sets the y coordinate
+         * @param _y new y coordinate
+         */
+        public void set_y(double _y){
+            y = _y;
         }
         
         /**
