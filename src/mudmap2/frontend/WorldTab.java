@@ -23,8 +23,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JToolBar;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import mudmap2.backend.ExitDirection;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Layer.PlaceNotFoundException;
@@ -47,6 +51,8 @@ class WorldTab extends JPanel {
     
     WorldPanel worldpanel;
     JToolBar toolbar;
+    JSlider slider_zoom;
+    JPanel panel_south;
     
     // currently shown position
     Deque<WorldCoordinate> positions;
@@ -63,7 +69,7 @@ class WorldTab extends JPanel {
     int place_selected_x, place_selected_y;
     
     static final int meta_file_ver_major = 1;
-    static final int meta_file_ver_minor = 0;
+    static final int meta_file_ver_minor = 1;
     
     // tile size in pixel
     int tile_size;
@@ -80,6 +86,11 @@ class WorldTab extends JPanel {
         
         world_name = _world_name;
         
+        mouse_in_panel = false;
+        mouse_x_previous = mouse_y_previous = 0;
+        
+        place_selection_enabled = false;
+        
         tile_center_color = new Color(207, 190, 134);
         
         setLayout(new BorderLayout());
@@ -90,14 +101,23 @@ class WorldTab extends JPanel {
         worldpanel = new WorldPanel(this);
         add(worldpanel, BorderLayout.CENTER);
         
-        mouse_in_panel = false;
-        mouse_x_previous = mouse_y_previous = 0;
-        
-        place_selection_enabled = false;
-        
         // open / get the world
         world = WorldManager.get_world(WorldManager.get_world_file(world_name));
         load_meta();
+        
+        add(panel_south = new JPanel(), BorderLayout.SOUTH);
+        panel_south.setLayout(new BorderLayout());
+        
+        slider_zoom = new JSlider(0, 100, (int) (100.0 / tile_size_max * tile_size));
+        panel_south.add(slider_zoom, BorderLayout.EAST);
+        slider_zoom.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent arg0) {
+                set_tile_size((int) ((double) tile_size_max * ((JSlider) arg0.getSource()).getValue() / 100.0));
+            }
+        });
+        
+        panel_south.add(new JButton("dff"), BorderLayout.CENTER);
         
         // set default selected place to hte center place
         place_selected_x = (int) Math.round(get_cur_position().get_x());
@@ -174,7 +194,7 @@ class WorldTab extends JPanel {
     private void move_screen_to_place_selection(){           
         int screen_x = worldpanel.get_screen_pos_x(place_selected_x);
         int screen_y = worldpanel.get_screen_pos_y(place_selected_y);
-        int tilesize = worldpanel.get_tile_size();
+        int tilesize = get_tile_size();
         
         double dx = 0, dy = 0;
         
@@ -247,11 +267,20 @@ class WorldTab extends JPanel {
     }
     
     /**
+     * Gets the current tile size
+     * @return tile size
+     */
+    private int get_tile_size(){
+        return tile_size;
+    }
+    
+    /**
      * sets the tile size
      * @param ts new tile size
      */
     public void set_tile_size(int ts){
-        tile_size = ts;
+        tile_size = Math.min(Math.max(ts, tile_size_min), tile_size_max);
+        slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         redraw();
     }
     
@@ -260,6 +289,7 @@ class WorldTab extends JPanel {
      */
     public void tile_size_increment(){
         if(tile_size < tile_size_max) tile_size++;
+        slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         redraw();
     }
     
@@ -268,6 +298,7 @@ class WorldTab extends JPanel {
      */
     public void tile_size_decrement(){
         if(tile_size > tile_size_min) tile_size--;
+        slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         redraw();
     }
     
@@ -387,19 +418,11 @@ class WorldTab extends JPanel {
         }
         
         /**
-         * Gets the current tile size
-         * @return tile size
-         */
-        private int get_tile_size(){
-            return parent.tile_size;
-        }
-        
-        /**
          * Gets the current tile border area size
          * @return area border width
          */
         private int get_tile_border_area(){
-            return (int) Math.round(tile_border_area * Math.min(1.0, Math.max(0.5, (double) (get_tile_size() - 20) / 80)));
+            return (int) Math.round(tile_border_area * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
             //return get_tile_draw_text() ? tile_border_area : (tile_border_area / 2);
         }
         
@@ -408,7 +431,7 @@ class WorldTab extends JPanel {
          * @return risk level border width
          */
         private int get_tile_border_risk_level(){
-            return (int) Math.round(tile_border_risk_level * Math.min(1.0, Math.max(0.5, (double) (get_tile_size() - 20) / 80)));
+            return (int) Math.round(tile_border_risk_level * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
             //return get_tile_draw_text() ? tile_border_risk_level : (tile_border_risk_level / 2);
         }
         
@@ -417,7 +440,7 @@ class WorldTab extends JPanel {
          * @return 
          */
         private boolean get_tile_draw_text(){
-            return get_tile_size() >= 60;
+            return parent.get_tile_size() >= 60;
         }
         
         /**
@@ -430,24 +453,24 @@ class WorldTab extends JPanel {
          */
         private boolean get_exit_offset(ExitDirection dir, Integer x_offset, Integer y_offset){
             if(dir.get_abbreviation().equals("n")){ // north
-                x_offset = get_tile_size() / 2;
+                x_offset = parent.get_tile_size() / 2;
                 y_offset = get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("ne")){ // north-east
                 x_offset = get_tile_border_risk_level();
-                y_offset = get_tile_size() - get_tile_border_risk_level();
+                y_offset = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("e")){ // east
-                x_offset = get_tile_size() / 2;
+                x_offset = parent.get_tile_size() / 2;
                 y_offset = get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("se")){ // south-east
-                x_offset = y_offset = get_tile_size() - get_tile_border_risk_level();
+                x_offset = y_offset = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("s")){ // south
-                x_offset = get_tile_size() / 2;
-                y_offset = get_tile_size() - get_tile_border_risk_level();
+                x_offset = parent.get_tile_size() / 2;
+                y_offset = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("sw")){ // south-west
-                x_offset = get_tile_size() - get_tile_border_risk_level();
+                x_offset = parent.get_tile_size() - get_tile_border_risk_level();
                 y_offset = get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("w")){ // west
-                x_offset = get_tile_size() / 2;
+                x_offset = parent.get_tile_size() / 2;
                 y_offset = get_tile_border_risk_level();
             } else if(dir.get_abbreviation().equals("nw")){ // north-west
                 x_offset = get_tile_border_risk_level();
@@ -519,7 +542,7 @@ class WorldTab extends JPanel {
          * @return world coordinate x
          */
         private int get_place_pos_x(int screen_x){
-            return (int) Math.ceil((double) (screen_x - screen_width / 2) / get_tile_size() + parent.get_cur_position().get_x()) - 1;
+            return (int) Math.ceil((double) (screen_x - screen_width / 2) / parent.get_tile_size() + parent.get_cur_position().get_x()) - 1;
         }
         
         /**
@@ -528,7 +551,7 @@ class WorldTab extends JPanel {
          * @return world coordinate y
          */
         private int get_place_pos_y(int screen_y){
-            return (int) -Math.ceil((double) (screen_y - screen_height / 2) / get_tile_size() - parent.get_cur_position().get_y()) + 1;
+            return (int) -Math.ceil((double) (screen_y - screen_height / 2) / parent.get_tile_size() - parent.get_cur_position().get_y()) + 1;
         }
         
         /**
@@ -537,7 +560,7 @@ class WorldTab extends JPanel {
          * @return a screen coordinate x
          */
         private int get_screen_pos_x(int place_x){
-            int tile_size = get_tile_size();
+            int tile_size = parent.get_tile_size();
             double screen_center_x = ((double) screen_width / tile_size) / 2; // note: wdtwd2
             int place_x_offset = (int) (Math.round((double) parent.get_cur_position().get_x()) - Math.round(screen_center_x));
             return (int)((place_x - place_x_offset + remint(screen_center_x) - remint(parent.get_cur_position().get_x())) * tile_size);
@@ -549,7 +572,7 @@ class WorldTab extends JPanel {
          * @return a screen coordinate y
          */
         private int get_screen_pos_y(int place_y){
-            int tile_size = get_tile_size();
+            int tile_size = parent.get_tile_size();
             double screen_center_y = ((double) screen_height / tile_size) / 2;
             int place_y_offset = (int) (Math.round(parent.get_cur_position().get_y()) - Math.round(screen_center_y));
             return (int)((-place_y + place_y_offset - remint(screen_center_y) + remint(parent.get_cur_position().get_y())) * tile_size + screen_height);
@@ -565,7 +588,7 @@ class WorldTab extends JPanel {
             WorldCoordinate cur_pos = parent.get_cur_position();
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
             
-            int tile_size = get_tile_size();
+            int tile_size = parent.get_tile_size();
             
             // screen size
             screen_width = g.getClipBounds().getWidth();
@@ -606,8 +629,10 @@ class WorldTab extends JPanel {
                         }
                         
                         // draw tile center color
-                        g.setColor(parent.tile_center_color);
-                        g.fillRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
+                        if(get_tile_draw_text()){
+                            g.setColor(parent.tile_center_color);
+                            g.fillRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
+                        }
                         
                         // TODO: draw risk level border
                         g.setColor(parent.world.get_risk_level(cur_place.get_risk_lvl()).get_color().get_awt_color());
@@ -705,8 +730,8 @@ class WorldTab extends JPanel {
             @Override
             public void mouseDragged(MouseEvent arg0) {
                 if(parent.mouse_in_panel){
-                    double dx = (double) (arg0.getX() - parent.mouse_x_previous) / get_tile_size();
-                    double dy = (double) (arg0.getY() - parent.mouse_y_previous) / get_tile_size();
+                    double dx = (double) (arg0.getX() - parent.mouse_x_previous) / parent.get_tile_size();
+                    double dy = (double) (arg0.getY() - parent.mouse_y_previous) / parent.get_tile_size();
                     parent.get_cur_position().move(-dx , dy);
                 }
                 parent.mouse_x_previous = arg0.getX();
@@ -761,7 +786,6 @@ class WorldTab extends JPanel {
             public void keyReleased(KeyEvent arg0) {}
             
         }
-        
     }
     
     private class WorldCoordinate {
