@@ -51,7 +51,7 @@ class WorldTab extends JPanel {
     // currently shown position
     Deque<WorldCoordinate> positions;
     // max amount of elements in the list
-    final int history_max_length = 25;
+    static final int history_max_length = 25;
     
     // true, if the mouse is in the panel, for relative motion calculation
     boolean mouse_in_panel;
@@ -62,16 +62,13 @@ class WorldTab extends JPanel {
     boolean keyboard_place_selection_enabled;
     int place_selected_x, place_selected_y;
     
-    final int meta_file_ver_major = 1;
-    final int meta_file_ver_minor = 0;
+    static final int meta_file_ver_major = 1;
+    static final int meta_file_ver_minor = 0;
     
-    /**
-     * Describes the tile size / zoom
-     */
-    enum TileSize {
-        SMALL, MEDIUM, LARGE
-    };
-    TileSize tile_size;
+    // tile size in pixel
+    int tile_size;
+    static final int tile_size_min = 10;
+    static final int tile_size_max = 200;
     
     /**
      * Constructs the world tab, opens the world if necessary
@@ -79,7 +76,7 @@ class WorldTab extends JPanel {
      */
     public WorldTab(String _world_name){
         positions = new LinkedList<WorldCoordinate>();
-        tile_size = TileSize.MEDIUM;
+        tile_size = 120;
         
         world_name = _world_name;
         
@@ -227,6 +224,31 @@ class WorldTab extends JPanel {
     }
     
     /**
+     * sets the tile size
+     * @param ts new tile size
+     */
+    public void set_tile_size(int ts){
+        tile_size = ts;
+        redraw();
+    }
+    
+    /**
+     * increases the tile size
+     */
+    public void tile_size_increment(){
+        if(tile_size < tile_size_max) tile_size++;
+        redraw();
+    }
+    
+    /**
+     * decreases the tile size
+     */
+    public void tile_size_decrement(){
+        if(tile_size > tile_size_min) tile_size--;
+        redraw();
+    }
+    
+    /**
      * Loads the world meta data file
      * this file describes the coordinates of the last shown positions
      */
@@ -304,22 +326,13 @@ class WorldTab extends JPanel {
     
     private static class WorldPanel extends JPanel {
         
-        final float risk_level_stroke_width = 3;
+        static final float risk_level_stroke_width = 3;
         
-        final float tile_selection_stroke_width = 3;
-        final java.awt.Color tile_selection_color = new java.awt.Color(255, 0, 0);
+        static final float tile_selection_stroke_width = 3;
+        static final java.awt.Color tile_selection_color = new java.awt.Color(255, 0, 0);
         
-        final int tile_small_size = 60;
-        final int tile_small_border_area = 5;
-        final int tile_small_border_risk_level = 5;
-        
-        final int tile_medium_size = 120;
-        final int tile_medium_border_area = 10;
-        final int tile_medium_border_risk_level = 10;
-        
-        final int tile_big_size = 180;
-        final int tile_big_border_area = 10;
-        final int tile_big_border_risk_level = 10;
+        static final int tile_border_area = 10;
+        static final int tile_border_risk_level = 10;
         
         double screen_width, screen_height;
         
@@ -342,14 +355,7 @@ class WorldTab extends JPanel {
          * @return tile size
          */
         private int get_tile_size(){
-            switch(parent.tile_size){
-                case SMALL: return tile_small_size;
-                case MEDIUM: return tile_medium_size;
-                case LARGE: return tile_big_size;
-                default:
-                    throw new UnsupportedOperationException("Tile size " + parent.tile_size + " is not supported yet.");
-            }
-            //return tile_medium_size;
+            return parent.tile_size;
         }
         
         /**
@@ -357,14 +363,8 @@ class WorldTab extends JPanel {
          * @return area border width
          */
         private int get_tile_border_area(){
-            switch(parent.tile_size){
-                case SMALL: return tile_small_border_area;
-                case MEDIUM: return tile_medium_border_area;
-                case LARGE: return tile_big_border_area;
-                default:
-                    throw new UnsupportedOperationException("Tile size " + parent.tile_size + " is not supported yet.");
-            }
-            //return tile_medium_border_area;
+            return (int) Math.round(tile_border_area * Math.min(1.0, Math.max(0.5, (double) (get_tile_size() - 20) / 80)));
+            //return get_tile_draw_text() ? tile_border_area : (tile_border_area / 2);
         }
         
         /**
@@ -372,14 +372,16 @@ class WorldTab extends JPanel {
          * @return risk level border width
          */
         private int get_tile_border_risk_level(){
-            switch(parent.tile_size){
-                case SMALL: return tile_small_border_risk_level;
-                case MEDIUM: return tile_medium_border_risk_level;
-                case LARGE: return tile_big_border_risk_level;
-                default:
-                    throw new UnsupportedOperationException("Tile size " + parent.tile_size + " is not supported yet.");
-            }
-            //return tile_medium_size;
+            return (int) Math.round(tile_border_risk_level * Math.min(1.0, Math.max(0.5, (double) (get_tile_size() - 20) / 80)));
+            //return get_tile_draw_text() ? tile_border_risk_level : (tile_border_risk_level / 2);
+        }
+        
+        /**
+         * Returns true if the tile is large enough to draw text
+         * @return 
+         */
+        private boolean get_tile_draw_text(){
+            return get_tile_size() >= 60;
         }
         
         /**
@@ -439,13 +441,15 @@ class WorldTab extends JPanel {
                 // string at max_length 
                 while(fm.stringWidth(str.substring(0, strlen)) > max_length){
                     int whitespace = str.substring(0, strlen).lastIndexOf(' ');
-                    if(whitespace != -1) strlen = whitespace;
+                    // if there is still a whitespace: cut the string
+                    if(whitespace != -1) strlen = whitespace; 
                     else {
-                        int lenpx = fm.stringWidth(str.substring(0, strlen / 2));
+                        // if there is no whitespace fit the string length to the line pixel width
+                        int lenpx = fm.stringWidth(str.substring(0, (int) Math.ceil(strlen / 1.5)));
                         while(lenpx > max_length){
-                            strlen /= 2;
+                            strlen = (int) Math.ceil(strlen / 1.5);
                             lenpx = fm.stringWidth(str.substring(0, strlen));
-                            if(lenpx < max_length) strlen *= 1.5;
+                            //if(lenpx < max_length) strlen *= 1.5;
                         } 
                         break;
                     }
@@ -453,11 +457,12 @@ class WorldTab extends JPanel {
                 
                 // cut the next part and return it, abbreviate the string if the max line number is reached
                 if(max_lines > 0){
-                    ret = fit_line_width(str.substring(strlen), fm, max_length, max_lines - 1);
+                    ret = fit_line_width(str.substring(strlen).trim(), fm, max_length, max_lines - 1);
                     ret.addFirst(str.substring(0, strlen));
                 } else {
                     ret = new LinkedList<String>();
-                    ret.add(str.substring(0, strlen - 3) + "...");
+                    if(strlen > 3) ret.add(str.substring(0, strlen - 3) + "...");
+                    else ret.add("...");
                 }
             }
             return ret;
@@ -584,18 +589,17 @@ class WorldTab extends JPanel {
                         // funktioniert die Werterückgabe?
                         
                         // draw text, if not in small tiles mode
-                        if(parent.tile_size != TileSize.SMALL){
+                        if(get_tile_draw_text()){
                             g.setColor(Color.BLACK);
                             FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
                             // fit the string into the tile
-                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * get_tile_border_risk_level() - risk_level_stroke_width), (int) Math.floor(tile_size / fm.getHeight()) - 1);
+                           
+                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (get_tile_border_area() + tile_selection_stroke_width)), (int) Math.floor((tile_size - 2 * (get_tile_border_risk_level() + get_tile_border_area())) / fm.getHeight()) - 1);
                             int line_num = 0;
                             for(String str: line){
                                 g.drawString(str, place_x_px + get_tile_border_risk_level() + (int) Math.ceil(risk_level_stroke_width), place_y_px + get_tile_border_risk_level() + fm.getHeight() * (1 + line_num));
                                 line_num++;
                             }
-                            
-                            g.drawString(place_x + " " + place_y, place_x_px, place_y_px + tile_size / 2);
                         }
                         
                         // TODO: draw flags
@@ -685,7 +689,7 @@ class WorldTab extends JPanel {
             public void keyTyped(KeyEvent arg0) {
                 // TODO: warum funktionieren keine Keycodes?
                 switch(Character.toLowerCase(arg0.getKeyChar())){
-                    // Shift place selection - wasd
+                    // shift place selection - wasd
                     case 'w':
                         if(parent.keyboard_place_selection_enabled) parent.move_place_selection(0, +1);
                         break;
@@ -697,6 +701,13 @@ class WorldTab extends JPanel {
                         break;
                     case 'd':
                         if(parent.keyboard_place_selection_enabled) parent.move_place_selection(+1, 0);
+                        break;
+                    // zoom the map
+                    case '+':
+                        parent.tile_size_increment();
+                        break;
+                    case '-':
+                        parent.tile_size_decrement();
                         break;
                 } 
             }
