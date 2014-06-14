@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
@@ -49,6 +50,7 @@ class WorldTab extends JPanel {
     
     Color tile_center_color;
     
+    JFrame parent;
     WorldPanel worldpanel;
     JToolBar toolbar;
     JSlider slider_zoom;
@@ -80,7 +82,9 @@ class WorldTab extends JPanel {
      * Constructs the world tab, opens the world if necessary
      * @param _world_name name of the world
      */
-    public WorldTab(String _world_name){
+    public WorldTab(JFrame _parent, String _world_name){
+        parent = _parent;
+        
         positions = new LinkedList<WorldCoordinate>();
         tile_size = 120;
         
@@ -96,7 +100,8 @@ class WorldTab extends JPanel {
         setLayout(new BorderLayout());
         
         toolbar = new JToolBar();
-        add(toolbar, BorderLayout.NORTH);
+        add(toolbar, BorderLayout.WEST);
+        toolbar.add(new JButton("dsd"));
         
         worldpanel = new WorldPanel(this);
         add(worldpanel, BorderLayout.CENTER);
@@ -104,7 +109,7 @@ class WorldTab extends JPanel {
         // open / get the world
         world = WorldManager.get_world(WorldManager.get_world_file(world_name));
         load_meta();
-        
+                        
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
         panel_south.setLayout(new BorderLayout());
         
@@ -452,27 +457,27 @@ class WorldTab extends JPanel {
          * @return false if the dot/circle doesn't have to be drawn
          */
         private boolean get_exit_offset(ExitDirection dir, Integer x_offset, Integer y_offset){
-            if(dir.get_abbreviation().equals("n")){ // north
+            if(dir.get_dir().equals("n")){ // north
                 x_offset = parent.get_tile_size() / 2;
                 y_offset = get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("ne")){ // north-east
+            } else if(dir.get_dir().equals("ne")){ // north-east
                 x_offset = get_tile_border_risk_level();
                 y_offset = parent.get_tile_size() - get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("e")){ // east
+            } else if(dir.get_dir().equals("e")){ // east
                 x_offset = parent.get_tile_size() / 2;
                 y_offset = get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("se")){ // south-east
+            } else if(dir.get_dir().equals("se")){ // south-east
                 x_offset = y_offset = parent.get_tile_size() - get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("s")){ // south
+            } else if(dir.get_dir().equals("s")){ // south
                 x_offset = parent.get_tile_size() / 2;
                 y_offset = parent.get_tile_size() - get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("sw")){ // south-west
+            } else if(dir.get_dir().equals("sw")){ // south-west
                 x_offset = parent.get_tile_size() - get_tile_border_risk_level();
                 y_offset = get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("w")){ // west
+            } else if(dir.get_dir().equals("w")){ // west
                 x_offset = parent.get_tile_size() / 2;
                 y_offset = get_tile_border_risk_level();
-            } else if(dir.get_abbreviation().equals("nw")){ // north-west
+            } else if(dir.get_dir().equals("nw")){ // north-west
                 x_offset = get_tile_border_risk_level();
                 y_offset = get_tile_border_risk_level();
             } else return false;

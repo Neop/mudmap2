@@ -8,7 +8,7 @@ import java.util.TreeSet;
  * A place in the world
  * @author neop
  */
-public class Place extends LayerElement {
+public class Place extends LayerElement implements Comparable<Place> {
     // next id to be assigned
     static int next_id;
     
@@ -194,6 +194,23 @@ public class Place extends LayerElement {
     }
     
     /**
+     * Connects a place to another one tht is specified in path
+     * If 'this place' is not in path an exception will be thrown
+     * @param p 
+     */
+    public void connect_path(Path path) throws RuntimeException{
+        Place[] pp = path.get_places();
+        Place other;
+        
+        if(pp[0] == this) other = pp[1];
+        else if(pp[1] == this) other = pp[0];
+        else throw new RuntimeException("This place is not specified in given path");
+        
+        connected_places.add(path);
+        other.connected_places.add(path);
+    }
+    
+    /**
      * Gets all paths
      * @return all paths
      */
@@ -218,5 +235,16 @@ public class Place extends LayerElement {
      */
     public void set_flag(String key, boolean state){
         flags.put(key, state);
+    }
+    
+    public void connect_child(Place p){
+        children.add(p);
+        p.parents.add(this);
+    }
+    
+    @Override
+    public int compareTo(Place arg0) {
+        if(arg0 == null) throw new NullPointerException();
+        return (this.id == arg0.id) ? 0 : 1;
     }
 }

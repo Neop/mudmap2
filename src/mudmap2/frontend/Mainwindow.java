@@ -148,7 +148,7 @@ public class Mainwindow extends JFrame {
     public void open_world(String world_name){
         if(!world_tabs.containsKey(world_name)){ 
             // open new tab
-            WorldTab tab = new WorldTab(world_name);
+            WorldTab tab = new WorldTab(this, world_name);
             world_tabs.put(world_name, tab);
             tabbed_pane.addTab(tab.get_world_name(), tab);
         }

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,8 +16,8 @@ import java.util.logging.Logger;
 public class World {
     
     public final int file_version_major = 1;
-    public final int file_version_minor = 4;
-    public final int file_version_build = 60;
+    public final int file_version_minor = 5;
+    public final int file_version_build = 0;
     
     // name and file of the world
     String name, file;
@@ -79,14 +80,24 @@ public class World {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             
             String line;
-            try {
-                int cur_area = -1;
-                Place cur_place = new Place(-1, "", 0, 0, new Layer());
-                
-                // temporary data for creating a place
-                int cur_place_id = -1;
-                String cur_place_name = "";
-                
+            
+            int file_major = 0, file_minor = 0, file_build = 0;
+            
+            int cur_area = -1;
+            Place cur_place = new Place(-1, "", 0, 0, new Layer());
+
+            // temporary data for creating a place
+            int cur_place_id = -1;
+            String cur_place_name = "";
+            ArrayList<Pair<Place, Integer>> children = new ArrayList<Pair<Place, Integer>>();
+            ArrayList<PathTmp> tmp_paths = new ArrayList<PathTmp>();
+            ArrayList<PathTmp> tmp_paths_deprecated = new ArrayList<PathTmp>();
+            // error counter for deprecated path specification format
+            // increments if there are more than one path between two places
+            // (there is no way to reconstruct which exits were connected)
+            int path_connection_error_dep_double = 0;
+            
+            try {    
                 while((line = reader.readLine()) != null){
                     line = line.trim();
 
@@ -99,12 +110,13 @@ public class World {
                         
                         // remove tag and split version                      
                         String[] tmp = line.substring(4).trim().split("\\.");
-                        int major = Integer.parseInt(tmp[0]);
-                        int minor = Integer.parseInt(tmp[1]);
-                        int build = Integer.parseInt(tmp[2]);
+                        file_major = Integer.parseInt(tmp[0]);
+                        file_minor = Integer.parseInt(tmp[1]);
+                        file_build = Integer.parseInt(tmp[2]);
 
-                        if(major > file_version_major || (major == file_version_major && (minor > file_version_minor || (minor == file_version_minor && build > file_version_build))))
+                        if(file_major > file_version_major || (file_major == file_version_major && (file_minor > file_version_minor || (file_minor == file_version_minor && file_build > file_version_build))))
                             throw new Exception("World file version is greater than file reader version. Please update mudmap or consult the developer.");
+                            // TODO: Show message dialog
                     } else if(line.startsWith("wname")){ // world name
                         name = line.substring(5).trim();
                     } else if(line.startsWith("wcol")){ // path line color
@@ -160,14 +172,27 @@ public class World {
                          */
                         String[] tmp = line.split(" ");
                         int other_place_id = Integer.parseInt(tmp[1]);
-                        String local_exit = config_get_text(2, line);
                         
-                        // TODO: neue verbindung erstellen, wenn im anderen Ort noch keine ist
-                        // if(places.containsKey(other_place_id) && places.get(other_place_id))
+                        boolean found_path = false;
+                        
+                        for(PathTmp path: tmp_paths_deprecated){
+                            // find place - place pair and connect it
+                            if(path.place_b == cur_place_id && path.place_a.get_id() == other_place_id){
+                                if(path.exits[1] == null){
+                                    path.exits[1] = new ExitDirection(tmp[2]);
+                                    found_path = true;
+                                    break;
+                                } else path_connection_error_dep_double++;
+                            }
+                        }
+                        // if there is no pair create a new entry
+                        if(!found_path) tmp_paths_deprecated.add(new PathTmp(cur_place, other_place_id, new ExitDirection(tmp[2]), null));
                     } else if(line.startsWith("pp")){ // place to place (path) connection
-                        
+                        String[] tmp = line.split(" ");
+                        tmp_paths.add(new PathTmp(cur_place, Integer.parseInt(tmp[1]), new ExitDirection(tmp[2]), new ExitDirection(tmp[3])));
                     } else if(line.startsWith("pchi")){ // place child
-                        
+                        String[] tmp = line.split(" ");
+                        children.add(new Pair(cur_place, Integer.parseInt(tmp[1])));
                     } else if(line.startsWith("pdl")){ // place risk level
                         cur_place.set_risk_lvl(Integer.parseInt(line.substring(3).trim()));
                     } else if(line.startsWith("prl")){ // place reccomended level
@@ -181,9 +206,47 @@ public class World {
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            // connect children and parent places
+            for(Pair<Place, Integer> p: children){
+                p.first.connect_child(places.get(p.second));
+            }
+            
+            // new path specification format is introduced in file version 1.5.0 (after 1.4.45)
+            if(file_major == 1 && file_minor >= 5){ // connect paths
+                for(PathTmp path: tmp_paths){
+                    path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), path.exits[1]));
+                }
+            } else { // connect deprecated paths (for compatibility to mudmap 1)
+                for(PathTmp path: tmp_paths){
+                    int error_not_paired_cnt = 0;
+                    if(path.exits[1] == null) error_not_paired_cnt++;
+                    path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), (path.exits[1] != null) ? path.exits[1] : new ExitDirection("unknown")));
+                    System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
+                    System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
+                    // TODO: show error message dialog
+                }
+            }
+            
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+        }
+    }
+    
+    // Path creation helper class
+    public class PathTmp {
+        public Place place_a;
+        public int place_b;
+        public ExitDirection[] exits;
+        
+        PathTmp(Place _place_a, int _place_b, ExitDirection exit_a, ExitDirection exit_b){
+            place_a = _place_a;
+            place_b = _place_b;
+            
+            exits = new ExitDirection[2];
+            exits[0] = exit_a;
+            exits[1] = exit_b;
         }
     }
     
