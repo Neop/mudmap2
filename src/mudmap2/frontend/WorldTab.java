@@ -30,6 +30,7 @@ import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import mudmap2.Pair;
 import mudmap2.backend.ExitDirection;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Layer.PlaceNotFoundException;
@@ -406,6 +407,8 @@ class WorldTab extends JPanel {
         static final int tile_border_area = 10;
         static final int tile_border_risk_level = 10;
         
+        static final int exit_circle_radius = 5;
+        
         double screen_width, screen_height;
         
         WorldTab parent;
@@ -439,6 +442,10 @@ class WorldTab extends JPanel {
             return (int) Math.round(tile_border_risk_level * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
             //return get_tile_draw_text() ? tile_border_risk_level : (tile_border_risk_level / 2);
         }
+                
+        private int get_exit_circle_radius(){
+            return (int) Math.round(exit_circle_radius * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
+        }
         
         /**
          * Returns true if the tile is large enough to draw text
@@ -456,32 +463,33 @@ class WorldTab extends JPanel {
          * @param y_offset reference to the y offset
          * @return false if the dot/circle doesn't have to be drawn
          */
-        private boolean get_exit_offset(ExitDirection dir, Integer x_offset, Integer y_offset){
+        private Pair<Integer, Integer> get_exit_offset(ExitDirection dir){
+            Pair<Integer, Integer> ret = new Pair<Integer, Integer>(0, 0);
             if(dir.get_dir().equals("n")){ // north
-                x_offset = parent.get_tile_size() / 2;
-                y_offset = get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() / 2;
+                ret.second = get_tile_border_risk_level();
             } else if(dir.get_dir().equals("ne")){ // north-east
-                x_offset = get_tile_border_risk_level();
-                y_offset = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = get_tile_border_risk_level();
+                ret.second = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_dir().equals("e")){ // east
-                x_offset = parent.get_tile_size() / 2;
-                y_offset = get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() / 2;
+                ret.second = get_tile_border_risk_level();
             } else if(dir.get_dir().equals("se")){ // south-east
-                x_offset = y_offset = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = ret.second = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_dir().equals("s")){ // south
-                x_offset = parent.get_tile_size() / 2;
-                y_offset = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() / 2;
+                ret.second = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_dir().equals("sw")){ // south-west
-                x_offset = parent.get_tile_size() - get_tile_border_risk_level();
-                y_offset = get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.second = get_tile_border_risk_level();
             } else if(dir.get_dir().equals("w")){ // west
-                x_offset = parent.get_tile_size() / 2;
-                y_offset = get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() / 2;
+                ret.second = get_tile_border_risk_level();
             } else if(dir.get_dir().equals("nw")){ // north-west
-                x_offset = get_tile_border_risk_level();
-                y_offset = get_tile_border_risk_level();
-            } else return false;
-            return true;
+                ret.first = get_tile_border_risk_level();
+                ret.second = get_tile_border_risk_level();
+            }
+            return ret;
         }
         
         /**
@@ -594,6 +602,7 @@ class WorldTab extends JPanel {
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
             
             int tile_size = parent.get_tile_size();
+            int exit_radius = get_exit_circle_radius();
             
             // screen size
             screen_width = g.getClipBounds().getWidth();
@@ -644,17 +653,19 @@ class WorldTab extends JPanel {
                         ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
                         g.drawRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
                         
-                        // TODO: draw exits
-                        g.setColor(parent.world.get_path_color().get_awt_color());
-                        Integer exit_x_offset = new Integer(0), exit_y_offset = new Integer(0);
-                        //System.out.println(cur_place.get_paths().size() + " exits");
-                        for(Path p: cur_place.get_paths()){
-                            if(get_exit_offset(p.get_exit(cur_place), exit_x_offset, exit_y_offset)){
-                                //System.out.println("Exit " + exit_x_offset + " " + exit_y_offset);
+                        // draw exits
+                        if(tile_size >= 20){
+                            g.setColor(parent.world.get_path_color().get_awt_color());
+                            Integer exit_x_offset = new Integer(0), exit_y_offset = new Integer(0);
+                            //System.out.println(cur_place.get_paths().size() + " exits");
+                            g.setColor(parent.world.get_path_color().get_awt_color());
+                            for(Path p: cur_place.get_paths()){
+                                Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
+                                if(exit_offset.first != 0 || exit_offset.second != 0){
+                                    g.fillOval(place_x_px + exit_offset.first - exit_radius, place_y_px + exit_offset.second - exit_radius, 2 * exit_radius, 2 * exit_radius);
+                                }
                             }
                         }
-                        // TODO: implement paths in world loader and draw the exits
-                        // funktioniert die Werterückgabe?
                         
                         // draw text, if not in small tiles mode
                         if(get_tile_draw_text()){

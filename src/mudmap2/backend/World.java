@@ -1,5 +1,6 @@
 package mudmap2.backend;
 
+import mudmap2.Pair;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -218,15 +219,16 @@ public class World {
                     path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), path.exits[1]));
                 }
             } else { // connect deprecated paths (for compatibility to mudmap 1)
-                for(PathTmp path: tmp_paths){
-                    int error_not_paired_cnt = 0;
+                int error_not_paired_cnt = 0;
+                for(PathTmp path: tmp_paths_deprecated){
                     if(path.exits[1] == null) error_not_paired_cnt++;
                     path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), (path.exits[1] != null) ? path.exits[1] : new ExitDirection("unknown")));
-                    System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
-                    System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
-                    // TODO: show error message dialog
                 }
+                if(path_connection_error_dep_double > 0) System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
+                if(error_not_paired_cnt > 0) System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
+                // TODO: show error message dialog
             }
+            //System.out.println("paths: " + tmp_paths.size() + " " + tmp_paths_deprecated.size());
             
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");

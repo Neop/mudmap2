@@ -1,5 +1,6 @@
 package mudmap2.backend;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -19,7 +20,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     boolean has_shop, has_teacher, has_food, has_beverages;
     
     TreeSet<Place> children, parents;
-    TreeSet<Path> connected_places;
+    HashSet<Path> connected_places;
     TreeMap<String, Boolean> flags;
     LinkedList<String> comments;
     
@@ -54,7 +55,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     private void initialize(){
         children = new TreeSet<Place>();
         parents = new TreeSet<Place>();
-        connected_places = new TreeSet<Path>();
+        connected_places = new HashSet<Path>();
         flags = new TreeMap<String, Boolean>();
         comments = new LinkedList<String>();
     }
@@ -214,7 +215,7 @@ public class Place extends LayerElement implements Comparable<Place> {
      * Gets all paths
      * @return all paths
      */
-    public TreeSet<Path> get_paths(){
+    public HashSet<Path> get_paths(){
         return connected_places;
     }
     
@@ -237,6 +238,10 @@ public class Place extends LayerElement implements Comparable<Place> {
         flags.put(key, state);
     }
     
+    /**
+     * Connects a place as child, this place will be added to it as parent
+     * @param p 
+     */
     public void connect_child(Place p){
         children.add(p);
         p.parents.add(this);
