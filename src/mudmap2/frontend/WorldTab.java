@@ -59,7 +59,7 @@ class WorldTab extends JPanel {
     int mouse_x_previous, mouse_y_previous;
     
     // the position of the selected place (selected by mouse or keyboard)
-    boolean keyboard_place_selection_enabled;
+    boolean place_selection_enabled;
     int place_selected_x, place_selected_y;
     
     static final int meta_file_ver_major = 1;
@@ -89,19 +89,16 @@ class WorldTab extends JPanel {
         
         worldpanel = new WorldPanel(this);
         add(worldpanel, BorderLayout.CENTER);
-        /**worldpanel.addMouseListener(worldpanel.new TabMouseListener());
-        worldpanel.addMouseMotionListener(worldpanel.new TabMouseMotionListener());
-        worldpanel.addKeyListener(worldpanel.new TabKeyListener());
-        */
         
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
+        
+        place_selection_enabled = false;
         
         // open / get the world
         world = WorldManager.get_world(WorldManager.get_world_file(world_name));
         load_meta();
         
-        keyboard_place_selection_enabled = true; // TODO: default false, read state from file
         // set default selected place to hte center place
         place_selected_x = (int) Math.round(get_cur_position().get_x());
         place_selected_y = (int) Math.round(get_cur_position().get_y());
@@ -188,6 +185,32 @@ class WorldTab extends JPanel {
         
         if(dx != 0 || dy != 0) get_cur_position().move(dx, dy);
     }
+    
+    /**
+     * Sets the place selection enabled state (if true, the selection will be shown)
+     * @param b 
+     */
+    public void set_place_selection(boolean b){
+        place_selection_enabled = b;
+        redraw();
+    }
+    
+    /**
+     * Toggles the place selection enabled state
+     */
+    public void set_place_selection_toggle(){
+        place_selection_enabled = !place_selection_enabled;
+        redraw();
+    }
+    
+    /**
+     * Gets the place selection enabled state
+     * @return 
+     */
+    public boolean get_place_selection_enabled(){
+        return place_selection_enabled;
+    }
+    
     
     /**
      * Pushes a new position on the position stack
@@ -284,6 +307,12 @@ class WorldTab extends JPanel {
                         
                         WorldCoordinate newcoord = new WorldCoordinate(tmp_layer_id, tmp_pos_x, tmp_pos_y);
                         if(positions.size() == 0 || !get_cur_position().equals(newcoord)) push_position(newcoord);
+                    } else if(line.startsWith("tile_size")){
+                        String[] tmp = line.split(" ");
+                        tile_size = Integer.parseInt(tmp[1]);
+                    } else if(line.startsWith("enable_place_selection")){
+                        String[] tmp = line.split(" ");
+                        place_selection_enabled = Boolean.parseBoolean(tmp[1]);
                     }
                 }
             } catch (IOException ex) {
@@ -301,7 +330,7 @@ class WorldTab extends JPanel {
     /**
      * Saves the world meta file
      */
-    private void write_meta(){
+    public void write_meta(){
         try {
             // open file
             PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(world.get_file() + "_meta")));
@@ -309,9 +338,16 @@ class WorldTab extends JPanel {
             outstream.println("# MUD Map (v2) world meta data file");
             outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
             
+            // tile size
+            outstream.println("tile_size " + tile_size);
+            
+            // write whether the place selection is shown
+            outstream.println("enable_place_selection " + get_place_selection_enabled());
+            
             // write current position and position history
             outstream.println("lp " + get_cur_position().get_meta_String());
             
+            // shown place history
             for(Iterator<WorldCoordinate> wcit = positions.descendingIterator(); wcit.hasNext();){
                 WorldCoordinate next = wcit.next();
                 if(next != get_cur_position()) outstream.println("pcv " + next.get_meta_String());
@@ -564,8 +600,10 @@ class WorldTab extends JPanel {
                         // TODO: draw path lines here
                         
                         // draw area color
-                        g.setColor(cur_place.get_area().get_color().get_awt_color());
-                        g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
+                        if(cur_place.get_area() != null){
+                            g.setColor(cur_place.get_area().get_color().get_awt_color());
+                            g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
+                        }
                         
                         // draw tile center color
                         g.setColor(parent.tile_center_color);
@@ -610,7 +648,7 @@ class WorldTab extends JPanel {
                     }
                     
                     // draw cursor / place selection
-                    if(parent.keyboard_place_selection_enabled && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
+                    if(parent.get_place_selection_enabled() && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
                         int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
                         int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
                         
@@ -638,7 +676,7 @@ class WorldTab extends JPanel {
             @Override
             public void mouseClicked(MouseEvent arg0) {
                 // if doubleclick: set place selection to coordinates if keyboard selection is enabled
-                if(parent.keyboard_place_selection_enabled && arg0.getClickCount() > 1){
+                if(parent.get_place_selection_enabled() && arg0.getClickCount() > 1){
                     parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                 }
             }
@@ -689,18 +727,22 @@ class WorldTab extends JPanel {
             public void keyTyped(KeyEvent arg0) {
                 // TODO: warum funktionieren keine Keycodes?
                 switch(Character.toLowerCase(arg0.getKeyChar())){
+                    // enable / disable place selection
+                    case 'p':
+                        parent.set_place_selection_toggle();
+                        break;
                     // shift place selection - wasd
                     case 'w':
-                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(0, +1);
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
                         break;
                     case 'a':
-                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(-1, 0);
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
                         break;
                     case 's':
-                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(0, -1);
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
                         break;
                     case 'd':
-                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(+1, 0);
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
                         break;
                     // zoom the map
                     case '+':

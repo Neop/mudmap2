@@ -8,6 +8,8 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.HashMap;
 import java.util.Set;
 import javax.swing.JButton;
@@ -87,12 +89,13 @@ public class Mainwindow extends JFrame {
     JTabbedPane tabbed_pane;
     
     public Mainwindow(){
-        super("MUD Map 2 beta");
+        super("MUD Map 2 alpha");
         
         world_tabs = new HashMap<String, WorldTab>();
         
         setSize(750, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        addWindowListener(new MainWindowListener());
         
         // Add GUI components
         menu_bar = new JMenuBar();
@@ -151,6 +154,42 @@ public class Mainwindow extends JFrame {
         }
         // change current tab
         tabbed_pane.setSelectedComponent(world_tabs.get(world_name));
+    }
+    
+    public void close_tabs(){
+        for(WorldTab tab: world_tabs.values()){
+            // TODO: implement dialog which asks the user if the world should be saved
+            /*if(save_world) tab.save();
+            else*/ tab.write_meta();
+            tabbed_pane.remove(tab);
+        }
+    }
+    
+    public class MainWindowListener implements WindowListener {
+
+        @Override
+        public void windowOpened(WindowEvent arg0) {}
+
+        @Override
+        public void windowClosing(WindowEvent arg0) {
+            close_tabs();
+        }
+
+        @Override
+        public void windowClosed(WindowEvent arg0) {}
+
+        @Override
+        public void windowIconified(WindowEvent arg0) {}
+
+        @Override
+        public void windowDeiconified(WindowEvent arg0) {}
+
+        @Override
+        public void windowActivated(WindowEvent arg0) {}
+
+        @Override
+        public void windowDeactivated(WindowEvent arg0) {}
+        
     }
     
 }
