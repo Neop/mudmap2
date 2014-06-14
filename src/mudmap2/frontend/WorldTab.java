@@ -59,7 +59,7 @@ class WorldTab extends JPanel {
     int mouse_x_previous, mouse_y_previous;
     
     // the position of the selected place (selected by mouse or keyboard)
-    boolean show_place_selection;
+    boolean keyboard_place_selection_enabled;
     int place_selected_x, place_selected_y;
     
     final int meta_file_ver_major = 1;
@@ -69,7 +69,7 @@ class WorldTab extends JPanel {
      * Describes the tile size / zoom
      */
     enum TileSize {
-        SMALL, MEDIUM, BIG
+        SMALL, MEDIUM, LARGE
     };
     TileSize tile_size;
     
@@ -104,7 +104,8 @@ class WorldTab extends JPanel {
         world = WorldManager.get_world(WorldManager.get_world_file(world_name));
         load_meta();
         
-        show_place_selection = true; // TODO: default false, read state from file
+        keyboard_place_selection_enabled = true; // TODO: default false, read state from file
+        // set default selected place to hte center place
         place_selected_x = (int) Math.round(get_cur_position().get_x());
         place_selected_y = (int) Math.round(get_cur_position().get_y());
     }
@@ -174,32 +175,21 @@ class WorldTab extends JPanel {
     }
     
     /**
-     * moves the shown places so the slection is on the screen
+     * moves the shown places so the selection is on the screen
      */
-    private void move_screen_to_place_selection(){    
-        // screen center in world coordinates
-        /*double screen_center_x = ((double) worldpanel.screen_width / worldpanel.get_tile_size()) / 2; // note: wdtwd2
-        double screen_center_y = ((double) worldpanel.screen_height / worldpanel.get_tile_size()) / 2;
-
-        int place_x_offset = (int) (Math.round((float) get_cur_position().get_x()) - Math.floor(screen_center_x));
-        int place_y_offset = (int) (Math.round((float) get_cur_position().get_y()) - Math.floor(screen_center_y));
-
-        // place position on the map
-        int place_x_min = place_x_offset;
-        int place_y_min = place_y_offset + (int)(worldpanel.screen_height / worldpanel.get_tile_size());
+    private void move_screen_to_place_selection(){           
+        int screen_x = worldpanel.get_screen_pos_x(place_selected_x);
+        int screen_y = worldpanel.get_screen_pos_y(place_selected_y);
+        int tilesize = worldpanel.get_tile_size();
         
-        int place_x_max = place_x_min + (int) (worldpanel.screen_width / worldpanel.get_tile_size());
-        int place_y_max = place_y_min + (int) (worldpanel.screen_height / worldpanel.get_tile_size());
+        double dx = 0, dy = 0;
         
-        double ofs_x = 1 - ((worldpanel.screen_width / worldpanel.get_tile_size()) + place_x_min - place_x_max - get_cur_position().get_x() + Math.floor(get_cur_position().get_x()));
-        double dx_left = -screen_center_x - get_cur_position().get_x() + Math.round(screen_center_x) + Math.round(get_cur_position().get_x());
-        double dx_right = dx_left + worldpanel.screen_width / worldpanel.get_tile_size() - Math.floor(worldpanel.screen_width / worldpanel.get_tile_size());
+        if(screen_x < 0) dx = (double) screen_x / tilesize;
+        else if(screen_x > worldpanel.screen_width - tilesize) dx = (double) (screen_x - worldpanel.screen_width) / tilesize + 1;
+        if(screen_y < 0) dy = (double) -screen_y / tilesize;
+        else if(screen_y > worldpanel.screen_height - tilesize) dy = (double) -(screen_y - worldpanel.screen_height) / tilesize - 1;
         
-        System.out.println(dx_left + " " + dx_right);
-        
-        if(place_selected_x > place_x_max) get_cur_position().move(place_selected_x - place_x_max, 0);
-        else if(place_selected_x < place_x_min + 1) get_cur_position().move(place_selected_x - place_x_min + dx_left, 0); // ok
-        */
+        if(dx != 0 || dy != 0) get_cur_position().move(dx, dy);
     }
     
     /**
@@ -355,9 +345,11 @@ class WorldTab extends JPanel {
             switch(parent.tile_size){
                 case SMALL: return tile_small_size;
                 case MEDIUM: return tile_medium_size;
-                case BIG: return tile_big_size;
+                case LARGE: return tile_big_size;
+                default:
+                    throw new UnsupportedOperationException("Tile size " + parent.tile_size + " is not supported yet.");
             }
-            return tile_medium_size;
+            //return tile_medium_size;
         }
         
         /**
@@ -368,9 +360,11 @@ class WorldTab extends JPanel {
             switch(parent.tile_size){
                 case SMALL: return tile_small_border_area;
                 case MEDIUM: return tile_medium_border_area;
-                case BIG: return tile_big_border_area;
+                case LARGE: return tile_big_border_area;
+                default:
+                    throw new UnsupportedOperationException("Tile size " + parent.tile_size + " is not supported yet.");
             }
-            return tile_medium_border_area;
+            //return tile_medium_border_area;
         }
         
         /**
@@ -381,9 +375,11 @@ class WorldTab extends JPanel {
             switch(parent.tile_size){
                 case SMALL: return tile_small_border_risk_level;
                 case MEDIUM: return tile_medium_border_risk_level;
-                case BIG: return tile_big_border_risk_level;
+                case LARGE: return tile_big_border_risk_level;
+                default:
+                    throw new UnsupportedOperationException("Tile size " + parent.tile_size + " is not supported yet.");
             }
-            return tile_medium_size;
+            //return tile_medium_size;
         }
         
         /**
@@ -427,7 +423,7 @@ class WorldTab extends JPanel {
          * @param str string to be fitted
          * @param fm fontmetrics
          * @param max_length maximum length of the string in pixel
-         * * @param max_lines maximum number of lines
+         * @param max_lines maximum number of lines
          * @return a list of strings
          */
         private Deque<String> fit_line_width(String str, FontMetrics fm, int max_length, int max_lines){
@@ -468,28 +464,54 @@ class WorldTab extends JPanel {
         }
         
         /**
-         * Converts mouse / screen coordinates to world coordinates
-         * @param mouse_x a screen coordinate (x-axis)
-         * @return world coordinate x
+         * Remove integer part, the part after the point remains
+         * @param val
+         * @return 
          */
-        private int get_tile_pos_x(int mouse_x){
-            int tile_size = get_tile_size();
-            //return (int) -Math.round((double) (mouse_x - screen_width / 2) / tile_size - parent.get_cur_position().get_x());
-            return (int) (mouse_x / tile_size + screen_width / 2 + parent.get_cur_position().get_x() - Math.round(screen_width / 2) + Math.round(parent.get_cur_position().get_x()));
-            // TODO: Formel verbessern
-            
-            //tile_x = (place_x_px / tile_size) + screen_center_x + cur_pos.get_x() - Math.round(screen_center_x) - Math.round(cur_pos.get_x());
-            
+        private double remint(double val){
+            return val - Math.round(val);
         }
         
         /**
-         * Converts mouse / screen coordinates to world coordinates
+         * Converts screen coordinates to world coordinates
+         * @param screen_x a screen coordinate (x-axis)
+         * @return world coordinate x
+         */
+        private int get_place_pos_x(int screen_x){
+            return (int) Math.ceil((double) (screen_x - screen_width / 2) / get_tile_size() + parent.get_cur_position().get_x()) - 1;
+        }
+        
+        /**
+         * Converts screen coordinates to world coordinates
          * @param mouse_y a screen coordinate (y-axis)
          * @return world coordinate y
          */
-        private int get_tile_pos_y(int mouse_y){
+        private int get_place_pos_y(int screen_y){
+            return (int) -Math.ceil((double) (screen_y - screen_height / 2) / get_tile_size() - parent.get_cur_position().get_y()) + 1;
+        }
+        
+        /**
+         * Converts world coordinates to screen coordinates
+         * @param place_x a world (place) coordinate (x axis)
+         * @return a screen coordinate x
+         */
+        private int get_screen_pos_x(int place_x){
             int tile_size = get_tile_size();
-            return (int) -Math.round((double) (mouse_y - screen_height / 2) / tile_size - parent.get_cur_position().get_y());
+            double screen_center_x = ((double) screen_width / tile_size) / 2; // note: wdtwd2
+            int place_x_offset = (int) (Math.round((double) parent.get_cur_position().get_x()) - Math.round(screen_center_x));
+            return (int)((place_x - place_x_offset + remint(screen_center_x) - remint(parent.get_cur_position().get_x())) * tile_size);
+        }
+        
+        /**
+         * Converts world coordinates to screen coordinates
+         * @param place_y a world (place) coordinate (y axis)
+         * @return a screen coordinate y
+         */
+        private int get_screen_pos_y(int place_y){
+            int tile_size = get_tile_size();
+            double screen_center_y = ((double) screen_height / tile_size) / 2;
+            int place_y_offset = (int) (Math.round(parent.get_cur_position().get_y()) - Math.round(screen_center_y));
+            return (int)((-place_y + place_y_offset - remint(screen_center_y) + remint(parent.get_cur_position().get_y())) * tile_size + screen_height);
         }
         
         /**
@@ -502,50 +524,52 @@ class WorldTab extends JPanel {
             WorldCoordinate cur_pos = parent.get_cur_position();
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
             
+            int tile_size = get_tile_size();
+            
             // screen size
             screen_width = g.getClipBounds().getWidth();
             screen_height = g.getClipBounds().getHeight();
             
             // screen center in world coordinates
-            double screen_center_x = ((double) screen_width / get_tile_size()) / 2; // note: wdtwd2
-            double screen_center_y = ((double) screen_height / get_tile_size()) / 2;
+            double screen_center_x = ((double) screen_width / tile_size) / 2; // note: wdtwd2
+            double screen_center_y = ((double) screen_height / tile_size) / 2;
             
-            int place_x_offset = (int) (Math.round((float) cur_pos.get_x()) - Math.floor(screen_center_x));
+            int place_x_offset = (int) (Math.round((float) cur_pos.get_x()) - Math.round(screen_center_x));
             int place_y_offset = (int) (Math.round((float) cur_pos.get_y()) - Math.floor(screen_center_y));
             
             // clear screen
             g.clearRect(0, 0, (int) screen_width + 1, (int) screen_height + 1);
             
             // draw the tiles / places
-            for(int tile_x = -1; tile_x < screen_width / get_tile_size() + 1; ++tile_x){
-                for(int tile_y = -1; tile_y < screen_height / get_tile_size() + 1; ++tile_y){
+            for(int tile_x = -1; tile_x < screen_width / tile_size + 1; ++tile_x){
+                for(int tile_y = -1; tile_y < screen_height / tile_size + 1; ++tile_y){
                     
                     // place position on the map
                     int place_x = tile_x + place_x_offset;
-                    int place_y = (int)(screen_height / get_tile_size()) - tile_y + place_y_offset;
+                    int place_y = (int)(screen_height / tile_size) - tile_y + place_y_offset;
                     
                     try { // layer.get throws an exception, if the place doesn't exist
                         Place cur_place = (Place) layer.get(place_x, place_y);
                         
                         // place position in pixel on the screen
-                        // TODO: extract constant calculation from for loop (eg get_tile_size())
-                        int place_x_px = (int)((tile_x - screen_center_x - cur_pos.get_x() + Math.round(screen_center_x) + Math.round(cur_pos.get_x())) * get_tile_size());
-                        int place_y_px = (int)((tile_y + screen_center_y + cur_pos.get_y() - Math.round(screen_center_y) - Math.round(cur_pos.get_y())) * get_tile_size());
+                        // TODO: extract constant calculation from for loop
+                        int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
+                        int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
                     
                         // TODO: draw path lines here
                         
                         // draw area color
                         g.setColor(cur_place.get_area().get_color().get_awt_color());
-                        g.fillRect(place_x_px, place_y_px, get_tile_size(), get_tile_size());
+                        g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
                         
                         // draw tile center color
                         g.setColor(parent.tile_center_color);
-                        g.fillRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), get_tile_size() - 2 * get_tile_border_area(), get_tile_size() - 2 * get_tile_border_area());
+                        g.fillRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
                         
                         // TODO: draw risk level border
                         g.setColor(parent.world.get_risk_level(cur_place.get_risk_lvl()).get_color().get_awt_color());
                         ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
-                        g.drawRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), get_tile_size() - 2 * get_tile_border_area(), get_tile_size() - 2 * get_tile_border_area());
+                        g.drawRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
                         
                         // TODO: draw exits
                         g.setColor(parent.world.get_path_color().get_awt_color());
@@ -564,14 +588,14 @@ class WorldTab extends JPanel {
                             g.setColor(Color.BLACK);
                             FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
                             // fit the string into the tile
-                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (get_tile_size() - 2 * get_tile_border_risk_level() - risk_level_stroke_width), (int) Math.floor(get_tile_size() / fm.getHeight()) - 1);
+                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * get_tile_border_risk_level() - risk_level_stroke_width), (int) Math.floor(tile_size / fm.getHeight()) - 1);
                             int line_num = 0;
                             for(String str: line){
                                 g.drawString(str, place_x_px + get_tile_border_risk_level() + (int) Math.ceil(risk_level_stroke_width), place_y_px + get_tile_border_risk_level() + fm.getHeight() * (1 + line_num));
                                 line_num++;
                             }
                             
-                            g.drawString(place_x + " " + place_y, place_x_px, place_y_px + get_tile_size() / 2);
+                            g.drawString(place_x + " " + place_y, place_x_px, place_y_px + tile_size / 2);
                         }
                         
                         // TODO: draw flags
@@ -582,46 +606,37 @@ class WorldTab extends JPanel {
                     }
                     
                     // draw cursor / place selection
-                    if(parent.show_place_selection && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
-                        int place_x_px = (int)((tile_x - screen_center_x - cur_pos.get_x() + Math.round(screen_center_x) + Math.round(cur_pos.get_x())) * get_tile_size());
-                        int place_y_px = (int)((tile_y + screen_center_y + cur_pos.get_y() - Math.round(screen_center_y) - Math.round(cur_pos.get_y())) * get_tile_size());
+                    if(parent.keyboard_place_selection_enabled && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
+                        int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
+                        int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
                         
                         g.setColor(tile_selection_color);
                         ((Graphics2D)g).setStroke(new BasicStroke(tile_selection_stroke_width));
                         
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width + get_tile_size() / 4));
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px + tile_selection_stroke_width + get_tile_size() / 4), (int) (place_y_px + tile_selection_stroke_width));
+                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width + tile_size / 4));
+                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px + tile_selection_stroke_width + tile_size / 4), (int) (place_y_px + tile_selection_stroke_width));
                         
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + get_tile_size()), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px - tile_selection_stroke_width + get_tile_size()), (int) (place_y_px + tile_selection_stroke_width + get_tile_size() / 4));
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + get_tile_size()), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px - tile_selection_stroke_width + get_tile_size() * 3 / 4), (int) (place_y_px + tile_selection_stroke_width));
+                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px + tile_selection_stroke_width + tile_size / 4));
+                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px - tile_selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + tile_selection_stroke_width));
                         
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + get_tile_size()), (int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + get_tile_size() * 3 / 4));
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + get_tile_size()), (int) (place_x_px + tile_selection_stroke_width + get_tile_size()  / 4), (int) (place_y_px - tile_selection_stroke_width + get_tile_size()));                         
+                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + tile_size * 3 / 4));
+                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px + tile_selection_stroke_width + tile_size  / 4), (int) (place_y_px - tile_selection_stroke_width + tile_size));                         
                         
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + get_tile_size()), (int) (place_y_px - tile_selection_stroke_width + get_tile_size()), (int) (place_x_px - tile_selection_stroke_width + get_tile_size()), (int) (place_y_px - tile_selection_stroke_width + get_tile_size() * 3 / 4));
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + get_tile_size()), (int) (place_y_px - tile_selection_stroke_width + get_tile_size()), (int) (place_x_px - tile_selection_stroke_width + get_tile_size() * 3 / 4), (int) (place_y_px - tile_selection_stroke_width + get_tile_size()));
-                    }
-                    
+                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px - tile_selection_stroke_width + tile_size * 3 / 4));
+                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px - tile_selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - tile_selection_stroke_width + tile_size));
+                    }       
                 }
-            }
-            
+            }    
         }
         
         public class TabMouseListener implements MouseListener {
 
             @Override
             public void mouseClicked(MouseEvent arg0) {
-                int x = get_tile_pos_x(arg0.getX());
-                int y = get_tile_pos_y(arg0.getY());
-                
-                System.out.println("pl " + x + " " + y);
-                /*try {
-                    System.out.println("- " + ((Place) parent.world.get_layer(parent.get_cur_position().get_layer()).get(x, y)).get_name());
-                } catch (PlaceNotFoundException ex) {
-                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                }*/
-                
-                // TODO: if doubleclick: set place selection to coordinates
+                // if doubleclick: set place selection to coordinates if keyboard selection is enabled
+                if(parent.keyboard_place_selection_enabled && arg0.getClickCount() > 1){
+                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                }
             }
 
             @Override
@@ -641,7 +656,6 @@ class WorldTab extends JPanel {
             public void mouseExited(MouseEvent arg0) {
                 parent.mouse_in_panel = false;
             }
-            
         }
         
         public class TabMouseMotionListener implements MouseMotionListener {
@@ -673,16 +687,16 @@ class WorldTab extends JPanel {
                 switch(Character.toLowerCase(arg0.getKeyChar())){
                     // Shift place selection - wasd
                     case 'w':
-                        parent.move_place_selection(0, +1);
+                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(0, +1);
                         break;
                     case 'a':
-                        parent.move_place_selection(-1, 0);
+                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(-1, 0);
                         break;
                     case 's':
-                        parent.move_place_selection(0, -1);
+                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(0, -1);
                         break;
                     case 'd':
-                        parent.move_place_selection(+1, 0);
+                        if(parent.keyboard_place_selection_enabled) parent.move_place_selection(+1, 0);
                         break;
                 } 
             }
