@@ -9,32 +9,12 @@ import java.util.TreeMap;
  * @author neop
  */
 public class Layer {
-
-    /**
-     * This exception will be thrown, if a place doesn't exist at a certain position
-     * 
-     */
-    public static class PlaceNotFoundException extends Exception {
-        int x, y;
-        
-        /**
-         * Constructs an exception
-         * @param _x x coordinate of the place
-         * @param _y y coordinate of the place
-         */
-        public PlaceNotFoundException(int _x, int _y) {
-            x = _x; y = _y;
-        }
-        
-        @Override
-        public String toString(){
-            return "Element at position " + x + ", " + y + " doesn't exist";
-        }
-    }
     
+    int id;
     TreeMap<Integer, TreeMap<Integer, LayerElement>> elements;
     
-    public Layer() {
+    public Layer(int _id) {
+        id = _id;
         elements = new TreeMap<Integer, TreeMap<Integer, LayerElement>>();
     }
     
@@ -73,6 +53,14 @@ public class Layer {
     }
     
     /**
+     * Gets the id of the layer
+     * @return layer id
+     */
+    public int get_id(){
+        return id;
+    }
+    
+    /**
      * Removes an element from the layer
      * @param element 
      */
@@ -91,6 +79,27 @@ public class Layer {
     public boolean exist(int x, int y){
         if(!elements.containsKey(x) || !elements.get(x).containsKey(y)) return false;
         return true;
+    }
+    
+    /**
+     * This exception will be thrown, if a place doesn't exist at a certain position
+     */
+    public static class PlaceNotFoundException extends Exception {
+        int x, y;
+        
+        /**
+         * Constructs an exception
+         * @param _x x coordinate of the place
+         * @param _y y coordinate of the place
+         */
+        public PlaceNotFoundException(int _x, int _y) {
+            x = _x; y = _y;
+        }
+        
+        @Override
+        public String toString(){
+            return "Element at position " + x + ", " + y + " doesn't exist";
+        }
     }
     
 }

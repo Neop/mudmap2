@@ -1,5 +1,6 @@
 package mudmap2.backend;
 
+import mudmap2.Paths;
 import mudmap2.Pair;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -85,7 +86,7 @@ public class World {
             int file_major = 0, file_minor = 0, file_build = 0;
             
             int cur_area = -1;
-            Place cur_place = new Place(-1, "", 0, 0, new Layer());
+            Place cur_place = new Place(-1, "", 0, 0, new Layer(-1));
 
             // temporary data for creating a place
             int cur_place_id = -1;
@@ -153,7 +154,7 @@ public class World {
                         int layer = Integer.parseInt(tmp[1]);
                         
                         // create the layer, if it doesn't exist
-                        if(!layers.containsKey(layer)) layers.put(layer, new Layer());
+                        if(!layers.containsKey(layer)) layers.put(layer, new Layer(layer));
                         
                         if(cur_place_id != -1){
                             // create place and add it to the layer and places list
@@ -231,7 +232,7 @@ public class World {
             //System.out.println("paths: " + tmp_paths.size() + " " + tmp_paths_deprecated.size());
             
         } catch (FileNotFoundException ex) {
-            System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
+            System.out.println("Couldn't open world file \"" + Paths.get_available_worlds_file() + "\", file not found");
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
     }

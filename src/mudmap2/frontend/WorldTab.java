@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -50,6 +51,9 @@ class WorldTab extends JPanel {
     World world;
     
     Color tile_center_color;
+    
+    static boolean show_path_lines = true;
+    static boolean show_path_lines_curved = true;
     
     JFrame parent;
     WorldPanel worldpanel;
@@ -136,6 +140,38 @@ class WorldTab extends JPanel {
      */
     public String get_world_name() {
         return world_name;
+    }
+    
+    /**
+     * Returns true if the path lines are enabled
+     * @return 
+     */
+    public static boolean get_show_path_lines(){
+        return show_path_lines;
+    }
+    
+    /**
+     * Enables or disables the path lines
+     * @param b 
+     */
+    public static void set_show_path_lines(boolean b){
+        show_path_lines = b;
+    }
+    
+    /**
+     * Returns true if curved path lines are enabled
+     * @return 
+     */
+    public static boolean get_show_path_lines_curved(){
+        return show_path_lines_curved;
+    }
+    
+    /**
+     * Enables or disables curved path lines
+     * @param b 
+     */
+    public static void set_show_path_lines_curved(boolean b){
+        show_path_lines_curved = b;
     }
     
     /**
@@ -468,26 +504,52 @@ class WorldTab extends JPanel {
             if(dir.get_dir().equals("n")){ // north
                 ret.first = parent.get_tile_size() / 2;
                 ret.second = get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("ne")){ // north-east
-                ret.first = get_tile_border_risk_level();
-                ret.second = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_dir().equals("e")){ // east
-                ret.first = parent.get_tile_size() / 2;
-                ret.second = get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("se")){ // south-east
-                ret.first = ret.second = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.second = parent.get_tile_size() / 2;
             } else if(dir.get_dir().equals("s")){ // south
                 ret.first = parent.get_tile_size() / 2;
                 ret.second = parent.get_tile_size() - get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("sw")){ // south-west
+            } else if(dir.get_dir().equals("w")){ // west
+                ret.first = get_tile_border_risk_level();
+                ret.second = parent.get_tile_size() / 2;
+            } else if(dir.get_dir().equals("ne")){ // north-east
                 ret.first = parent.get_tile_size() - get_tile_border_risk_level();
                 ret.second = get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("w")){ // west
-                ret.first = parent.get_tile_size() / 2;
-                ret.second = get_tile_border_risk_level();
+            } else if(dir.get_dir().equals("se")){ // south-east
+                ret.first = ret.second = parent.get_tile_size() - get_tile_border_risk_level();
             } else if(dir.get_dir().equals("nw")){ // north-west
+                ret.first = ret.second = get_tile_border_risk_level();
+            } else if(dir.get_dir().equals("sw")){ // south-west
                 ret.first = get_tile_border_risk_level();
-                ret.second = get_tile_border_risk_level();
+                ret.second = parent.get_tile_size() - get_tile_border_risk_level();
+            }
+            return ret;
+        }
+        
+        /**
+         * Gets the direction / normal angle of an exit
+         * @param dir exit direction
+         * @return normal angle
+         */
+        private int get_exit_normal_angle(ExitDirection dir){
+            int ret = 0;
+            if(dir.get_dir().equals("n")){ // north
+                ret = 90;
+            } else if(dir.get_dir().equals("e")){ // east
+                ret = 0;
+            } else if(dir.get_dir().equals("s")){ // south
+                ret = 270;
+            } else if(dir.get_dir().equals("w")){ // west
+                ret = 180;
+            } else if(dir.get_dir().equals("ne")){ // north-east
+                ret = 45;
+            } else if(dir.get_dir().equals("se")){ // south-east
+                ret = 315;
+            } else if(dir.get_dir().equals("nw")){ // north-west
+                ret = 135;
+            } else if(dir.get_dir().equals("sw")){ // south-west
+                ret = 225;
             }
             return ret;
         }
@@ -596,7 +658,7 @@ class WorldTab extends JPanel {
          * @param g 
          */
         @Override
-        public void paintComponent(Graphics g){
+        public void paintComponent(Graphics g){ 
             /// TODO: check if layer exists
             WorldCoordinate cur_pos = parent.get_cur_position();
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
@@ -618,6 +680,10 @@ class WorldTab extends JPanel {
             // clear screen
             g.clearRect(0, 0, (int) screen_width + 1, (int) screen_height + 1);
             
+            // Paths will be drawn on this graphic and later on copied to g
+            Graphics graphic_path = null;
+            if(show_path_lines) graphic_path = g.create();
+
             // draw the tiles / places
             for(int tile_x = -1; tile_x < screen_width / tile_size + 1; ++tile_x){
                 for(int tile_y = -1; tile_y < screen_height / tile_size + 1; ++tile_y){
@@ -634,7 +700,41 @@ class WorldTab extends JPanel {
                         int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
                         int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
                     
-                        // TODO: draw path lines here
+                        // draw path lines here
+                        if(show_path_lines){
+                            for(Path p: cur_place.get_paths()){
+                                try {
+                                    Place other_place = p.get_other_place(cur_place);
+                                    // if both places of a path are on the same layer
+                                    if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer()){
+                                        Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
+                                        Pair<Integer, Integer> exit_offset_other = get_exit_offset(p.get_exit(other_place));
+                                        
+                                        g.setColor(parent.world.get_path_color().get_awt_color());
+                                        
+                                        if(show_path_lines_curved){
+                                            int angle_a = get_exit_normal_angle(p.get_exit(cur_place));
+                                            if(angle_a == 0){
+                                                //angle_a = arcsin((cur_place.get_y() - other_place.get_y()) / sqrt(dx² + dy²))
+                                                // TODO: Winkel für beide berechnen (Fall kein normaler ausgang)
+                                            }
+                                            
+                                            int angle_b = get_exit_normal_angle(p.get_exit(other_place));
+                                            
+                                            
+                                            
+                                            //g.drawArc(WIDTH, WIDTH, WIDTH, WIDTH, WIDTH, WIDTH);
+                                        } else {
+                                            graphic_path.drawLine(place_x_px + exit_offset.first, place_y_px + exit_offset.second, 
+                                                                  place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first, 
+                                                                  place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second);
+                                        }
+                                    }
+                                } catch(RuntimeException e){
+                                    System.out.println(e);
+                                }
+                            }
+                        }
                         
                         // draw area color
                         if(cur_place.get_area() != null){
@@ -652,6 +752,8 @@ class WorldTab extends JPanel {
                         g.setColor(parent.world.get_risk_level(cur_place.get_risk_lvl()).get_color().get_awt_color());
                         ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
                         g.drawRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
+                        // TODO: this has to be done after the path rendering
+                        if(show_path_lines) graphic_path.clearRect((int) (place_x_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (place_y_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2));
                         
                         // draw exits
                         if(tile_size >= 20){
@@ -687,6 +789,10 @@ class WorldTab extends JPanel {
                         System.out.println(e);
                     } catch (PlaceNotFoundException e){ // these exceptions are normal
                     }
+
+                    // TODO: draw graphic_path to g
+                    //if(show_path_lines)
+                    graphic_path.dispose();
                     
                     // draw cursor / place selection
                     if(parent.get_place_selection_enabled() && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
@@ -717,7 +823,7 @@ class WorldTab extends JPanel {
             @Override
             public void mouseClicked(MouseEvent arg0) {
                 // if doubleclick: set place selection to coordinates if keyboard selection is enabled
-                if(parent.get_place_selection_enabled() && arg0.getClickCount() > 1){
+                if(arg0.getButton() == MouseEvent.BUTTON1 && parent.get_place_selection_enabled() && arg0.getClickCount() > 1){
                     parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                 }
             }

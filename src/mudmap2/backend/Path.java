@@ -66,4 +66,16 @@ public class Path {
         else if(places[1] == p) return exitdirections[1];
         else throw new RuntimeException("Place not found in path");
     }
+    
+    /**
+     * Gets the place that is not equal to p in a path
+     * @param p
+     * @return place of path that is not p
+     * @throws RuntimeException 
+     */
+    public Place get_other_place(Place p) throws RuntimeException{
+        if(places[0] == p) return places[1];
+        else if(places[1] == p) return places[0];
+        else throw new RuntimeException("Place not found in path");
+    }
 }
