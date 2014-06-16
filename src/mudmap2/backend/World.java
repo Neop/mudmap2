@@ -1,3 +1,26 @@
+/*  MUD Map (v2) - A tool to create and organize maps for text-based games
+ *  Copyright (C) 2014  Neop (email: mneop@web.de)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *  for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*  File description
+ *
+ *  This file contains all data of a world. Places, Layers, Areas,... can be
+ *  accessed via World. It also reads and writes world files
+ */
+
 package mudmap2.backend;
 
 import mudmap2.Paths;
@@ -12,7 +35,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -199,17 +221,17 @@ public class World {
                             // find place - place pair and connect it
                             if(path.place_b == cur_place_id && path.place_a.get_id() == other_place_id){
                                 if(path.exits[1] == null){
-                                    path.exits[1] = new ExitDirection(tmp[2]);
+                                    path.exits[1] = tmp[2];
                                     found_path = true;
                                     break;
                                 } else path_connection_error_dep_double++;
                             }
                         }
                         // if there is no pair create a new entry
-                        if(!found_path) tmp_paths_deprecated.add(new PathTmp(cur_place, other_place_id, new ExitDirection(tmp[2]), null));
+                        if(!found_path) tmp_paths_deprecated.add(new PathTmp(cur_place, other_place_id, tmp[2], null));
                     } else if(line.startsWith("pp")){ // place to place (path) connection
                         String[] tmp = line.substring(3).split("\\$");
-                        tmp_paths.add(new PathTmp(cur_place, Integer.parseInt(tmp[0]), new ExitDirection(tmp[1]), new ExitDirection(tmp[2])));
+                        tmp_paths.add(new PathTmp(cur_place, Integer.parseInt(tmp[0]), tmp[1], tmp[2]));
                     } else if(line.startsWith("pchi")){ // place child
                         String[] tmp = line.split(" ");
                         children.add(new Pair(cur_place, Integer.parseInt(tmp[1])));
@@ -244,7 +266,7 @@ public class World {
                 int error_not_paired_cnt = 0;
                 for(PathTmp path: tmp_paths_deprecated){
                     if(path.exits[1] == null) error_not_paired_cnt++;
-                    path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), (path.exits[1] != null) ? path.exits[1] : new ExitDirection("unknown")));
+                    path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), (path.exits[1] != null) ? path.exits[1] : "unknown"));
                 }
                 if(path_connection_error_dep_double > 0) System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
                 if(error_not_paired_cnt > 0) System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
@@ -331,13 +353,13 @@ public class World {
     public class PathTmp {
         public Place place_a;
         public int place_b;
-        public ExitDirection[] exits;
+        public String[] exits;
         
-        PathTmp(Place _place_a, int _place_b, ExitDirection exit_a, ExitDirection exit_b){
+        PathTmp(Place _place_a, int _place_b, String exit_a, String exit_b){
             place_a = _place_a;
             place_b = _place_b;
             
-            exits = new ExitDirection[2];
+            exits = new String[2];
             exits[0] = exit_a;
             exits[1] = exit_b;
         }

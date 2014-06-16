@@ -1,7 +1,26 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/*  MUD Map (v2) - A tool to create and organize maps for text-based games
+ *  Copyright (C) 2014  Neop (email: mneop@web.de)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *  for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
+/*  File description
+ *
+ *  This class constructs the main window and the available worlds tab. It also
+ *  reads and writes the main config file
+ */
+
 package mudmap2.frontend;
 
 import java.awt.BorderLayout;
@@ -17,7 +36,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.logging.Level;

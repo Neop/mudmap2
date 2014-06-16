@@ -1,3 +1,27 @@
+/*  MUD Map (v2) - A tool to create and organize maps for text-based games
+ *  Copyright (C) 2014  Neop (email: mneop@web.de)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *  for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*  File description
+ *
+ *  This class displays a world and the GUI elements that belong to it. It also
+ *  processes keyboard commands. The class is supposed to be a tab in Mainwindow.
+ *  It reads and writes the world meta (*_meta) files
+ */
+
 package mudmap2.frontend;
 
 import java.awt.BasicStroke;
@@ -32,7 +56,6 @@ import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mudmap2.Pair;
-import mudmap2.backend.ExitDirection;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Path;
@@ -534,28 +557,28 @@ class WorldTab extends JPanel {
          * @param y_offset reference to the y offset
          * @return false if the dot/circle doesn't have to be drawn
          */
-        private Pair<Integer, Integer> get_exit_offset(ExitDirection dir){
+        private Pair<Integer, Integer> get_exit_offset(String dir){
             Pair<Integer, Integer> ret = new Pair<Integer, Integer>(0, 0);
-            if(dir.get_dir().equals("n")){ // north
+            if(dir.equals("n")){ // north
                 ret.first = parent.get_tile_size() / 2;
                 ret.second = get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("e")){ // east
+            } else if(dir.equals("e")){ // east
                 ret.first = parent.get_tile_size() - get_tile_border_risk_level();
                 ret.second = parent.get_tile_size() / 2;
-            } else if(dir.get_dir().equals("s")){ // south
+            } else if(dir.equals("s")){ // south
                 ret.first = parent.get_tile_size() / 2;
                 ret.second = parent.get_tile_size() - get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("w")){ // west
+            } else if(dir.equals("w")){ // west
                 ret.first = get_tile_border_risk_level();
                 ret.second = parent.get_tile_size() / 2;
-            } else if(dir.get_dir().equals("ne")){ // north-east
+            } else if(dir.equals("ne")){ // north-east
                 ret.first = parent.get_tile_size() - get_tile_border_risk_level();
                 ret.second = get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("se")){ // south-east
+            } else if(dir.equals("se")){ // south-east
                 ret.first = ret.second = parent.get_tile_size() - get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("nw")){ // north-west
+            } else if(dir.equals("nw")){ // north-west
                 ret.first = ret.second = get_tile_border_risk_level();
-            } else if(dir.get_dir().equals("sw")){ // south-west
+            } else if(dir.equals("sw")){ // south-west
                 ret.first = get_tile_border_risk_level();
                 ret.second = parent.get_tile_size() - get_tile_border_risk_level();
             } else {
@@ -569,23 +592,23 @@ class WorldTab extends JPanel {
          * @param dir exit direction
          * @return normal angle
          */
-        private int get_exit_normal_angle(ExitDirection dir){
+        private int get_exit_normal_angle(String dir){
             int ret = 0;
-            if(dir.get_dir().equals("n")){ // north
+            if(dir.equals("n")){ // north
                 ret = 90;
-            } else if(dir.get_dir().equals("e")){ // east
+            } else if(dir.equals("e")){ // east
                 ret = 0;
-            } else if(dir.get_dir().equals("s")){ // south
+            } else if(dir.equals("s")){ // south
                 ret = 270;
-            } else if(dir.get_dir().equals("w")){ // west
+            } else if(dir.equals("w")){ // west
                 ret = 180;
-            } else if(dir.get_dir().equals("ne")){ // north-east
+            } else if(dir.equals("ne")){ // north-east
                 ret = 45;
-            } else if(dir.get_dir().equals("se")){ // south-east
+            } else if(dir.equals("se")){ // south-east
                 ret = 315;
-            } else if(dir.get_dir().equals("nw")){ // north-west
+            } else if(dir.equals("nw")){ // north-west
                 ret = 135;
-            } else if(dir.get_dir().equals("sw")){ // south-west
+            } else if(dir.equals("sw")){ // south-west
                 ret = 225;
             }
             return ret;
@@ -747,7 +770,7 @@ class WorldTab extends JPanel {
                                         Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
                                         Pair<Integer, Integer> exit_offset_other = get_exit_offset(p.get_exit(other_place));
                                         
-                                        g.setColor(parent.world.get_path_color().get_awt_color());
+                                        g.setColor(parent.world.get_path_color());
                                         
                                         if(get_show_paths_curved()){
                                             /*int angle_a = get_exit_normal_angle(p.get_exit(cur_place));
@@ -779,7 +802,7 @@ class WorldTab extends JPanel {
                         
                         // draw area color
                         if(cur_place.get_area() != null){
-                            g.setColor(cur_place.get_area().get_color().get_awt_color());
+                            g.setColor(cur_place.get_area().get_color());
                             g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
                         }
                         
@@ -791,7 +814,7 @@ class WorldTab extends JPanel {
                         
                         // draw risk level border
                         if(cur_place.get_risk_level() != null){
-                            g.setColor(cur_place.get_risk_level().get_color().get_awt_color());
+                            g.setColor(cur_place.get_risk_level().get_color());
                             ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
                             g.drawRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
                             // TODO: this has to be done after the path rendering
@@ -800,15 +823,29 @@ class WorldTab extends JPanel {
                         
                         // draw exits
                         if(tile_size >= 20){
-                            g.setColor(parent.world.get_path_color().get_awt_color());
+                            g.setColor(parent.world.get_path_color());
                             Integer exit_x_offset = new Integer(0), exit_y_offset = new Integer(0);
-                            //System.out.println(cur_place.get_paths().size() + " exits");
-                            g.setColor(parent.world.get_path_color().get_awt_color());
+                            g.setColor(parent.world.get_path_color());
+                            boolean up = false, down = false;
+                            
                             for(Path p: cur_place.get_paths()){
-                                Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
-                                if(exit_offset.first != tile_size / 2 || exit_offset.second != tile_size / 2){
-                                    g.fillOval(place_x_px + exit_offset.first - exit_radius, place_y_px + exit_offset.second - exit_radius, 2 * exit_radius, 2 * exit_radius);
+                                String exit = p.get_exit(cur_place);
+                                if(exit.equals("u")) up = true;
+                                else if(exit.equals("d")) down = true;
+                                else {
+                                    Pair<Integer, Integer> exit_offset = get_exit_offset(exit);
+                                    if(exit_offset.first != tile_size / 2 || exit_offset.second != tile_size / 2){
+                                        g.fillOval(place_x_px + exit_offset.first - exit_radius, place_y_px + exit_offset.second - exit_radius, 2 * exit_radius, 2 * exit_radius);
+                                    }
                                 }
+                            }
+                            
+                            if(up || down){
+                                // TODO: find working arrows, calculate position
+                                g.setColor(Color.BLACK);
+                                // ⬆⬇ ￪￬ ↑↓
+                                String updownstr = "" + (up ? "\342\254\206" : "") + (down ? "\342\254\207" : "");
+                                g.drawString(updownstr, place_x_px, place_y_px);
                             }
                         }
                         

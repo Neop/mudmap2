@@ -1,72 +1,44 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/*  MUD Map (v2) - A tool to create and organize maps for text-based games
+ *  Copyright (C) 2014  Neop (email: mneop@web.de)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *  for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
+/*  File description
+ *
+ *  This class describes a color
+ */
+
 package mudmap2.backend;
 
 /**
- * A RGB Color
+ * A color
+ * 
  * @author neop
  */
-public class Color {
+public class Color extends java.awt.Color {
     
-    int r, g, b;
-    
-    public Color(int _r, int _g, int _b) {
-        r = clamp255(_r);
-        g = clamp255(_g);
-        b = clamp255(_b);
+    public Color(){
+        super(0);
     }
     
-    /**
-     * Convert to java awt color
-     * @return awt compatible color
-     */
-    public java.awt.Color get_awt_color(){
-        return new java.awt.Color(r, g, b);
-    }
-    
-    /**
-     * Gets the red value
-     * 
-     * @return red value
-     */
-    public int get_r(){
-        return r;
-    }
-    
-    /**
-     * Gets the green value
-     * 
-     * @return green value
-     */
-    public int get_g(){
-        return g;
-    }
-    
-    /**
-     * Gets the blue value
-     * 
-     * @return blue value
-     */
-    public int get_b(){
-        return b;
-    }
-    
-    /**
-     * Clamps the value to the inteval 0 - 255
-     * 
-     * @param v value to clamp
-     * @return clamped value
-     */
-    private int clamp255(int v) {
-        if(v > 255) v = 255;
-        else if(v < 0) v = 0;
-        return v;
+    public Color(int r, int g, int b){
+        super(Math.min(255, Math.max(0, r)), Math.min(255, Math.max(0, g)), Math.min(255, Math.max(0, b)));
     }
     
     @Override
     public String toString(){
-        return "" + r + " " + g + " " + b;
+        return "" + getRed() + " " + getGreen() + " " + getBlue();
     }
 }

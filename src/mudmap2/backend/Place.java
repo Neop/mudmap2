@@ -1,3 +1,25 @@
+/*  MUD Map (v2) - A tool to create and organize maps for text-based games
+ *  Copyright (C) 2014  Neop (email: mneop@web.de)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *  for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*  File description
+ *
+ *  This class describes a place in a world
+ */
+
 package mudmap2.backend;
 
 import java.util.HashSet;
@@ -187,7 +209,7 @@ public class Place extends LayerElement implements Comparable<Place> {
      * @param dir exit direction
      * @return path connected to that exit
      */
-    public Path get_exit(ExitDirection dir){
+    public Path get_exit(String dir){
         for(Path path: connected_places){
             if(path.get_exit(this) == dir) return path;
         }
@@ -220,7 +242,7 @@ public class Place extends LayerElement implements Comparable<Place> {
         else throw new RuntimeException("This place is not specified in given path");
         
         boolean exit_occupied = false;
-        ExitDirection exit_this = path.get_exit(this);
+        String exit_this = path.get_exit(this);
         
         // check if exit is already connected with path
         for(Path p: connected_places){
