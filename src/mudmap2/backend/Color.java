@@ -10,15 +10,12 @@ package mudmap2.backend;
  */
 public class Color {
     
-    /// Combined RGB values
-    private int rgb;
-
-    public Color(int r, int g, int b) {
-        r = clamp255(r);
-        g = clamp255(g);
-        b = clamp255(b);
-        
-        rgb = (r << (8 * 2)) | (g << 8) | b;
+    int r, g, b;
+    
+    public Color(int _r, int _g, int _b) {
+        r = clamp255(_r);
+        g = clamp255(_g);
+        b = clamp255(_b);
     }
     
     /**
@@ -26,7 +23,7 @@ public class Color {
      * @return awt compatible color
      */
     public java.awt.Color get_awt_color(){
-        return new java.awt.Color(rgb);
+        return new java.awt.Color(r, g, b);
     }
     
     /**
@@ -35,7 +32,7 @@ public class Color {
      * @return red value
      */
     public int get_r(){
-        return (rgb >>> 8 * 2) & 0xF;
+        return r;
     }
     
     /**
@@ -44,7 +41,7 @@ public class Color {
      * @return green value
      */
     public int get_g(){
-        return (rgb >>> 8) & 0xF;
+        return g;
     }
     
     /**
@@ -53,7 +50,7 @@ public class Color {
      * @return blue value
      */
     public int get_b(){
-        return rgb & 0xF;
+        return b;
     }
     
     /**
@@ -66,5 +63,10 @@ public class Color {
         if(v > 255) v = 255;
         else if(v < 0) v = 0;
         return v;
+    }
+    
+    @Override
+    public String toString(){
+        return "" + r + " " + g + " " + b;
     }
 }

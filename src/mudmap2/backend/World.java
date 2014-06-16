@@ -3,11 +3,16 @@ package mudmap2.backend;
 import mudmap2.Paths;
 import mudmap2.Pair;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.NavigableMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,9 +22,11 @@ import java.util.logging.Logger;
  */
 public class World {
     
-    public final int file_version_major = 1;
-    public final int file_version_minor = 5;
-    public final int file_version_build = 0;
+    public static final int file_version_major = 1;
+    public static final int file_version_minor = 5;
+    public static final int file_version_build = 0;
+    
+    public static boolean compatibility_mudmap_1 = true;
     
     // name and file of the world
     String name, file;
@@ -87,6 +94,7 @@ public class World {
             
             int cur_area = -1;
             Place cur_place = new Place(-1, "", 0, 0, new Layer(-1));
+            final RiskLevel risk_level_default = get_risk_level(0);
 
             // temporary data for creating a place
             int cur_place_id = -1;
@@ -135,7 +143,16 @@ public class World {
                         home_y = Double.parseDouble(tmp[2]);
                     } else if(line.startsWith("dlc")){ // risk level colors
                         String[] tmp = line.split(" ");
-                        risk_levels.put(Integer.parseInt(tmp[1]), new RiskLevel(Integer.parseInt(tmp[1]), config_get_text(4, line), new Color(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]))));
+                        int rlid = Integer.parseInt(tmp[1]);
+                        String description = config_get_text(5, line);
+                        
+                        // only create a new risk level if it doesn't exist yet
+                        if(!risk_levels.containsKey(rlid))
+                            risk_levels.put(rlid, new RiskLevel(rlid, description, new Color(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]))));
+                        else {
+                            risk_levels.get(rlid).set_description(description);
+                            risk_levels.get(rlid).set_color(new Color(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4])));
+                        }
                     } 
                     
                     else if(line.startsWith("a ")){ // area id + name
@@ -159,6 +176,7 @@ public class World {
                         if(cur_place_id != -1){
                             // create place and add it to the layer and places list
                             cur_place = new Place(cur_place_id, cur_place_name, Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), layers.get(Integer.parseInt(tmp[1])));
+                            cur_place.set_risk_level(risk_level_default);
                             places.put(cur_place.get_id(), cur_place);
                             layers.get(Integer.parseInt(tmp[1])).put(cur_place);
                         }
@@ -190,14 +208,17 @@ public class World {
                         // if there is no pair create a new entry
                         if(!found_path) tmp_paths_deprecated.add(new PathTmp(cur_place, other_place_id, new ExitDirection(tmp[2]), null));
                     } else if(line.startsWith("pp")){ // place to place (path) connection
-                        String[] tmp = line.split(" ");
-                        tmp_paths.add(new PathTmp(cur_place, Integer.parseInt(tmp[1]), new ExitDirection(tmp[2]), new ExitDirection(tmp[3])));
+                        String[] tmp = line.substring(3).split("\\$");
+                        tmp_paths.add(new PathTmp(cur_place, Integer.parseInt(tmp[0]), new ExitDirection(tmp[1]), new ExitDirection(tmp[2])));
                     } else if(line.startsWith("pchi")){ // place child
                         String[] tmp = line.split(" ");
                         children.add(new Pair(cur_place, Integer.parseInt(tmp[1])));
                     } else if(line.startsWith("pdl")){ // place risk level
-                        cur_place.set_risk_lvl(Integer.parseInt(line.substring(3).trim()));
-                    } else if(line.startsWith("prl")){ // place reccomended level
+                        int rlid = Integer.parseInt(line.substring(3).trim());
+                        RiskLevel rl = risk_levels.get(rlid);
+                        if(rl != null) cur_place.set_risk_level(rl);
+                        else System.out.println("Couldn't load risk level " + rlid + " for " + cur_place_name);
+                    } else if(line.startsWith("prl")){ // place recommended level
                         String[] tmp = line.split(" ");
                         cur_place.set_rec_lvl_min(Integer.parseInt(tmp[1]));
                         cur_place.set_rec_lvl_max(Integer.parseInt(tmp[2]));
@@ -237,6 +258,75 @@ public class World {
         }
     }
     
+    /**
+     * Saves the world
+     */
+    public void write_world(){
+        try {
+            // open file
+            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)));
+
+            outstream.println("# MUD Map 2 world file");
+            outstream.println("# compatibility for MUD Map 1 " + (compatibility_mudmap_1 ? "enabled" : "disabled"));
+            
+            outstream.println("ver " + file_version_major + "." + file_version_minor + "." + file_version_build);
+            outstream.println("mver " + mudmap2.Mudmap2.get_version_major() + "." + mudmap2.Mudmap2.get_version_minor() + "." + mudmap2.Mudmap2.get_version_build());
+            outstream.println("name " + get_name());
+            outstream.println("wcol " + get_path_color());
+            outstream.println("wcnd " + get_path_color_nstd());
+            outstream.println("home " + get_home_layer() + " " + get_home_x() + " " + get_home_y());
+            
+            // risk levels
+            for(RiskLevel rl: risk_levels.values())
+                outstream.println("dlc " + rl.get_id() + " " + rl.get_color() + " " + rl.get_description());
+            
+            // areas
+            for(Area a: areas.values()){
+                outstream.println("a " + a.get_id() + " " + a.get_name());
+                outstream.println("acol " + a.get_color());
+            }
+            
+            // places
+            for(Place p: places.values()){
+                outstream.println("p " + p.get_id() + " " + p.get_name());
+                outstream.println("ppos " + p.get_layer() + " " + p.get_x() + " " + p.get_y());
+                if(p.get_area() != null) outstream.println("par " + p.get_area().get_id());
+                
+                // paths
+                for(Path path: p.get_paths()){
+                    Place other_place = path.get_other_place(p);
+                    
+                    if(compatibility_mudmap_1) // deprecated path format
+                        outstream.println("pw " + other_place.get_id() + " " + path.get_exit(p));
+                    
+                    // new path format
+                    if(path.get_places()[0] == p) // only one of both places should describe the path
+                        outstream.println("pp " + other_place.get_id() + "$" + path.get_exit(p) + "$" + path.get_exit(other_place));
+                }
+                
+                // risk level and recommended level
+                outstream.println("pdl " + p.get_risk_level().get_id());
+                if(p.get_rec_lvl_min() != -1 || p.get_rec_lvl_max() != -1) outstream.println("prl " + p.get_rec_lvl_min() + " " + p.get_rec_lvl_max());
+                
+                // children
+                for(Place child: p.children) outstream.println("pchi " + child.get_id());
+                // comments
+                for(String comment: p.get_comments()) outstream.println("pcom " + comment);
+                // flags
+                for(Map.Entry<String, Boolean> flag: p.flags.entrySet()){
+                    if(flag.getValue()) outstream.println("pb " + flag.getKey());
+                }
+            }
+            
+                            
+            
+            outstream.close();
+        } catch (IOException ex) {
+            System.out.printf("Couldn't write config file " + mudmap2.Paths.get_config_file());
+            Logger.getLogger(World.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+    
     // Path creation helper class
     public class PathTmp {
         public Place place_a;
@@ -268,13 +358,6 @@ public class World {
             line = line.substring(line.indexOf(" ")).trim();
         }
         return line;
-    }
-    
-    /**
-     * Saves the world
-     */
-    public void write_world(){
-        /// TODO: save world file
     }
     
     /**

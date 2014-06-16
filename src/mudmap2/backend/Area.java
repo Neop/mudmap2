@@ -6,6 +6,8 @@ package mudmap2.backend;
  * @author neop
  */
 public class Area {
+    // next id to be assigned
+    static int next_id = 0;
     
     int id;
     String name;
@@ -17,8 +19,8 @@ public class Area {
      * @param _name Name of the area
      * @param col 
      */
-    public Area(int _id, String _name, Color col) {
-        id = _id;
+    public Area(String _name, Color col) {
+        id = next_id++;
         name = _name;
         color = col;
     }
@@ -30,8 +32,13 @@ public class Area {
      */
     Area(int _id, String _name) {
         id = _id;
+        if(id >= next_id) next_id = id + 1;
         name = _name;
         color = new Color(0, 0, 0);
+    }
+    
+    public int get_id(){
+        return id;
     }
     
     /**

@@ -61,6 +61,15 @@ public class Layer {
     }
     
     /**
+     * Gets the id
+     * @return layer id
+     */
+    @Override
+    public String toString(){
+        return "" + get_id();
+    }
+    
+    /**
      * Removes an element from the layer
      * @param element 
      */

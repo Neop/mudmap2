@@ -29,6 +29,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
 
 /**
@@ -127,7 +128,9 @@ public final class Mainwindow extends JFrame {
         for(WorldTab tab: world_tabs.values()){
             // TODO: implement dialog which asks the user if the world should be saved
             /*if(save_world) tab.save();
-            else*/ tab.write_meta();
+            else*/ 
+            //tab.write_meta();
+            tab.save();
             tabbed_pane.remove(tab);
         }
     }
@@ -152,12 +155,15 @@ public final class Mainwindow extends JFrame {
                         String[] tmp = line.substring(4).split("\\.");
                         file_major = Integer.parseInt(tmp[0]);
                         file_minor = Integer.parseInt(tmp[1]);
-                    } else if(line.startsWith("show_paths")){
+                    } else if(line.startsWith("show_paths ")){ // show path lines
                         String[] tmp = line.split(" ");
-                        WorldTab.set_show_path_lines(Boolean.parseBoolean(tmp[1]));
-                    } else if(line.startsWith("show_paths")){
+                        WorldTab.set_show_paths(Boolean.parseBoolean(tmp[1]));
+                    } else if(line.startsWith("show_paths_curved")){ // show curved path lines - if path lines are enabled
                         String[] tmp = line.split(" ");
-                        WorldTab.set_show_path_lines_curved(Boolean.parseBoolean(tmp[1]));
+                        WorldTab.set_show_paths_curved(Boolean.parseBoolean(tmp[1]));
+                    } else if(line.startsWith("compat_mudmap_1")){ // save world files compatible to mudmap 1
+                        String[] tmp = line.split(" ");
+                        World.compatibility_mudmap_1 = Boolean.parseBoolean(tmp[1]);
                     }
                 }
             } catch (IOException ex) {
@@ -176,13 +182,14 @@ public final class Mainwindow extends JFrame {
 
             outstream.println("# MUD Map 2 config file");
             outstream.println("ver " + config_file_version_major + "." + config_file_version_minor);
-            outstream.println("show_paths " + WorldTab.get_show_path_lines());
-            outstream.println("show_paths_curved " + WorldTab.get_show_path_lines_curved());
+            outstream.println("show_paths " + WorldTab.get_show_paths());
+            outstream.println("show_paths_curved " + WorldTab.get_show_paths_curved());
+            outstream.println("compat_mudmap_1 " + World.compatibility_mudmap_1);
             
             outstream.close();
         } catch (IOException ex) {
             System.out.printf("Couldn't write config file " + mudmap2.Paths.get_config_file());
-            Logger.getLogger(WorldTab.class.getName()).log(Level.WARNING, null, ex);
+            Logger.getLogger(Mainwindow.class.getName()).log(Level.WARNING, null, ex);
         }
     }
     

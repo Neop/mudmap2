@@ -16,8 +16,8 @@ public class Place extends LayerElement implements Comparable<Place> {
     int id;
     String name;
     Area area;
-    int rec_lvl_min, rec_lvl_max, risk_lvl;
-    boolean has_shop, has_teacher, has_food, has_beverages;
+    int rec_lvl_min, rec_lvl_max;
+    RiskLevel risk_level;
     
     TreeSet<Place> children, parents;
     HashSet<Path> connected_places;
@@ -27,7 +27,6 @@ public class Place extends LayerElement implements Comparable<Place> {
     public Place(int _id, String _name, int pos_x, int pos_y, Layer l){
         super(pos_x, pos_y, l);
         name = _name;
-        area = null;
         id = _id;
         if(_id >= next_id) next_id++;
         
@@ -43,7 +42,6 @@ public class Place extends LayerElement implements Comparable<Place> {
     public Place(String _name, int pos_x, int pos_y, Layer l){
         super(pos_x, pos_y, l);
         name = _name;
-        area = null;
         id = next_id++;
         
         initialize();
@@ -53,6 +51,10 @@ public class Place extends LayerElement implements Comparable<Place> {
      * Initializes the place
      */
     private void initialize(){
+        area = null;
+        risk_level = null;
+        rec_lvl_min = rec_lvl_max = -1;
+        
         children = new TreeSet<Place>();
         parents = new TreeSet<Place>();
         connected_places = new HashSet<Path>();
@@ -136,16 +138,16 @@ public class Place extends LayerElement implements Comparable<Place> {
      * Gets the risk level
      * @return risk level
      */
-    public int get_risk_lvl(){
-        return risk_lvl;
+    public RiskLevel get_risk_level(){
+        return risk_level;
     }
     
     /**
      * sets the risk level
      * @param _risk_lvl 
      */
-    public void set_risk_lvl(int _risk_lvl){
-        risk_lvl = _risk_lvl;
+    public void set_risk_level(RiskLevel _risk_level){
+        risk_level = _risk_level;
     }
     
     /**
@@ -168,6 +170,16 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public LinkedList<String> get_comments(){
         return comments;
+    }
+    
+    /**
+     * Gets the comments as a single string
+     * @return 
+     */
+    public String get_comments_string(){
+        String ret = "";
+        for(String c: comments) ret += (ret.length() == 0 ? "" : " ") + c;
+        return ret;
     }
     
     /**
@@ -199,7 +211,7 @@ public class Place extends LayerElement implements Comparable<Place> {
      * If 'this place' is not in path an exception will be thrown
      * @param p 
      */
-    public void connect_path(Path path) throws RuntimeException{
+    public boolean connect_path(Path path) throws RuntimeException{
         Place[] pp = path.get_places();
         Place other;
         
@@ -207,8 +219,31 @@ public class Place extends LayerElement implements Comparable<Place> {
         else if(pp[1] == this) other = pp[0];
         else throw new RuntimeException("This place is not specified in given path");
         
-        connected_places.add(path);
-        other.connected_places.add(path);
+        boolean exit_occupied = false;
+        ExitDirection exit_this = path.get_exit(this);
+        
+        // check if exit is already connected with path
+        for(Path p: connected_places){
+            if(p.get_exit(this) == exit_this){
+                exit_occupied = true;
+                break;
+            }
+        }
+        if(!exit_occupied){
+            exit_this = path.get_exit(other);
+            for(Path p: other.connected_places){
+                if(p.get_exit(other) == exit_this){
+                    exit_occupied = true;
+                    break;
+                }
+            }
+        
+            if(!exit_occupied){
+                connected_places.add(path);
+                other.connected_places.add(path);
+            }
+        }
+        return !exit_occupied;
     }
     
     /**
@@ -245,6 +280,15 @@ public class Place extends LayerElement implements Comparable<Place> {
     public void connect_child(Place p){
         children.add(p);
         p.parents.add(this);
+    }
+    
+    /**
+     * Gets the name
+     * @return name of he place
+     */
+    @Override
+    public String toString(){
+        return name;
     }
     
     @Override
