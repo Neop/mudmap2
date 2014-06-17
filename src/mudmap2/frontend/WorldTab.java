@@ -45,6 +45,7 @@ import java.io.PrintWriter;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -493,14 +494,11 @@ class WorldTab extends JPanel {
     
     private static class WorldPanel extends JPanel {
         
-        static final float risk_level_stroke_width = 3;
-        
         static final float tile_selection_stroke_width = 3;
         static final java.awt.Color tile_selection_color = new java.awt.Color(255, 0, 0);
         
-        static final int tile_border_area = 10;
-        static final int tile_border_risk_level = 10;
-        
+        static final float tile_risk_level_stroke_width = 3;
+        static final int tile_border_width = 10;
         static final int exit_circle_radius = 5;
         
         double screen_width, screen_height;
@@ -523,22 +521,33 @@ class WorldTab extends JPanel {
          * Gets the current tile border area size
          * @return area border width
          */
-        private int get_tile_border_area(){
-            return (int) Math.round(tile_border_area * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
-            //return get_tile_draw_text() ? tile_border_area : (tile_border_area / 2);
+        private int get_tile_border_width(){
+            // with interpolation for smooth transition
+            return (int) Math.round(tile_border_width * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
+        }
+                
+        /**
+         * Gets the radius of the exit circles / dots
+         * @return 
+         */
+        private int get_exit_circle_radius(){
+            return (int) Math.round(exit_circle_radius * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
         }
         
         /**
-         * Gets the current tile risk level border size
-         * @return risk level border width
+         * Gets the stroke width of the tile selection box
+         * @return 
          */
-        private int get_tile_border_risk_level(){
-            return (int) Math.round(tile_border_risk_level * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
-            //return get_tile_draw_text() ? tile_border_risk_level : (tile_border_risk_level / 2);
+        private float get_tile_selection_stroke_width(){
+            return tile_selection_stroke_width;
         }
-                
-        private int get_exit_circle_radius(){
-            return (int) Math.round(exit_circle_radius * Math.min(1.0, Math.max(0.5, (double) (parent.get_tile_size() - 20) / 80)));
+        
+        /**
+         * Gets the stroke width of the risk level border
+         * @return 
+         */
+        private float get_risk_level_stroke_width(){
+            return tile_risk_level_stroke_width;
         }
         
         /**
@@ -559,28 +568,29 @@ class WorldTab extends JPanel {
          */
         private Pair<Integer, Integer> get_exit_offset(String dir){
             Pair<Integer, Integer> ret = new Pair<Integer, Integer>(0, 0);
+            int border_width = get_tile_border_width();
             if(dir.equals("n")){ // north
                 ret.first = parent.get_tile_size() / 2;
-                ret.second = get_tile_border_risk_level();
+                ret.second = border_width;
             } else if(dir.equals("e")){ // east
-                ret.first = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() - border_width;
                 ret.second = parent.get_tile_size() / 2;
             } else if(dir.equals("s")){ // south
                 ret.first = parent.get_tile_size() / 2;
-                ret.second = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.second = parent.get_tile_size() - border_width;
             } else if(dir.equals("w")){ // west
-                ret.first = get_tile_border_risk_level();
+                ret.first = border_width;
                 ret.second = parent.get_tile_size() / 2;
             } else if(dir.equals("ne")){ // north-east
-                ret.first = parent.get_tile_size() - get_tile_border_risk_level();
-                ret.second = get_tile_border_risk_level();
+                ret.first = parent.get_tile_size() - border_width;
+                ret.second = border_width;
             } else if(dir.equals("se")){ // south-east
-                ret.first = ret.second = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = ret.second = parent.get_tile_size() - border_width;
             } else if(dir.equals("nw")){ // north-west
-                ret.first = ret.second = get_tile_border_risk_level();
+                ret.first = ret.second = border_width;
             } else if(dir.equals("sw")){ // south-west
-                ret.first = get_tile_border_risk_level();
-                ret.second = parent.get_tile_size() - get_tile_border_risk_level();
+                ret.first = border_width;
+                ret.second = parent.get_tile_size() - border_width; 
             } else {
                 ret.first = ret.second = parent.get_tile_size() / 2;
             }
@@ -723,8 +733,16 @@ class WorldTab extends JPanel {
             WorldCoordinate cur_pos = parent.get_cur_position();
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
             
-            int tile_size = parent.get_tile_size();
-            int exit_radius = get_exit_circle_radius();
+            FontMetrics fm = g.getFontMetrics();
+            
+            final int tile_size = parent.get_tile_size();
+            final int exit_radius = get_exit_circle_radius();
+            final float selection_stroke_width = get_tile_selection_stroke_width();
+            final float risk_level_stroke_width = get_risk_level_stroke_width();
+            final int border_width = get_tile_border_width();
+            
+            // max number of text lines tht fit in a tile
+            final int max_lines = (int) Math.floor((double)(tile_size - 3 * (border_width + (int) Math.ceil(risk_level_stroke_width))) / fm.getHeight());
             
             // screen size
             screen_width = g.getClipBounds().getWidth();
@@ -759,6 +777,9 @@ class WorldTab extends JPanel {
                         // TODO: extract constant calculation from for loop
                         int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
                         int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+                        
+                        // number of drawn text lines
+                        int line_num = 0;
                     
                         // draw path lines here
                         if(get_show_paths()){
@@ -809,17 +830,71 @@ class WorldTab extends JPanel {
                         // draw tile center color
                         if(get_tile_draw_text()){
                             g.setColor(parent.tile_center_color);
-                            g.fillRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
+                            g.fillRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
                         }
                         
                         // draw risk level border
                         if(cur_place.get_risk_level() != null){
                             g.setColor(cur_place.get_risk_level().get_color());
                             ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
-                            g.drawRect(place_x_px + get_tile_border_area(), place_y_px + get_tile_border_area(), tile_size - 2 * get_tile_border_area(), tile_size - 2 * get_tile_border_area());
+                            g.drawRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
                             // TODO: this has to be done after the path rendering
                             //if(show_path_lines) graphic_path.clearRect((int) (place_x_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (place_y_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2));
                         } else System.out.println("Error: Can't draw risk level, reference is null");
+                        
+                        // draw text, if not in small tiles mode
+                        if(get_tile_draw_text()){
+                            g.setColor(Color.BLACK);
+                            //FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
+                            // fit the string into the tile
+
+                            // place name
+                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
+                            for(String str: line){
+                                g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                line_num++;
+                            }
+                            
+                            if(line_num < max_lines){ // it't not unusual for some places to fill up all the lines
+                                // recommended level
+                                int reclvlmin = cur_place.get_rec_lvl_min(), reclvlmax = cur_place.get_rec_lvl_max();
+                                if(reclvlmin != -1 || reclvlmax != -1){
+                                    g.drawString("lvl " + (reclvlmin != -1 ? reclvlmin : "?") + " - " + (reclvlmax != -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                    line_num++;
+                                }
+                                
+                                // sub areas / children
+                                if(line_num < max_lines && !cur_place.get_children().isEmpty()){
+                                    int children_num = cur_place.get_children().size();
+                                    String sa_str = "sa" + (children_num > 1 ? " (" + cur_place.get_children().size() + "): " : ": ");
+                                    
+                                    boolean first_child = true;
+                                    for(Place child: cur_place.get_children()){
+                                        sa_str += (first_child ? "" : ", ") + child.get_name();
+                                        first_child = false;
+                                    }
+                                    line = fit_line_width(sa_str, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines - line_num);
+                                    for(String str: line){
+                                        g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                        line_num++;
+                                    }
+                                }
+                                
+                                // flags
+                                if(line_num < max_lines){
+                                    String flags = "";
+                                    // place has comments
+                                    if(cur_place.get_comments().size() > 0) flags += "C";
+                                    
+                                    // other flags
+                                    for(Entry<String, Boolean> flag: cur_place.get_flags().entrySet())
+                                        if(flag.getValue()) flags += flag.getKey();
+                                    
+                                    // draw flags
+                                    g.drawString(flags, place_x_px + border_width + (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
+                                }
+                            }
+                        }
                         
                         // draw exits
                         if(tile_size >= 20){
@@ -840,26 +915,12 @@ class WorldTab extends JPanel {
                                 }
                             }
                             
-                            if(up || down){
+                            if((up || down) && get_tile_draw_text() && line_num < max_lines){
                                 // TODO: find working arrows, calculate position
                                 g.setColor(Color.BLACK);
                                 // ⬆⬇ ￪￬ ↑↓
-                                String updownstr = "" + (up ? "\342\254\206" : "") + (down ? "\342\254\207" : "");
-                                g.drawString(updownstr, place_x_px, place_y_px);
-                            }
-                        }
-                        
-                        // draw text, if not in small tiles mode
-                        if(get_tile_draw_text()){
-                            g.setColor(Color.BLACK);
-                            FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
-                            // fit the string into the tile
-                           
-                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (get_tile_border_area() + tile_selection_stroke_width)), (int) Math.floor((tile_size - 2 * (get_tile_border_risk_level() + get_tile_border_area())) / fm.getHeight()) - 1);
-                            int line_num = 0;
-                            for(String str: line){
-                                g.drawString(str, place_x_px + get_tile_border_risk_level() + (int) Math.ceil(risk_level_stroke_width), place_y_px + get_tile_border_risk_level() + fm.getHeight() * (1 + line_num));
-                                line_num++;
+                                String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
+                                g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                             }
                         }
                         
@@ -880,19 +941,19 @@ class WorldTab extends JPanel {
                         int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
                         
                         g.setColor(tile_selection_color);
-                        ((Graphics2D)g).setStroke(new BasicStroke(tile_selection_stroke_width));
+                        ((Graphics2D)g).setStroke(new BasicStroke((selection_stroke_width)));
                         
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width + tile_size / 4));
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px + tile_selection_stroke_width + tile_size / 4), (int) (place_y_px + tile_selection_stroke_width));
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width + tile_size / 4));
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width + tile_size / 4), (int) (place_y_px + selection_stroke_width));
                         
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px + tile_selection_stroke_width + tile_size / 4));
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px + tile_selection_stroke_width), (int) (place_x_px - tile_selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + tile_selection_stroke_width));
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width + tile_size / 4));
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + selection_stroke_width));
                         
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + tile_size * 3 / 4));
-                        g.drawLine((int) (place_x_px + tile_selection_stroke_width), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px + tile_selection_stroke_width + tile_size  / 4), (int) (place_y_px - tile_selection_stroke_width + tile_size));                         
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));                         
                         
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px - tile_selection_stroke_width + tile_size * 3 / 4));
-                        g.drawLine((int) (place_x_px - tile_selection_stroke_width + tile_size), (int) (place_y_px - tile_selection_stroke_width + tile_size), (int) (place_x_px - tile_selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - tile_selection_stroke_width + tile_size));
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - selection_stroke_width + tile_size));
                     }       
                 }
             }    

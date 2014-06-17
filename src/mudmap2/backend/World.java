@@ -150,7 +150,7 @@ public class World {
                             throw new Exception("World file version is greater than file reader version. Please update mudmap or consult the developer.");
                             // TODO: Show message dialog
                     } else if(line.startsWith("wname")){ // world name
-                        name = line.substring(5).trim();
+                        name = line.substring(6).trim();
                     } else if(line.startsWith("wcol")){ // path line color
                         String[] tmp = line.substring(5).split(" ");
                         if(path_color == path_color_nstd) path_color_nstd = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
@@ -293,7 +293,7 @@ public class World {
             
             outstream.println("ver " + file_version_major + "." + file_version_minor + "." + file_version_build);
             outstream.println("mver " + mudmap2.Mudmap2.get_version_major() + "." + mudmap2.Mudmap2.get_version_minor() + "." + mudmap2.Mudmap2.get_version_build());
-            outstream.println("name " + get_name());
+            outstream.println("wname " + get_name());
             outstream.println("wcol " + get_path_color());
             outstream.println("wcnd " + get_path_color_nstd());
             outstream.println("home " + get_home_layer() + " " + get_home_x() + " " + get_home_y());

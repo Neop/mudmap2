@@ -211,7 +211,7 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public Path get_exit(String dir){
         for(Path path: connected_places){
-            if(path.get_exit(this) == dir) return path;
+            if(path.get_exit(this).equals(dir)) return path;
         }
         throw new RuntimeException();
     }
@@ -246,7 +246,7 @@ public class Place extends LayerElement implements Comparable<Place> {
         
         // check if exit is already connected with path
         for(Path p: connected_places){
-            if(p.get_exit(this) == exit_this){
+            if(p.get_exit(this).equals(exit_this)){
                 exit_occupied = true;
                 break;
             }
@@ -254,7 +254,7 @@ public class Place extends LayerElement implements Comparable<Place> {
         if(!exit_occupied){
             exit_this = path.get_exit(other);
             for(Path p: other.connected_places){
-                if(p.get_exit(other) == exit_this){
+                if(p.get_exit(other).equals(exit_this)){
                     exit_occupied = true;
                     break;
                 }
@@ -296,12 +296,28 @@ public class Place extends LayerElement implements Comparable<Place> {
     }
     
     /**
+     * Gets the flags of a place
+     * @return 
+     */
+    public TreeMap<String, Boolean> get_flags(){
+        return flags;
+    }
+    
+    /**
      * Connects a place as child, this place will be added to it as parent
      * @param p 
      */
     public void connect_child(Place p){
         children.add(p);
         p.parents.add(this);
+    }
+    
+    /**
+     * Gets the child places / subareas
+     * @return 
+     */
+    public TreeSet<Place> get_children(){
+        return children;
     }
     
     /**
