@@ -39,6 +39,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -617,28 +618,42 @@ class WorldTab extends JPanel {
         }
         
         /**
-         * Gets the direction / normal angle of an exit
+         * Gets the normal vector of an exit
          * @param dir exit direction
-         * @return normal angle
+         * @return normal vector
          */
-        private int get_exit_normal_angle(String dir){
-            int ret = 0;
-            if(dir.equals("n")){ // north
-                ret = 90;
-            } else if(dir.equals("e")){ // east
-                ret = 0;
-            } else if(dir.equals("s")){ // south
-                ret = 270;
-            } else if(dir.equals("w")){ // west
-                ret = 180;
-            } else if(dir.equals("ne")){ // north-east
-                ret = 45;
-            } else if(dir.equals("se")){ // south-east
-                ret = 315;
-            } else if(dir.equals("nw")){ // north-west
-                ret = 135;
-            } else if(dir.equals("sw")){ // south-west
-                ret = 225;
+        private Pair<Double, Double> get_exit_normal(String dir){
+            Pair<Double, Double> ret = new Pair(0, 0);
+            if(dir.equals("n")){
+                ret.first = 0.0;
+                ret.second = 1.0;
+            } else if(dir.equals("e")){
+                ret.first = -1.0;
+                ret.second = 0.0;
+            } else if(dir.equals("s")){
+                ret.first = 0.0;
+                ret.second = -1.0;
+            } else if(dir.equals("w")){
+                ret.first = 1.0;
+                ret.second = 0.0;
+            } else if(dir.equals("ne")){
+                ret.first = -1.0;
+                ret.second = 1.0;
+            } else if(dir.equals("se")){
+                ret.first = -1.0;
+                ret.second = -1.0;
+            } else if(dir.equals("nw")){
+                ret.first = 1.0;
+                ret.second = 1.0;
+            } else if(dir.equals("sw")){
+                ret.first = 1.0;
+                ret.second = -1.0;
+            }
+            // normalize it
+            if(ret.first != 0.0 && ret.second != 0.0){
+                double length = Math.sqrt(ret.first * ret.first + ret.second * ret.second);
+                ret.first /= length;
+                ret.second /= length;
             }
             return ret;
         }
@@ -801,13 +816,13 @@ class WorldTab extends JPanel {
          
                         if(layer.exist(place_x, place_y)){                
                             Place cur_place = (Place) layer.get(place_x, place_y);
-
-                            if(tile_positions != null) tile_positions.add(new Pair(tile_x, tile_y));
                             
                             // place position in pixel on the screen
                             // TODO: extract constant calculation from for loop
                             int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
                             int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+                            
+                            if(tile_positions != null) tile_positions.add(new Pair(place_x_px, place_y_px));
 
                             // number of drawn text lines
                             int line_num = 0;
@@ -822,19 +837,35 @@ class WorldTab extends JPanel {
                                             Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
                                             Pair<Integer, Integer> exit_offset_other = get_exit_offset(p.get_exit(other_place));
 
-                                            if(get_show_paths_curved()){
-                                                /*int angle_a = get_exit_normal_angle(p.get_exit(cur_place));
-                                                if(angle_a == 0){
-                                                    //angle_a = arcsin((cur_place.get_y() - other_place.get_y()) / sqrt(dx² + dy²))
-                                                    // TODO: Winkel für beide berechnen (Fall kein normaler ausgang)
+                                            // TODO: implement curved lines, normals dont fit yet and lines are drawn twice
+                                            boolean draw_curves = false;//get_show_paths_curved();
+                                                    
+                                            if(draw_curves){
+                                                Pair<Double, Double> normal1 = get_exit_normal(p.get_exit(cur_place));
+                                                Pair<Double, Double> normal2 = get_exit_normal(p.get_exit(other_place));
+                                                
+                                                double exit_1_x = place_x_px + exit_offset.first;
+                                                double exit_1_y = place_y_px + exit_offset.second;
+                                                double exit_2_x = place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first;
+                                                double exit_2_y = place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second;
+                                                
+                                                double dx = exit_2_x - exit_1_x;
+                                                double dy = exit_2_y - exit_1_y;
+                                                
+                                                if(draw_curves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tile_size){
+                                                    CubicCurve2D c = new CubicCurve2D.Double();
+                                                    c.setCurve(exit_1_x, 
+                                                            exit_1_y,
+                                                            place_x_px + normal1.first * tile_size, place_y_px + normal1.second * tile_size,
+                                                            place_x_px + (other_place.get_x() - cur_place.get_x() + normal2.first) * tile_size + exit_offset_other.first,
+                                                            place_y_px - (other_place.get_y() - cur_place.get_y() + normal2.second) * tile_size + exit_offset_other.second,
+                                                            exit_2_x, 
+                                                            exit_2_y);
+                                                    ((Graphics2D) graphic_path).draw(c);
                                                 }
-
-                                                int angle_b = get_exit_normal_angle(p.get_exit(other_place));*/
-
-
-
-                                                //g.drawArc(WIDTH, WIDTH, WIDTH, WIDTH, WIDTH, WIDTH);
-                                            } else {
+                                            }
+                                            
+                                            if(!draw_curves){
                                                 graphic_path.drawLine(place_x_px + exit_offset.first, place_y_px + exit_offset.second, 
                                                                       place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first, 
                                                                       place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second);
@@ -979,8 +1010,10 @@ class WorldTab extends JPanel {
                 if(get_show_paths()){
                     // mask out tile positions on graphic_path
                     ((Graphics2D) graphic_path).setBackground(new Color(0,0,0,0));
+                    int clear_tile_size = tile_size - 2 * border_width;
                     for(Pair<Integer, Integer> p: tile_positions)
-                        graphic_path.clearRect(p.first, p.second, p.first + tile_size, p.second + tile_size);
+                        //graphic_path.clearRect(p.first, p.second, p.first + tile_size, p.second + tile_size);
+                        graphic_path.clearRect(p.first + border_width, p.second + border_width, clear_tile_size, clear_tile_size);
                     
                     // draw graphic_path to g
                     g.drawImage(image_path, 0, 0, null);
