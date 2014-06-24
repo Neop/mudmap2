@@ -27,9 +27,12 @@ package mudmap2.frontend;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.DisplayMode;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -63,6 +66,7 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
+import sun.awt.DisplayChangedListener;
 
 /**
  * A tab in the main window that displays a world
@@ -512,6 +516,8 @@ class WorldTab extends JPanel {
         public WorldPanel(WorldTab _parent) {
             parent = _parent;
             setFocusable(true);
+            requestFocusInWindow();
+            addFocusListener(new TabFocusListener());
             addKeyListener(new TabKeyListener());
             addMouseListener(new TabMouseListener());
             addMouseMotionListener(new TabMouseMotionListener());
@@ -959,7 +965,7 @@ class WorldTab extends JPanel {
             }    
         }
         
-        public class TabMouseListener implements MouseListener {
+        private class TabMouseListener implements MouseListener {
 
             @Override
             public void mouseClicked(MouseEvent arg0) {
@@ -970,7 +976,9 @@ class WorldTab extends JPanel {
             }
 
             @Override
-            public void mousePressed(MouseEvent arg0) {}
+            public void mousePressed(MouseEvent arg0) {
+                requestFocusInWindow();
+            }
 
             @Override
             public void mouseReleased(MouseEvent arg0) {}
@@ -988,7 +996,7 @@ class WorldTab extends JPanel {
             }
         }
         
-        public class TabMouseMotionListener implements MouseMotionListener {
+        private class TabMouseMotionListener implements MouseMotionListener {
 
             @Override
             public void mouseDragged(MouseEvent arg0) {
@@ -1009,7 +1017,7 @@ class WorldTab extends JPanel {
             
         }
         
-        public class TabKeyListener implements KeyListener {
+        private class TabKeyListener implements KeyListener {
 
             @Override
             public void keyTyped(KeyEvent arg0) {
@@ -1047,6 +1055,19 @@ class WorldTab extends JPanel {
 
             @Override
             public void keyReleased(KeyEvent arg0) {}
+            
+        }
+        
+        // prevents the panel to loose focus
+        private class TabFocusListener implements FocusListener{
+
+            @Override
+            public void focusGained(FocusEvent arg0) {}
+
+            @Override
+            public void focusLost(FocusEvent arg0) {
+                requestFocusInWindow();
+            }
             
         }
     }
