@@ -851,7 +851,7 @@ class WorldTab extends JPanel {
                             //if(show_path_lines) graphic_path.clearRect((int) (place_x_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (place_y_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2));
                         } else System.out.println("Error: Can't draw risk level, reference is null");
                         
-                        // draw text, if not in small tiles mode
+                        // draw text, if tiles are large enough
                         if(get_tile_draw_text()){
                             g.setColor(Color.BLACK);
                             //FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
@@ -928,7 +928,8 @@ class WorldTab extends JPanel {
                                 // TODO: find working arrows, calculate position
                                 g.setColor(Color.BLACK);
                                 // ⬆⬇ ￪￬ ↑↓
-                                String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
+                                //String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
+                                String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
                                 g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                             }
                         }
