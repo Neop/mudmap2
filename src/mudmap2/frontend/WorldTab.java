@@ -38,6 +38,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -520,6 +522,7 @@ class WorldTab extends JPanel {
             addFocusListener(new TabFocusListener());
             addKeyListener(new TabKeyListener());
             addMouseListener(new TabMouseListener());
+            addMouseWheelListener(new TabMouseWheelListener());
             addMouseMotionListener(new TabMouseMotionListener());
         }
         
@@ -994,6 +997,15 @@ class WorldTab extends JPanel {
             public void mouseExited(MouseEvent arg0) {
                 parent.mouse_in_panel = false;
             }
+        }
+        
+        private class TabMouseWheelListener implements MouseWheelListener {
+
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent arg0) {
+                parent.set_tile_size(parent.get_tile_size() + arg0.getWheelRotation());
+            }
+            
         }
         
         private class TabMouseMotionListener implements MouseMotionListener {
