@@ -70,8 +70,8 @@ public class Layer {
      * @param y y coordinate
      * @return element at that position
      */
-    public LayerElement get(int x, int y) throws PlaceNotFoundException{
-        if(!exist(x, y)) throw new PlaceNotFoundException(x, y);
+    public LayerElement get(int x, int y) /*throws PlaceNotFoundException*/{
+        //if(!exist(x, y)) throw new PlaceNotFoundException(x, y);
         return elements.get(x).get(y);
     }
     
@@ -109,8 +109,7 @@ public class Layer {
      * @return true, if an element exists
      */
     public boolean exist(int x, int y){
-        if(!elements.containsKey(x) || !elements.get(x).containsKey(y)) return false;
-        return true;
+        return elements.containsKey(x) && elements.get(x).containsKey(y);
     }
     
     /**
