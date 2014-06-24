@@ -974,9 +974,9 @@ class WorldTab extends JPanel {
             @Override
             public void mouseClicked(MouseEvent arg0) {
                 // if doubleclick: set place selection to coordinates if keyboard selection is enabled
-                if(arg0.getButton() == MouseEvent.BUTTON1 && parent.get_place_selection_enabled() && arg0.getClickCount() > 1){
+                //if(arg0.getButton() == MouseEvent.BUTTON1 && parent.get_place_selection_enabled() && arg0.getClickCount() > 1){
                     parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                }
+                //}
             }
 
             @Override
