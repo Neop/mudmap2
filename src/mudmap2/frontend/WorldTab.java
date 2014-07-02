@@ -74,6 +74,7 @@ import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.PlaceDialog;
+import mudmap2.frontend.dialog.PlaceRemoveDialog;
 
 /**
  * A tab in the main window that displays a world
@@ -1052,10 +1053,6 @@ class WorldTab extends JPanel {
                     TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
                 }
-                
-                //AreaDialog d = new AreaDialog(parent.parent, true);
-                //d.setVisible(true);
-                
             }
 
             @Override
@@ -1113,7 +1110,6 @@ class WorldTab extends JPanel {
 
             @Override
             public void keyTyped(KeyEvent arg0) {
-                // TODO: warum funktionieren keine Keycodes?
                 switch(Character.toLowerCase(arg0.getKeyChar())){
                     // zoom the map
                     case '+':
@@ -1142,12 +1138,20 @@ class WorldTab extends JPanel {
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
                         break;
                         
-                    case 'e':
-                        Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
-                        PlaceDialog dlg;
-                        if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
-                        else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
-                        dlg.setVisible(true);
+                    case 'e': // edit / add place
+                        if(parent.get_place_selection_enabled()){
+                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                            PlaceDialog dlg;
+                            if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
+                            else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
+                            dlg.setVisible(true);
+                        }
+                        break;
+                    case 'r': // remove place
+                        if(parent.get_place_selection_enabled()){
+                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                            if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
+                        }
                         break;
                 } 
             }
@@ -1196,6 +1200,7 @@ class WorldTab extends JPanel {
                         mi_edit.addMouseListener(new PlaceDialog(parent.parent, parent.world, place));
                         add(mi_edit);
                         JMenuItem mi_remove = new JMenuItem("Remove place");
+                        mi_remove.addMouseListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
                         add(mi_remove);
                         JMenuItem mi_area = new JMenuItem("Edit area");
                         add(mi_area);

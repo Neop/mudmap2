@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import mudmap2.backend.Layer.PlaceNotFoundException;
 
 /**
  *
@@ -413,6 +414,18 @@ public class World {
         l.put(place, x, y);
         // add to place list
         places.put(place.get_id(), place);
+    }
+    
+    public void remove(Place place) throws RuntimeException, PlaceNotFoundException {
+        Layer layer = layers.get(place.get_layer().get_id());
+        if(layer == null || layer != place.get_layer()){
+            // error, wrong layer? (shouldn't occur)
+            throw new RuntimeException("Couldn't remove \"" + place.get_name() + "\" (ID: " + place.get_id() + "): layer mismatch");
+        } else {
+            place.remove_connections();
+            layer.remove(place);
+            places.remove(place.get_id());
+        }
     }
     
     /**

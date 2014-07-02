@@ -329,9 +329,26 @@ public class Place extends LayerElement implements Comparable<Place> {
         return name;
     }
     
+    /**
+     * Compares two places by their name
+     * @param arg0
+     * @return 
+     */
     @Override
     public int compareTo(Place arg0) {
         if(arg0 == null) throw new NullPointerException();
         return (this.id == arg0.id) ? 0 : 1;
+    }
+
+    /**
+     * Removes all connections to other places (paths, child-connections)
+     */
+    void remove_connections() {
+        // remove paths (buffer, becaus connected_places will be modified
+        HashSet<Path> cp_buffer = (HashSet<Path>) connected_places.clone();
+        for(Path p: cp_buffer) p.remove();
+        // remove connection to sub-areas (children / parents)
+        for(Place pl: children) pl.parents.remove(this);
+        for(Place pl: parents) pl.children.remove(this);
     }
 }

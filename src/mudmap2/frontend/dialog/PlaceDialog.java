@@ -17,7 +17,7 @@
 
 /*  File description
  *
- *  The file dialog is used to create and modify places
+ *  The place dialog is used to create and modify places
  */
 package mudmap2.frontend.dialog;
 
@@ -69,8 +69,7 @@ public class PlaceDialog extends JDialog implements MouseListener {
      * @param _place existing place
      */
     public PlaceDialog(JFrame _parent, World _world, Place _place){
-        super(_parent, true);
-        setTitle("Edit place - " + _place.get_name() + " (ID: " + _place.get_id() + ")");
+        super(_parent, "Edit place - " + _place.get_name() + " (ID: " + _place.get_id() + ")", true);
         
         parent = _parent;
         world = _world;
@@ -89,8 +88,7 @@ public class PlaceDialog extends JDialog implements MouseListener {
      * @param py place coordinate y
      */
     public PlaceDialog(JFrame _parent, World _world, Layer _layer, int _px, int _py){
-        super(_parent, true);
-        setTitle("Add place");
+        super(_parent, "Add place", true);
         
         parent = _parent;
         world = _world;

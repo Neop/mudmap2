@@ -101,4 +101,12 @@ public class Path {
         else if(places[1] == p) return places[0];
         else throw new RuntimeException("Place not found in path");
     }
+
+    /**
+     * Removes this path from both places
+     */
+    void remove() {
+        places[0].connected_places.remove(this);
+        places[1].connected_places.remove(this);
+    }
 }
