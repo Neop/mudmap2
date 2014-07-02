@@ -92,11 +92,18 @@ public class Area implements Comparable<Area> {
     
     /**
      * Sets a new area color
-     * 
      * @param col new area color
      */
     public void set_color(Color col){
         color = col;
+    }
+    
+    /**
+     * Sets a new area color
+     * @param col new area color
+     */
+    public void set_color(java.awt.Color _color) {
+        color = new Color(_color);
     }
     
     /**
@@ -111,5 +118,10 @@ public class Area implements Comparable<Area> {
     @Override
     public int compareTo(Area arg0) {
         return -arg0.get_name().compareTo(name);
+    }
+    
+    @Override
+    public Object clone(){
+        return new Area(name, color);
     }
 }

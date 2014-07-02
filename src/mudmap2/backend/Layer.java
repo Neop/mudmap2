@@ -68,11 +68,11 @@ public class Layer {
      * Gets the element at a position
      * @param x x coordinate
      * @param y y coordinate
-     * @return element at that position
+     * @return element at that position or null
      */
-    public LayerElement get(int x, int y) /*throws PlaceNotFoundException*/{
-        //if(!exist(x, y)) throw new PlaceNotFoundException(x, y);
-        return elements.get(x).get(y);
+    public LayerElement get(int x, int y){
+        TreeMap<Integer, LayerElement> foo = elements.get(x);
+        return foo != null ? foo.get(y) : null;
     }
     
     /**

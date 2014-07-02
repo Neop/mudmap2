@@ -73,6 +73,7 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
+import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 
@@ -120,6 +121,9 @@ class WorldTab extends JPanel {
     static final int tile_size_min = 10;
     static final int tile_size_max = 200;
     
+    // true, if a context menu is shown (to disable forced focus)
+    boolean is_context_menu_shown;
+    
     /**
      * Constructs the world tab, opens the world if necessary
      * @param _world_name name of the world
@@ -129,6 +133,8 @@ class WorldTab extends JPanel {
         
         positions = new LinkedList<WorldCoordinate>();
         tile_size = 120;
+        
+        is_context_menu_shown = false;
         
         world_name = _world_name;
         
@@ -428,6 +434,23 @@ class WorldTab extends JPanel {
         redraw();
     }
     
+    
+    /**
+     * Sets whether a context menu is shown, to disable forced focus
+     * @param b 
+     */
+    private void set_context_menu(boolean b) {
+        is_context_menu_shown = b;
+    }
+    
+    /**
+     * Returns true, if a context menu is shown and forced focus is disabled
+     * @return 
+     */
+    private boolean has_context_menu(){
+        return is_context_menu_shown;
+    }
+    
     /**
      * Loads the world meta data file
      * this file describes the coordinates of the last shown positions
@@ -540,8 +563,8 @@ class WorldTab extends JPanel {
             parent = _parent;
             setFocusable(true);
             requestFocusInWindow();
-            addFocusListener(new TabFocusListener());
-            addKeyListener(new TabKeyListener());
+            addFocusListener(new TabFocusListener(parent));
+            addKeyListener(new TabKeyListener(this));
             addMouseListener(new TabMouseListener());
             addMouseWheelListener(new TabMouseWheelListener());
             addMouseMotionListener(new TabMouseMotionListener());
@@ -1107,38 +1130,65 @@ class WorldTab extends JPanel {
         }
         
         private class TabKeyListener implements KeyListener {
+            
+            WorldPanel worldpanel;
+            
+            public TabKeyListener(WorldPanel parent){
+                worldpanel = parent;
+            }
 
             @Override
-            public void keyTyped(KeyEvent arg0) {
-                switch(Character.toLowerCase(arg0.getKeyChar())){
+            public void keyTyped(KeyEvent arg0) {}
+
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                switch(arg0.getKeyCode()){
+                    // show context menu
+                    case KeyEvent.VK_CONTEXT_MENU:
+                        if(parent.get_place_selection_enabled()){
+                            TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
+                            context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
+                        }
+                        break;
+                        
                     // zoom the map
-                    case '+':
+                    case KeyEvent.VK_PLUS:
+                    case KeyEvent.VK_SUBTRACT:
+                    case KeyEvent.VK_PAGE_UP:
                         parent.tile_size_increment();
                         break;
-                    case '-':
+                    case KeyEvent.VK_ADD:
+                    case KeyEvent.VK_MINUS:
+                    case KeyEvent.VK_PAGE_DOWN:
                         parent.tile_size_decrement();
                         break;
-                    
+
                     // enable / disable place selection
-                    case 'p':
+                    case KeyEvent.VK_P:
                         parent.set_place_selection_toggle();
                         break;
-                        
+
                     // shift place selection - wasd
-                    case 'w':
+                    case KeyEvent.VK_UP:
+                    case KeyEvent.VK_W:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
                         break;
-                    case 'a':
+                    case KeyEvent.VK_LEFT:
+                    case KeyEvent.VK_A:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
                         break;
-                    case 's':
+                    case KeyEvent.VK_DOWN:
+                    case KeyEvent.VK_S:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
                         break;
-                    case 'd':
+                    case KeyEvent.VK_RIGHT:
+                    case KeyEvent.VK_D:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
                         break;
-                        
-                    case 'e': // edit / add place
+
+                    // edit / add place
+                    case KeyEvent.VK_INSERT:
+                    case KeyEvent.VK_E:
                         if(parent.get_place_selection_enabled()){
                             Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
                             PlaceDialog dlg;
@@ -1147,17 +1197,26 @@ class WorldTab extends JPanel {
                             dlg.setVisible(true);
                         }
                         break;
-                    case 'r': // remove place
+                    // remove place
+                    case KeyEvent.VK_DELETE:
+                    case KeyEvent.VK_R:
                         if(parent.get_place_selection_enabled()){
                             Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
                             if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
                         }
                         break;
-                } 
+                    // modify area
+                    case KeyEvent.VK_Q:
+                        Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                        AreaDialog dlg = null;
+                        // if no place is selected or selection disabled: create new area
+                        if(place == null || !parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world);
+                        // else modify area of selected place
+                        else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
+                        // show dialog
+                        if(dlg != null) dlg.setVisible(true);
+                }
             }
-
-            @Override
-            public void keyPressed(KeyEvent arg0) {}
 
             @Override
             public void keyReleased(KeyEvent arg0) {}
@@ -1167,12 +1226,18 @@ class WorldTab extends JPanel {
         // prevents the panel to loose focus
         private class TabFocusListener implements FocusListener{
 
+            WorldTab parent;
+
+            public TabFocusListener(WorldTab _parent) {
+                parent = _parent;
+            }
+            
             @Override
             public void focusGained(FocusEvent arg0) {}
 
             @Override
             public void focusLost(FocusEvent arg0) {
-                requestFocusInWindow();
+                if(!parent.has_context_menu()) requestFocusInWindow();
             }
             
         }
@@ -1193,26 +1258,26 @@ class WorldTab extends JPanel {
                 parent = _parent;
                 Layer layer = parent.world.get_layer(parent.get_cur_position().get_layer());
                 
-                if(layer != null){ // if layer exists
-                    Place place = (Place) layer.get(px, py);
-                    if(place != null){ // if place exists
-                        JMenuItem mi_edit = new JMenuItem("Edit place");
-                        mi_edit.addMouseListener(new PlaceDialog(parent.parent, parent.world, place));
-                        add(mi_edit);
-                        JMenuItem mi_remove = new JMenuItem("Remove place");
-                        mi_remove.addMouseListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
-                        add(mi_remove);
-                        JMenuItem mi_area = new JMenuItem("Edit area");
-                        add(mi_area);
-                        JMenuItem mi_paths = new JMenuItem("Paths / Exits");
-                        add(mi_paths);
-                        JMenuItem mi_subareas = new JMenuItem("Sub-areas");
-                        add(mi_subareas);
-                    } else { // if no place exists at position x,y
-                        JMenuItem mi_new = new JMenuItem("New place");
-                        mi_new.addMouseListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
-                        add(mi_new);
-                    }
+                Place place = null;
+                if(layer != null && (place = (Place) layer.get(px, py)) != null){ // if place exists
+                    JMenuItem mi_edit = new JMenuItem("Edit place");
+                    mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
+                    add(mi_edit);
+                    JMenuItem mi_remove = new JMenuItem("Remove place");
+                    mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
+                    add(mi_remove);
+                    JMenuItem mi_area = new JMenuItem("Edit area");
+                    if(place.get_area() != null) mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place.get_area()));
+                    else mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
+                    add(mi_area);
+                    JMenuItem mi_paths = new JMenuItem("Paths / Exits");
+                    add(mi_paths);
+                    JMenuItem mi_subareas = new JMenuItem("Sub-areas");
+                    add(mi_subareas);
+                }  else { // if layer doesn't exist or no place exists at position x,y
+                    JMenuItem mi_new = new JMenuItem("New place");
+                    mi_new.addActionListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
+                    add(mi_new);
                 }
             }
             
@@ -1220,15 +1285,19 @@ class WorldTab extends JPanel {
             private class TabContextPopMenuListener implements PopupMenuListener {
 
                 @Override
-                public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {}
+                public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {
+                    parent.set_context_menu(true);
+                }
 
                 @Override
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
+                    parent.set_context_menu(false);
                     parent.redraw();
                 }
 
                 @Override
                 public void popupMenuCanceled(PopupMenuEvent arg0) {
+                    parent.set_context_menu(false);
                     parent.redraw();
                 }
                 

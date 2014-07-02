@@ -21,12 +21,28 @@ default) Note that MUD Map 1 might be updated to use the same file
 format after version 1.4
 
 Keyboard commands
-keyboard commands can be used to navigate and alter the map if keyboard
-place selection is enabled (a red box should be visible on the screen)
+Keyboard commands can be used to navigate and alter the map if keyboard
+place selection is enabled by pressing p. A red box should be visible on
+the screen. You might have to click at the map once after you opened it
+for it to be able to receive keyboard events.
 
-+/-:		increment and decrement the tile size
-p:			enable / disable place selection
+The keys used here are not final and might not be optimal. Please let me
+know if you think that other keys should be used. I can change them in
+no time ;) 
 
-w/a/s/d: 	shift the selection
-e:			edit / create place at selection
-r:			remove selected place
+context menu key				show the context menu of the selected
+								place (like right click on that place)
+
++/- 		page up/down		increment and decrement the tile size
+p:								enable / disable place selection
+
+w/a/s/d 	arrow keys			shift the selection
+e 			insert key			create / edit place at selection
+f								create a placeholder place
+r 			delete key			remove selected place
+q								modify area of selected place. Note that
+								this also affects other places that
+								belong to the same area. If no place is
+								selected or selection is disabled, a new
+								area will be created
+								

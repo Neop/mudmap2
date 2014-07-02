@@ -25,7 +25,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -48,7 +47,7 @@ import mudmap2.backend.World;
  * 
  * @author neop
  */
-public class PlaceDialog extends JDialog implements MouseListener {
+public class PlaceDialog extends JDialog implements ActionListener {
 
     JFrame parent;
     World world;
@@ -180,22 +179,10 @@ public class PlaceDialog extends JDialog implements MouseListener {
         }
         parent.repaint();
     }
-    
-    @Override
-    public void mouseClicked(MouseEvent arg0) {}
 
     @Override
-    public void mousePressed(MouseEvent arg0) {
+    public void actionPerformed(ActionEvent arg0) {
         setVisible(true);
     }
-
-    @Override
-    public void mouseReleased(MouseEvent arg0) {}
-
-    @Override
-    public void mouseEntered(MouseEvent arg0) {}
-
-    @Override
-    public void mouseExited(MouseEvent arg0) {}
     
 }

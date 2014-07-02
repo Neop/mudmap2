@@ -416,6 +416,12 @@ public class World {
         places.put(place.get_id(), place);
     }
     
+    /**
+     * Removes a place from the world and removes it's connections to other places
+     * @param place place to be removed
+     * @throws RuntimeException
+     * @throws mudmap2.backend.Layer.PlaceNotFoundException 
+     */
     public void remove(Place place) throws RuntimeException, PlaceNotFoundException {
         Layer layer = layers.get(place.get_layer().get_id());
         if(layer == null || layer != place.get_layer()){
@@ -544,6 +550,35 @@ public class World {
         ArrayList<Area> ret = new ArrayList<Area>(areas.values());
         Collections.sort(ret);
         return ret;
+    }
+    
+    /**
+     * Gets an area by it's id
+     * @param id area id
+     * @return area
+     */
+    public Area get_area(int id){
+        return areas.get(id);
+    }
+    
+    /**
+     * Adds an area
+     * @param area new area
+     */
+    public void add_area(Area area) {
+        if(!areas.containsValue(area)) areas.put(area.get_id(), area);
+    }
+    
+    /**
+     * Removes an area
+     * @param area area to be removed
+     */
+    public void remove_area(Area area){
+        // remove area from places
+        for(Place p: places.values()){
+            if(p.get_area() == area) p.set_area(null);
+        }
+        areas.remove(area.get_id());
     }
     
     /**

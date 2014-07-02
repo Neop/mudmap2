@@ -33,6 +33,10 @@ public class Color extends java.awt.Color {
         super(0);
     }
     
+    public Color(java.awt.Color color){
+        super(color.getRGB());
+    }
+    
     public Color(int r, int g, int b){
         super(Math.min(255, Math.max(0, r)), Math.min(255, Math.max(0, g)), Math.min(255, Math.max(0, b)));
     }
