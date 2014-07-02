@@ -52,24 +52,28 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import mudmap2.Pair;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
+import mudmap2.frontend.dialog.PlaceDialog;
 
 /**
  * A tab in the main window that displays a world
@@ -365,6 +369,19 @@ class WorldTab extends JPanel {
      */
     private void goto_home(){
         push_position(new WorldCoordinate(world.get_home_layer(), world.get_home_x(), world.get_home_y()));
+    }
+    
+    /**
+     * Gets a place on the current layer
+     * @param x x coordinate
+     * @param y y coordinate
+     * @return place or null
+     */
+    public Place get_place(int x, int y){
+        Place ret = null;
+        Layer layer = world.get_layer(get_cur_position().get_layer());
+        if(layer != null) ret = (Place) layer.get(x, y);
+        return ret;
     }
     
     /**
@@ -914,8 +931,8 @@ class WorldTab extends JPanel {
                                 if(line_num < max_lines){ // it't not unusual for some places to fill up all the lines
                                     // recommended level
                                     int reclvlmin = cur_place.get_rec_lvl_min(), reclvlmax = cur_place.get_rec_lvl_max();
-                                    if(reclvlmin != -1 || reclvlmax != -1){
-                                        g.drawString("lvl " + (reclvlmin != -1 ? reclvlmin : "?") + " - " + (reclvlmax != -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                    if(reclvlmin > -1 || reclvlmax > -1){
+                                        g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
                                         line_num++;
                                     }
 
@@ -1027,10 +1044,18 @@ class WorldTab extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent arg0) {
-                // if doubleclick: set place selection to coordinates if keyboard selection is enabled
-                //if(arg0.getButton() == MouseEvent.BUTTON1 && parent.get_place_selection_enabled() && arg0.getClickCount() > 1){
+                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
+                    // set place selection to coordinates if keyboard selection is enabled
                     parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                //}
+                } else if(arg0.getButton() == MouseEvent.BUTTON3){ // right click
+                    // show context menu
+                    TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
+                }
+                
+                //AreaDialog d = new AreaDialog(parent.parent, true);
+                //d.setVisible(true);
+                
             }
 
             @Override
@@ -1090,10 +1115,19 @@ class WorldTab extends JPanel {
             public void keyTyped(KeyEvent arg0) {
                 // TODO: warum funktionieren keine Keycodes?
                 switch(Character.toLowerCase(arg0.getKeyChar())){
+                    // zoom the map
+                    case '+':
+                        parent.tile_size_increment();
+                        break;
+                    case '-':
+                        parent.tile_size_decrement();
+                        break;
+                    
                     // enable / disable place selection
                     case 'p':
                         parent.set_place_selection_toggle();
                         break;
+                        
                     // shift place selection - wasd
                     case 'w':
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
@@ -1107,12 +1141,13 @@ class WorldTab extends JPanel {
                     case 'd':
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
                         break;
-                    // zoom the map
-                    case '+':
-                        parent.tile_size_increment();
-                        break;
-                    case '-':
-                        parent.tile_size_decrement();
+                        
+                    case 'e':
+                        Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                        PlaceDialog dlg;
+                        if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
+                        else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
+                        dlg.setVisible(true);
                         break;
                 } 
             }
@@ -1137,6 +1172,65 @@ class WorldTab extends JPanel {
             }
             
         }
+        
+        // constructs the context menu (on right click)
+        private static class TabContextMenu extends JPopupMenu {
+            
+            WorldTab parent;
+            
+            /**
+             * Constructs a context menu at position (x,y)
+             * @param x screen / panel coordinate x
+             * @param y screen / panel coordinate y
+             */
+            public TabContextMenu(WorldTab _parent, int px, int py) {
+                addPopupMenuListener(new TabContextPopMenuListener());
+                
+                parent = _parent;
+                Layer layer = parent.world.get_layer(parent.get_cur_position().get_layer());
+                
+                if(layer != null){ // if layer exists
+                    Place place = (Place) layer.get(px, py);
+                    if(place != null){ // if place exists
+                        JMenuItem mi_edit = new JMenuItem("Edit place");
+                        mi_edit.addMouseListener(new PlaceDialog(parent.parent, parent.world, place));
+                        add(mi_edit);
+                        JMenuItem mi_remove = new JMenuItem("Remove place");
+                        add(mi_remove);
+                        JMenuItem mi_area = new JMenuItem("Edit area");
+                        add(mi_area);
+                        JMenuItem mi_paths = new JMenuItem("Paths / Exits");
+                        add(mi_paths);
+                        JMenuItem mi_subareas = new JMenuItem("Sub-areas");
+                        add(mi_subareas);
+                    } else { // if no place exists at position x,y
+                        JMenuItem mi_new = new JMenuItem("New place");
+                        mi_new.addMouseListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
+                        add(mi_new);
+                    }
+                }
+            }
+            
+            // redraws the world tab after the popup is closed
+            private class TabContextPopMenuListener implements PopupMenuListener {
+
+                @Override
+                public void popupMenuWillBecomeVisible(PopupMenuEvent arg0) {}
+
+                @Override
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
+                    parent.redraw();
+                }
+
+                @Override
+                public void popupMenuCanceled(PopupMenuEvent arg0) {
+                    parent.redraw();
+                }
+                
+            }
+            
+        }
+
     }
     
     private class WorldCoordinate {

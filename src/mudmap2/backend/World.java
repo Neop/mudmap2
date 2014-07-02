@@ -33,10 +33,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -264,13 +267,22 @@ public class World {
                 }
             } else { // connect deprecated paths (for compatibility to mudmap 1)
                 int error_not_paired_cnt = 0;
+                String error_places = "";
                 for(PathTmp path: tmp_paths_deprecated){
                     if(path.exits[1] == null) error_not_paired_cnt++;
                     path.place_a.connect_path(new Path(path.place_a, path.exits[0], places.get(path.place_b), (path.exits[1] != null) ? path.exits[1] : "unknown"));
                 }
-                if(path_connection_error_dep_double > 0) System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
-                if(error_not_paired_cnt > 0) System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
-                // TODO: show error message dialog
+                // error messages
+                if(path_connection_error_dep_double > 0) 
+                    System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
+                if(error_not_paired_cnt > 0)
+                    System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
+                
+                // show error message dialog
+                if(path_connection_error_dep_double > 0)
+                    JOptionPane.showMessageDialog(null, path_connection_error_dep_double + " paths might not be properly reconstructed from a MUD Map v1 world file.\nExit mispairings might occur at places that are directly connected via more than one path.", "World reconstruction warning", JOptionPane.WARNING_MESSAGE);
+                if(error_not_paired_cnt > 0)
+                    JOptionPane.showMessageDialog(null, error_not_paired_cnt + " paths could not be properly reconstructed.\nThis means that one exit of each faulty path is unknown.", "World reconstruction warning", JOptionPane.WARNING_MESSAGE);
             }
             //System.out.println("paths: " + tmp_paths.size() + " " + tmp_paths_deprecated.size());
             
@@ -340,8 +352,6 @@ public class World {
                 }
             }
             
-                            
-            
             outstream.close();
         } catch (IOException ex) {
             System.out.printf("Couldn't write config file " + mudmap2.Paths.get_config_file());
@@ -363,6 +373,46 @@ public class World {
             exits[0] = exit_a;
             exits[1] = exit_b;
         }
+    }
+    
+    /**
+     * Gets a place
+     * @param layer layer id
+     * @param x x coordinate
+     * @param y y coordinate
+     * @return place or null if it doesn't exist
+     */
+    public Place get(int layer, int x, int y){
+        Layer l = get_layer(layer);
+        if(l == null) return null;
+        else return (Place) l.get(x, y);
+    }
+    
+    /**
+     * Places a place in the world, the layer and coordinates described by the
+     * place will be used
+     * @param place new place
+     */
+    public void put(Place place) throws Exception {
+        put(place, place.get_layer().get_id(), place.get_x(), place.get_y());
+    }
+    
+    /**
+     * Places a place in the world
+     * @param place new place
+     * @param layer layer for the place to be put on, will be created if it doesnt exist
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    public void put(Place place, int layer, int x, int y) throws Exception {
+        // get layer, create a new one, if necessary
+        Layer l = get_layer(layer);
+        if(l == null) layers.put(layer, l = new Layer(layer));
+        
+        // add to layer
+        l.put(place, x, y);
+        // add to place list
+        places.put(place.get_id(), place);
     }
     
     /**
@@ -471,6 +521,24 @@ public class World {
      */
     public Color get_path_color_nstd(){
         return path_color_nstd;
+    }
+    
+    /**
+     * Gets all areas (eg. for lists)
+     * @return all areas
+     */
+    public ArrayList<Area> get_areas(){
+        ArrayList<Area> ret = new ArrayList<Area>(areas.values());
+        Collections.sort(ret);
+        return ret;
+    }
+    
+    /**
+     * Gets all risk levels (eg. for lists)
+     * @return all risk levels
+     */
+    public Collection<RiskLevel> get_risk_levels(){
+        return risk_levels.values();
     }
 
 }

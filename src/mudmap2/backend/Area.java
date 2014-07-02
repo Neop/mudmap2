@@ -28,7 +28,7 @@ package mudmap2.backend;
  * 
  * @author neop
  */
-public class Area {
+public class Area implements Comparable<Area> {
     // next id to be assigned
     static int next_id = 0;
     
@@ -97,5 +97,19 @@ public class Area {
      */
     public void set_color(Color col){
         color = col;
+    }
+    
+    /**
+     * Gets the name of an area
+     * @return name
+     */
+    @Override
+    public String toString(){
+        return name;
+    }
+
+    @Override
+    public int compareTo(Area arg0) {
+        return -arg0.get_name().compareTo(name);
     }
 }

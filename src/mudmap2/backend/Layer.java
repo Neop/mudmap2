@@ -98,7 +98,9 @@ public class Layer {
      */
     public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException{
         if(element.get_layer() != this) throw new RuntimeException("Element not in this layer");
-        if(get(element.get_x(), element.get_y()) != element) throw new RuntimeException("Element location mismatch (" + element.get_x() + ", " + element.get_y() + ")");
+        // element on the layer before placing the new one
+        LayerElement el_bef = get(element.get_x(), element.get_y());
+        if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.get_x() + ", " + element.get_y() + ")");
         elements.get(element.get_x()).remove(element.get_y());
     }
     
