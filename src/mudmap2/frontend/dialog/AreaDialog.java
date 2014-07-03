@@ -30,7 +30,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import mudmap2.backend.Area;
-import mudmap2.backend.Color;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.frontend.GUIElement.ColorChooserButton;
@@ -138,7 +137,7 @@ public class AreaDialog extends JDialog implements ActionListener {
     private void save(){
         // add new area to world and place
         if(new_area){
-            area = new Area(textfield_name.getText(), new Color(colorchooserbutton.get_color()));
+            area = new Area(textfield_name.getText(), colorchooserbutton.get_color());
             world.add_area(area);
             if(place != null) place.set_area(area);
         } else {

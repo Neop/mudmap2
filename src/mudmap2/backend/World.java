@@ -23,6 +23,7 @@
 
 package mudmap2.backend;
 
+import java.awt.Color;
 import mudmap2.Paths;
 import mudmap2.Pair;
 import java.io.BufferedReader;
@@ -307,18 +308,18 @@ public class World {
             outstream.println("ver " + file_version_major + "." + file_version_minor + "." + file_version_build);
             outstream.println("mver " + mudmap2.Mudmap2.get_version_major() + "." + mudmap2.Mudmap2.get_version_minor() + "." + mudmap2.Mudmap2.get_version_build());
             outstream.println("wname " + get_name());
-            outstream.println("wcol " + get_path_color());
-            outstream.println("wcnd " + get_path_color_nstd());
+            outstream.println("wcol " + get_path_color().getRed() + " " + get_path_color().getGreen() + " " + get_path_color().getBlue());
+            outstream.println("wcnd " + get_path_color_nstd().getRed() + " " + get_path_color_nstd().getGreen() + " " + get_path_color_nstd().getBlue());
             outstream.println("home " + get_home_layer() + " " + get_home_x() + " " + get_home_y());
             
             // risk levels
             for(RiskLevel rl: risk_levels.values())
-                outstream.println("dlc " + rl.get_id() + " " + rl.get_color() + " " + rl.get_description());
+                outstream.println("dlc " + rl.get_id() + " " + rl.get_color().getRed() + " " + rl.get_color().getGreen() + " " + rl.get_color().getBlue() + " " + rl.get_description());
             
             // areas
             for(Area a: areas.values()){
                 outstream.println("a " + a.get_id() + " " + a.get_name());
-                outstream.println("acol " + a.get_color());
+                outstream.println("acol " + a.get_color().getRed() + " " + a.get_color().getGreen() + " " + a.get_color().getBlue());
             }
             
             // places

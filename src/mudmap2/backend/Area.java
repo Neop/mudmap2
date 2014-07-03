@@ -23,6 +23,8 @@
 
 package mudmap2.backend;
 
+import java.awt.Color;
+
 /**
  * An area is a collection of places, marked by a color
  * 
@@ -94,16 +96,8 @@ public class Area implements Comparable<Area> {
      * Sets a new area color
      * @param col new area color
      */
-    public void set_color(Color col){
-        color = col;
-    }
-    
-    /**
-     * Sets a new area color
-     * @param col new area color
-     */
-    public void set_color(java.awt.Color _color) {
-        color = new Color(_color);
+    public void set_color(Color _color) {
+        color = _color;
     }
     
     /**

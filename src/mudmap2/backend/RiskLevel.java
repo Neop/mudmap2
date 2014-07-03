@@ -24,6 +24,8 @@
 
 package mudmap2.backend;
 
+import java.awt.Color;
+
 /**
  * Describes a risk level (which are shown as the colored border of each place)
  * @author neop
