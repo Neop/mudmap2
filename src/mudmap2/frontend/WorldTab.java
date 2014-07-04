@@ -74,6 +74,7 @@ import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
+import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
@@ -86,7 +87,6 @@ import mudmap2.frontend.dialog.PlaceRemoveDialog;
  */
 class WorldTab extends JPanel {
     
-    String world_name;
     World world;
     
     Color tile_center_color;
@@ -137,9 +137,7 @@ class WorldTab extends JPanel {
         tile_size = 120;
         
         is_context_menu_shown = false;
-        
-        world_name = _world_name;
-        
+
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
         
@@ -158,7 +156,7 @@ class WorldTab extends JPanel {
         add(worldpanel, BorderLayout.CENTER);
         
         // open / get the world
-        world = WorldManager.get_world(WorldManager.get_world_file(world_name));
+        world = WorldManager.get_world(WorldManager.get_world_file(_world_name));
         load_meta(); // important: call this after creation of worldpanel!
                         
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
@@ -179,13 +177,13 @@ class WorldTab extends JPanel {
         place_selected_x = (int) Math.round(get_cur_position().get_x());
         place_selected_y = (int) Math.round(get_cur_position().get_y());
     }
-
+    
     /**
-     * Gets the world name
-     * @return world name
+     * Gets the world
+     * @return world
      */
-    public String get_world_name() {
-        return world_name;
+    public World get_world(){
+        return world;
     }
     
     /**
@@ -294,6 +292,7 @@ class WorldTab extends JPanel {
         else if(screen_y > worldpanel.screen_height - tilesize) dy = (double) -(screen_y - worldpanel.screen_height) / tilesize - 1;
         
         if(dx != 0 || dy != 0) get_cur_position().move(dx, dy);
+        redraw();
     }
     
     /**
@@ -377,8 +376,16 @@ class WorldTab extends JPanel {
     /**
      * Go to the home position
      */
-    private void goto_home(){
-        push_position(new WorldCoordinate(world.get_home_layer(), world.get_home_x(), world.get_home_y()));
+    public void goto_home(){
+        push_position(world.get_home().clone());
+        set_place_selection((int) Math.round(get_cur_position().get_x()), (int) Math.round(get_cur_position().get_y()));
+    }
+    
+    /**
+     * Sets a new home position
+     */
+    public void set_home(){
+        world.set_home(get_cur_position().clone());
     }
     
     /**
@@ -1142,6 +1149,7 @@ class WorldTab extends JPanel {
                     double dx = (double) (arg0.getX() - parent.mouse_x_previous) / parent.get_tile_size();
                     double dy = (double) (arg0.getY() - parent.mouse_y_previous) / parent.get_tile_size();
                     parent.get_cur_position().move(-dx , dy);
+                    parent.redraw();
                 }
                 parent.mouse_x_previous = arg0.getX();
                 parent.mouse_y_previous = arg0.getY();
@@ -1225,7 +1233,6 @@ class WorldTab extends JPanel {
                         break;
                     // create placeholder
                     case KeyEvent.VK_F:
-                    case KeyEvent.VK_BEGIN:
                         if(parent.get_place_selection_enabled()){
                             Place place = parent.world.get(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
                             // create placeholder or remove one
@@ -1261,6 +1268,11 @@ class WorldTab extends JPanel {
                         else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
                         // show dialog
                         if(dlg != null) dlg.setVisible(true);
+                        break;
+                    // goto home
+                    case KeyEvent.VK_H:
+                    case KeyEvent.VK_HOME:
+                        parent.goto_home();
                         break;
                 }
             }
@@ -1341,96 +1353,6 @@ class WorldTab extends JPanel {
                 
             }
             
-        }
-
-    }
-    
-    private class WorldCoordinate {
-        int layer;
-        double x, y;
-        
-        /**
-         * describes a position in the world
-         * @param _layer current layer
-         * @param _x x coordinate
-         * @param _y y coordinate
-         */
-        public WorldCoordinate(int _layer, double _x, double _y){
-            layer = _layer;
-            x = _x;
-            y = _y;
-        }
-        
-        /**
-         * Gets the layer
-         * @return layer
-         */
-        public int get_layer(){
-            return layer;
-        }
-        
-        /**
-         * Gets the x coordinate
-         * @return x coordinate
-         */
-        public double get_x(){
-            return x;
-        }
-        
-        /**
-         * Gets the y coordinate
-         * @return y coordinate
-         */
-        public double get_y(){
-            return y;
-        }
-        
-        /**
-         * Sets the x coordinate
-         * @param _x new x coordinate
-         */
-        public void set_x(double _x){
-            x = _x;
-        }
-        
-        /**
-         * Sets the y coordinate
-         * @param _y new y coordinate
-         */
-        public void set_y(double _y){
-            y = _y;
-        }
-        
-        /**
-         * Moves the map
-         * @param dx x movement
-         * @param dy y movement
-         */
-        public void move(double dx, double dy){
-            x += dx;
-            y += dy;
-            redraw();
-        }
-        
-        /**
-         * Gets the position data in String format
-         * @return 
-         */
-        @Override
-        public String toString(){
-            return layer + " " + x + " " + y;
-        }
-        
-        /**
-         * Gets the position data in String format for meta files
-         * @return 
-         */
-        public String get_meta_String(){
-            return layer + " " + -x + " " + y;
-        }
-        
-        public boolean equals(WorldCoordinate c){
-            return layer == c.layer && x == c.x && y == c.y;
         }
     }
 }

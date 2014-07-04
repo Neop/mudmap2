@@ -61,8 +61,7 @@ public class World {
     // color of path lines and self-defined path colors
     Color path_color, path_color_nstd;
     // Coordinates of the home position
-    int home_layer;
-    double home_x, home_y;
+    WorldCoordinate home;
     
     HashMap<Integer, RiskLevel> risk_levels;
     HashMap<Integer, Area> areas;
@@ -94,6 +93,7 @@ public class World {
      * Initializes the world
      */
     private void initialize(){
+        home = new WorldCoordinate(0, 0, 0);
         // path line colors
         path_color_nstd = path_color = new Color(0, 255, 0);
         // risk levels
@@ -166,9 +166,7 @@ public class World {
                         path_color_nstd = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
                     } else if(line.startsWith("home")){ // home coordinates
                         String[] tmp = line.substring(5).split(" ");
-                        home_layer = Integer.parseInt(tmp[0]);
-                        home_x = Double.parseDouble(tmp[1]);
-                        home_y = Double.parseDouble(tmp[2]);
+                        home = new WorldCoordinate(Integer.parseInt(tmp[0]), Double.parseDouble(tmp[1]), Double.parseDouble(tmp[2]));
                     } else if(line.startsWith("dlc")){ // risk level colors
                         String[] tmp = line.split(" ");
                         int rlid = Integer.parseInt(tmp[1]);
@@ -311,7 +309,7 @@ public class World {
             outstream.println("wname " + get_name());
             outstream.println("wcol " + get_path_color().getRed() + " " + get_path_color().getGreen() + " " + get_path_color().getBlue());
             outstream.println("wcnd " + get_path_color_nstd().getRed() + " " + get_path_color_nstd().getGreen() + " " + get_path_color_nstd().getBlue());
-            outstream.println("home " + get_home_layer() + " " + get_home_x() + " " + get_home_y());
+            outstream.println("home " + get_home());
             
             // risk levels
             for(RiskLevel rl: risk_levels.values())
@@ -401,7 +399,7 @@ public class World {
         Layer layer = place.get_layer();
         if(layer == null){
             layer = new Layer(this);
-            layers.put(home_layer, layer);
+            layers.put(home.get_layer(), layer);
             place.set_layer(layer);
         }
         put(place, place.get_layer().get_id(), place.get_x(), place.get_y());
@@ -541,27 +539,18 @@ public class World {
     }
     
     /**
-     * Gets the layer of the home position
-     * @return home layer
+     * Gets the home position
+     * @return home coordinate
      */
-    public int get_home_layer(){
-        return home_layer;
+    public WorldCoordinate get_home(){
+        return home;
     }
     
     /**
-     * Gets the x coordinate of the home position
-     * @return x coordinate
+     * Sets a new home position
      */
-    public double get_home_x(){
-        return home_x;
-    }
-    
-    /**
-     * Gets the y coordinate of the home position
-     * @return y coordinate
-     */
-    public double get_home_y(){
-        return home_y;
+    public void set_home(WorldCoordinate _home){
+        home = _home; System.out.println("dvad" + _home);
     }
     
     /**

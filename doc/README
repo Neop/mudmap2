@@ -29,7 +29,7 @@ for it to be able to receive keyboard events.
 The keys used here are not final and might not be optimal. Please let me
 know if you think that other keys should be used ;)
 
-context menu key				show the context menu of the selected
+			context menu key	show the context menu of the selected
 								place (like right click on that place)
 
 +/- 		page up/down		increment and decrement the tile size
@@ -44,4 +44,4 @@ q								modify area of selected place. Note that
 								belong to the same area. If no place is
 								selected or selection is disabled, a new
 								area will be created
-								
+			home key			go to home location

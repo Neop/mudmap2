@@ -54,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
+import mudmap2.frontend.dialog.AreaDialog;
 
 /**
  * Main class for the mudmap window
@@ -71,7 +72,7 @@ public final class Mainwindow extends JFrame {
     JMenuBar menu_bar;
     JMenu menu_file, menu_edit, menu_help;
     JMenuItem menu_file_new, menu_file_open, menu_file_save, menu_file_save_as_image, menu_file_quit;
-    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_edit_world;
+    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world;
     JMenuItem menu_help_help, menu_help_info;
     
     JTabbedPane tabbed_pane;
@@ -151,16 +152,56 @@ public final class Mainwindow extends JFrame {
         menu_file.addSeparator();
         menu_file_save = new JMenuItem("Save");
         menu_file.add(menu_file_save);
-        menu_file_save_as_image = new JMenuItem("Save as image");
-        menu_file.add(menu_file_save_as_image);
+        menu_file_save.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                WorldTab wt = get_selected_tab();
+                if(wt != null) wt.save();
+            }
+        });
+        
+        // TODO: implement save as image
+        /*menu_file_save_as_image = new JMenuItem("Save as image");
+        menu_file.add(menu_file_save_as_image);*/
         menu_file.addSeparator();
         menu_file_quit = new JMenuItem("Quit");
         menu_file.add(menu_file_quit);
+        menu_file_quit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                quit();
+            }
+        });
         
         menu_edit_add_area = new JMenuItem("Add area");
         menu_edit.add(menu_edit_add_area);
+        menu_edit_add_area.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                WorldTab wt = get_selected_tab();
+                if(wt != null) (new AreaDialog(wt.parent, wt.get_world())).setVisible(true);
+            }
+        });
+        
         menu_edit_set_home_position = new JMenuItem("Set home position");
         menu_edit.add(menu_edit_set_home_position);
+        menu_edit_set_home_position.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                WorldTab wt = get_selected_tab();
+                if(wt != null) wt.set_home();
+            }
+        });
+        menu_edit_goto_home_position = new JMenuItem("Go to home position");
+        menu_edit.add(menu_edit_goto_home_position);
+        menu_edit_goto_home_position.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                WorldTab wt = get_selected_tab();
+                if(wt != null) wt.goto_home();
+            }
+        });
+        
         menu_edit_edit_world = new JMenuItem("Edit world");
         menu_edit.add(menu_edit_edit_world);
         
@@ -189,29 +230,46 @@ public final class Mainwindow extends JFrame {
             // open new tab
             WorldTab tab = new WorldTab(this, world_name);
             world_tabs.put(world_name, tab);
-            tabbed_pane.addTab(tab.get_world_name(), tab);
+            tabbed_pane.addTab(tab.get_world().get_name(), tab);
         }
         // change current tab
         tabbed_pane.setSelectedComponent(world_tabs.get(world_name));
     }
     
+    /**
+     * Closes all tabs
+     */
     public void close_tabs(){
         for(WorldTab tab: world_tabs.values()){
-            // TODO: implement dialog which asks the user if the world should be saved
-            /*if(save_world) tab.save();
-            else*/ 
-            //tab.write_meta();
-            tab.save();
+            int ret = JOptionPane.showConfirmDialog(this, "Save world \"" + tab.get_world().get_name() + "\"?", "Save world", JOptionPane.YES_NO_OPTION);
+            if(ret == 0) tab.save(); // save world
             tabbed_pane.remove(tab);
         }
     }
     
+    /**
+     * Gets the currently shown WorldTab
+     * @return WorldTab or null
+     */
+    private WorldTab get_selected_tab(){
+        Component ret = tabbed_pane.getSelectedComponent();
+        if(ret instanceof WorldTab) return (WorldTab) ret;
+        else return null;
+    }
+    
+    /**
+     * Saves all config
+     */
     public void quit(){
         write_config();
         WorldManager.save_world_list();
         close_tabs();
+        System.exit(0);
     }
     
+    /**
+     * Reads MUD Map config file
+     */
     public void read_config(){
         try {
             BufferedReader reader = new BufferedReader(new FileReader(mudmap2.Paths.get_config_file()));
@@ -247,6 +305,9 @@ public final class Mainwindow extends JFrame {
         }
     }
     
+    /**
+     * Writes MUD Map config file
+     */
     public void write_config(){
         try {
             // open file
@@ -266,7 +327,7 @@ public final class Mainwindow extends JFrame {
     }
     
     /**
-     * The available worlds tab
+     * The available worlds tab shows a list off all known worlds
      */
     private static class AvailableWorldsTab extends JPanel {
 
@@ -293,6 +354,9 @@ public final class Mainwindow extends JFrame {
             }
         }
         
+        /**
+         * Updates the tab (call this after creating a new world)
+         */
         public void update(){
             Set<String> worlds = WorldManager.get_world_list();
             
