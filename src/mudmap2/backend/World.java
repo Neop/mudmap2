@@ -42,6 +42,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import mudmap2.backend.Layer.PlaceNotFoundException;
+import mudmap2.backend.Layer.PlaceNotInsertedException;
 
 /**
  *
@@ -120,7 +121,7 @@ public class World {
             int file_major = 0, file_minor = 0, file_build = 0;
             
             int cur_area = -1;
-            Place cur_place = new Place(-1, "", 0, 0, new Layer(-1));
+            Place cur_place = new Place(-1, "", 0, 0, new Layer(-1, this));
             final RiskLevel risk_level_default = get_risk_level(0);
 
             // temporary data for creating a place
@@ -198,7 +199,7 @@ public class World {
                         int layer = Integer.parseInt(tmp[1]);
                         
                         // create the layer, if it doesn't exist
-                        if(!layers.containsKey(layer)) layers.put(layer, new Layer(layer));
+                        if(!layers.containsKey(layer)) layers.put(layer, new Layer(layer, this));
                         
                         if(cur_place_id != -1){
                             // create place and add it to the layer and places list
@@ -409,12 +410,41 @@ public class World {
     public void put(Place place, int layer, int x, int y) throws Exception {
         // get layer, create a new one, if necessary
         Layer l = get_layer(layer);
-        if(l == null) layers.put(layer, l = new Layer(layer));
+        if(l == null) layers.put(layer, l = new Layer(layer, this));
         
         // add to layer
+        place.set_layer(l);
         l.put(place, x, y);
         // add to place list
         places.put(place.get_id(), place);
+    }
+    
+    /**
+     * Creates a placeholder place
+     * @param layer layer
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    public void put_placeholder(int layer, int x, int y){
+        try {
+            Place place = new Place(Place.placeholder_name, x, y, null);
+            
+            // find or create placeholder area
+            Area area = null;
+            for(Area a: areas.values()) if(a.get_name().equals("placeholder")){
+                area = a;
+                break;
+            }
+            // create new placeholder area
+            if(area == null) add_area(area = new Area("placeholder", Color.GREEN));
+            
+            place.set_area(area);
+            place.set_risk_level(get_risk_level(0));
+            put(place, layer, x, y);
+        } catch(PlaceNotInsertedException ex){ // ignore
+        } catch (Exception ex) {
+            Logger.getLogger(World.class.getName()).log(Level.WARNING, "Couldn't put placeholder to map: " + ex, ex);
+        }
     }
     
     /**

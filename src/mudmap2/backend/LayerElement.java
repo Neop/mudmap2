@@ -69,6 +69,14 @@ public class LayerElement {
     }
     
     /**
+     * Sets the layer
+     * @param _layer layer
+     */
+    public void set_layer(Layer _layer){
+        layer = _layer;
+    }
+    
+    /**
      * Sets the position
      * @param _x x position
      * @param _y y position

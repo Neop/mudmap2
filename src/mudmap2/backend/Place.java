@@ -26,12 +26,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import mudmap2.backend.Layer.PlaceNotFoundException;
 
 /**
  * A place in the world
  * @author neop
  */
 public class Place extends LayerElement implements Comparable<Place> {
+    
+    public static final String placeholder_name = "?";
+    
     // next id to be assigned
     static int next_id;
     
@@ -350,5 +354,9 @@ public class Place extends LayerElement implements Comparable<Place> {
         // remove connection to sub-areas (children / parents)
         for(Place pl: children) pl.parents.remove(this);
         for(Place pl: parents) pl.children.remove(this);
+    }
+
+    public void remove() throws RuntimeException, PlaceNotFoundException {
+        get_layer().get_world().remove(this);
     }
 }

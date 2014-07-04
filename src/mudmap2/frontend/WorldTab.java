@@ -30,6 +30,8 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -69,6 +71,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import mudmap2.Pair;
 import mudmap2.backend.Layer;
+import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -1197,6 +1200,26 @@ class WorldTab extends JPanel {
                             dlg.setVisible(true);
                         }
                         break;
+                    // create placeholder
+                    case KeyEvent.VK_F:
+                    case KeyEvent.VK_BEGIN:
+                        if(parent.get_place_selection_enabled()){
+                            Place place = parent.world.get(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                            // create placeholder or remove one
+                            if(place == null){
+                                parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                            } else if(place.get_name().equals(Place.placeholder_name)){
+                                try {
+                                    place.remove();
+                                } catch (RuntimeException ex) {
+                                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (PlaceNotFoundException ex) {
+                                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        }
+                        parent.redraw();
+                        break;
                     // remove place
                     case KeyEvent.VK_DELETE:
                     case KeyEvent.VK_R:
@@ -1215,6 +1238,7 @@ class WorldTab extends JPanel {
                         else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
                         // show dialog
                         if(dlg != null) dlg.setVisible(true);
+                        break;
                 }
             }
 
@@ -1252,7 +1276,7 @@ class WorldTab extends JPanel {
              * @param x screen / panel coordinate x
              * @param y screen / panel coordinate y
              */
-            public TabContextMenu(WorldTab _parent, int px, int py) {
+            public TabContextMenu(WorldTab _parent, final int px, final int py) {
                 addPopupMenuListener(new TabContextPopMenuListener());
                 
                 parent = _parent;
@@ -1278,6 +1302,16 @@ class WorldTab extends JPanel {
                     JMenuItem mi_new = new JMenuItem("New place");
                     mi_new.addActionListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
                     add(mi_new);
+                    JMenuItem mi_placeholder = new JMenuItem("New placeholder");
+                    add(mi_placeholder);
+                    mi_placeholder.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            // creates a placeholder place
+                            parent.world.put_placeholder(parent.get_cur_position().get_layer(), px, py);
+                            parent.redraw();
+                        }
+                    });
                 }
             }
             

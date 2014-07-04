@@ -27,8 +27,7 @@ the screen. You might have to click at the map once after you opened it
 for it to be able to receive keyboard events.
 
 The keys used here are not final and might not be optimal. Please let me
-know if you think that other keys should be used. I can change them in
-no time ;) 
+know if you think that other keys should be used ;)
 
 context menu key				show the context menu of the selected
 								place (like right click on that place)
@@ -38,7 +37,7 @@ p:								enable / disable place selection
 
 w/a/s/d 	arrow keys			shift the selection
 e 			insert key			create / edit place at selection
-f								create a placeholder place
+f								create or remove a placeholder place
 r 			delete key			remove selected place
 q								modify area of selected place. Note that
 								this also affects other places that

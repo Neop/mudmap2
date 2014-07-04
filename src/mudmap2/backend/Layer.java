@@ -33,10 +33,12 @@ import java.util.TreeMap;
  */
 public class Layer {
     
+    World world;
     int id;
     TreeMap<Integer, TreeMap<Integer, LayerElement>> elements;
     
-    public Layer(int _id) {
+    public Layer(int _id, World _world){
+        world = _world;
         id = _id;
         elements = new TreeMap<Integer, TreeMap<Integer, LayerElement>>();
     }
@@ -48,7 +50,7 @@ public class Layer {
      * @param element new element
      */
     public void put(LayerElement element, int x, int y) throws Exception{
-        element.get_layer().remove(element);
+        //element.get_layer().remove(element);
         element.set_position(x, y, this);
         put(element);
     }
@@ -57,8 +59,8 @@ public class Layer {
      * Adds an element to the layer, uses the position of the element
      * @param element element to be added
      */
-    public void put(LayerElement element) throws Exception{
-        if(exist(element.get_x(), element.get_y())) throw new Exception("Position " + element.get_x() + ", " + element.get_y() + " is already in use");
+    public void put(LayerElement element) throws PlaceNotInsertedException {
+        if(exist(element.get_x(), element.get_y())) throw new PlaceNotInsertedException(element.get_x(), element.get_y());
         // create map if it doesn't exist
         if(!elements.containsKey(element.get_x())) elements.put(element.get_x(), new TreeMap<Integer, LayerElement>());
         elements.get(element.get_x()).put(element.get_y(), element);
@@ -81,6 +83,14 @@ public class Layer {
      */
     public int get_id(){
         return id;
+    }
+    
+    /**
+     * Gets the world
+     * @return world
+     */
+    public World get_world(){
+        return world;
     }
     
     /**
@@ -132,6 +142,24 @@ public class Layer {
         @Override
         public String toString(){
             return "Element at position " + x + ", " + y + " doesn't exist";
+        }
+    }
+    
+    public static class PlaceNotInsertedException extends Exception {
+        int x, y;
+        
+        /**
+         * Constructs an exception
+         * @param _x x coordinate of the place
+         * @param _y y coordinate of the place
+         */
+        public PlaceNotInsertedException(int _x, int _y) {
+            x = _x; y = _y;
+        }
+        
+        @Override
+        public String toString(){
+            return "Couldn't insert place at position " + x + ", " + y;
         }
     }
     
