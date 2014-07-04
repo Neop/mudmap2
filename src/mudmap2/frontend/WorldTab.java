@@ -837,261 +837,257 @@ class WorldTab extends JPanel {
             WorldCoordinate cur_pos = parent.get_cur_position();
             Layer layer = parent.world.get_layer(cur_pos.get_layer());
             
-            // check whether layer exists
-            if(layer != null && layer.get_id() != -1){
-            
-                FontMetrics fm = g.getFontMetrics();
+            FontMetrics fm = g.getFontMetrics();
 
-                final int tile_size = parent.get_tile_size();
-                final int exit_radius = get_exit_circle_radius();
-                final float selection_stroke_width = get_tile_selection_stroke_width();
-                final float risk_level_stroke_width = get_risk_level_stroke_width();
-                final int border_width = get_tile_border_width();
+            final int tile_size = parent.get_tile_size();
+            final int exit_radius = get_exit_circle_radius();
+            final float selection_stroke_width = get_tile_selection_stroke_width();
+            final float risk_level_stroke_width = get_risk_level_stroke_width();
+            final int border_width = get_tile_border_width();
 
-                // max number of text lines tht fit in a tile
-                final int max_lines = (int) Math.floor((double)(tile_size - 3 * (border_width + (int) Math.ceil(risk_level_stroke_width))) / fm.getHeight());
+            // max number of text lines tht fit in a tile
+            final int max_lines = (int) Math.floor((double)(tile_size - 3 * (border_width + (int) Math.ceil(risk_level_stroke_width))) / fm.getHeight());
 
-                // screen size
-                screen_width = g.getClipBounds().getWidth();
-                screen_height = g.getClipBounds().getHeight();
+            // screen size
+            screen_width = g.getClipBounds().getWidth();
+            screen_height = g.getClipBounds().getHeight();
 
-                // screen center in world coordinates
-                double screen_center_x = ((double) screen_width / tile_size) / 2; // note: wdtwd2
-                double screen_center_y = ((double) screen_height / tile_size) / 2;
+            // screen center in world coordinates
+            double screen_center_x = ((double) screen_width / tile_size) / 2; // note: wdtwd2
+            double screen_center_y = ((double) screen_height / tile_size) / 2;
 
-                int place_x_offset = (int) (Math.round((float) cur_pos.get_x()) - Math.round(screen_center_x));
-                int place_y_offset = (int) (Math.round((float) cur_pos.get_y()) - Math.floor(screen_center_y));
+            int place_x_offset = (int) (Math.round((float) cur_pos.get_x()) - Math.round(screen_center_x));
+            int place_y_offset = (int) (Math.round((float) cur_pos.get_y()) - Math.floor(screen_center_y));
 
-                // clear screen
-                g.clearRect(0, 0, (int) screen_width + 1, (int) screen_height + 1);
+            // clear screen
+            g.clearRect(0, 0, (int) screen_width + 1, (int) screen_height + 1);
 
-                // Paths will be drawn on this graphic and later on copied to g
-                BufferedImage image_path = null;
-                Graphics graphic_path = null;
-                ArrayList<Pair<Integer, Integer>> tile_positions = null; // to mask out the tile positions on graphic_path
-                if(get_show_paths()){
-                    image_path = new BufferedImage((int) screen_width, (int) screen_height, BufferedImage.TYPE_INT_ARGB);
-                    graphic_path = image_path.getGraphics();
-                    graphic_path.setColor(parent.world.get_path_color());
-                    ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
-                    tile_positions = new ArrayList<Pair<Integer, Integer>>();
-                }
+            // Paths will be drawn on this graphic and later on copied to g
+            BufferedImage image_path = null;
+            Graphics graphic_path = null;
+            ArrayList<Pair<Integer, Integer>> tile_positions = null; // to mask out the tile positions on graphic_path
+            if(get_show_paths()){
+                image_path = new BufferedImage((int) screen_width, (int) screen_height, BufferedImage.TYPE_INT_ARGB);
+                graphic_path = image_path.getGraphics();
+                graphic_path.setColor(parent.world.get_path_color());
+                ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
+                tile_positions = new ArrayList<Pair<Integer, Integer>>();
+            }
 
-                // draw the tiles / places
-                for(int tile_x = -1; tile_x < screen_width / tile_size + 1; ++tile_x){
-                    for(int tile_y = -1; tile_y < screen_height / tile_size + 1; ++tile_y){
+            // draw the tiles / places
+            for(int tile_x = -1; tile_x < screen_width / tile_size + 1; ++tile_x){
+                for(int tile_y = -1; tile_y < screen_height / tile_size + 1; ++tile_y){
 
-                        // place position on the map
-                        int place_x = tile_x + place_x_offset;
-                        int place_y = (int)(screen_height / tile_size) - tile_y + place_y_offset;
-         
-                        if(layer.exist(place_x, place_y)){                
-                            Place cur_place = (Place) layer.get(place_x, place_y);
-                            
-                            // place position in pixel on the screen
-                            // TODO: extract constant calculation from for loop
-                            int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
-                            int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
-                            
-                            if(tile_positions != null) tile_positions.add(new Pair(place_x_px, place_y_px));
+                    // place position on the map
+                    int place_x = tile_x + place_x_offset;
+                    int place_y = (int)(screen_height / tile_size) - tile_y + place_y_offset;
 
-                            // number of drawn text lines
-                            int line_num = 0;
+                    if(layer != null && layer.exist(place_x, place_y)){                
+                        Place cur_place = (Place) layer.get(place_x, place_y);
 
-                            // draw path lines here
-                            if(get_show_paths()){
-                                for(Path p: cur_place.get_paths()){
-                                    try {
-                                        Place other_place = p.get_other_place(cur_place);
-                                        // if both places of a path are on the same layer
-                                        if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer()){
-                                            Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
-                                            Pair<Integer, Integer> exit_offset_other = get_exit_offset(p.get_exit(other_place));
+                        // place position in pixel on the screen
+                        // TODO: extract constant calculation from for loop
+                        int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
+                        int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
 
-                                            // TODO: implement curved lines, normals dont fit yet and lines are drawn twice
-                                            boolean draw_curves = false;//get_show_paths_curved();
-                                                    
-                                            if(draw_curves){
-                                                Pair<Double, Double> normal1 = get_exit_normal(p.get_exit(cur_place));
-                                                Pair<Double, Double> normal2 = get_exit_normal(p.get_exit(other_place));
-                                                
-                                                double exit_1_x = place_x_px + exit_offset.first;
-                                                double exit_1_y = place_y_px + exit_offset.second;
-                                                double exit_2_x = place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first;
-                                                double exit_2_y = place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second;
-                                                
-                                                double dx = exit_2_x - exit_1_x;
-                                                double dy = exit_2_y - exit_1_y;
-                                                
-                                                if(draw_curves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tile_size){
-                                                    CubicCurve2D c = new CubicCurve2D.Double();
-                                                    c.setCurve(exit_1_x, 
-                                                            exit_1_y,
-                                                            place_x_px + normal1.first * tile_size, place_y_px + normal1.second * tile_size,
-                                                            place_x_px + (other_place.get_x() - cur_place.get_x() + normal2.first) * tile_size + exit_offset_other.first,
-                                                            place_y_px - (other_place.get_y() - cur_place.get_y() + normal2.second) * tile_size + exit_offset_other.second,
-                                                            exit_2_x, 
-                                                            exit_2_y);
-                                                    ((Graphics2D) graphic_path).draw(c);
-                                                }
-                                            }
-                                            
-                                            if(!draw_curves){
-                                                graphic_path.drawLine(place_x_px + exit_offset.first, place_y_px + exit_offset.second, 
-                                                                      place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first, 
-                                                                      place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second);
+                        if(tile_positions != null) tile_positions.add(new Pair(place_x_px, place_y_px));
+
+                        // number of drawn text lines
+                        int line_num = 0;
+
+                        // draw path lines here
+                        if(get_show_paths()){
+                            for(Path p: cur_place.get_paths()){
+                                try {
+                                    Place other_place = p.get_other_place(cur_place);
+                                    // if both places of a path are on the same layer
+                                    if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer()){
+                                        Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
+                                        Pair<Integer, Integer> exit_offset_other = get_exit_offset(p.get_exit(other_place));
+
+                                        // TODO: implement curved lines, normals dont fit yet and lines are drawn twice
+                                        boolean draw_curves = false;//get_show_paths_curved();
+
+                                        if(draw_curves){
+                                            Pair<Double, Double> normal1 = get_exit_normal(p.get_exit(cur_place));
+                                            Pair<Double, Double> normal2 = get_exit_normal(p.get_exit(other_place));
+
+                                            double exit_1_x = place_x_px + exit_offset.first;
+                                            double exit_1_y = place_y_px + exit_offset.second;
+                                            double exit_2_x = place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first;
+                                            double exit_2_y = place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second;
+
+                                            double dx = exit_2_x - exit_1_x;
+                                            double dy = exit_2_y - exit_1_y;
+
+                                            if(draw_curves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tile_size){
+                                                CubicCurve2D c = new CubicCurve2D.Double();
+                                                c.setCurve(exit_1_x, 
+                                                        exit_1_y,
+                                                        place_x_px + normal1.first * tile_size, place_y_px + normal1.second * tile_size,
+                                                        place_x_px + (other_place.get_x() - cur_place.get_x() + normal2.first) * tile_size + exit_offset_other.first,
+                                                        place_y_px - (other_place.get_y() - cur_place.get_y() + normal2.second) * tile_size + exit_offset_other.second,
+                                                        exit_2_x, 
+                                                        exit_2_y);
+                                                ((Graphics2D) graphic_path).draw(c);
                                             }
                                         }
-                                    } catch(RuntimeException e){
-                                        System.out.println(e);
+
+                                        if(!draw_curves){
+                                            graphic_path.drawLine(place_x_px + exit_offset.first, place_y_px + exit_offset.second, 
+                                                                  place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first, 
+                                                                  place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second);
+                                        }
                                     }
+                                } catch(RuntimeException e){
+                                    System.out.println(e);
                                 }
                             }
+                        }
 
-                            // draw area color
-                            if(cur_place.get_area() != null){
-                                g.setColor(cur_place.get_area().get_color());
-                                g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
+                        // draw area color
+                        if(cur_place.get_area() != null){
+                            g.setColor(cur_place.get_area().get_color());
+                            g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
+                        }
+
+                        // draw tile center color
+                        if(get_tile_draw_text()){
+                            g.setColor(parent.tile_center_color);
+                            g.fillRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
+                        }
+
+                        // draw risk level border
+                        if(cur_place.get_risk_level() != null){
+                            g.setColor(cur_place.get_risk_level().get_color());
+                            ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
+                            g.drawRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
+                            // TODO: this has to be done after the path rendering
+                            //if(show_path_lines) graphic_path.clearRect((int) (place_x_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (place_y_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2));
+                        } else System.out.println("Error: Can't draw risk level, reference is null");
+
+                        // draw text, if tiles are large enough
+                        if(get_tile_draw_text()){
+                            g.setColor(Color.BLACK);
+                            //FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
+                            // fit the string into the tile
+
+                            // place name
+                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
+                            for(String str: line){
+                                g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                line_num++;
                             }
 
-                            // draw tile center color
-                            if(get_tile_draw_text()){
-                                g.setColor(parent.tile_center_color);
-                                g.fillRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
-                            }
-
-                            // draw risk level border
-                            if(cur_place.get_risk_level() != null){
-                                g.setColor(cur_place.get_risk_level().get_color());
-                                ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
-                                g.drawRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
-                                // TODO: this has to be done after the path rendering
-                                //if(show_path_lines) graphic_path.clearRect((int) (place_x_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (place_y_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2));
-                            } else System.out.println("Error: Can't draw risk level, reference is null");
-
-                            // draw text, if tiles are large enough
-                            if(get_tile_draw_text()){
-                                g.setColor(Color.BLACK);
-                                //FontMetrics fm = g.getFontMetrics(); // TODO: move constant expression out of the loop (this and part of next line)
-                                // fit the string into the tile
-
-                                // place name
-                                Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
-                                for(String str: line){
-                                    g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                            if(line_num < max_lines){ // it't not unusual for some places to fill up all the lines
+                                // recommended level
+                                int reclvlmin = cur_place.get_rec_lvl_min(), reclvlmax = cur_place.get_rec_lvl_max();
+                                if(reclvlmin > -1 || reclvlmax > -1){
+                                    g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
                                     line_num++;
                                 }
 
-                                if(line_num < max_lines){ // it't not unusual for some places to fill up all the lines
-                                    // recommended level
-                                    int reclvlmin = cur_place.get_rec_lvl_min(), reclvlmax = cur_place.get_rec_lvl_max();
-                                    if(reclvlmin > -1 || reclvlmax > -1){
-                                        g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                // sub areas / children
+                                if(line_num < max_lines && !cur_place.get_children().isEmpty()){
+                                    int children_num = cur_place.get_children().size();
+                                    String sa_str = "sa" + (children_num > 1 ? " (" + cur_place.get_children().size() + "): " : ": ");
+
+                                    boolean first_child = true;
+                                    for(Place child: cur_place.get_children()){
+                                        sa_str += (first_child ? "" : ", ") + child.get_name();
+                                        first_child = false;
+                                    }
+                                    line = fit_line_width(sa_str, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines - line_num);
+                                    for(String str: line){
+                                        g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
                                         line_num++;
                                     }
+                                }
 
-                                    // sub areas / children
-                                    if(line_num < max_lines && !cur_place.get_children().isEmpty()){
-                                        int children_num = cur_place.get_children().size();
-                                        String sa_str = "sa" + (children_num > 1 ? " (" + cur_place.get_children().size() + "): " : ": ");
+                                // flags
+                                if(line_num < max_lines){
+                                    String flags = "";
+                                    // place has comments
+                                    if(cur_place.get_comments().size() > 0) flags += "C";
 
-                                        boolean first_child = true;
-                                        for(Place child: cur_place.get_children()){
-                                            sa_str += (first_child ? "" : ", ") + child.get_name();
-                                            first_child = false;
-                                        }
-                                        line = fit_line_width(sa_str, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines - line_num);
-                                        for(String str: line){
-                                            g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
-                                            line_num++;
-                                        }
-                                    }
+                                    // other flags
+                                    for(Entry<String, Boolean> flag: cur_place.get_flags().entrySet())
+                                        if(flag.getValue()) flags += flag.getKey();
 
-                                    // flags
-                                    if(line_num < max_lines){
-                                        String flags = "";
-                                        // place has comments
-                                        if(cur_place.get_comments().size() > 0) flags += "C";
-
-                                        // other flags
-                                        for(Entry<String, Boolean> flag: cur_place.get_flags().entrySet())
-                                            if(flag.getValue()) flags += flag.getKey();
-
-                                        // draw flags
-                                        g.drawString(flags, place_x_px + border_width + (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
-                                    }
+                                    // draw flags
+                                    g.drawString(flags, place_x_px + border_width + (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                                 }
                             }
-
-                            // draw exits
-                            if(tile_size >= 20){
-                                g.setColor(parent.world.get_path_color());
-                                Integer exit_x_offset = new Integer(0), exit_y_offset = new Integer(0);
-                                g.setColor(parent.world.get_path_color());
-                                boolean up = false, down = false;
-
-                                for(Path p: cur_place.get_paths()){
-                                    String exit = p.get_exit(cur_place);
-                                    if(exit.equals("u")) up = true;
-                                    else if(exit.equals("d")) down = true;
-                                    else {
-                                        Pair<Integer, Integer> exit_offset = get_exit_offset(exit);
-                                        if(exit_offset.first != tile_size / 2 || exit_offset.second != tile_size / 2){
-                                            g.fillOval(place_x_px + exit_offset.first - exit_radius, place_y_px + exit_offset.second - exit_radius, 2 * exit_radius, 2 * exit_radius);
-                                        }
-                                    }
-                                }
-
-                                if((up || down) && get_tile_draw_text() && line_num < max_lines){
-                                    // TODO: find working arrows, calculate position
-                                    g.setColor(Color.BLACK);
-                                    // ⬆⬇ ￪￬ ↑↓
-                                    //String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
-                                    String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
-                                    g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
-                                }
-                            }
-
-                            // TODO: draw flags
                         }
 
-                        // draw cursor / place selection
-                        if(parent.get_place_selection_enabled() && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
-                            int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
-                            int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+                        // draw exits
+                        if(tile_size >= 20){
+                            g.setColor(parent.world.get_path_color());
+                            Integer exit_x_offset = new Integer(0), exit_y_offset = new Integer(0);
+                            g.setColor(parent.world.get_path_color());
+                            boolean up = false, down = false;
 
-                            g.setColor(tile_selection_color);
-                            ((Graphics2D)g).setStroke(new BasicStroke((selection_stroke_width)));
+                            for(Path p: cur_place.get_paths()){
+                                String exit = p.get_exit(cur_place);
+                                if(exit.equals("u")) up = true;
+                                else if(exit.equals("d")) down = true;
+                                else {
+                                    Pair<Integer, Integer> exit_offset = get_exit_offset(exit);
+                                    if(exit_offset.first != tile_size / 2 || exit_offset.second != tile_size / 2){
+                                        g.fillOval(place_x_px + exit_offset.first - exit_radius, place_y_px + exit_offset.second - exit_radius, 2 * exit_radius, 2 * exit_radius);
+                                    }
+                                }
+                            }
 
-                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width + tile_size / 4));
-                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width + tile_size / 4), (int) (place_y_px + selection_stroke_width));
+                            if((up || down) && get_tile_draw_text() && line_num < max_lines){
+                                // TODO: find working arrows, calculate position
+                                g.setColor(Color.BLACK);
+                                // ⬆⬇ ￪￬ ↑↓
+                                //String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
+                                String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
+                                g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
+                            }
+                        }
 
-                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width + tile_size / 4));
-                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + selection_stroke_width));
-
-                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
-                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));                         
-
-                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
-                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - selection_stroke_width + tile_size));
-                        }       
+                        // TODO: draw flags
                     }
+
+                    // draw cursor / place selection
+                    if(parent.get_place_selection_enabled() && place_x == parent.place_selected_x && place_y == parent.place_selected_y){
+                        int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
+                        int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+
+                        g.setColor(tile_selection_color);
+                        ((Graphics2D)g).setStroke(new BasicStroke((selection_stroke_width)));
+
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width + tile_size / 4));
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width + tile_size / 4), (int) (place_y_px + selection_stroke_width));
+
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width + tile_size / 4));
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + selection_stroke_width));
+
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));                         
+
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
+                        g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - selection_stroke_width + tile_size));
+                    }       
                 }
-                
-                if(get_show_paths()){
-                    // mask out tile positions on graphic_path
-                    ((Graphics2D) graphic_path).setBackground(new Color(0,0,0,0));
-                    int clear_tile_size = tile_size - 2 * border_width;
-                    for(Pair<Integer, Integer> p: tile_positions)
-                        //graphic_path.clearRect(p.first, p.second, p.first + tile_size, p.second + tile_size);
-                        graphic_path.clearRect(p.first + border_width, p.second + border_width, clear_tile_size, clear_tile_size);
-                    
-                    // draw graphic_path to g
-                    g.drawImage(image_path, 0, 0, null);
-                    graphic_path.dispose();
-                }
-                
             }
+
+            if(get_show_paths()){
+                // mask out tile positions on graphic_path
+                ((Graphics2D) graphic_path).setBackground(new Color(0,0,0,0));
+                int clear_tile_size = tile_size - 2 * border_width;
+                for(Pair<Integer, Integer> p: tile_positions)
+                    //graphic_path.clearRect(p.first, p.second, p.first + tile_size, p.second + tile_size);
+                    graphic_path.clearRect(p.first + border_width, p.second + border_width, clear_tile_size, clear_tile_size);
+
+                // draw graphic_path to g
+                g.drawImage(image_path, 0, 0, null);
+                graphic_path.dispose();
+            }
+
         }
         
         private class TabMouseListener implements MouseListener {

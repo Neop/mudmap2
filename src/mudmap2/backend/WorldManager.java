@@ -26,11 +26,15 @@ package mudmap2.backend;
 
 import mudmap2.Paths;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +50,9 @@ public class WorldManager {
     /// contains the loaded worlds <file, world>
     static HashMap<String, World> loaded_worlds = new HashMap<String, World>();
     
+    static final int meta_file_ver_major = 1;
+    static final int meta_file_ver_minor = 1;
+    
     /**
      * Reads the available worlds list
      */
@@ -58,6 +65,7 @@ public class WorldManager {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(Paths.get_available_worlds_file()));
             
+            boolean relative_path = false;
             String line, name = new String(), file = new String();
             try {
                 while((line = reader.readLine()) != null){
@@ -66,13 +74,21 @@ public class WorldManager {
                     if(line.charAt(0) == 'n'){ // world name
                         // save world if found
                         if(!name.isEmpty() && !file.isEmpty()){
-                            if(!available_worlds.containsKey(name) && file_exists(file)) available_worlds.put(name, file);
+                            if(!available_worlds.containsKey(name)){
+                                if(file_exists(file)) available_worlds.put(name, file);
+                                else if(file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(name, Paths.get_worlds_dir() + file);
+                            }
+                            relative_path = false;
                             name = new String();
                             file = new String();
                         }
                         name = line.substring(2).trim();
-                    } else if(line.charAt(0) == 'f') // file name
+                    } else if(line.charAt(0) == 'f' && !relative_path) // file name
                         file = line.substring(2).trim();
+                    else if(line.charAt(0) == 'g'){ // file name (new, relative format)
+                        file = line.substring(2).trim();
+                        relative_path = true;
+                    }
                 }
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -122,7 +138,31 @@ public class WorldManager {
      * Saves the available worlds list
      */
     public static void save_world_list(){
-        // TODO: implement this
+        final String file = Paths.get_worlds_dir() + "worlds";
+        try {
+            // open file
+            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)));
+
+            outstream.println("# MUD Map (v2) worlds file");
+            outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
+            
+            for(Entry<String, String> w: available_worlds.entrySet()){
+                if(file_exists(w.getValue())){
+                    outstream.println("n " + w.getKey());
+                    String w_file = w.getValue();
+                    outstream.println("f " + w_file);
+                    if(w_file.startsWith(Paths.get_worlds_dir())){
+                        w_file = w_file.substring(Paths.get_worlds_dir().length());
+                        outstream.println("g " + w_file);
+                    }
+                }
+            }
+            
+            outstream.close();
+        } catch (IOException ex) {
+            System.out.printf("Couldn't write worlds file " + file);
+            Logger.getLogger(WorldManager.class.getName()).log(Level.WARNING, null, ex);
+        }
     }
     
     /**

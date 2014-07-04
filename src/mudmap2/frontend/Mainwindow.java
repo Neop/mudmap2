@@ -208,7 +208,8 @@ public final class Mainwindow extends JFrame {
     
     public void quit(){
         write_config();
-        close_tabs();        
+        WorldManager.save_world_list();
+        close_tabs();
     }
     
     public void read_config(){
