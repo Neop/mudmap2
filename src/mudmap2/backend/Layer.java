@@ -34,12 +34,20 @@ import java.util.TreeMap;
 public class Layer {
     
     World world;
+    static int next_id;
     int id;
     TreeMap<Integer, TreeMap<Integer, LayerElement>> elements;
     
     public Layer(int _id, World _world){
-        world = _world;
         id = _id;
+        if(id >= next_id) next_id = id + 1;
+        world = _world;
+        elements = new TreeMap<Integer, TreeMap<Integer, LayerElement>>();
+    }
+    
+    public Layer(World _world){
+        id = next_id++;
+        world = _world;
         elements = new TreeMap<Integer, TreeMap<Integer, LayerElement>>();
     }
     

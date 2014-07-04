@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -150,16 +149,17 @@ class WorldTab extends JPanel {
         
         setLayout(new BorderLayout());
         
-        toolbar = new JToolBar();
+        /// TODO: Toolbar
+        /*toolbar = new JToolBar();
         add(toolbar, BorderLayout.WEST);
-        toolbar.add(new JButton("dsd"));
+        toolbar.add(new JButton("dsd"));*/
         
         worldpanel = new WorldPanel(this);
         add(worldpanel, BorderLayout.CENTER);
         
         // open / get the world
         world = WorldManager.get_world(WorldManager.get_world_file(world_name));
-        load_meta();
+        load_meta(); // important: call this after creation of worldpanel!
                         
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
         panel_south.setLayout(new BorderLayout());
@@ -457,6 +457,8 @@ class WorldTab extends JPanel {
     /**
      * Loads the world meta data file
      * this file describes the coordinates of the last shown positions
+     *
+     * important: call this after creation of worldpanel!
      */
     private void load_meta(){
         String file = world.get_file() + "_meta";
@@ -505,8 +507,10 @@ class WorldTab extends JPanel {
             push_position(new WorldCoordinate(layer_id, pos_x, pos_y));
             
         } catch (FileNotFoundException ex) {
-            System.out.println("Couldn't open available worlds file \"" + file + "\", file not found");
-            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            System.out.println("Couldn't open world meta file \"" + file + "\", file not found");
+            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            
+            push_position(new WorldCoordinate(0, 0, 0));
         }
     }
     
@@ -566,11 +570,34 @@ class WorldTab extends JPanel {
             parent = _parent;
             setFocusable(true);
             requestFocusInWindow();
-            addFocusListener(new TabFocusListener(parent));
+            addFocusListener(new FocusListener() {
+                @Override
+                public void focusGained(FocusEvent arg0) {}
+                @Override
+                public void focusLost(FocusEvent arg0) {
+                    if(!parent.has_context_menu()) requestFocusInWindow();
+                }
+            });
             addKeyListener(new TabKeyListener(this));
             addMouseListener(new TabMouseListener());
             addMouseWheelListener(new TabMouseWheelListener());
             addMouseMotionListener(new TabMouseMotionListener());
+        }
+        
+        /**
+         * Gets the screen width
+         * @return screen width
+         */
+        public double get_screen_width(){
+            return screen_width;
+        }
+        
+        /**
+         * Gets the screen height
+         * @return screen height
+         */
+        public double get_screen_height(){
+            return screen_height;
         }
         
         /**
@@ -1244,25 +1271,6 @@ class WorldTab extends JPanel {
 
             @Override
             public void keyReleased(KeyEvent arg0) {}
-            
-        }
-        
-        // prevents the panel to loose focus
-        private class TabFocusListener implements FocusListener{
-
-            WorldTab parent;
-
-            public TabFocusListener(WorldTab _parent) {
-                parent = _parent;
-            }
-            
-            @Override
-            public void focusGained(FocusEvent arg0) {}
-
-            @Override
-            public void focusLost(FocusEvent arg0) {
-                if(!parent.has_context_menu()) requestFocusInWindow();
-            }
             
         }
         

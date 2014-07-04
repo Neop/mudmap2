@@ -24,6 +24,7 @@
 package mudmap2.frontend;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -48,6 +49,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import mudmap2.backend.World;
@@ -73,6 +75,7 @@ public final class Mainwindow extends JFrame {
     JMenuItem menu_help_help, menu_help_info;
     
     JTabbedPane tabbed_pane;
+    AvailableWorldsTab available_worlds_tab;
     
     public Mainwindow(){
         super("MUD Map 2 " + "(" + mudmap2.Mudmap2.get_version_major() + "." + mudmap2.Mudmap2.get_version_minor() + "." + mudmap2.Mudmap2.get_version_build() + " " + mudmap2.Mudmap2.get_version_state() + ")");
@@ -91,7 +94,24 @@ public final class Mainwindow extends JFrame {
         
         setSize(750, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        addWindowListener(new MainWindowListener());
+        addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent arg0) {}
+            @Override
+            public void windowClosing(WindowEvent arg0) {
+                quit();
+            }
+            @Override
+            public void windowClosed(WindowEvent arg0) {}
+            @Override
+            public void windowIconified(WindowEvent arg0) {}
+            @Override
+            public void windowDeiconified(WindowEvent arg0) {}
+            @Override
+            public void windowActivated(WindowEvent arg0) {}
+            @Override
+            public void windowDeactivated(WindowEvent arg0) {}
+        });
         
         // Add GUI components
         menu_bar = new JMenuBar();
@@ -106,6 +126,26 @@ public final class Mainwindow extends JFrame {
         
         menu_file_new = new JMenuItem("New");
         menu_file.add(menu_file_new);
+        menu_file_new.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {                
+                String ret = JOptionPane.showInputDialog((Component) arg0.getSource(), "Enter new world name", "New world", JOptionPane.PLAIN_MESSAGE);
+                if(ret != null && !ret.isEmpty()){
+                    // create a new world
+                    if(WorldManager.get_world_file(ret) == null) // no world with that name yet
+                        try {
+                        WorldManager.create_world(ret);
+                        available_worlds_tab.update();
+                        open_world(ret);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
+                        JOptionPane.showMessageDialog((Component) arg0.getSource(), "Couldn't create world \"" + ret + "\":\n" + ex.getMessage());
+                    }
+                    else JOptionPane.showMessageDialog((Component) arg0.getSource(), "Can't create world \"" + ret + "\", name already exists");
+                }
+            }
+        });
+        
         menu_file_open = new JMenuItem("Open");
         menu_file.add(menu_file_open);
         menu_file.addSeparator();
@@ -135,7 +175,7 @@ public final class Mainwindow extends JFrame {
         // ---
         tabbed_pane = new JTabbedPane();
         add(tabbed_pane);
-        tabbed_pane.addTab("Available worlds", new AvailableWorldsTab(this));
+        tabbed_pane.addTab("Available worlds", available_worlds_tab = new AvailableWorldsTab(this));
         
         setVisible(true);
     }
@@ -224,33 +264,6 @@ public final class Mainwindow extends JFrame {
         }
     }
     
-    public class MainWindowListener implements WindowListener {
-
-        @Override
-        public void windowOpened(WindowEvent arg0) {}
-
-        @Override
-        public void windowClosing(WindowEvent arg0) {
-            quit();
-        }
-
-        @Override
-        public void windowClosed(WindowEvent arg0) {}
-
-        @Override
-        public void windowIconified(WindowEvent arg0) {}
-
-        @Override
-        public void windowDeiconified(WindowEvent arg0) {}
-
-        @Override
-        public void windowActivated(WindowEvent arg0) {}
-
-        @Override
-        public void windowDeactivated(WindowEvent arg0) {}
-   
-    }
-    
     /**
      * The available worlds tab
      */
@@ -267,37 +280,35 @@ public final class Mainwindow extends JFrame {
             
             setLayout(new GridLayout(worlds.size(), 2));
             
-            for(String world_name: worlds){
+            for(final String world_name: worlds){
                 JButton b = new JButton(world_name);
-                b.addActionListener(new ListenerButtonOpenWorld(mwin, world_name));
+                b.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        mwin.open_world(world_name);
+                    }
+                });
                 add(b);
             }
         }
         
-        /**
-         * Opens a world tab (existing or creates it) when the corresponding
-         * button is pressed
-         */
-        public class ListenerButtonOpenWorld implements ActionListener {
-
-            Mainwindow mwin;
-            String world_name;
+        public void update(){
+            Set<String> worlds = WorldManager.get_world_list();
             
-            /**
-             * Constructor
-             * @param _mwin reference to the main window
-             * @param _world_name name of the world to open
-             */
-            public ListenerButtonOpenWorld(Mainwindow _mwin, String _world_name){
-                mwin = _mwin;
-                world_name = _world_name;
+            removeAll();
+            setLayout(new GridLayout(worlds.size(), 2));
+            
+            for(final String world_name: worlds){
+                JButton b = new JButton(world_name);
+                b.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        mwin.open_world(world_name);
+                    }
+                });
+                add(b);
             }
-            
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                mwin.open_world(world_name);
-            }   
-        }   
+        }
     }
     
 }

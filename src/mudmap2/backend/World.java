@@ -397,6 +397,13 @@ public class World {
      * @param place new place
      */
     public void put(Place place) throws Exception {
+        // create layer, if it doesn't exist
+        Layer layer = place.get_layer();
+        if(layer == null){
+            layer = new Layer(this);
+            layers.put(home_layer, layer);
+            place.set_layer(layer);
+        }
         put(place, place.get_layer().get_id(), place.get_x(), place.get_y());
     }
     

@@ -65,9 +65,8 @@ public class WorldManager {
                     
                     if(line.charAt(0) == 'n'){ // world name
                         // save world if found
-                        // TODO: check if the file exists?
                         if(!name.isEmpty() && !file.isEmpty()){
-                            if(!available_worlds.containsKey(name)) available_worlds.put(name, file);
+                            if(!available_worlds.containsKey(name) && file_exists(file)) available_worlds.put(name, file);
                             name = new String();
                             file = new String();
                         }
@@ -80,7 +79,7 @@ public class WorldManager {
             }
             
             // save last found world
-            if(!available_worlds.containsKey(name)) available_worlds.put(name, file);
+            if(!available_worlds.containsKey(name) && file_exists(file)) available_worlds.put(name, file);
             
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
@@ -166,12 +165,41 @@ public class WorldManager {
         // check if name already exists
         if(!available_worlds.containsKey(name)){
             // check if the file already exists
-            File f = new File(file);
-            if(!f.exists() && !f.isDirectory()){
+            if(!file_exists(file)){
                 loaded_worlds.put(file, new World(file, name));
                 available_worlds.put(name, file);
-            } throw new Exception("File \"" + file + "\" already exists");
+            } else throw new Exception("File \"" + file + "\" already exists");
         } else throw new Exception("A world with name \"" + name + "\" already exists");
+        
+        loaded_worlds.put(file, new World(file, name));
     }
     
+    /**
+     * Creates a new world and adds it to the available worlds list
+     * @param name world name
+     */
+    public static void create_world(String name) throws Exception{
+        String path = Paths.get_worlds_dir();
+        String file = name;
+        
+        // create available file path, if necessary
+        boolean file_ok = false;
+        for(int num = 0; !file_ok; ++num){
+            file_ok = true;
+            file = (num > 0 ? "_" + num : "");
+            for(String s: available_worlds.values()) if(s.toLowerCase().equals((path + name + file).toLowerCase())) file_ok = false;
+        }
+        
+        create_world(name, path + name + file);
+    }
+    
+    /**
+     * Checks whether a file exists
+     * @param file file to check
+     * @return true, if file exists or is a directory
+     */
+    private static boolean file_exists(String file){
+        File f = new File(file);
+        return f.exists() || f.isDirectory();
+    }
 }
