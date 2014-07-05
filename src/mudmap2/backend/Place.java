@@ -200,11 +200,13 @@ public class Place extends LayerElement implements Comparable<Place> {
     
     /**
      * Gets the comments as a single string
+     * @param newlines insert \n at lineendings, if true
      * @return 
      */
-    public String get_comments_string(){
+    public String get_comments_string(boolean newlines){
         String ret = "";
-        for(String c: comments) ret += (ret.length() == 0 ? "" : " ") + c;
+        String lineending = newlines ? "\n" : " ";
+        for(String c: comments) ret += (ret.length() == 0 ? "" : lineending) + c;
         return ret;
     }
     

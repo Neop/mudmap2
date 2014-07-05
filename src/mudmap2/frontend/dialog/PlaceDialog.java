@@ -25,7 +25,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -106,8 +105,6 @@ public class PlaceDialog extends JDialog implements ActionListener {
      * Creates the dialog
      */
     private void create(){
-        setSize(400, 200);
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
         setLayout(new GridLayout(6, 2));
         
         add(new JLabel("Name"));
@@ -166,6 +163,9 @@ public class PlaceDialog extends JDialog implements ActionListener {
                 dispose();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        
+        pack();
+        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
     }
     
     /**

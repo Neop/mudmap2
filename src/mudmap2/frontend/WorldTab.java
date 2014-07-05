@@ -77,6 +77,7 @@ import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
+import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 
@@ -112,6 +113,7 @@ class WorldTab extends JPanel {
     int mouse_x_previous, mouse_y_previous;
     
     // the position of the selected place (selected by mouse or keyboard)
+    static boolean place_selection_enabled_default = true; // default value
     boolean place_selection_enabled;
     int place_selected_x, place_selected_y;
     
@@ -141,7 +143,7 @@ class WorldTab extends JPanel {
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
         
-        place_selection_enabled = false;
+        place_selection_enabled = place_selection_enabled_default;
         
         tile_center_color = new Color(207, 190, 134);
         
@@ -312,7 +314,7 @@ class WorldTab extends JPanel {
                     String infotext = pl.get_name();
                     if(has_area || has_comments) infotext += " (";
                     if(has_area) infotext += pl.get_area().get_name();
-                    if(has_comments) infotext += (has_area ? ", " : "") + pl.get_comments_string();
+                    if(has_comments) infotext += (has_area ? ", " : "") + pl.get_comments_string(false);
                     if(has_area || has_comments) infotext += ")";
                     
                     label_infobar.setText(infotext);
@@ -1047,9 +1049,8 @@ class WorldTab extends JPanel {
                             }
 
                             if((up || down) && get_tile_draw_text() && line_num < max_lines){
-                                // TODO: find working arrows, calculate position
                                 g.setColor(Color.BLACK);
-                                // ⬆⬇ ￪￬ ↑↓
+                                // have some arrows: ⬆⬇ ￪￬ ↑↓
                                 //String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
                                 String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
                                 g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
@@ -1258,6 +1259,16 @@ class WorldTab extends JPanel {
                             if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
                         }
                         break;
+                    // edit place comments
+                    case KeyEvent.VK_C:
+                        if(parent.get_place_selection_enabled()){
+                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                            if(place != null){
+                                (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
+                                parent.update_infobar();
+                            }
+                        }
+                        break;
                     // modify area
                     case KeyEvent.VK_Q:
                         Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
@@ -1306,6 +1317,9 @@ class WorldTab extends JPanel {
                     JMenuItem mi_remove = new JMenuItem("Remove place");
                     mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
                     add(mi_remove);
+                    JMenuItem mi_comments = new JMenuItem("Edit comments");
+                    mi_comments.addActionListener(new PlaceCommentDialog(parent.parent, place));
+                    add(mi_comments);
                     JMenuItem mi_area = new JMenuItem("Edit area");
                     if(place.get_area() != null) mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place.get_area()));
                     else mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));

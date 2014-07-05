@@ -39,9 +39,10 @@ w/a/s/d 	arrow keys			shift the selection
 e 			insert key			create / edit place at selection
 f								create or remove a placeholder place
 r 			delete key			remove selected place
+c								edit place comments
 q								modify area of selected place. Note that
 								this also affects other places that
 								belong to the same area. If no place is
 								selected or selection is disabled, a new
 								area will be created
-			home key			go to home location
+h			home key			go to home location

@@ -104,8 +104,6 @@ public class AreaDialog extends JDialog implements ActionListener {
      * Creates the GUI
      */
     private void create(){
-        setSize(300, 150);
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
         setLayout(new GridLayout(3, 2));
         
         add(new JLabel("Name"));
@@ -143,6 +141,9 @@ public class AreaDialog extends JDialog implements ActionListener {
                 dispose();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        
+        pack();
+        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
     }
     
     private void save(){
