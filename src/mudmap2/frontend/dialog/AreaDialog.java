@@ -24,11 +24,14 @@ package mudmap2.frontend.dialog;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import mudmap2.backend.Area;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -119,7 +122,7 @@ public class AreaDialog extends JDialog implements ActionListener {
         button_cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                setVisible(false);
+                dispose();
             }
         });
         
@@ -129,9 +132,17 @@ public class AreaDialog extends JDialog implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 save();
-                setVisible(false);
+                dispose();
             }
         });
+       
+        // listener for escape key
+        getRootPane().registerKeyboardAction(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                dispose();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
     
     private void save(){

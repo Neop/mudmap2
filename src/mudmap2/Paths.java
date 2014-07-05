@@ -22,11 +22,21 @@
 
 package mudmap2;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Helper class to get common paths and filenames
  * @author neop
  */
 public class Paths {
+    
+    static String user_data_dir;
+    final static String website_url = "http://mudmap.sf.net";
+    final static String manual_url = website_url;
     
     /**
      * Gets the user data path
@@ -59,9 +69,40 @@ public class Paths {
         return get_worlds_dir() + "worlds";
     }
     
+    /**
+     * Gets the config file path
+     * @return 
+     */
     public static String get_config_file(){
         return get_user_data_dir() + "config";
     }
     
-    static String user_data_dir;
+    /**
+     * Gets the website url
+     * @return manual url
+     */
+    public static String get_website_url(){
+        return website_url;
+    }
+    
+    /**
+     * Gets the online manual url
+     * @return manual url
+     */
+    public static String get_manual_url(){
+        return manual_url;
+    }
+    
+    /**
+     * Tries to open the url in a web-browser
+     * @param url 
+     */
+    public static void open_website(String url){
+        try {
+            Desktop.getDesktop().browse(URI.create(url));
+        } catch (IOException ex) {
+            Logger.getLogger(Paths.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
 }

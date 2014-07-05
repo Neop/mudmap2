@@ -52,6 +52,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import mudmap2.Paths;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
@@ -205,8 +206,15 @@ public final class Mainwindow extends JFrame {
         menu_edit_edit_world = new JMenuItem("Edit world");
         menu_edit.add(menu_edit_edit_world);
         
-        menu_help_help = new JMenuItem("Help");
+        menu_help_help = new JMenuItem("Help (online)");
         menu_help.add(menu_help_help);
+        menu_help_help.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                Paths.open_website(Paths.get_manual_url());
+            }
+        });
+        
         menu_help_info = new JMenuItem("Info");
         menu_help.add(menu_help_info);
         
