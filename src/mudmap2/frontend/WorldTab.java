@@ -116,6 +116,7 @@ class WorldTab extends JPanel {
     static boolean place_selection_enabled_default = true; // default value
     boolean place_selection_enabled;
     int place_selected_x, place_selected_y;
+    boolean force_selection;
     
     static final int meta_file_ver_major = 1;
     static final int meta_file_ver_minor = 1;
@@ -128,13 +129,34 @@ class WorldTab extends JPanel {
     // true, if a context menu is shown (to disable forced focus)
     boolean is_context_menu_shown;
     
+    // passive worldtabs don't modify the world
+    final boolean passive;
+
     /**
      * Constructs the world tab, opens the world if necessary
+     * @param _parent parent frame
      * @param _world_name name of the world
      */
-    public WorldTab(JFrame _parent, String _world_name){
+    public WorldTab(JFrame _parent, String _world_name, boolean _passive){
         parent = _parent;
-        
+        world = WorldManager.get_world(WorldManager.get_world_file(_world_name));
+        passive = _passive;
+        create();
+    }
+    
+    /**
+     * Constructs the world tab, opens the world if necessary
+     * @param _parent parent frame
+     * @param _world world
+     */
+    public WorldTab(JFrame _parent, World _world, boolean _passive){
+        parent = _parent;
+        world = _world;
+        passive = _passive;
+        create();
+    }
+    
+    private void create(){
         positions = new LinkedList<WorldCoordinate>();
         tile_size = 120;
         
@@ -143,6 +165,7 @@ class WorldTab extends JPanel {
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
         
+        force_selection = false;
         place_selection_enabled = place_selection_enabled_default;
         
         tile_center_color = new Color(207, 190, 134);
@@ -154,11 +177,9 @@ class WorldTab extends JPanel {
         add(toolbar, BorderLayout.WEST);
         toolbar.add(new JButton("dsd"));*/
         
-        worldpanel = new WorldPanel(this);
+        worldpanel = new WorldPanel(this, passive);
         add(worldpanel, BorderLayout.CENTER);
         
-        // open / get the world
-        world = WorldManager.get_world(WorldManager.get_world_file(_world_name));
         load_meta(); // important: call this after creation of worldpanel!
                         
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
@@ -224,15 +245,17 @@ class WorldTab extends JPanel {
      * Saves the changes in the world
      */
     public void save(){
-        write_meta();
-        world.write_world();
+        if(!passive){
+            write_meta();
+            world.write_world();
+        }
     }
     
     /**
      * Gets the currently shown position
      * @return current position
      */
-    private WorldCoordinate get_cur_position(){
+    public WorldCoordinate get_cur_position(){
         return positions.getFirst();
     }
     
@@ -240,7 +263,7 @@ class WorldTab extends JPanel {
      * Gets the x coordinate of the selected place
      * @return x coordinate
      */
-    private int get_place_selection_x(){
+    public int get_place_selection_x(){
         return place_selected_x;
     }
     
@@ -248,7 +271,7 @@ class WorldTab extends JPanel {
      * Gets the y coordinate of the selected place 
      * @return y coordinate
      */
-    private int get_place_selection_y(){
+    public int get_place_selection_y(){
         return place_selected_y;
     }
     
@@ -257,7 +280,7 @@ class WorldTab extends JPanel {
      * @param x x coordinate
      * @param y y coordinate
      */
-    private void set_place_selection(int x, int y){
+    public void set_place_selection(int x, int y){
         place_selected_x = x;
         place_selected_y = y;
         update_infobar();
@@ -324,15 +347,15 @@ class WorldTab extends JPanel {
             } else {
                 label_infobar.setText("");
             }
-        }
+        } else label_infobar.setText("");
     }
     
     /**
      * Sets the place selection enabled state (if true, the selection will be shown)
      * @param b 
      */
-    public void set_place_selection(boolean b){
-        place_selection_enabled = b;
+    public void set_place_selection_enabled(boolean b){
+        place_selection_enabled = b || force_selection;
         update_infobar();
         redraw();
     }
@@ -341,9 +364,11 @@ class WorldTab extends JPanel {
      * Toggles the place selection enabled state
      */
     public void set_place_selection_toggle(){
-        place_selection_enabled = !place_selection_enabled;
-        update_infobar();
-        redraw();
+        if(!force_selection){
+            place_selection_enabled = !place_selection_enabled;
+            update_infobar();
+            redraw();
+        }
     }
     
     /**
@@ -351,9 +376,25 @@ class WorldTab extends JPanel {
      * @return 
      */
     public boolean get_place_selection_enabled(){
-        return place_selection_enabled;
+        return place_selection_enabled || force_selection;
     }
     
+    /**
+     * Enables or disables the place selection
+     * @param b new place selection state
+     */
+    private void set_place_selection(boolean b){
+        place_selection_enabled = b || force_selection;
+        redraw();
+    }
+    
+    /**
+     * Forces the place selection to be enabled, if true
+     * @param b 
+     */
+    public void set_place_selection_forced(boolean b){
+        if(force_selection = b) set_place_selection(true);
+    }
     
     /**
      * Pushes a new position on the position stack
@@ -372,6 +413,19 @@ class WorldTab extends JPanel {
     public void pop_position(){
         if(positions.size() > 0) positions.removeFirst();
         if(positions.size() == 0) goto_home();
+        redraw();
+    }
+    
+    /**
+     * Removes all previously visited positions from history and sets pos
+     * @param pos new position
+     */
+    public void reset_history(WorldCoordinate pos){
+        positions.clear();
+        positions.add(pos);
+        place_selected_x = (int) Math.round(pos.get_x());
+        place_selected_y = (int) Math.round(pos.get_y());
+        update_infobar();
         redraw();
     }
     
@@ -506,7 +560,7 @@ class WorldTab extends JPanel {
                         tile_size = Integer.parseInt(tmp[1]);
                     } else if(line.startsWith("enable_place_selection")){
                         String[] tmp = line.split(" ");
-                        place_selection_enabled = Boolean.parseBoolean(tmp[1]);
+                        place_selection_enabled = Boolean.parseBoolean(tmp[1]) || force_selection;
                     }
                 }
             } catch (IOException ex) {
@@ -527,32 +581,34 @@ class WorldTab extends JPanel {
      * Saves the world meta file
      */
     public void write_meta(){
-        try {
-            // open file
-            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(world.get_file() + "_meta")));
+        if(!passive){
+            try {
+                // open file
+                PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(world.get_file() + "_meta")));
 
-            outstream.println("# MUD Map (v2) world meta data file");
-            outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
-            
-            // tile size
-            outstream.println("tile_size " + tile_size);
-            
-            // write whether the place selection is shown
-            outstream.println("enable_place_selection " + get_place_selection_enabled());
-            
-            // write current position and position history
-            outstream.println("lp " + get_cur_position().get_meta_String());
-            
-            // shown place history
-            for(Iterator<WorldCoordinate> wcit = positions.descendingIterator(); wcit.hasNext();){
-                WorldCoordinate next = wcit.next();
-                if(next != get_cur_position()) outstream.println("pcv " + next.get_meta_String());
+                outstream.println("# MUD Map (v2) world meta data file");
+                outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
+
+                // tile size
+                outstream.println("tile_size " + tile_size);
+
+                // write whether the place selection is shown
+                outstream.println("enable_place_selection " + get_place_selection_enabled());
+
+                // write current position and position history
+                outstream.println("lp " + get_cur_position().get_meta_String());
+
+                // shown place history
+                for(Iterator<WorldCoordinate> wcit = positions.descendingIterator(); wcit.hasNext();){
+                    WorldCoordinate next = wcit.next();
+                    if(next != get_cur_position()) outstream.println("pcv " + next.get_meta_String());
+                }
+
+                outstream.close();
+            } catch (IOException ex) {
+                System.out.printf("Couldn't write world meta file " + world.get_file() + "_meta");
+                Logger.getLogger(WorldTab.class.getName()).log(Level.WARNING, null, ex);
             }
-            
-            outstream.close();
-        } catch (IOException ex) {
-            System.out.printf("Couldn't write world meta file " + world.get_file() + "_meta");
-            Logger.getLogger(WorldTab.class.getName()).log(Level.WARNING, null, ex);
         }
     }
     
@@ -571,12 +627,16 @@ class WorldTab extends JPanel {
         
         WorldTab parent;
 
+        // passive worldpanels don't modify the world
+        final boolean passive;
+        
         /**
          * Constructs a world panel
          * @param _parent parent world tab
          */
-        public WorldPanel(WorldTab _parent) {
+        public WorldPanel(WorldTab _parent, boolean _passive) {
             parent = _parent;
+            passive = _passive;
             setFocusable(true);
             requestFocusInWindow();
             addFocusListener(new FocusListener() {
@@ -587,8 +647,13 @@ class WorldTab extends JPanel {
                     if(!parent.has_context_menu()) requestFocusInWindow();
                 }
             });
-            addKeyListener(new TabKeyListener(this));
-            addMouseListener(new TabMouseListener());
+            if(passive){
+                addKeyListener(new TabKeyPassiveListener(this));
+                addMouseListener(new TabMousePassiveListener());
+            } else {
+                addKeyListener(new TabKeyListener(this));
+                addMouseListener(new TabMouseListener());
+            }
             addMouseWheelListener(new TabMouseWheelListener());
             addMouseMotionListener(new TabMouseMotionListener());
         }
@@ -1133,6 +1198,16 @@ class WorldTab extends JPanel {
             }
         }
         
+        private class TabMousePassiveListener extends TabMouseListener implements MouseListener {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
+                    // set place selection to coordinates if keyboard selection is enabled
+                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                }
+            }
+        }
+        
         private class TabMouseWheelListener implements MouseWheelListener {
 
             @Override
@@ -1285,12 +1360,71 @@ class WorldTab extends JPanel {
                     case KeyEvent.VK_HOME:
                         parent.goto_home();
                         break;
+                    
+                    // TODO: remove test
+                    case KeyEvent.VK_O:
+                        PlaceSelectionDialog sel;
+                        (sel = new PlaceSelectionDialog(parent.parent, parent.world, parent.get_cur_position(), true)).setVisible(true);
+                        if(sel.get_selected() && sel.get_selection() != null) System.out.println(sel.get_selection().get_name());
+                        break;
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent arg0) {}
             
+        }
+        
+        private class TabKeyPassiveListener extends TabKeyListener {
+            public TabKeyPassiveListener(WorldPanel parent){
+                super(parent);
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                switch(arg0.getKeyCode()){
+                    // zoom the map
+                    case KeyEvent.VK_PLUS:
+                    case KeyEvent.VK_SUBTRACT:
+                    case KeyEvent.VK_PAGE_UP:
+                        parent.tile_size_increment();
+                        break;
+                    case KeyEvent.VK_ADD:
+                    case KeyEvent.VK_MINUS:
+                    case KeyEvent.VK_PAGE_DOWN:
+                        parent.tile_size_decrement();
+                        break;
+
+                    // enable / disable place selection
+                    case KeyEvent.VK_P:
+                        parent.set_place_selection_toggle();
+                        break;
+
+                    // shift place selection - wasd
+                    case KeyEvent.VK_UP:
+                    case KeyEvent.VK_W:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
+                        break;
+                    case KeyEvent.VK_LEFT:
+                    case KeyEvent.VK_A:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                    case KeyEvent.VK_S:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                    case KeyEvent.VK_D:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
+                        break;
+                        
+                    // goto home
+                    case KeyEvent.VK_H:
+                    case KeyEvent.VK_HOME:
+                        parent.goto_home();
+                        break;
+                }
+            }
         }
         
         // constructs the context menu (on right click)
