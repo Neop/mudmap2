@@ -270,8 +270,8 @@ public final class Mainwindow extends JFrame {
      */
     public void quit(){
         write_config();
-        WorldManager.save_world_list();
         close_tabs();
+        WorldManager.write_world_list(); // do this after writing the world files
         System.exit(0);
     }
     
@@ -309,7 +309,7 @@ public final class Mainwindow extends JFrame {
             }
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open config file \"" + mudmap2.Paths.get_config_file() + "\", file not found");
-            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
     }
     
@@ -319,7 +319,8 @@ public final class Mainwindow extends JFrame {
     public void write_config(){
         try {
             // open file
-            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(mudmap2.Paths.get_config_file())));
+            if(!Paths.is_directory(Paths.get_user_data_dir())) Paths.create_directory(Paths.get_user_data_dir());
+            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(Paths.get_config_file())));
 
             outstream.println("# MUD Map 2 config file");
             outstream.println("ver " + config_file_version_major + "." + config_file_version_minor);
@@ -329,7 +330,7 @@ public final class Mainwindow extends JFrame {
             
             outstream.close();
         } catch (IOException ex) {
-            System.out.printf("Couldn't write config file " + mudmap2.Paths.get_config_file());
+            System.out.printf("Couldn't write config file " + Paths.get_config_file());
             Logger.getLogger(Mainwindow.class.getName()).log(Level.WARNING, null, ex);
         }
     }

@@ -75,8 +75,8 @@ public class WorldManager {
                         // save world if found
                         if(!name.isEmpty() && !file.isEmpty()){
                             if(!available_worlds.containsKey(name)){
-                                if(file_exists(file)) available_worlds.put(name, file);
-                                else if(file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(name, Paths.get_worlds_dir() + file);
+                                if(Paths.file_exists(file)) available_worlds.put(name, file);
+                                else if(Paths.file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(name, Paths.get_worlds_dir() + file);
                             }
                             relative_path = false;
                             name = new String();
@@ -95,40 +95,43 @@ public class WorldManager {
             }
             
             // save last found world
-            if(!available_worlds.containsKey(name) && file_exists(file)) available_worlds.put(name, file);
+            if(!available_worlds.containsKey(name) && Paths.file_exists(file)) available_worlds.put(name, file);
             
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
-            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
         
         // read from directory
         // get file list
         File dir = new File(Paths.get_worlds_dir());
-        File[] fileList = dir.listFiles();
+        File[] fileList = null;
+        if(dir != null) fileList = dir.listFiles();
         
-        // find world files in file list
-        for(File file : fileList){
-            // exclude meta and backup files
-            if(!file.getName().endsWith("_meta") && !file.getName().endsWith(".backup")){
-                try {
-                    BufferedReader reader = new BufferedReader(new FileReader(file));
+        if(fileList != null){
+            // find world files in file list
+            for(File file : fileList){
+                // exclude meta and backup files
+                if(!file.getName().endsWith("_meta") && !file.getName().endsWith(".backup")){
                     try {
-                        String line;
-                        boolean is_world_file = false;
-                        while((line = reader.readLine()) != null && !is_world_file){
-                            if(line.trim().startsWith("wname")){
-                                // world name found in file, save it
-                                String name = line.trim().substring(6).trim();
-                                if(!available_worlds.containsKey(name))
-                                    available_worlds.put(name, file.toString());
+                        BufferedReader reader = new BufferedReader(new FileReader(file));
+                        try {
+                            String line;
+                            boolean is_world_file = false;
+                            while((line = reader.readLine()) != null && !is_world_file){
+                                if(line.trim().startsWith("wname")){
+                                    // world name found in file, save it
+                                    String name = line.trim().substring(6).trim();
+                                    if(!available_worlds.containsKey(name))
+                                        available_worlds.put(name, file.toString());
+                                }
                             }
+                        } catch (IOException ex) {
+                            Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    } catch (IOException ex) {
-                        Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
                     }
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
                 }
             }
         }
@@ -136,18 +139,22 @@ public class WorldManager {
     
     /**
      * Saves the available worlds list
+     * do this after writing the world files or new places won't appear in list
      */
-    public static void save_world_list(){
+    public static void write_world_list(){
+        System.out.println("a" + available_worlds.size());
+        
         final String file = Paths.get_worlds_dir() + "worlds";
         try {
             // open file
+            if(!Paths.is_directory(Paths.get_worlds_dir())) Paths.create_directory(Paths.get_worlds_dir());
             PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)));
 
             outstream.println("# MUD Map (v2) worlds file");
             outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
             
             for(Entry<String, String> w: available_worlds.entrySet()){
-                if(file_exists(w.getValue())){
+                if(Paths.file_exists(w.getValue())){
                     outstream.println("n " + w.getKey());
                     String w_file = w.getValue();
                     outstream.println("f " + w_file);
@@ -161,7 +168,7 @@ public class WorldManager {
             outstream.close();
         } catch (IOException ex) {
             System.out.printf("Couldn't write worlds file " + file);
-            Logger.getLogger(WorldManager.class.getName()).log(Level.WARNING, null, ex);
+            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
     }
     
@@ -205,7 +212,7 @@ public class WorldManager {
         // check if name already exists
         if(!available_worlds.containsKey(name)){
             // check if the file already exists
-            if(!file_exists(file)){
+            if(!Paths.file_exists(file)){
                 loaded_worlds.put(file, new World(file, name));
                 available_worlds.put(name, file);
             } else throw new Exception("File \"" + file + "\" already exists");
@@ -231,15 +238,5 @@ public class WorldManager {
         }
         
         create_world(name, path + name + file);
-    }
-    
-    /**
-     * Checks whether a file exists
-     * @param file file to check
-     * @return true, if file exists or is a directory
-     */
-    private static boolean file_exists(String file){
-        File f = new File(file);
-        return f.exists() || f.isDirectory();
     }
 }

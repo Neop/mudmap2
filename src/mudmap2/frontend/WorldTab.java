@@ -69,6 +69,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import mudmap2.Pair;
+import mudmap2.Paths;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Path;
@@ -584,6 +585,7 @@ class WorldTab extends JPanel {
         if(!passive){
             try {
                 // open file
+                if(!Paths.is_directory(Paths.get_worlds_dir())) Paths.create_directory(Paths.get_worlds_dir());
                 PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(world.get_file() + "_meta")));
 
                 outstream.println("# MUD Map (v2) world meta data file");

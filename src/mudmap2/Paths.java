@@ -23,6 +23,7 @@
 package mudmap2;
 
 import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -105,4 +106,42 @@ public class Paths {
         }
     }
     
+    /**
+     * Checks whether a file exists
+     * @param file file to check
+     * @return true, if file exists or is a directory
+     */
+    public static boolean file_exists(String file){
+        File f = new File(file);
+        return f.exists() || f.isDirectory();
+    }
+    
+    /**
+     * checks if path is a file
+     * @param file
+     * @return true, if path is a file
+     */
+    public static boolean is_file(String path){
+        File f = new File(path);
+        return f.exists() && !f.isDirectory();
+    }
+    
+    /**
+     * checks if path is a directory
+     * @param file
+     * @return true, if path is a directory
+     */
+    public static boolean is_directory(String path){
+        File f = new File(path);
+        return f.exists() && f.isDirectory();
+    }
+    
+    /**
+     * Creates a directory
+     * @param path 
+     */
+    public static void create_directory(String path){
+        File f = new File(path);
+        if(!f.exists()) f.mkdir();
+    }
 }
