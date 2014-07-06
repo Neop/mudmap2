@@ -25,6 +25,7 @@ package mudmap2.frontend;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -90,6 +91,8 @@ public final class Mainwindow extends JFrame {
         } catch(Exception e){
             System.out.println(e);
         }
+        
+        setMinimumSize(new Dimension(400, 300));
         
         // create GUI
         world_tabs = new HashMap<String, WorldTab>();
@@ -234,6 +237,8 @@ public final class Mainwindow extends JFrame {
      * @param world_name world name
      */
     public void open_world(String world_name){
+        setMinimumSize(new Dimension(500, 400));
+        
         if(!world_tabs.containsKey(world_name)){ 
             // open new tab
             WorldTab tab = new WorldTab(this, world_name, false);
@@ -248,11 +253,14 @@ public final class Mainwindow extends JFrame {
      * Closes all tabs
      */
     public void close_tabs(){
-        for(WorldTab tab: world_tabs.values()){
-            int ret = JOptionPane.showConfirmDialog(this, "Save world \"" + tab.get_world().get_name() + "\"?", "Save world", JOptionPane.YES_NO_OPTION);
-            if(ret == 0) tab.save(); // save world
-            tabbed_pane.remove(tab);
-        }
+        for(WorldTab tab: world_tabs.values()) tab.close();
+    }
+    
+    /**
+     * Removes a tab without saving and closing the world in WorldManager
+     */
+    public void remove_tab(WorldTab tab){
+        tabbed_pane.remove(tab);
     }
     
     /**
@@ -338,29 +346,15 @@ public final class Mainwindow extends JFrame {
     /**
      * The available worlds tab shows a list off all known worlds
      */
-    private static class AvailableWorldsTab extends JPanel {
+    private static final class AvailableWorldsTab extends JPanel {
 
         // Reference to the main window
-        Mainwindow mwin;
+        final Mainwindow mwin;
         
         public AvailableWorldsTab(Mainwindow _mwin) {
             mwin = _mwin;
-            
             WorldManager.read_world_list();
-            Set<String> worlds = WorldManager.get_world_list();
-            
-            setLayout(new GridLayout(worlds.size(), 2));
-            
-            for(final String world_name: worlds){
-                JButton b = new JButton(world_name);
-                b.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent arg0) {
-                        mwin.open_world(world_name);
-                    }
-                });
-                add(b);
-            }
+            update();
         }
         
         /**
@@ -370,7 +364,8 @@ public final class Mainwindow extends JFrame {
             Set<String> worlds = WorldManager.get_world_list();
             
             removeAll();
-            setLayout(new GridLayout(worlds.size(), 2));
+            // TODO: fix layout
+            setLayout(new GridLayout(0, 2));
             
             for(final String world_name: worlds){
                 JButton b = new JButton(world_name);
@@ -381,6 +376,17 @@ public final class Mainwindow extends JFrame {
                     }
                 });
                 add(b);
+                
+                JButton r = new JButton("Delete");
+                r.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        WorldManager.delete_world(world_name);
+                    }
+                });
+                add(r);
+                
+                mwin.pack();
             }
         }
     }

@@ -24,6 +24,7 @@
 
 package mudmap2.frontend;
 
+import mudmap2.frontend.dialog.PlaceSelectionDialog;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -60,6 +61,7 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
@@ -87,7 +89,7 @@ import mudmap2.frontend.dialog.PlaceRemoveDialog;
  * 
  * @author neop
  */
-class WorldTab extends JPanel {
+public class WorldTab extends JPanel {
     
     World world;
     
@@ -200,6 +202,18 @@ class WorldTab extends JPanel {
         // set default selected place to hte center place
         place_selected_x = (int) Math.round(get_cur_position().get_x());
         place_selected_y = (int) Math.round(get_cur_position().get_y());
+    }
+    
+    /**
+     * Closes the tab
+     */
+    public void close(){
+        if(parent instanceof Mainwindow){
+            int ret = JOptionPane.showConfirmDialog(this, "Save world \"" + get_world().get_name() + "\"?", "Save world", JOptionPane.YES_NO_OPTION);
+            if(ret == JOptionPane.YES_OPTION) save();
+            WorldManager.close_world(world.get_file());
+            ((Mainwindow) parent).remove_tab(this);
+        }
     }
     
     /**

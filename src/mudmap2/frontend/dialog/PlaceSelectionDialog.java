@@ -19,7 +19,7 @@
  *
  *  The PlaceSelectionDialog can be used to select a place or a position on a map
  */
-package mudmap2.frontend;
+package mudmap2.frontend.dialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,6 +31,7 @@ import javax.swing.JOptionPane;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
+import mudmap2.frontend.WorldTab;
 
 /**
  * The PlaceSelectionDialog can be used to select a place or a position on a map

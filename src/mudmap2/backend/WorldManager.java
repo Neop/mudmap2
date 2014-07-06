@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -107,7 +108,7 @@ public class WorldManager {
         File dir = new File(Paths.get_worlds_dir());
         File[] fileList = null;
         if(dir != null) fileList = dir.listFiles();
-        
+
         if(fileList != null){
             // find world files in file list
             for(File file : fileList){
@@ -239,4 +240,40 @@ public class WorldManager {
         
         create_world(name, path + name + file);
     }
+    
+    /**
+     * Deletes a worl, this can not be undone
+     * @param name 
+     */
+    public static void delete_world(String name){
+        String file = get_world_file(name);
+        
+        if(file != null && !file.isEmpty()){
+            if(loaded_worlds.containsKey(file))
+                JOptionPane.showMessageDialog(null, "Can't delete world \"" + name + "\", it is currently loaded", "Delete world", JOptionPane.INFORMATION_MESSAGE);
+            else {
+                int ret = JOptionPane.showConfirmDialog(null, "Do you want to delete \"" + name + "\"", "Delete world", JOptionPane.YES_NO_OPTION);
+                if(ret == JOptionPane.YES_OPTION){
+                    // delete world file
+                    try {
+                        (new File(file)).delete();
+                    } catch (Exception e) {}
+
+                    // delete world meta file
+                    try {
+                        (new File(file + "_meta")).delete();
+                    } catch (Exception e) {}    
+                }
+            }
+        }
+    }
+    
+    /**
+     * Removes a world from loaded worlds list
+     * @param file 
+     */
+    public static void close_world(String file){
+        loaded_worlds.remove(file);
+    }
+    
 }
