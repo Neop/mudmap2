@@ -24,7 +24,6 @@
 
 package mudmap2.frontend;
 
-import mudmap2.frontend.dialog.PlaceSelectionDialog;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -53,17 +52,21 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
@@ -83,6 +86,7 @@ import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
+import mudmap2.frontend.dialog.PlaceSelectionDialog;
 
 /**
  * A tab in the main window that displays a world
@@ -139,6 +143,7 @@ public class WorldTab extends JPanel {
      * Constructs the world tab, opens the world if necessary
      * @param _parent parent frame
      * @param _world_name name of the world
+     * @param _passive if true, everything, that modifies the world, is disabled
      */
     public WorldTab(JFrame _parent, String _world_name, boolean _passive){
         parent = _parent;
@@ -151,6 +156,7 @@ public class WorldTab extends JPanel {
      * Constructs the world tab, opens the world if necessary
      * @param _parent parent frame
      * @param _world world
+     * @param _passive if true, everything, that modifies the world, is disabled
      */
     public WorldTab(JFrame _parent, World _world, boolean _passive){
         parent = _parent;
@@ -412,7 +418,7 @@ public class WorldTab extends JPanel {
     }
     
     /**
-     * Pushes a new position on the position stack
+     * Pushes a new position on the position stack ("goto")
      * @param pos new position
      */
     public void push_position(WorldCoordinate pos){
@@ -1376,13 +1382,6 @@ public class WorldTab extends JPanel {
                     case KeyEvent.VK_HOME:
                         parent.goto_home();
                         break;
-                    
-                    // TODO: remove test
-                    case KeyEvent.VK_O:
-                        PlaceSelectionDialog sel;
-                        (sel = new PlaceSelectionDialog(parent.parent, parent.world, parent.get_cur_position(), true)).setVisible(true);
-                        if(sel.get_selected() && sel.get_selection() != null) System.out.println(sel.get_selection().get_name());
-                        break;
                 }
             }
 
@@ -1459,25 +1458,77 @@ public class WorldTab extends JPanel {
                 parent = _parent;
                 Layer layer = parent.world.get_layer(parent.get_cur_position().get_layer());
                 
-                Place place = null;
-                if(layer != null && (place = (Place) layer.get(px, py)) != null){ // if place exists
+                final Place place = (layer != null ? (Place) layer.get(px, py) : null);
+                if(layer != null && place != null){ // if place exists
                     JMenuItem mi_edit = new JMenuItem("Edit place");
                     mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
                     add(mi_edit);
+                    
                     JMenuItem mi_remove = new JMenuItem("Remove place");
                     mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
                     add(mi_remove);
+                    
                     JMenuItem mi_comments = new JMenuItem("Edit comments");
                     mi_comments.addActionListener(new PlaceCommentDialog(parent.parent, place));
                     add(mi_comments);
+                    
                     JMenuItem mi_area = new JMenuItem("Edit area");
                     if(place.get_area() != null) mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place.get_area()));
                     else mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
                     add(mi_area);
-                    JMenuItem mi_paths = new JMenuItem("Paths / Exits");
-                    add(mi_paths);
-                    JMenuItem mi_subareas = new JMenuItem("Sub-areas");
-                    add(mi_subareas);
+                    
+                    // -----
+                    JMenu m_paths = new JMenu("Paths / Exits");
+                    add(m_paths);
+                    
+                    // -----
+                    JMenu m_subareas = new JMenu("Sub-areas");
+                    m_subareas.setToolTipText("Not to be confused with areas, sub-areas usually connect a place to another layer of the map, eg. a building <-> rooms inside it");
+                    add(m_subareas);
+                    
+                    JMenuItem mi_sa_connect = new JMenuItem("Connect with place");
+                    m_subareas.add(mi_sa_connect);
+                    mi_sa_connect.setToolTipText("Connects another place to this place as sub-area");
+                    mi_sa_connect.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            PlaceSelectionDialog dlg = new PlaceSelectionDialog((JFrame) parent.parent, parent.world, parent.get_cur_position(), true);
+                            dlg.setVisible(true);
+                            Place child = dlg.get_selection();
+                            if(child != null && child != place){
+                                int ret = JOptionPane.showConfirmDialog(parent, "Connect \"" + child.get_name() + "\" to \"" + place.get_name() + "\"?", "Connect sub-area", JOptionPane.YES_NO_OPTION);
+                                if(ret == JOptionPane.YES_OPTION){
+                                    place.connect_child(child);
+                                    parent.redraw();
+                                }
+                            }
+                        }
+                    });
+                    
+                    JMenuItem mi_sa_new_layer = new JMenuItem("Add on new layer");
+                    mi_sa_new_layer.setToolTipText("Creates a new place on a new layer and connects it with \"" + place.get_name() + "\" as a sub-area");
+                    m_subareas.add(mi_sa_new_layer);
+                    
+                    HashSet<Place> children = place.get_children();
+                    if(!children.isEmpty()){
+                        JMenu m_sa_remove = new JMenu("Remove");
+                        m_subareas.add(m_sa_remove);
+                    
+                        for(Place child: children){
+                            JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.get_name());
+                            m_sa_remove.add(mi_sa_remove);
+                            mi_sa_remove.addActionListener(new RemoveSubAreaActionListener(place, child));
+                        }
+                        
+                        m_subareas.add(new JSeparator());
+                        
+                        for(Place child: children){
+                            JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.get_name());
+                            m_subareas.add(mi_sa_goto);
+                            mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
+                        }
+                    }
+                    
                 }  else { // if layer doesn't exist or no place exists at position x,y
                     JMenuItem mi_new = new JMenuItem("New place");
                     mi_new.addActionListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
@@ -1495,7 +1546,9 @@ public class WorldTab extends JPanel {
                 }
             }
             
-            // redraws the world tab after the popup is closed
+            /**
+             * redraws the world tab after the popup is closed
+             */
             private class TabContextPopMenuListener implements PopupMenuListener {
 
                 @Override
@@ -1514,7 +1567,41 @@ public class WorldTab extends JPanel {
                     parent.set_context_menu(false);
                     parent.redraw();
                 }
+            }
+            
+            /**
+             * Moves the map to the place, if action is performed
+             */
+            private class GotoPlaceActionListener implements ActionListener{
+                WorldTab worldtab;
+                Place place;
                 
+                public GotoPlaceActionListener(WorldTab _worldtab, Place _place){
+                    worldtab = _worldtab;
+                    place = _place;
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(place != null) worldtab.push_position(place.get_coordinate());
+                }
+            }
+            
+            /**
+             * Removes a subarea child from a place, if action performed
+             */
+            private class RemoveSubAreaActionListener implements ActionListener{
+                Place place, child;
+                
+                public RemoveSubAreaActionListener(Place _place, Place _child) {
+                    place = _place;
+                    child = _child;
+                }
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(place != null && child != null) place.remove_child(child);
+                }
             }
             
         }

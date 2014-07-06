@@ -143,8 +143,6 @@ public class WorldManager {
      * do this after writing the world files or new places won't appear in list
      */
     public static void write_world_list(){
-        System.out.println("a" + available_worlds.size());
-        
         final String file = Paths.get_worlds_dir() + "worlds";
         try {
             // open file

@@ -25,7 +25,6 @@ package mudmap2.backend;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 
 /**
@@ -45,7 +44,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     int rec_lvl_min, rec_lvl_max;
     RiskLevel risk_level;
     
-    TreeSet<Place> children, parents;
+    HashSet<Place> children, parents;
     HashSet<Path> connected_places;
     TreeMap<String, Boolean> flags;
     LinkedList<String> comments;
@@ -62,8 +61,9 @@ public class Place extends LayerElement implements Comparable<Place> {
     /**
      * Constructs new a place a certain position
      * @param _name name
-     * @param _pos_x x coordinate
-     * @param _pos_y y coordinate
+     * @param pos_x x coordinate
+     * @param pos_y y coordinate
+     * @param l
      */
     public Place(String _name, int pos_x, int pos_y, Layer l){
         super(pos_x, pos_y, l);
@@ -81,8 +81,8 @@ public class Place extends LayerElement implements Comparable<Place> {
         risk_level = null;
         rec_lvl_min = rec_lvl_max = -1;
         
-        children = new TreeSet<Place>();
-        parents = new TreeSet<Place>();
+        children = new HashSet<Place>();
+        parents = new HashSet<Place>();
         connected_places = new HashSet<Path>();
         flags = new TreeMap<String, Boolean>();
         comments = new LinkedList<String>();
@@ -110,6 +110,14 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public void set_name(String _name){
         name = _name;
+    }
+    
+    /**
+     * Gets the position of a place as world coordinate
+     * @return place coordinate
+     */
+    public WorldCoordinate get_coordinate(){
+        return new WorldCoordinate(get_layer().get_id(), get_x(), get_y());
     }
     
     /**
@@ -170,7 +178,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     
     /**
      * sets the risk level
-     * @param _risk_lvl 
+     * @param _risk_level
      */
     public void set_risk_level(RiskLevel _risk_level){
         risk_level = _risk_level;
@@ -178,6 +186,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     
     /**
      * Adds a comment at the end of the list
+     * @param comment
      */
     public void add_comment(String comment){
         comments.add(comment);
@@ -237,7 +246,8 @@ public class Place extends LayerElement implements Comparable<Place> {
     /**
      * Connects a place to another one tht is specified in path
      * If 'this place' is not in path an exception will be thrown
-     * @param p 
+     * @param path
+     * @return true, if successfully connected
      */
     public boolean connect_path(Path path) throws RuntimeException{
         Place[] pp = path.get_places();
@@ -319,10 +329,19 @@ public class Place extends LayerElement implements Comparable<Place> {
     }
     
     /**
+     * Removes a parent - child connection (subarea)
+     * @param child child to be removed
+     */
+    public void remove_child(Place child){
+        children.remove(child);
+        child.parents.remove(this);
+    }
+    
+    /**
      * Gets the child places / subareas
      * @return 
      */
-    public TreeSet<Place> get_children(){
+    public HashSet<Place> get_children(){
         return children;
     }
     
@@ -358,6 +377,11 @@ public class Place extends LayerElement implements Comparable<Place> {
         for(Place pl: parents) pl.children.remove(this);
     }
 
+    /**
+     * Removes the place from its layer
+     * @throws RuntimeException
+     * @throws mudmap2.backend.Layer.PlaceNotFoundException 
+     */
     public void remove() throws RuntimeException, PlaceNotFoundException {
         get_layer().get_world().remove(this);
     }
