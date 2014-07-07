@@ -63,6 +63,7 @@ public class World {
     // Coordinates of the home position
     WorldCoordinate home;
     
+    // ID and object
     HashMap<Integer, RiskLevel> risk_levels;
     HashMap<Integer, Area> areas;
     HashMap<Integer, Place> places;
@@ -71,6 +72,7 @@ public class World {
     /**
      * Loads a world from a file
      * @param _file world file
+     * @throws java.lang.Exception
      */
     public World(String _file) throws Exception{
         file = _file;
@@ -80,8 +82,8 @@ public class World {
     
     /**
      * Creates an empty world
-     * @param file new world file
-     * @param name name of the world
+     * @param _file new world file
+     * @param _name name of the world
      */
     public World(String _file, String _name){
         name = _name;
@@ -393,6 +395,7 @@ public class World {
      * Places a place in the world, the layer and coordinates described by the
      * place will be used
      * @param place new place
+     * @throws java.lang.Exception
      */
     public void put(Place place) throws Exception {
         // create layer, if it doesn't exist
@@ -411,6 +414,7 @@ public class World {
      * @param layer layer for the place to be put on, will be created if it doesnt exist
      * @param x x coordinate
      * @param y y coordinate
+     * @throws java.lang.Exception
      */
     public void put(Place place, int layer, int x, int y) throws Exception {
         // get layer, create a new one, if necessary
@@ -548,6 +552,7 @@ public class World {
     
     /**
      * Sets a new home position
+     * @param _home
      */
     public void set_home(WorldCoordinate _home){
         home = _home; System.out.println("dvad" + _home);
@@ -567,6 +572,22 @@ public class World {
      */
     public Color get_path_color_nstd(){
         return path_color_nstd;
+    }
+    
+    /**
+     * Sets the path color
+     * @param color new color
+     */
+    public void set_path_color(Color color){
+        path_color = color;
+    }
+    
+    /**
+     * Sets the color for paths that aren't predefined
+     * @param color 
+     */
+    public void set_path_color_nstd(Color color){
+        path_color_nstd = color;
     }
     
     /**
@@ -614,6 +635,25 @@ public class World {
      */
     public Collection<RiskLevel> get_risk_levels(){
         return risk_levels.values();
+    }
+    
+    /**
+     * Adds a risk level
+     * @param rl new risk level
+     */
+    public void add_risk_level(RiskLevel rl){
+        if(!risk_levels.containsKey(rl.get_id())) risk_levels.put(rl.get_id(), rl);
+    }
+    
+    /**
+     * Removes a risk level
+     * @param rl 
+     */
+    public void remove_risk_level(RiskLevel rl){
+        risk_levels.remove(rl.get_id());
+        // remove from places
+        for(Place place: places.values())
+            if(place.get_risk_level().get_id() == rl.get_id()) place.set_risk_level(null);
     }
 
 }

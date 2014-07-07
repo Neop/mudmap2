@@ -57,6 +57,7 @@ import mudmap2.Paths;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
+import mudmap2.frontend.dialog.EditWorldDialog;
 
 /**
  * Main class for the mudmap window
@@ -124,7 +125,7 @@ public final class Mainwindow extends JFrame {
         
         menu_file = new JMenu("File");
         menu_bar.add(menu_file);
-        menu_edit = new JMenu("Edit");
+        menu_edit = new JMenu("World"); // Edit renamed to World
         menu_bar.add(menu_edit);
         menu_help = new JMenu("Help");
         menu_bar.add(menu_help);
@@ -208,6 +209,15 @@ public final class Mainwindow extends JFrame {
         
         menu_edit_edit_world = new JMenuItem("Edit world");
         menu_edit.add(menu_edit_edit_world);
+        menu_edit_edit_world.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                WorldTab tab = get_selected_tab();
+                if(tab != null){
+                    (new EditWorldDialog(tab.parent, tab.get_world())).setVisible(true);
+                }
+            }
+        });
         
         menu_help_help = new JMenuItem("Help (online)");
         menu_help.add(menu_help_help);
@@ -258,6 +268,7 @@ public final class Mainwindow extends JFrame {
     
     /**
      * Removes a tab without saving and closing the world in WorldManager
+     * @param tab
      */
     public void remove_tab(WorldTab tab){
         tabbed_pane.remove(tab);
