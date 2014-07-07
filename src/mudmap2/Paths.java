@@ -36,8 +36,11 @@ import java.util.logging.Logger;
 public class Paths {
     
     static String user_data_dir;
-    final static String website_url = "http://mudmap.sf.net";
-    final static String manual_url = website_url;
+    public final static String website_url = "http://mudmap.sf.net";
+    public final static String manual_url = website_url;
+    
+    public static final String github_url = "https://github.com/Neop/mudmap2";
+    public static final String sourceforge_url = "http://sf.net/p/mudmap";
     
     /**
      * Gets the user data path
@@ -79,22 +82,6 @@ public class Paths {
     }
     
     /**
-     * Gets the website url
-     * @return manual url
-     */
-    public static String get_website_url(){
-        return website_url;
-    }
-    
-    /**
-     * Gets the online manual url
-     * @return manual url
-     */
-    public static String get_manual_url(){
-        return manual_url;
-    }
-    
-    /**
      * Tries to open the url in a web-browser
      * @param url 
      */
@@ -118,7 +105,7 @@ public class Paths {
     
     /**
      * checks if path is a file
-     * @param file
+     * @param path
      * @return true, if path is a file
      */
     public static boolean is_file(String path){
@@ -128,7 +115,7 @@ public class Paths {
     
     /**
      * checks if path is a directory
-     * @param file
+     * @param path
      * @return true, if path is a directory
      */
     public static boolean is_directory(String path){

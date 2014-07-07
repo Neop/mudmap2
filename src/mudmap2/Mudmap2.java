@@ -89,4 +89,12 @@ public class Mudmap2 {
     public static String get_version_state(){
         return version_state;
     }
+    
+    /**
+     * Gets the version number as a string
+     * @return major, minor and build version, separated b '.'
+     */
+    public static String get_version(){
+        return version_major + "." + version_minor + "." + version_build;
+    }
 }

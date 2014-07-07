@@ -4,14 +4,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/frontend/dialog/EditWorldDialog.java</file>
-            <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/frontend/dialog/PlaceRemoveDialog.java</file>
-            <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/frontend/dialog/PlaceSelectionDialog.java</file>
             <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/frontend/Mainwindow.java</file>
             <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/frontend/dialog/PlaceDialog.java</file>
-            <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/backend/WorldManager.java</file>
             <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/frontend/WorldTab.java</file>
-            <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/backend/World.java</file>
             <file>file:/home/neop/dev/mudmap/mudmap2/src/mudmap2/backend/Place.java</file>
         </group>
     </open-files>

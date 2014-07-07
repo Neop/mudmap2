@@ -56,6 +56,7 @@ import javax.swing.JTabbedPane;
 import mudmap2.Paths;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
+import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 
@@ -76,7 +77,7 @@ public final class Mainwindow extends JFrame {
     JMenu menu_file, menu_edit, menu_help;
     JMenuItem menu_file_new, menu_file_open, menu_file_save, menu_file_save_as_image, menu_file_quit;
     JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world;
-    JMenuItem menu_help_help, menu_help_info;
+    JMenuItem menu_help_help, menu_help_about;
     
     JTabbedPane tabbed_pane;
     AvailableWorldsTab available_worlds_tab;
@@ -224,12 +225,13 @@ public final class Mainwindow extends JFrame {
         menu_help_help.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                Paths.open_website(Paths.get_manual_url());
+                Paths.open_website(Paths.manual_url);
             }
         });
         
-        menu_help_info = new JMenuItem("Info");
-        menu_help.add(menu_help_info);
+        menu_help_about = new JMenuItem("About");
+        menu_help.add(menu_help_about);
+        menu_help_about.addActionListener((ActionListener) new AboutDialog(this));
         
         // ---
         read_config();
