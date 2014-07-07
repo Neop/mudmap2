@@ -67,6 +67,8 @@ public class PlaceDialog extends JDialog implements ActionListener {
     
     /**
      * Creates a dialog to modify a place
+     * @param _parent
+     * @param _world
      * @param _place existing place
      */
     public PlaceDialog(JFrame _parent, World _world, Place _place){
@@ -84,9 +86,11 @@ public class PlaceDialog extends JDialog implements ActionListener {
     
     /**
      * Creates a dialog to create a new place
+     * @param _parent
      * @param _layer layer
-     * @param px place coordinate x
-     * @param py place coordinate y
+     * @param _world
+     * @param _px place coordinate x
+     * @param _py place coordinate y
      */
     public PlaceDialog(JFrame _parent, World _world, Layer _layer, int _px, int _py){
         super(_parent, "Add place", true);
@@ -105,7 +109,7 @@ public class PlaceDialog extends JDialog implements ActionListener {
      * Creates the dialog
      */
     private void create(){
-        setLayout(new GridLayout(6, 2));
+        setLayout(new GridLayout(0, 2));
         
         add(new JLabel("Name"));
         if(place != null) textfield_name = new JTextField(place.get_name());
