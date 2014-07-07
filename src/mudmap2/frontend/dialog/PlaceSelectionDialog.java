@@ -71,7 +71,7 @@ public class PlaceSelectionDialog  extends JDialog implements ActionListener {
                 if(isVisible() && arg0.getSource() == optionPane && arg0.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)){
                     int value = ((Integer) optionPane.getValue()).intValue();
                     ok = value == JOptionPane.OK_OPTION;
-                    setVisible(false);
+                    dispose();
                     parent.repaint();
                 }
             }
