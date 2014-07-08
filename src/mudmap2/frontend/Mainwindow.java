@@ -29,6 +29,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -382,6 +383,7 @@ public final class Mainwindow extends JFrame {
             
             setLayout(new GridBagLayout());
             GridBagConstraints constraints = new GridBagConstraints();
+            constraints.insets = new Insets(2, 2, 2, 2);
             
             for(final String world_name: worlds){
                 JButton b = new JButton(world_name);
@@ -394,7 +396,7 @@ public final class Mainwindow extends JFrame {
                 constraints.gridx = 0;
                 constraints.gridy++;
                 constraints.weightx = 1.0;
-                constraints.fill = 1;
+                constraints.fill = GridBagConstraints.HORIZONTAL;
                 add(b, constraints);
                 
                 JButton r = new JButton("Delete");

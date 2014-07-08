@@ -83,6 +83,7 @@ import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
+import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
@@ -135,9 +136,12 @@ public class WorldTab extends JPanel {
     
     // true, if a context menu is shown (to disable forced focus)
     boolean is_context_menu_shown;
+    boolean forced_focus_disabled;
     
     // passive worldtabs don't modify the world
     final boolean passive;
+    
+    LinkedList<PlaceSelectionListener> place_selection_listeners;
 
     /**
      * Constructs the world tab, opens the world if necessary
@@ -170,6 +174,7 @@ public class WorldTab extends JPanel {
         tile_size = 120;
         
         is_context_menu_shown = false;
+        forced_focus_disabled = true;
 
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
@@ -208,6 +213,8 @@ public class WorldTab extends JPanel {
         // set default selected place to hte center place
         place_selected_x = (int) Math.round(get_cur_position().get_x());
         place_selected_y = (int) Math.round(get_cur_position().get_y());
+        
+        place_selection_listeners = new LinkedList<PlaceSelectionListener>();
     }
     
     /**
@@ -307,6 +314,7 @@ public class WorldTab extends JPanel {
         update_infobar();
         move_screen_to_place_selection();
         redraw();
+        call_place_selection_listeners();
     }
     
     /**
@@ -320,6 +328,7 @@ public class WorldTab extends JPanel {
         update_infobar();
         move_screen_to_place_selection();
         redraw();
+        call_place_selection_listeners();
     }
     
     /**
@@ -345,30 +354,28 @@ public class WorldTab extends JPanel {
      * Updates the infobar
      */
     private void update_infobar(){
-        if(get_place_selection_enabled()){
-            Layer layer = world.get_layer(get_cur_position().get_layer());
-            if(layer != null && layer.exist(get_place_selection_x(), get_place_selection_y())){
-                Place pl;
-                //try {
-                    pl = (Place) layer.get(get_place_selection_x(), get_place_selection_y());
-                    
-                    boolean has_area = pl.get_area() != null;
-                    boolean has_comments = pl.get_comments().size() != 0;
+        if(label_infobar != null ){ 
+            if(get_place_selection_enabled()){
+                Layer layer = world.get_layer(get_cur_position().get_layer());
+                if(layer != null && layer.exist(get_place_selection_x(), get_place_selection_y())){
+                    Place pl;
+                        pl = (Place) layer.get(get_place_selection_x(), get_place_selection_y());
 
-                    String infotext = pl.get_name();
-                    if(has_area || has_comments) infotext += " (";
-                    if(has_area) infotext += pl.get_area().get_name();
-                    if(has_comments) infotext += (has_area ? ", " : "") + pl.get_comments_string(false);
-                    if(has_area || has_comments) infotext += ")";
-                    
-                    label_infobar.setText(infotext);
-                /*} catch (PlaceNotFoundException ex) {
-                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                }*/
-            } else {
-                label_infobar.setText("");
-            }
-        } else label_infobar.setText("");
+                        boolean has_area = pl.get_area() != null;
+                        boolean has_comments = pl.get_comments().size() != 0;
+
+                        String infotext = pl.get_name();
+                        if(has_area || has_comments) infotext += " (";
+                        if(has_area) infotext += pl.get_area().get_name();
+                        if(has_comments) infotext += (has_area ? ", " : "") + pl.get_comments_string(false);
+                        if(has_area || has_comments) infotext += ")";
+
+                        label_infobar.setText(infotext);
+                } else {
+                    label_infobar.setText("");
+                }
+            } else label_infobar.setText("");
+        }
     }
     
     /**
@@ -419,10 +426,13 @@ public class WorldTab extends JPanel {
     
     /**
      * Pushes a new position on the position stack ("goto")
-     * @param pos new position
+     * @param _pos new position
      */
-    public void push_position(WorldCoordinate pos){
+    public void push_position(WorldCoordinate _pos){
+        WorldCoordinate pos = _pos.clone();
         positions.push(pos);
+        // move place selection
+        set_place_selection((int) pos.get_x(), (int) pos.get_y());
         while(positions.size() > history_max_length) positions.removeLast();
         redraw();
     }
@@ -539,6 +549,73 @@ public class WorldTab extends JPanel {
     }
     
     /**
+     * Manually disables the forced focus
+     * @param b 
+     */
+    public void set_forced_focus_disabled(boolean b){
+        forced_focus_disabled = b;
+    }
+    
+    /**
+     * Returns true, if forced focus is disabled manually
+     * @return 
+     */
+    public boolean get_forced_focus_disabled(){
+        return forced_focus_disabled;
+    }
+    
+    /**
+     * Returs true, if forced focus can be enabled
+     * @return 
+     */
+    private boolean get_forced_focus(){
+        return !forced_focus_disabled && !is_context_menu_shown;
+    }
+    
+    
+    /**
+     * Adds a place selection listener
+     * @param listener 
+     */
+    public void add_place_selection_listener(PlaceSelectionListener listener){
+        if(!place_selection_listeners.contains(listener))
+            place_selection_listeners.add(listener);
+    }
+    
+    /**
+     * Removes a place selection listener
+     * @param listener 
+     */
+    public void remove_place_selection_listener(PlaceSelectionListener listener){
+        place_selection_listeners.remove(listener);
+    }
+    
+    /**
+     * calls all place selection listeners
+     */
+    private void call_place_selection_listeners(){
+        Place place = get_place(get_place_selection_x(), get_place_selection_y());
+
+        if(place_selection_listeners != null) {
+            if(place != null) 
+                for(PlaceSelectionListener listener: place_selection_listeners) 
+                    listener.placeSelected(place);
+            else{
+                Layer layer = get_world().get_layer(get_cur_position().get_layer());
+                for(PlaceSelectionListener listener: place_selection_listeners) 
+                    listener.placeDeselected(layer, get_place_selection_x(), get_place_selection_y());
+            }
+        }
+    }
+    
+    public interface PlaceSelectionListener{
+        // gets called, when the place selection changes to another place
+        public void placeSelected(Place p);
+        // gets called, when the place selection changes to null
+        public void placeDeselected(Layer layer, int x, int y);
+    }
+    
+    /**
      * Loads the world meta data file
      * this file describes the coordinates of the last shown positions
      *
@@ -557,7 +634,7 @@ public class WorldTab extends JPanel {
                 while((line = reader.readLine()) != null){
                     line = line.trim();
 
-                    if(line.startsWith("//") || line.startsWith("#")) continue;
+                    if(line.isEmpty() || line.startsWith("//") || line.startsWith("#")) continue;
                     else if(line.startsWith("lp")){ // last position
                         String[] tmp = line.split(" ");
                         layer_id = Integer.parseInt(tmp[1]);
@@ -666,7 +743,7 @@ public class WorldTab extends JPanel {
                 public void focusGained(FocusEvent arg0) {}
                 @Override
                 public void focusLost(FocusEvent arg0) {
-                    if(!parent.has_context_menu()) requestFocusInWindow();
+                    if(parent.get_forced_focus()) requestFocusInWindow();
                 }
             });
             if(passive){
@@ -676,7 +753,12 @@ public class WorldTab extends JPanel {
                 addKeyListener(new TabKeyListener(this));
                 addMouseListener(new TabMouseListener());
             }
-            addMouseWheelListener(new TabMouseWheelListener());
+            addMouseWheelListener(new MouseWheelListener() {
+                @Override
+                public void mouseWheelMoved(MouseWheelEvent e) {
+                    parent.set_tile_size(parent.get_tile_size() + e.getWheelRotation());
+                }
+            });
             addMouseMotionListener(new TabMouseMotionListener());
         }
         
@@ -1230,15 +1312,6 @@ public class WorldTab extends JPanel {
             }
         }
         
-        private class TabMouseWheelListener implements MouseWheelListener {
-
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent arg0) {
-                parent.set_tile_size(parent.get_tile_size() + arg0.getWheelRotation());
-            }
-            
-        }
-        
         private class TabMouseMotionListener implements MouseMotionListener {
 
             @Override
@@ -1481,6 +1554,51 @@ public class WorldTab extends JPanel {
                     JMenu m_paths = new JMenu("Paths / Exits");
                     add(m_paths);
                     
+                    JMenu m_path_connect = new JMenu("Connect");
+                    m_paths.add(m_path_connect);
+                    m_path_connect.setToolTipText("Connect a path from this place to another one");
+                    
+                    JMenuItem mi_path_connect_select = new JMenuItem("Select");
+                    m_path_connect.add(mi_path_connect_select);
+                    mi_path_connect_select.setToolTipText("Select any place from the map");
+                    mi_path_connect_select.addActionListener(new PathConnectDialog(parent.parent, place));
+                    
+                    /*JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
+                    m_path_connect.add(mi_path_connect_neighbors);
+                    mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
+                    */
+                    m_path_connect.add(new JSeparator());
+
+                    LinkedList<Place> places = layer.get_neighbors(px, py, 1);
+                    for(Place neighbor: places){
+                        // only show, if no connection exists, yet
+                        if(place.get_paths(neighbor).isEmpty()){
+                            String dir1 = "", dir2 = "";
+
+                            if(neighbor.get_y() > place.get_y())
+                                {dir1 = "n"; dir2 = "s";}
+                            else if(neighbor.get_y() < place.get_y())
+                                {dir1 = "s"; dir2 = "n";}
+                            if(neighbor.get_x() > place.get_x())
+                                {dir1 = dir1 + "e"; dir2 = dir2 + "w";}
+                            else if(neighbor.get_x() < place.get_x())
+                                {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
+
+                            JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
+                            m_path_connect.add(mi_path_connect);
+                            mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                        }
+                    }
+
+                    m_paths.add(new JSeparator());
+
+                    for(Path path: place.get_paths()){
+                        Place other_place = path.get_other_place(place);
+                        JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.get_exit(place) + "] " + other_place);
+                        m_paths.add(mi_path_goto);
+                        mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
+                    }
+                    
                     // -----
                     JMenu m_subareas = new JMenu("Sub-areas");
                     m_subareas.setToolTipText("Not to be confused with areas, sub-areas usually connect a place to another layer of the map, eg. a building <-> rooms inside it");
@@ -1602,6 +1720,46 @@ public class WorldTab extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     if(place != null && child != null) place.remove_child(child);
                 }
+            }
+            
+            private class ConnectPathActionListener implements ActionListener{
+                
+                Place pl1, pl2;
+                String dir1, dir2;
+
+                public ConnectPathActionListener(Place _pl1, Place _pl2, String _dir1, String _dir2) {
+                    pl1 = _pl1;
+                    pl2 = _pl2;
+                    dir1 = _dir1;
+                    dir2 = _dir2;
+                }
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    pl1.connect_path(new Path(pl1, dir1, pl2, dir2));
+                }
+            }
+            
+            private class RemovePathActionListener implements ActionListener{
+
+                Place pl1, pl2;
+                String dir1, dir2;
+
+                public RemovePathActionListener(Place _pl1, Place _pl2, String _dir1, String _dir2) {
+                    pl1 = _pl1;
+                    pl2 = _pl2;
+                    dir1 = _dir1;
+                    dir2 = _dir2;
+                }
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        pl1.remove_path(dir1, pl2, dir2);
+                    } catch (Exception ex) {
+                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }   
             }
             
         }

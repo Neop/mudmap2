@@ -23,6 +23,7 @@
 
 package mudmap2.backend;
 
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 /**
@@ -56,6 +57,7 @@ public class Layer {
      * @param x x coordinate
      * @param y y coordinate
      * @param element new element
+     * @throws java.lang.Exception
      */
     public void put(LayerElement element, int x, int y) throws Exception{
         //element.get_layer().remove(element);
@@ -66,6 +68,7 @@ public class Layer {
     /**
      * Adds an element to the layer, uses the position of the element
      * @param element element to be added
+     * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
     public void put(LayerElement element) throws PlaceNotInsertedException {
         if(exist(element.get_x(), element.get_y())) throw new PlaceNotInsertedException(element.get_x(), element.get_y());
@@ -83,6 +86,27 @@ public class Layer {
     public LayerElement get(int x, int y){
         TreeMap<Integer, LayerElement> foo = elements.get(x);
         return foo != null ? foo.get(y) : null;
+    }
+    
+    /**
+     * Gets the surrounding places, without the center place
+     * @param _x center coordinate
+     * @param _y center coordinate
+     * @param distance maximum distance in each drection
+     * @return
+     */
+    public LinkedList<Place> get_neighbors(int _x, int _y, int distance){
+        LinkedList<Place> ret = new LinkedList<Place>();
+        distance = Math.abs(distance);
+        for(int x = -distance; x <= distance; ++x){
+            for(int y = -distance; y <= distance; ++y){
+                if(!(x == 0 && y == 0)){ // if not center place
+                    LayerElement el = get(_x + x, _y + y);
+                    if(el != null) ret.add((Place) el);
+                }
+            }
+        }
+        return ret;
     }
     
     /**
@@ -113,6 +137,7 @@ public class Layer {
     /**
      * Removes an element from the layer
      * @param element 
+     * @throws mudmap2.backend.Layer.PlaceNotFoundException 
      */
     public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException{
         if(element.get_layer() != this) throw new RuntimeException("Element not in this layer");

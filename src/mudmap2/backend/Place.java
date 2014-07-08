@@ -228,7 +228,7 @@ public class Place extends LayerElement implements Comparable<Place> {
         for(Path path: connected_places){
             if(path.get_exit(this).equals(dir)) return path;
         }
-        throw new RuntimeException();
+        return null;
     }
     
     /**
@@ -236,11 +236,30 @@ public class Place extends LayerElement implements Comparable<Place> {
      * @param place a place that this place is connected to
      * @return path to place, if available
      */
-    public Path get_path(Place place){
-        for(Path path: connected_places){
-            if(path.has_place(place)) return path;
+    public HashSet<Path> get_paths(Place place){
+        HashSet<Path> ret = new HashSet<Path>();
+        for(Path path: connected_places)
+            if(path.has_place(place)) ret.add(path);            
+        return ret;
+    }
+    
+    /**
+     * Removes a path
+     * @param dir1 exit direction on this place
+     * @param other connected place
+     * @param dir2 exit direction of the other place
+     * @throws java.lang.Exception if path could not be removed
+     */
+    public void remove_path(String dir1, Place other, String dir2) throws Exception{
+        boolean ok = false;
+        for(Path path: get_paths(other)){
+            if(path.get_exit(this).equals(dir1) && path.get_exit(other).equals(dir2)){
+                connected_places.remove(path);
+                other.connected_places.remove(path);
+                ok = true;
+            }
         }
-        throw new RuntimeException();
+        if(!ok) throw RuntimeException("Couldn't remove path connection (" + this + " [" + dir1 + "] - " + other + " [" + dir2 + "]), path not found");
     }
     
     /**
@@ -384,5 +403,9 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public void remove() throws RuntimeException, PlaceNotFoundException {
         get_layer().get_world().remove(this);
+    }
+
+    private Exception RuntimeException(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
