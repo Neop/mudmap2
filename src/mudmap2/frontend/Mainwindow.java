@@ -26,7 +26,8 @@ package mudmap2.frontend;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -99,7 +100,7 @@ public final class Mainwindow extends JFrame {
         // create GUI
         world_tabs = new HashMap<String, WorldTab>();
         
-        setSize(750, 500);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new WindowListener() {
             @Override
@@ -376,9 +377,11 @@ public final class Mainwindow extends JFrame {
         public void update(){
             Set<String> worlds = WorldManager.get_world_list();
             
+            // reset previously created tab
             removeAll();
-            // TODO: fix layout
-            setLayout(new GridLayout(0, 2));
+            
+            setLayout(new GridBagLayout());
+            GridBagConstraints constraints = new GridBagConstraints();
             
             for(final String world_name: worlds){
                 JButton b = new JButton(world_name);
@@ -388,7 +391,11 @@ public final class Mainwindow extends JFrame {
                         mwin.open_world(world_name);
                     }
                 });
-                add(b);
+                constraints.gridx = 0;
+                constraints.gridy++;
+                constraints.weightx = 1.0;
+                constraints.fill = 1;
+                add(b, constraints);
                 
                 JButton r = new JButton("Delete");
                 r.addActionListener(new ActionListener() {
@@ -397,9 +404,9 @@ public final class Mainwindow extends JFrame {
                         WorldManager.delete_world(world_name);
                     }
                 });
-                add(r);
-                
-                mwin.pack();
+                constraints.gridx = 1;
+                constraints.weightx = 0.0;
+                add(r, constraints);
             }
         }
     }
