@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -746,10 +745,10 @@ public class WorldTab extends JPanel {
                     if(parent.get_forced_focus()) requestFocusInWindow();
                 }
             });
-            if(passive){
-                addKeyListener(new TabKeyPassiveListener(this));
-                addMouseListener(new TabMousePassiveListener());
-            } else {
+               
+            addKeyListener(new TabKeyPassiveListener(this));
+            addMouseListener(new TabMousePassiveListener());
+            if(!passive){
                 addKeyListener(new TabKeyListener(this));
                 addMouseListener(new TabMouseListener());
             }
@@ -1271,10 +1270,7 @@ public class WorldTab extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent arg0) {
-                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
-                    // set place selection to coordinates if keyboard selection is enabled
-                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                } else if(arg0.getButton() == MouseEvent.BUTTON3){ // right click
+                if(arg0.getButton() == MouseEvent.BUTTON3){ // right click
                     // show context menu
                     TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
@@ -1330,8 +1326,7 @@ public class WorldTab extends JPanel {
             public void mouseMoved(MouseEvent arg0) {
                 parent.mouse_x_previous = arg0.getX();
                 parent.mouse_y_previous = arg0.getY();
-            }
-            
+            }   
         }
         
         private class TabKeyListener implements KeyListener {
@@ -1354,41 +1349,6 @@ public class WorldTab extends JPanel {
                             TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
                             context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
                         }
-                        break;
-                        
-                    // zoom the map
-                    case KeyEvent.VK_PLUS:
-                    case KeyEvent.VK_SUBTRACT:
-                    case KeyEvent.VK_PAGE_UP:
-                        parent.tile_size_increment();
-                        break;
-                    case KeyEvent.VK_ADD:
-                    case KeyEvent.VK_MINUS:
-                    case KeyEvent.VK_PAGE_DOWN:
-                        parent.tile_size_decrement();
-                        break;
-
-                    // enable / disable place selection
-                    case KeyEvent.VK_P:
-                        parent.set_place_selection_toggle();
-                        break;
-
-                    // shift place selection - wasd
-                    case KeyEvent.VK_UP:
-                    case KeyEvent.VK_W:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
-                        break;
-                    case KeyEvent.VK_LEFT:
-                    case KeyEvent.VK_A:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
-                        break;
-                    case KeyEvent.VK_DOWN:
-                    case KeyEvent.VK_S:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                    case KeyEvent.VK_D:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
                         break;
 
                     // edit / add place
@@ -1449,11 +1409,6 @@ public class WorldTab extends JPanel {
                         else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
                         // show dialog
                         if(dlg != null) dlg.setVisible(true);
-                        break;
-                    // goto home
-                    case KeyEvent.VK_H:
-                    case KeyEvent.VK_HOME:
-                        parent.goto_home();
                         break;
                 }
             }
