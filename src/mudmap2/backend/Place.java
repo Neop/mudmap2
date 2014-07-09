@@ -259,7 +259,7 @@ public class Place extends LayerElement implements Comparable<Place> {
                 ok = true;
             }
         }
-        if(!ok) throw RuntimeException("Couldn't remove path connection (" + this + " [" + dir1 + "] - " + other + " [" + dir2 + "]), path not found");
+        if(!ok) throw new RuntimeException("Couldn't remove path connection (" + this + " [" + dir1 + "] - " + other + " [" + dir2 + "]), path not found");
     }
     
     /**
@@ -403,9 +403,5 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public void remove() throws RuntimeException, PlaceNotFoundException {
         get_layer().get_world().remove(this);
-    }
-
-    private Exception RuntimeException(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
