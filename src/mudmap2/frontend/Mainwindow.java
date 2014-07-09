@@ -43,8 +43,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.text.Collator;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -376,7 +377,9 @@ public final class Mainwindow extends JFrame {
          * Updates the tab (call this after creating a new world)
          */
         public void update(){
-            Set<String> worlds = WorldManager.get_world_list();
+            // get and sort world names (can't use String array here :C)
+            Object[] worlds = WorldManager.get_world_list().toArray();
+            Arrays.sort(worlds, Collator.getInstance());
             
             // reset previously created tab
             removeAll();
@@ -385,12 +388,12 @@ public final class Mainwindow extends JFrame {
             GridBagConstraints constraints = new GridBagConstraints();
             constraints.insets = new Insets(2, 2, 2, 2);
             
-            for(final String world_name: worlds){
-                JButton b = new JButton(world_name);
+            for(final Object world_name: worlds){
+                JButton b = new JButton((String) world_name);
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        mwin.open_world(world_name);
+                        mwin.open_world((String) world_name);
                     }
                 });
                 constraints.gridx = 0;
@@ -403,7 +406,7 @@ public final class Mainwindow extends JFrame {
                 r.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        WorldManager.delete_world(world_name);
+                        WorldManager.delete_world((String) world_name);
                     }
                 });
                 constraints.gridx = 1;
