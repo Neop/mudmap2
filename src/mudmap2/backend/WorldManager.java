@@ -153,7 +153,8 @@ public class WorldManager {
             outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
             
             for(Entry<String, String> w: available_worlds.entrySet()){
-                if(Paths.file_exists(w.getValue())){
+                // check whether the file name in file equals the name in the list
+                if(read_world_name(w.getValue()).equals(w.getKey())){
                     outstream.println("n " + w.getKey());
                     String w_file = w.getValue();
                     outstream.println("f " + w_file);
@@ -264,6 +265,35 @@ public class WorldManager {
                 }
             }
         }
+    }
+    
+    /**
+     * Opens a world file and reads the world name specified in it
+     * @param file world file
+     * @return 
+     */
+    private static String read_world_name(String file){
+        String ret = "";
+        
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(Paths.get_available_worlds_file()));
+            
+            String line;
+            try {
+                while((line = reader.readLine()) != null){
+                    line = line.trim();
+                    
+                    if(line.startsWith("wname")){ // world name
+                        ret = line.substring(6).trim();
+                        break;
+                    }
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (FileNotFoundException ex) {} // no output needed
+        
+        return ret;
     }
     
     /**
