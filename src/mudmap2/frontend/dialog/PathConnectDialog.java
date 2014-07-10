@@ -31,7 +31,6 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -41,26 +40,28 @@ import mudmap2.backend.Place;
 import mudmap2.frontend.WorldTab;
 
 /**
- *
+ * The PathConnectDialog select a second place and lets the user enter the two
+ * exit directions
  * @author neop
  */
-public class PathConnectDialog extends JDialog implements ActionListener{
+public class PathConnectDialog extends ActionDialog{
 
-    JFrame parent;
+    JFrame parent; // needed in this case by WorldTab
     Place place, other;
     
     WorldTab worldtab;
     JLabel label_other_place;
     JComboBox<String> direction_combo_box1, direction_combo_box2;
     
-    final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw"};
-    
     public PathConnectDialog(JFrame _parent, Place _place) {
         super(_parent, "Connect path to " + _place.get_name(), true);
         parent = _parent;
         place = _place;
         other = null;
-        
+    }
+    
+    @Override
+    void create(){
         setMinimumSize(new Dimension(600, 600));
         setLayout(new GridBagLayout());
         
@@ -87,7 +88,7 @@ public class PathConnectDialog extends JDialog implements ActionListener{
         add(new JLabel(place.get_name()), constraints);
         
         LinkedList<String> directions1 = new LinkedList<String>();
-        for(String s: directions)
+        for(String s: Path.directions)
             if(place.get_exit(s) == null) directions1.add(s);
         
         constraints.gridx = 1;
@@ -149,6 +150,7 @@ public class PathConnectDialog extends JDialog implements ActionListener{
         });
         
         pack();
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
     /**
@@ -157,7 +159,7 @@ public class PathConnectDialog extends JDialog implements ActionListener{
     private void update_direction_combo_box2() {
         direction_combo_box2.removeAllItems();
         if(other != null)
-            for(String s: directions)
+            for(String s: Path.directions)
                 if(other.get_exit(s) == null) direction_combo_box2.addItem(s);
     }    
     
@@ -181,10 +183,4 @@ public class PathConnectDialog extends JDialog implements ActionListener{
             parent.repaint();
         }
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        setVisible(true);
-    }
-
 }

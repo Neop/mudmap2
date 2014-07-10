@@ -21,11 +21,8 @@
  */
 package mudmap2.frontend.dialog;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import mudmap2.backend.Place;
@@ -37,7 +34,7 @@ import mudmap2.frontend.WorldTab;
  * The PlaceSelectionDialog can be used to select a place or a position on a map
  * @author neop
  */
-public class PlaceSelectionDialog  extends JDialog implements ActionListener {
+public class PlaceSelectionDialog extends ActionDialog {
     
     World world;
     boolean layer_change_allowed;
@@ -45,40 +42,20 @@ public class PlaceSelectionDialog  extends JDialog implements ActionListener {
     // true, if ok the button was clicked
     boolean ok; 
     
+    WorldCoordinate default_coordinate;
+    
     JFrame parent;
     JOptionPane optionPane;
     
     WorldTab worldtab;
     
-    public PlaceSelectionDialog(JFrame _parent, World _world, WorldCoordinate default_coordinate, boolean _layer_change_allowed) {
+    public PlaceSelectionDialog(JFrame _parent, World _world, WorldCoordinate _default_coordinate, boolean _layer_change_allowed) {
         super(_parent, "Select a place - " + _world.get_name(), true);
         parent = _parent;
         world = _world;
         
-        optionPane = new JOptionPane();
-        optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
-        
-        setContentPane(optionPane);
-        optionPane.setMessage(worldtab = new WorldTab(parent, world, true));
-        worldtab.set_place_selection_forced(true);
-        worldtab.reset_history(default_coordinate.clone());
-        
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        
-        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent arg0) {
-                if(isVisible() && arg0.getSource() == optionPane && arg0.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)){
-                    int value = ((Integer) optionPane.getValue()).intValue();
-                    ok = value == JOptionPane.OK_OPTION;
-                    dispose();
-                    parent.repaint();
-                }
-            }
-        });
-        
-        setSize(500, 500);
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
+        default_coordinate = _default_coordinate;
+        layer_change_allowed = _layer_change_allowed;
     }
     
     /**
@@ -104,9 +81,32 @@ public class PlaceSelectionDialog  extends JDialog implements ActionListener {
     public boolean get_selected(){
         return ok;
     }
-    
+
     @Override
-    public void actionPerformed(ActionEvent arg0) {
-        setVisible(true);
+    void create() {
+        optionPane = new JOptionPane();
+        optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
+        
+        setContentPane(optionPane);
+        optionPane.setMessage(worldtab = new WorldTab(parent, world, true));
+        worldtab.set_place_selection_forced(true);
+        worldtab.reset_history(default_coordinate.clone());
+        
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        
+        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent arg0) {
+                if(isVisible() && arg0.getSource() == optionPane && arg0.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)){
+                    int value = ((Integer) optionPane.getValue()).intValue();
+                    ok = value == JOptionPane.OK_OPTION;
+                    dispose();
+                    parent.repaint();
+                }
+            }
+        });
+        
+        setSize(500, 500);
+        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
     }
 }

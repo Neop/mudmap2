@@ -83,6 +83,7 @@ import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.PathConnectDialog;
+import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
@@ -1266,6 +1267,22 @@ public class WorldTab extends JPanel {
 
         }
         
+        /**
+         * This listener only contains actions, that don't modify the world
+         */
+        private class TabMousePassiveListener extends TabMouseListener implements MouseListener {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
+                    // set place selection to coordinates if keyboard selection is enabled
+                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                }
+            }
+        }
+        
+        /**
+         * This listener contains actions, that modify the world
+         */
         private class TabMouseListener implements MouseListener {
 
             @Override
@@ -1297,17 +1314,7 @@ public class WorldTab extends JPanel {
                 parent.mouse_in_panel = false;
             }
         }
-        
-        private class TabMousePassiveListener extends TabMouseListener implements MouseListener {
-            @Override
-            public void mouseClicked(MouseEvent arg0) {
-                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
-                    // set place selection to coordinates if keyboard selection is enabled
-                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                }
-            }
-        }
-        
+                
         private class TabMouseMotionListener implements MouseMotionListener {
 
             @Override
@@ -1329,6 +1336,64 @@ public class WorldTab extends JPanel {
             }   
         }
         
+        /**
+         * This listener only contains actions, that don't modify the world
+         */
+        private class TabKeyPassiveListener extends TabKeyListener {
+            public TabKeyPassiveListener(WorldPanel parent){
+                super(parent);
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                switch(arg0.getKeyCode()){
+                    // zoom the map
+                    case KeyEvent.VK_PLUS:
+                    case KeyEvent.VK_SUBTRACT:
+                    case KeyEvent.VK_PAGE_UP:
+                        parent.tile_size_increment();
+                        break;
+                    case KeyEvent.VK_ADD:
+                    case KeyEvent.VK_MINUS:
+                    case KeyEvent.VK_PAGE_DOWN:
+                        parent.tile_size_decrement();
+                        break;
+
+                    // enable / disable place selection
+                    case KeyEvent.VK_P:
+                        parent.set_place_selection_toggle();
+                        break;
+
+                    // shift place selection - wasd
+                    case KeyEvent.VK_UP:
+                    case KeyEvent.VK_W:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
+                        break;
+                    case KeyEvent.VK_LEFT:
+                    case KeyEvent.VK_A:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                    case KeyEvent.VK_S:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                    case KeyEvent.VK_D:
+                        if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
+                        break;
+                        
+                    // goto home
+                    case KeyEvent.VK_H:
+                    case KeyEvent.VK_HOME:
+                        parent.goto_home();
+                        break;
+                }
+            }
+        }
+        
+        /**
+         * This listener contains actions, that modify the world
+         */
         private class TabKeyListener implements KeyListener {
             
             WorldPanel worldpanel;
@@ -1418,58 +1483,6 @@ public class WorldTab extends JPanel {
             
         }
         
-        private class TabKeyPassiveListener extends TabKeyListener {
-            public TabKeyPassiveListener(WorldPanel parent){
-                super(parent);
-            }
-            
-            @Override
-            public void keyPressed(KeyEvent arg0) {
-                switch(arg0.getKeyCode()){
-                    // zoom the map
-                    case KeyEvent.VK_PLUS:
-                    case KeyEvent.VK_SUBTRACT:
-                    case KeyEvent.VK_PAGE_UP:
-                        parent.tile_size_increment();
-                        break;
-                    case KeyEvent.VK_ADD:
-                    case KeyEvent.VK_MINUS:
-                    case KeyEvent.VK_PAGE_DOWN:
-                        parent.tile_size_decrement();
-                        break;
-
-                    // enable / disable place selection
-                    case KeyEvent.VK_P:
-                        parent.set_place_selection_toggle();
-                        break;
-
-                    // shift place selection - wasd
-                    case KeyEvent.VK_UP:
-                    case KeyEvent.VK_W:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
-                        break;
-                    case KeyEvent.VK_LEFT:
-                    case KeyEvent.VK_A:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
-                        break;
-                    case KeyEvent.VK_DOWN:
-                    case KeyEvent.VK_S:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                    case KeyEvent.VK_D:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
-                        break;
-                        
-                    // goto home
-                    case KeyEvent.VK_H:
-                    case KeyEvent.VK_HOME:
-                        parent.goto_home();
-                        break;
-                }
-            }
-        }
-        
         // constructs the context menu (on right click)
         private static class TabContextMenu extends JPopupMenu {
             
@@ -1505,7 +1518,7 @@ public class WorldTab extends JPanel {
                     else mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
                     add(mi_area);
                     
-                    // -----
+                    // ------------- Paths ------------------
                     JMenu m_paths = new JMenu("Paths / Exits");
                     add(m_paths);
                     
@@ -1518,43 +1531,59 @@ public class WorldTab extends JPanel {
                     mi_path_connect_select.setToolTipText("Select any place from the map");
                     mi_path_connect_select.addActionListener(new PathConnectDialog(parent.parent, place));
                     
-                    /*JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
+                    JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
                     m_path_connect.add(mi_path_connect_neighbors);
                     mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
-                    */
-                    m_path_connect.add(new JSeparator());
+                    mi_path_connect_neighbors.addActionListener(new PathConnectNeighborsDialog(parent.parent, place));
 
                     LinkedList<Place> places = layer.get_neighbors(px, py, 1);
-                    for(Place neighbor: places){
-                        // only show, if no connection exists, yet
-                        if(place.get_paths(neighbor).isEmpty()){
-                            String dir1 = "", dir2 = "";
+                    if(!places.isEmpty()){
+                        m_path_connect.add(new JSeparator());
 
-                            if(neighbor.get_y() > place.get_y())
-                                {dir1 = "n"; dir2 = "s";}
-                            else if(neighbor.get_y() < place.get_y())
-                                {dir1 = "s"; dir2 = "n";}
-                            if(neighbor.get_x() > place.get_x())
-                                {dir1 = dir1 + "e"; dir2 = dir2 + "w";}
-                            else if(neighbor.get_x() < place.get_x())
-                                {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
+                        for(Place neighbor: places){
+                            // only show, if no connection exists, yet
+                            if(place.get_paths(neighbor).isEmpty()){
+                                String dir1 = "", dir2 = "";
 
-                            JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
-                            m_path_connect.add(mi_path_connect);
-                            mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                                if(neighbor.get_y() > place.get_y())
+                                    {dir1 = "n"; dir2 = "s";}
+                                else if(neighbor.get_y() < place.get_y())
+                                    {dir1 = "s"; dir2 = "n";}
+                                if(neighbor.get_x() > place.get_x())
+                                    {dir1 = dir1 + "e"; dir2 = dir2 + "w";}
+                                else if(neighbor.get_x() < place.get_x())
+                                    {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
+
+                                JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
+                                m_path_connect.add(mi_path_connect);
+                                mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                            }
                         }
                     }
+                    
+                    // get all connected places
+                    HashSet<Path> paths = place.get_paths();
+                    
+                    if(!paths.isEmpty()){
+                        JMenu m_path_remove = new JMenu("Remove");
+                        m_paths.add(m_path_remove);
+                        m_path_remove.setToolTipText("Remove a path");
+                        
+                        m_paths.add(new JSeparator());
 
-                    m_paths.add(new JSeparator());
-
-                    for(Path path: place.get_paths()){
-                        Place other_place = path.get_other_place(place);
-                        JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.get_exit(place) + "] " + other_place);
-                        m_paths.add(mi_path_goto);
-                        mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
+                        for(Path path: paths){
+                            Place other_place = path.get_other_place(place);
+                            JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.get_exit(place) + "] " + other_place);
+                            m_paths.add(mi_path_goto);
+                            mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
+                            
+                            JMenuItem mi_path_remove = new JMenuItem("Remove [" + path.get_exit(place) + "] " + other_place);
+                            m_path_remove.add(mi_path_remove);
+                            mi_path_remove.addActionListener(new RemovePathActionListener(path));
+                        }
                     }
                     
-                    // -----
+                    // ------------- sub-areas ------------------
                     JMenu m_subareas = new JMenu("Sub-areas");
                     m_subareas.setToolTipText("Not to be confused with areas, sub-areas usually connect a place to another layer of the map, eg. a building <-> rooms inside it");
                     add(m_subareas);
@@ -1677,6 +1706,9 @@ public class WorldTab extends JPanel {
                 }
             }
             
+            /**
+             * Connects a new path, if called
+             */
             private class ConnectPathActionListener implements ActionListener{
                 
                 Place pl1, pl2;
@@ -1695,25 +1727,19 @@ public class WorldTab extends JPanel {
                 }
             }
             
+            /**
+             * removes a path, if called
+             */
             private class RemovePathActionListener implements ActionListener{
+                Path path;
 
-                Place pl1, pl2;
-                String dir1, dir2;
-
-                public RemovePathActionListener(Place _pl1, Place _pl2, String _dir1, String _dir2) {
-                    pl1 = _pl1;
-                    pl2 = _pl2;
-                    dir1 = _dir1;
-                    dir2 = _dir2;
+                private RemovePathActionListener(Path _path) {
+                    path = _path;
                 }
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        pl1.remove_path(dir1, pl2, dir2);
-                    } catch (Exception ex) {
-                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    path.remove();
                 }   
             }
             

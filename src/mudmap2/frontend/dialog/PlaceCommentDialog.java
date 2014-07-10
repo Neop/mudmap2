@@ -22,10 +22,8 @@
 package mudmap2.frontend.dialog;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
@@ -35,19 +33,20 @@ import mudmap2.backend.Place;
  * The PlaceCommentDialog modifies the comments of a place
  * @author neop
  */
-public class PlaceCommentDialog extends JDialog implements ActionListener {
+public class PlaceCommentDialog extends ActionDialog {
 
     Place place;
     
-    JFrame parent;
     JTextArea commentarea;
     JOptionPane optionPane;
     
     public PlaceCommentDialog(JFrame _parent, Place _place) {
         super(_parent, "Comments - " + _place.get_name(), true);
-        parent = _parent;
         place = _place;
-        
+    }
+
+    @Override
+    void create() {
         optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.YES_NO_OPTION);
         
@@ -68,18 +67,13 @@ public class PlaceCommentDialog extends JDialog implements ActionListener {
                             for(String line: comments.split("\n"))
                                 place.add_comment(line);
                     }
-                    setVisible(false);
-                    parent.repaint();
+                    dispose();
+                    getParent().repaint();
                 }
             }
         });
         
         pack();
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
-    }
-    
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        setVisible(true);
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
 }

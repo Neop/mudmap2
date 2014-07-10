@@ -222,7 +222,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     /**
      * Gets the path connected to an exit
      * @param dir exit direction
-     * @return path connected to that exit
+     * @return path connected to that exit or null
      */
     public Path get_exit(String dir){
         for(Path path: connected_places){
@@ -234,7 +234,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     /**
      * Gets the path to a place, if available
      * @param place a place that this place is connected to
-     * @return path to place, if available
+     * @return paths to place or empty set
      */
     public HashSet<Path> get_paths(Place place){
         HashSet<Path> ret = new HashSet<Path>();
@@ -260,6 +260,15 @@ public class Place extends LayerElement implements Comparable<Place> {
             }
         }
         if(!ok) throw new RuntimeException("Couldn't remove path connection (" + this + " [" + dir1 + "] - " + other + " [" + dir2 + "]), path not found");
+    }
+    
+    /**
+     * Removes a path
+     * @param path 
+     */
+    public void remove_path(Path path){
+        connected_places.remove(path);
+        path.get_other_place(this).connected_places.remove(path);
     }
     
     /**

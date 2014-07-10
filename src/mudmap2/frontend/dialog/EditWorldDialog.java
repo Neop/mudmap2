@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -46,9 +45,8 @@ import mudmap2.frontend.GUIElement.ColorChooserButton;
  * risk levels
  * @author neop
  */
-public class EditWorldDialog extends JDialog implements ActionListener {
+public class EditWorldDialog extends ActionDialog {
 
-    JFrame parent;
     World world;
     
     JTextField textfield_name;
@@ -60,16 +58,18 @@ public class EditWorldDialog extends JDialog implements ActionListener {
     
     public EditWorldDialog(JFrame _parent, World _world) {
         super(_parent, "Edit world - " + _world.get_name(), true);
-        parent = _parent;
         world = _world;
-        
+    }
+    
+    @Override
+    void create() {
         setLayout(new GridLayout(0, 2));
         
         add(new JLabel("World name"));
         add(textfield_name = new JTextField(world.get_name()));
         
         add(new JLabel("Path color"));
-        add(colorchooser_path = new ColorChooserButton(parent, world.get_path_color()));
+        add(colorchooser_path = new ColorChooserButton(getParent(), world.get_path_color()));
         
         add(new JLabel("Risk Levels"));
         add(new JLabel());
@@ -78,13 +78,13 @@ public class EditWorldDialog extends JDialog implements ActionListener {
         for(RiskLevel rl: world.get_risk_levels()){
             JTextField tf_rl_name = new JTextField(rl.get_description());
             add(tf_rl_name);
-            ColorChooserButton colorchooser = new ColorChooserButton(parent, rl.get_color());
+            ColorChooserButton colorchooser = new ColorChooserButton(getParent(), rl.get_color());
             add(colorchooser);
             risklevel_colors.put(rl, new Pair<JTextField, ColorChooserButton>(tf_rl_name, colorchooser));
         }
         
         add(risklevel_new_name = new JTextField());
-        add(risklevel_new_color = new ColorChooserButton(parent));
+        add(risklevel_new_color = new ColorChooserButton(getParent()));
         
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel);
@@ -105,16 +105,8 @@ public class EditWorldDialog extends JDialog implements ActionListener {
             }
         });
         
-        // listener for escape key
-        getRootPane().registerKeyboardAction(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                dispose();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        
         pack();
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
     /**
@@ -145,12 +137,7 @@ public class EditWorldDialog extends JDialog implements ActionListener {
                 world.add_risk_level(new RiskLevel(name_new, risklevel_new_color.get_color()));
             }
         }
-        parent.repaint();
-    }
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        setVisible(true);
+        getParent().repaint();
     }
     
 }

@@ -26,7 +26,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import mudmap2.Paths;
@@ -36,7 +35,7 @@ import mudmap2.frontend.GUIElement.LinkLabel;
  * The Help->About dialog, it shows information about the program
  * @author neop
  */
-public class AboutDialog extends JDialog implements ActionListener {
+public class AboutDialog extends ActionDialog {
 
     /**
      * Creates an about dialog
@@ -44,8 +43,11 @@ public class AboutDialog extends JDialog implements ActionListener {
      */
     public AboutDialog(JFrame parent){
         super(parent, "bout MUD Map", true);
-        
-        setLayout(new GridLayout(0, 1));
+    }
+
+    @Override
+    void create() {
+                setLayout(new GridLayout(0, 1));
         
         add(new JLabel("MUD Map v2"));
         add(new JLabel("Version " + mudmap2.Mudmap2.get_version() + " " + mudmap2.Mudmap2.get_version_state()));
@@ -65,12 +67,6 @@ public class AboutDialog extends JDialog implements ActionListener {
         });
         
         pack();
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        setVisible(true);
-        System.out.println("dfdsv");
-    }        
 }

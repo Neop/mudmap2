@@ -29,6 +29,9 @@ package mudmap2.backend;
  * @author neop
  */
 public class Path {
+    
+    public static final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw"};
+    
     private Place[] places;
     private String[] exitdirections;
     
@@ -105,8 +108,45 @@ public class Path {
     /**
      * Removes this path from both places
      */
-    void remove() {
+    public void remove() {
         places[0].connected_places.remove(this);
         places[1].connected_places.remove(this);
+    }
+    
+    /**
+     * Gets the opposite direction, eg. n - s or ne - sw
+     * @param dir
+     * @return opposite direction or ""
+     */
+    public static String get_opposite_dir(String dir){
+        String ret = "";
+        if(dir.equals("n")) ret = "s";
+        else if(dir.equals("s")) ret = "n";
+        
+        else if(dir.equals("e")) ret = "w";
+        else if(dir.equals("w")) ret = "e";
+        
+        else if(dir.equals("se")) ret = "nw";
+        else if(dir.equals("sw")) ret = "ne";
+        
+        else if(dir.equals("ne")) ret = "sw";
+        else if(dir.equals("nw")) ret = "se";
+        return ret;
+    }
+    
+    /**
+     * Gets the direcion of the relative coordinates
+     * @param x coordinate relative to a place
+     * @param y coordinate relative to a place
+     * @return direction or "" if x == y == 0
+     */
+    public static String get_dir(int x, int y){
+        String ret = "";
+        if(y > 0) ret = "n";
+        else if(y < 0) ret = "s";
+        
+        if(x > 0) ret = ret + "e";
+        else if(x < 0) ret = ret + "w";
+        return ret;
     }
 }

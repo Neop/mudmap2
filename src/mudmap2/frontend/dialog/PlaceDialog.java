@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
@@ -49,9 +48,8 @@ import mudmap2.backend.World;
  * 
  * @author neop
  */
-public class PlaceDialog extends JDialog implements ActionListener {
+public class PlaceDialog extends ActionDialog {
 
-    JFrame parent;
     World world;
     Place place;
     Layer layer;
@@ -74,14 +72,11 @@ public class PlaceDialog extends JDialog implements ActionListener {
     public PlaceDialog(JFrame _parent, World _world, Place _place){
         super(_parent, "Edit place - " + _place.get_name() + " (ID: " + _place.get_id() + ")", true);
         
-        parent = _parent;
         world = _world;
         place = _place;
         layer = place.get_layer();
         px = place.get_x();
         py = place.get_y();
-        
-        create();
     }
     
     /**
@@ -95,20 +90,18 @@ public class PlaceDialog extends JDialog implements ActionListener {
     public PlaceDialog(JFrame _parent, World _world, Layer _layer, int _px, int _py){
         super(_parent, "Add place", true);
         
-        parent = _parent;
         world = _world;
         place = null;
         layer = _layer;
         px = _px;
         py = _py;
-        
-        create();
     }
     
     /**
      * Creates the dialog
      */
-    private void create(){
+    @Override
+    void create(){
         setLayout(new GridLayout(0, 2));
         
         add(new JLabel("Name"));
@@ -169,7 +162,7 @@ public class PlaceDialog extends JDialog implements ActionListener {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
         
         pack();
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
     /**
@@ -192,12 +185,7 @@ public class PlaceDialog extends JDialog implements ActionListener {
                 Logger.getLogger(PlaceDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        parent.repaint();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        setVisible(true);
+        getParent().repaint();
     }
     
 }

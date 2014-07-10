@@ -27,7 +27,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -41,7 +40,7 @@ import mudmap2.frontend.GUIElement.ColorChooserButton;
  * The area dialog is used to create, modify and remove areas
  * @author neop
  */
-public class AreaDialog extends JDialog implements ActionListener {
+public class AreaDialog extends ActionDialog {
 
     boolean new_area;
     
@@ -63,12 +62,9 @@ public class AreaDialog extends JDialog implements ActionListener {
         super(_parent, "Edit area - " + _area, true);
         
         new_area = false;
-        parent = _parent;
         world = _world;
         area = _area;
         place = null;
-        
-        create();
     }
     
     /**
@@ -80,12 +76,9 @@ public class AreaDialog extends JDialog implements ActionListener {
         super(_parent, "New area", true);
         
         new_area = true;
-        parent = _parent;
         world = _world;
         area = null;
         place = null;
-        
-        create();
     }
     
     public AreaDialog(JFrame _parent, World _world, Place _place){
@@ -93,17 +86,15 @@ public class AreaDialog extends JDialog implements ActionListener {
         
         place = _place;
         new_area = place.get_area() == null;
-        parent = _parent;
         world = _world;
         area = place.get_area();
-        
-        create();
     }
     
     /**
      * Creates the GUI
      */
-    private void create(){
+    @Override
+    void create(){
         setLayout(new GridLayout(3, 2));
         
         add(new JLabel("Name"));
@@ -112,8 +103,8 @@ public class AreaDialog extends JDialog implements ActionListener {
         add(textfield_name);
         
         add(new JLabel("Color"));
-        if(area != null) add(colorchooserbutton = new ColorChooserButton(parent, area.get_color())); 
-        else add(colorchooserbutton = new ColorChooserButton(parent));
+        if(area != null) add(colorchooserbutton = new ColorChooserButton(getParent(), area.get_color())); 
+        else add(colorchooserbutton = new ColorChooserButton(getParent()));
         
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel);
@@ -134,16 +125,8 @@ public class AreaDialog extends JDialog implements ActionListener {
             }
         });
        
-        // listener for escape key
-        getRootPane().registerKeyboardAction(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                dispose();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        
         pack();
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
     private void save(){
@@ -158,11 +141,6 @@ public class AreaDialog extends JDialog implements ActionListener {
             area.set_color(colorchooserbutton.get_color());
         }
         parent.repaint();
-    }
-    
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        setVisible(true);
     }
     
 }
