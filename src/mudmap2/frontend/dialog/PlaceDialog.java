@@ -70,7 +70,7 @@ public class PlaceDialog extends ActionDialog {
      * @param _place existing place
      */
     public PlaceDialog(JFrame _parent, World _world, Place _place){
-        super(_parent, "Edit place - " + _place.get_name() + " (ID: " + _place.get_id() + ")", true);
+        super(_parent, "Edit place - " + _place, true);
         
         world = _world;
         place = _place;
@@ -105,7 +105,7 @@ public class PlaceDialog extends ActionDialog {
         setLayout(new GridLayout(0, 2));
         
         add(new JLabel("Name"));
-        if(place != null) textfield_name = new JTextField(place.get_name());
+        if(place != null) textfield_name = new JTextField(place.toString());
         else textfield_name = new JTextField();
         add(textfield_name);
         

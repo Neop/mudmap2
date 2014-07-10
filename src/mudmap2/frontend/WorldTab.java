@@ -1573,11 +1573,11 @@ public class WorldTab extends JPanel {
 
                         for(Path path: paths){
                             Place other_place = path.get_other_place(place);
-                            JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.get_exit(place) + "] " + other_place);
+                            JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.get_exit(place) + "] " + other_place.get_name());
                             m_paths.add(mi_path_goto);
                             mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
                             
-                            JMenuItem mi_path_remove = new JMenuItem("Remove [" + path.get_exit(place) + "] " + other_place);
+                            JMenuItem mi_path_remove = new JMenuItem("Remove [" + path.get_exit(place) + "] " + other_place.get_name());
                             m_path_remove.add(mi_path_remove);
                             mi_path_remove.addActionListener(new RemovePathActionListener(path));
                         }

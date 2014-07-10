@@ -48,7 +48,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
     HashMap<Place, JCheckBox> neighbor_checkboxes;
     
     public PathConnectNeighborsDialog(JFrame _parent, Place _place) {
-        super(_parent, "Connect neighbor paths to " + _place.get_name(), true);
+        super(_parent, "Connect neighbor paths to " + _place, true);
         
         place = _place;
     }

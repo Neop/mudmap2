@@ -379,7 +379,7 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     @Override
     public String toString(){
-        return name;
+        return name + " (ID: " + get_id() + ")";
     }
     
     /**

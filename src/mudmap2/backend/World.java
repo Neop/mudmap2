@@ -466,7 +466,7 @@ public class World {
         Layer layer = layers.get(place.get_layer().get_id());
         if(layer == null || layer != place.get_layer()){
             // error, wrong layer? (shouldn't occur)
-            throw new RuntimeException("Couldn't remove \"" + place.get_name() + "\" (ID: " + place.get_id() + "): layer mismatch");
+            throw new RuntimeException("Couldn't remove \"" + place + ": layer mismatch");
         } else {
             place.remove_connections();
             layer.remove(place);

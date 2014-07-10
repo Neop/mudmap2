@@ -41,7 +41,7 @@ public class PlaceCommentDialog extends ActionDialog {
     JOptionPane optionPane;
     
     public PlaceCommentDialog(JFrame _parent, Place _place) {
-        super(_parent, "Comments - " + _place.get_name(), true);
+        super(_parent, "Comments - " + _place, true);
         place = _place;
     }
 

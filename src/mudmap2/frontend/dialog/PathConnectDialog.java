@@ -54,7 +54,7 @@ public class PathConnectDialog extends ActionDialog{
     JComboBox<String> direction_combo_box1, direction_combo_box2;
     
     public PathConnectDialog(JFrame _parent, Place _place) {
-        super(_parent, "Connect path to " + _place.get_name(), true);
+        super(_parent, "Connect path to " + _place, true);
         parent = _parent;
         place = _place;
         other = null;
@@ -85,7 +85,7 @@ public class PathConnectDialog extends ActionDialog{
         constraints.insets = new Insets(4, 4, 4, 4);
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.weightx = 1.0;
-        add(new JLabel(place.get_name()), constraints);
+        add(new JLabel(place.toString()), constraints);
         
         LinkedList<String> directions1 = new LinkedList<String>();
         for(String s: Path.directions)
@@ -140,7 +140,7 @@ public class PathConnectDialog extends ActionDialog{
             public void placeSelected(Place p) {
                 if(p != place){ 
                     other = p;
-                    label_other_place.setText(other.get_name());
+                    label_other_place.setText(other.toString());
                     update_direction_combo_box2();
                 }
             }

@@ -48,7 +48,7 @@ public class PlaceRemoveDialog implements ActionListener {
     }
     
     public void show(){
-        int ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove \"" + place.get_name() + "\" (ID: " + place.get_id() + ") from the map? This can not be undone!", "Remove place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove \"" + place + " from the map? This can not be undone!", "Remove place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         if(ret == 0){
             try {
                 world.remove(place);
