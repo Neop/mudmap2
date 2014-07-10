@@ -33,8 +33,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
@@ -62,6 +62,7 @@ import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
+import mudmap2.frontend.dialog.OpenWorldDialog;
 
 /**
  * Main class for the mudmap window
@@ -104,23 +105,11 @@ public final class Mainwindow extends JFrame {
         
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        addWindowListener(new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent arg0) {}
+        addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent arg0) {
                 quit();
             }
-            @Override
-            public void windowClosed(WindowEvent arg0) {}
-            @Override
-            public void windowIconified(WindowEvent arg0) {}
-            @Override
-            public void windowDeiconified(WindowEvent arg0) {}
-            @Override
-            public void windowActivated(WindowEvent arg0) {}
-            @Override
-            public void windowDeactivated(WindowEvent arg0) {}
         });
         
         // Add GUI components
@@ -158,6 +147,8 @@ public final class Mainwindow extends JFrame {
         
         menu_file_open = new JMenuItem("Open");
         menu_file.add(menu_file_open);
+        menu_file_open.addActionListener(new OpenWorldDialog(this));
+        
         menu_file.addSeparator();
         menu_file_save = new JMenuItem("Save");
         menu_file.add(menu_file_save);

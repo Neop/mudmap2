@@ -241,6 +241,19 @@ public class WorldManager {
     }
     
     /**
+     * Adds a world file to the list
+     * @param file 
+     * @return world name
+     */
+    public static String add_world(String file) throws Exception{
+        String name = read_world_name(file);
+        if(!available_worlds.containsKey(name)){
+            available_worlds.put(name, file);
+        } else throw new Exception("Can't add world, name is already in list");
+        return name;
+    }
+    
+    /**
      * Deletes a worl, this can not be undone
      * @param name 
      */
@@ -270,16 +283,17 @@ public class WorldManager {
     /**
      * Opens a world file and reads the world name specified in it
      * @param file world file
-     * @return 
+     * @return world name or ""
      */
-    private static String read_world_name(String file){
+    public static String read_world_name(String file){
         String ret = "";
         
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(Paths.get_available_worlds_file()));
+            BufferedReader reader = new BufferedReader(new FileReader(file));
             
             String line;
             try {
+                int line_cnt = 0;
                 while((line = reader.readLine()) != null){
                     line = line.trim();
                     
@@ -287,6 +301,8 @@ public class WorldManager {
                         ret = line.substring(6).trim();
                         break;
                     }
+                    // the world name should be in one of the first lines
+                    if(line_cnt++ > 15) break;
                 }
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
