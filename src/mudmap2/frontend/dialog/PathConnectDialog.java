@@ -31,7 +31,6 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import mudmap2.backend.Layer;
@@ -46,16 +45,15 @@ import mudmap2.frontend.WorldTab;
  */
 public class PathConnectDialog extends ActionDialog{
 
-    JFrame parent; // needed in this case by WorldTab
     Place place, other;
     
-    WorldTab worldtab;
+    WorldTab worldtab, wt_parent;
     JLabel label_other_place;
     JComboBox<String> direction_combo_box1, direction_combo_box2;
     
-    public PathConnectDialog(JFrame _parent, Place _place) {
-        super(_parent, "Connect path to " + _place, true);
-        parent = _parent;
+    public PathConnectDialog(WorldTab _parent, Place _place) {
+        super(_parent.get_parent(), "Connect path to " + _place, true);
+        wt_parent = _parent;
         place = _place;
         other = null;
     }
@@ -66,10 +64,11 @@ public class PathConnectDialog extends ActionDialog{
         setLayout(new GridBagLayout());
         
         // world tab
-        worldtab = new WorldTab(parent, place.get_layer().get_world(), true);
+        worldtab = (WorldTab) wt_parent.clone();
         worldtab.set_place_selection_forced(true);
         worldtab.reset_history(place.get_coordinate());
         worldtab.set_forced_focus_disabled(true);
+        
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = constraints.gridy = 0;
         constraints.fill = GridBagConstraints.BOTH;
@@ -180,7 +179,7 @@ public class PathConnectDialog extends ActionDialog{
             // else show message
             else JOptionPane.showMessageDialog(this, "Couldn't connect path, an exit of a place is occupied");
             
-            parent.repaint();
+            wt_parent.repaint();
         }
     }
 }

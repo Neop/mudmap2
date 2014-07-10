@@ -67,7 +67,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
-import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -103,9 +102,9 @@ public class WorldTab extends JPanel {
     static boolean show_paths = true;
     static boolean show_paths_curved = true;
     
+    // GUI elements
     JFrame parent;
     WorldPanel worldpanel;
-    JToolBar toolbar;
     JSlider slider_zoom;
     JPanel panel_south;
     JLabel label_infobar;
@@ -126,6 +125,7 @@ public class WorldTab extends JPanel {
     int place_selected_x, place_selected_y;
     boolean force_selection;
     
+    // world_meta file version supported by this WorldTab
     static final int meta_file_ver_major = 1;
     static final int meta_file_ver_minor = 1;
     
@@ -143,6 +143,8 @@ public class WorldTab extends JPanel {
     
     LinkedList<PlaceSelectionListener> place_selection_listeners;
 
+    // ============================= Methods ===================================
+    
     /**
      * Constructs the world tab, opens the world if necessary
      * @param _parent parent frame
@@ -169,7 +171,45 @@ public class WorldTab extends JPanel {
         create();
     }
     
+    /**
+     * Copies a WorldTab and creates a new passive one
+     * @param wt 
+     */
+    public WorldTab(WorldTab wt){
+        parent = wt.get_parent();
+        passive = true;
+        world = wt.get_world();
+        create_variables();
+        
+        tile_size = wt.tile_size;
+        place_selection_enabled = wt.place_selection_enabled;
+        // copy positions
+        for(WorldCoordinate pos: wt.positions) positions.add(pos);
+        
+        create_gui();
+    }
+    
+    /**
+     * Clones the WorldTab
+     */
+    @Override
+    public Object clone(){
+        return new WorldTab(this);
+    }
+    
+    /**
+     * Creates the WorldTab from scratch
+     */
     private void create(){
+        create_variables();
+        load_meta();
+        create_gui();
+    }
+    
+    /**
+     * Sets the initial values of the member variables
+     */
+    private void create_variables(){
         positions = new LinkedList<WorldCoordinate>();
         tile_size = 120;
         
@@ -183,18 +223,16 @@ public class WorldTab extends JPanel {
         place_selection_enabled = place_selection_enabled_default;
         
         tile_center_color = new Color(207, 190, 134);
-        
+    }
+    
+    /**
+     * Creates the GUI elements
+     */
+    private void create_gui(){
         setLayout(new BorderLayout());
-        
-        /// TODO: Toolbar
-        /*toolbar = new JToolBar();
-        add(toolbar, BorderLayout.WEST);
-        toolbar.add(new JButton("dsd"));*/
         
         worldpanel = new WorldPanel(this, passive);
         add(worldpanel, BorderLayout.CENTER);
-        
-        load_meta(); // important: call this after creation of worldpanel!
                         
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
         panel_south.setLayout(new BorderLayout());
@@ -215,6 +253,14 @@ public class WorldTab extends JPanel {
         place_selected_y = (int) Math.round(get_cur_position().get_y());
         
         place_selection_listeners = new LinkedList<PlaceSelectionListener>();
+    }
+    
+    /**
+     * Gets the parent frame
+     * @return 
+     */
+    public JFrame get_parent(){
+        return parent;
     }
     
     /**
@@ -287,6 +333,7 @@ public class WorldTab extends JPanel {
         return positions.getFirst();
     }
     
+    // ========================== Place selection ==============================
     /**
      * Gets the x coordinate of the selected place
      * @return x coordinate
@@ -313,7 +360,7 @@ public class WorldTab extends JPanel {
         place_selected_y = y;
         update_infobar();
         move_screen_to_place_selection();
-        redraw();
+        repaint();
         call_place_selection_listeners();
     }
     
@@ -327,27 +374,98 @@ public class WorldTab extends JPanel {
         place_selected_y += dy;
         update_infobar();
         move_screen_to_place_selection();
-        redraw();
+        repaint();
         call_place_selection_listeners();
     }
     
     /**
      * moves the shown places so the selection is on the screen
      */
-    private void move_screen_to_place_selection(){           
-        int screen_x = worldpanel.get_screen_pos_x(place_selected_x);
-        int screen_y = worldpanel.get_screen_pos_y(place_selected_y);
-        int tilesize = get_tile_size();
-        
-        double dx = 0, dy = 0;
-        
-        if(screen_x < 0) dx = (double) screen_x / tilesize;
-        else if(screen_x > worldpanel.screen_width - tilesize) dx = (double) (screen_x - worldpanel.screen_width) / tilesize + 1;
-        if(screen_y < 0) dy = (double) -screen_y / tilesize;
-        else if(screen_y > worldpanel.screen_height - tilesize) dy = (double) -(screen_y - worldpanel.screen_height) / tilesize - 1;
-        
-        if(dx != 0 || dy != 0) get_cur_position().move(dx, dy);
-        redraw();
+    private void move_screen_to_place_selection(){
+        if(worldpanel != null){
+            int screen_x = worldpanel.get_screen_pos_x(place_selected_x);
+            int screen_y = worldpanel.get_screen_pos_y(place_selected_y);
+            int tilesize = get_tile_size();
+
+            double dx = 0, dy = 0;
+
+            if(screen_x < 0) dx = (double) screen_x / tilesize;
+            else if(screen_x > worldpanel.screen_width - tilesize) dx = (double) (screen_x - worldpanel.screen_width) / tilesize + 1;
+            if(screen_y < 0) dy = (double) -screen_y / tilesize;
+            else if(screen_y > worldpanel.screen_height - tilesize) dy = (double) -(screen_y - worldpanel.screen_height) / tilesize - 1;
+
+            if(dx != 0 || dy != 0) get_cur_position().move(dx, dy);
+            repaint();
+        }
+    }
+    
+    /**
+     * Sets the place selection enabled state (if true, the selection will be shown)
+     * @param b 
+     */
+    public void set_place_selection_enabled(boolean b){
+        place_selection_enabled = b || force_selection;
+        update_infobar();
+        repaint();
+    }
+    
+    /**
+     * Toggles the place selection enabled state
+     */
+    public void set_place_selection_toggle(){
+        if(!force_selection){
+            place_selection_enabled = !place_selection_enabled;
+            update_infobar();
+            repaint();
+        }
+    }
+    
+    /**
+     * Gets the place selection enabled state
+     * @return 
+     */
+    public boolean get_place_selection_enabled(){
+        return place_selection_enabled || force_selection;
+    }
+    
+    /**
+     * Enables or disables the place selection
+     * @param b new place selection state
+     */
+    private void set_place_selection(boolean b){
+        place_selection_enabled = b || force_selection;
+        repaint();
+    }
+    
+    /**
+     * Forces the place selection to be enabled, if true
+     * @param b 
+     */
+    public void set_place_selection_forced(boolean b){
+        if(force_selection = b) set_place_selection(true);
+    }
+    
+    /**
+     * Pushes a new position on the position stack ("goto")
+     * @param _pos new position
+     */
+    public void push_position(WorldCoordinate _pos){
+        WorldCoordinate pos = _pos.clone();
+        positions.push(pos);
+        // move place selection
+        set_place_selection((int) pos.get_x(), (int) pos.get_y());
+        while(positions.size() > history_max_length) positions.removeLast();
+        repaint();
+    }
+    
+    /**
+     * Removes the first position from the position stack,
+     * go to home position if the stack is empty
+     */
+    public void pop_position(){
+        if(positions.size() > 0) positions.removeFirst();
+        if(positions.size() == 0) goto_home();
+        repaint();
     }
     
     /**
@@ -379,75 +497,6 @@ public class WorldTab extends JPanel {
     }
     
     /**
-     * Sets the place selection enabled state (if true, the selection will be shown)
-     * @param b 
-     */
-    public void set_place_selection_enabled(boolean b){
-        place_selection_enabled = b || force_selection;
-        update_infobar();
-        redraw();
-    }
-    
-    /**
-     * Toggles the place selection enabled state
-     */
-    public void set_place_selection_toggle(){
-        if(!force_selection){
-            place_selection_enabled = !place_selection_enabled;
-            update_infobar();
-            redraw();
-        }
-    }
-    
-    /**
-     * Gets the place selection enabled state
-     * @return 
-     */
-    public boolean get_place_selection_enabled(){
-        return place_selection_enabled || force_selection;
-    }
-    
-    /**
-     * Enables or disables the place selection
-     * @param b new place selection state
-     */
-    private void set_place_selection(boolean b){
-        place_selection_enabled = b || force_selection;
-        redraw();
-    }
-    
-    /**
-     * Forces the place selection to be enabled, if true
-     * @param b 
-     */
-    public void set_place_selection_forced(boolean b){
-        if(force_selection = b) set_place_selection(true);
-    }
-    
-    /**
-     * Pushes a new position on the position stack ("goto")
-     * @param _pos new position
-     */
-    public void push_position(WorldCoordinate _pos){
-        WorldCoordinate pos = _pos.clone();
-        positions.push(pos);
-        // move place selection
-        set_place_selection((int) pos.get_x(), (int) pos.get_y());
-        while(positions.size() > history_max_length) positions.removeLast();
-        redraw();
-    }
-    
-    /**
-     * Removes the first position from the position stack,
-     * go to home position if the stack is empty
-     */
-    public void pop_position(){
-        if(positions.size() > 0) positions.removeFirst();
-        if(positions.size() == 0) goto_home();
-        redraw();
-    }
-    
-    /**
      * Removes all previously visited positions from history and sets pos
      * @param pos new position
      */
@@ -457,7 +506,7 @@ public class WorldTab extends JPanel {
         place_selected_x = (int) Math.round(pos.get_x());
         place_selected_y = (int) Math.round(pos.get_y());
         update_infobar();
-        redraw();
+        repaint();
     }
     
     /**
@@ -489,13 +538,6 @@ public class WorldTab extends JPanel {
     }
     
     /**
-     * Redraws the window / tab
-     */
-    public void redraw(){
-        worldpanel.repaint();
-    }
-    
-    /**
      * Gets the current tile size
      * @return tile size
      */
@@ -510,7 +552,7 @@ public class WorldTab extends JPanel {
     public void set_tile_size(int ts){
         tile_size = Math.min(Math.max(ts, tile_size_min), tile_size_max);
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
-        redraw();
+        repaint();
     }
     
     /**
@@ -519,7 +561,7 @@ public class WorldTab extends JPanel {
     public void tile_size_increment(){
         if(tile_size < tile_size_max) tile_size++;
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
-        redraw();
+        repaint();
     }
     
     /**
@@ -528,7 +570,7 @@ public class WorldTab extends JPanel {
     public void tile_size_decrement(){
         if(tile_size > tile_size_min) tile_size--;
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
-        redraw();
+        repaint();
     }
     
     
@@ -572,7 +614,7 @@ public class WorldTab extends JPanel {
         return !forced_focus_disabled && !is_context_menu_shown;
     }
     
-    
+    // ========================= selection listener ============================
     /**
      * Adds a place selection listener
      * @param listener 
@@ -1267,6 +1309,8 @@ public class WorldTab extends JPanel {
 
         }
         
+        // ========================= Listeners and context menu ================
+        
         /**
          * This listener only contains actions, that don't modify the world
          */
@@ -1323,7 +1367,7 @@ public class WorldTab extends JPanel {
                     double dx = (double) (arg0.getX() - parent.mouse_x_previous) / parent.get_tile_size();
                     double dy = (double) (arg0.getY() - parent.mouse_y_previous) / parent.get_tile_size();
                     parent.get_cur_position().move(-dx , dy);
-                    parent.redraw();
+                    parent.repaint();
                 }
                 parent.mouse_x_previous = arg0.getX();
                 parent.mouse_y_previous = arg0.getY();
@@ -1444,7 +1488,7 @@ public class WorldTab extends JPanel {
                                 }
                             }
                         }
-                        parent.redraw();
+                        parent.repaint();
                         break;
                     // remove place
                     case KeyEvent.VK_DELETE:
@@ -1529,7 +1573,7 @@ public class WorldTab extends JPanel {
                     JMenuItem mi_path_connect_select = new JMenuItem("Select");
                     m_path_connect.add(mi_path_connect_select);
                     mi_path_connect_select.setToolTipText("Select any place from the map");
-                    mi_path_connect_select.addActionListener(new PathConnectDialog(parent.parent, place));
+                    mi_path_connect_select.addActionListener(new PathConnectDialog(parent, place));
                     
                     JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
                     m_path_connect.add(mi_path_connect_neighbors);
@@ -1601,7 +1645,7 @@ public class WorldTab extends JPanel {
                                 int ret = JOptionPane.showConfirmDialog(parent, "Connect \"" + child.get_name() + "\" to \"" + place.get_name() + "\"?", "Connect sub-area", JOptionPane.YES_NO_OPTION);
                                 if(ret == JOptionPane.YES_OPTION){
                                     place.connect_child(child);
-                                    parent.redraw();
+                                    parent.repaint();
                                 }
                             }
                         }
@@ -1642,7 +1686,7 @@ public class WorldTab extends JPanel {
                         public void actionPerformed(ActionEvent arg0) {
                             // creates a placeholder place
                             parent.world.put_placeholder(parent.get_cur_position().get_layer(), px, py);
-                            parent.redraw();
+                            parent.repaint();
                         }
                     });
                 }
@@ -1661,13 +1705,13 @@ public class WorldTab extends JPanel {
                 @Override
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0) {
                     parent.set_context_menu(false);
-                    parent.redraw();
+                    parent.repaint();
                 }
 
                 @Override
                 public void popupMenuCanceled(PopupMenuEvent arg0) {
                     parent.set_context_menu(false);
-                    parent.redraw();
+                    parent.repaint();
                 }
             }
             
