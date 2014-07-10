@@ -367,10 +367,18 @@ public class Place extends LayerElement implements Comparable<Place> {
     
     /**
      * Gets the child places / subareas
-     * @return 
+     * @return child places
      */
     public HashSet<Place> get_children(){
         return children;
+    }
+    
+    /**
+     * Gets the parent places (subarea parents)
+     * @return parent places
+     */
+    public HashSet<Place> get_parents(){
+        return parents;
     }
     
     /**

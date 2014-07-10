@@ -82,7 +82,7 @@ public class PlaceDialog extends ActionDialog {
     /**
      * Creates a dialog to create a new place
      * @param _parent
-     * @param _layer layer
+     * @param _layer layer or null to create a new one
      * @param _world
      * @param _px place coordinate x
      * @param _py place coordinate y
@@ -171,6 +171,8 @@ public class PlaceDialog extends ActionDialog {
     public void save(){
         if(!textfield_name.getText().isEmpty()){ // name not empty
             try {
+                if(layer == null) layer = world.get_new_layer();
+                
                 // create place if it doesn't exist else just set the name
                 if(place == null) world.put(place = new Place(textfield_name.getText(), px, py, layer));
                 else place.set_name(textfield_name.getText());
@@ -186,6 +188,14 @@ public class PlaceDialog extends ActionDialog {
             }
         }
         getParent().repaint();
+    }
+    
+    /**
+     * Gets the place (eg. after creation
+     * @return place
+     */
+    public Place get_place(){
+        return place;
     }
     
 }

@@ -501,6 +501,16 @@ public class World {
     }
     
     /**
+     * Creates a new and empty layer and returns it
+     * @return new layer
+     */
+    public Layer get_new_layer(){
+        Layer ret = new Layer(this);
+        layers.put(ret.get_id(), ret);
+        return ret;
+    }
+    
+    /**
      * Gets a place
      * @param id place id
      * @return place 

@@ -1654,6 +1654,22 @@ public class WorldTab extends JPanel {
                     JMenuItem mi_sa_new_layer = new JMenuItem("Add on new layer");
                     mi_sa_new_layer.setToolTipText("Creates a new place on a new layer and connects it with \"" + place.get_name() + "\" as a sub-area");
                     m_subareas.add(mi_sa_new_layer);
+                    mi_sa_new_layer.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            // create new place
+                            PlaceDialog dlg = new PlaceDialog(parent.parent, parent.get_world(), null, 0, 0);
+                            dlg.setVisible(true);
+                            
+                            Place place_new = dlg.get_place();
+                            if(place_new != null){
+                                // connect new place with place as a child
+                                place.connect_child(place_new);
+                                // go to new place
+                                parent.push_position(place_new.get_coordinate());
+                            }
+                        }
+                    });
                     
                     HashSet<Place> children = place.get_children();
                     if(!children.isEmpty()){
@@ -1670,6 +1686,17 @@ public class WorldTab extends JPanel {
                         
                         for(Place child: children){
                             JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.get_name());
+                            m_subareas.add(mi_sa_goto);
+                            mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
+                        }
+                    }
+                    
+                    HashSet<Place> parents = place.get_parents();
+                    if(!parents.isEmpty()){                        
+                        m_subareas.add(new JSeparator());
+                        
+                        for(Place child: parents){
+                            JMenuItem mi_sa_goto = new JMenuItem("Go to parent " + child.get_name());
                             m_subareas.add(mi_sa_goto);
                             mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                         }
