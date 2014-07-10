@@ -1226,13 +1226,17 @@ public class WorldTab extends JPanel {
 
                                 // flags
                                 if(line_num < max_lines){
-                                    String flags = "";
+                                    String flags = "";                                    
                                     // place has comments
-                                    if(cur_place.get_comments().size() > 0) flags += "C";
-
+                                    if(!cur_place.get_comments().isEmpty()) flags += "C";
+                                    if(!cur_place.get_children().isEmpty()) flags += "Sa";
+                                    if(!cur_place.get_parents().isEmpty()) flags += "Pa";
+                                    
                                     // other flags
-                                    for(Entry<String, Boolean> flag: cur_place.get_flags().entrySet())
-                                        if(flag.getValue()) flags += flag.getKey();
+                                    for(Entry<String, Boolean> flag: cur_place.get_flags().entrySet()){
+                                        if(flag.getValue()) flags += flag.getKey().toUpperCase();
+                                        if(fm.stringWidth(flags) >= tile_size - 2 * border_width) break;
+                                    }
 
                                     // draw flags
                                     g.drawString(flags, place_x_px + border_width + (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
@@ -1259,16 +1263,15 @@ public class WorldTab extends JPanel {
                                 }
                             }
 
+                            // the up / down flags have to be drawn after the 
+                            // exits to know whether they have to be drawn
                             if((up || down) && get_tile_draw_text() && line_num < max_lines){
                                 g.setColor(Color.BLACK);
                                 // have some arrows: ⬆⬇ ￪￬ ↑↓
-                                //String updownstr = "" + (up ? "u" : "") + (down ? "d" : "");
                                 String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
                                 g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                             }
                         }
-
-                        // TODO: draw flags
                     }
 
                     // draw cursor / place selection
