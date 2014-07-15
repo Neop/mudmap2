@@ -1519,6 +1519,11 @@ public class WorldTab extends JPanel {
                     case KeyEvent.VK_HOME:
                         parent.goto_home();
                         break;
+                        
+                    // show place list
+                    case KeyEvent.VK_L:
+                        (new PlaceListDialog(parent, passive)).setVisible(true);
+                        break;
                 }
             }
         }
