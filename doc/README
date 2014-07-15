@@ -1,24 +1,51 @@
 MUD Map, version 2
 by Neop (contact: email: mneop@web.de, jabber: neop@neop.mooo.com)
-Website: https://sourceforge.net/projects/mudmap/
-
-Please send me an e-mail if you encounter any bugs or other problems!
 
 license: GPLv3
 use it on your own risk!
+
+MUD Map Websites:
+GitHub (Sources, Information, etc): https://github.com/Neop/mudmap2
+Sourceforge (download packages, MUD Map v1 + v2): https://sourceforge.net/projects/mudmap/
+MUD Map v1 user manual / quick start guide: http://mudmap.sf.net
+
+If you encounter any bugs or other problems please contact me or write
+a bug report on GitHub (https://github.com/Neop/mudmap2/issues), so I
+can fix it.
+
+Some notes about the beta version:
+Everything important (except for moving places) should be implemented.
+If you think I forgot something, please contact me or write a short bug
+report on GitHub.
+
+Things that aren't implemented yet:
+- curved paths
+- moveable places (copy-paste)
+- areas can't be removed from the worlds
+- portable mode
+- an unimportant, but interesting feature that I don't want to talk
+about, yet ;)
+
+If you really need one of these things, please use MUD Map v1 or contact
+me.
 
 Installation
 --tbf--
 
 Updating
---tbf--
+Just replace the old mudmap2.jar file with a new one.
 
 Compatibility to MUD Map 1
 MUD Map 2 uses an improved version of the file format of MUD Map 1. It
 can read worlds that were created with MUD Map 1 and saves them in a
-compatible format if compatibility is enabled (should be enabled by 
+compatible format if compatibility is enabled (is enabled by 
 default) Note that MUD Map 1 might be updated to use the same file
 format after version 1.4
+
+How to use MUD Map:
+I didn't create a manual for MUD Map 2 yet, so please refer to the 
+manual of MUD Map 1, which is very similar: http://mudmap.sf.net
+If you've still questions, feel free to contact me ;)
 
 Keyboard commands
 Keyboard commands can be used to navigate and alter the map if keyboard
@@ -46,3 +73,4 @@ q								modify area of selected place. Note that
 								selected or selection is disabled, a new
 								area will be created
 h			home key			go to home location
+l								show place list
