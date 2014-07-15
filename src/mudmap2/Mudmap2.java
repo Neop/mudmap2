@@ -36,7 +36,7 @@ public class Mudmap2 {
     static int version_major = 2;
     static int version_minor = 0;
     static int version_build = 0;
-    static String version_state = "alpha";
+    static String version_state = "beta";
     
     /**
      * @param args the command line arguments
