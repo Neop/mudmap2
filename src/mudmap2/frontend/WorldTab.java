@@ -30,6 +30,8 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -41,7 +43,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -51,13 +52,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -85,6 +86,7 @@ import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
+import mudmap2.frontend.dialog.PlaceListDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 import mudmap2.frontend.dialog.PlaceSelectionDialog;
 
@@ -109,8 +111,9 @@ public class WorldTab extends JPanel {
     JPanel panel_south;
     JLabel label_infobar;
     
-    // currently shown position
-    Deque<WorldCoordinate> positions;
+    // history of shown position
+    LinkedList<WorldCoordinate> positions;
+    int positions_cur_index; // index of currently shown position
     // max amount of elements in the list
     static final int history_max_length = 25;
     
@@ -235,22 +238,58 @@ public class WorldTab extends JPanel {
         add(worldpanel, BorderLayout.CENTER);
                         
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
-        panel_south.setLayout(new BorderLayout());
+        panel_south.setLayout(new GridBagLayout());
+        
+        GridBagConstraints constraints = new GridBagConstraints();
+                
+        // add bottom panel elements
+        // previous / next buttons for the history
+        JButton button_prev = new JButton("Prev");
+        constraints.gridx++;
+        panel_south.add(button_prev, constraints);
+        button_prev.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                pop_position();
+            }
+        });
+
+        JButton button_next = new JButton("Next");
+        constraints.gridx++;
+        panel_south.add(button_next, constraints);
+        button_next.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                restore_position();
+            }
+        });
+        
+        JButton button_list = new JButton("List");
+        constraints.gridx++;
+        panel_south.add(button_list, constraints);
+        button_list.addActionListener(new PlaceListDialog(this, passive)); // passive WorldTab creates modal PlaceListDialogs
+        
+        constraints.gridx++;
+        constraints.weightx = 1.0;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        panel_south.add(label_infobar = new JLabel(), constraints);
+        
+        // set default selected place to hte center place
+        place_selected_x = (int) Math.round(get_cur_position().get_x());
+        place_selected_y = (int) Math.round(get_cur_position().get_y());
         
         slider_zoom = new JSlider(0, 100, (int) (100.0 / tile_size_max * tile_size));
-        panel_south.add(slider_zoom, BorderLayout.EAST);
+        constraints.gridx++;
+        constraints.weightx = 0.0;
+        constraints.fill = GridBagConstraints.NONE;
+        panel_south.add(slider_zoom, constraints);
         slider_zoom.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent arg0) {
                 set_tile_size((int) ((double) tile_size_max * ((JSlider) arg0.getSource()).getValue() / 100.0));
             }
         });
-        
-        panel_south.add(label_infobar = new JLabel(), BorderLayout.CENTER);
-        
-        // set default selected place to hte center place
-        place_selected_x = (int) Math.round(get_cur_position().get_x());
-        place_selected_y = (int) Math.round(get_cur_position().get_y());
+        // ---
         
         place_selection_listeners = new LinkedList<PlaceSelectionListener>();
     }
@@ -323,14 +362,6 @@ public class WorldTab extends JPanel {
             write_meta();
             world.write_world();
         }
-    }
-    
-    /**
-     * Gets the currently shown position
-     * @return current position
-     */
-    public WorldCoordinate get_cur_position(){
-        return positions.getFirst();
     }
     
     // ========================== Place selection ==============================
@@ -446,12 +477,28 @@ public class WorldTab extends JPanel {
     }
     
     /**
+     * Gets the currently shown position
+     * @return current position
+     */
+    public WorldCoordinate get_cur_position(){
+        return positions.get(positions_cur_index);
+        //return positions.getFirst();
+    }
+    
+    /**
      * Pushes a new position on the position stack ("goto")
      * @param _pos new position
      */
     public void push_position(WorldCoordinate _pos){
         WorldCoordinate pos = _pos.clone();
+        // remove all entries after the current one
+        while(positions_cur_index > 0){
+            positions.pop();
+            positions_cur_index--;
+        }
+        // add new position
         positions.push(pos);
+        
         // move place selection
         set_place_selection((int) pos.get_x(), (int) pos.get_y());
         while(positions.size() > history_max_length) positions.removeLast();
@@ -463,9 +510,24 @@ public class WorldTab extends JPanel {
      * go to home position if the stack is empty
      */
     public void pop_position(){
-        if(positions.size() > 0) positions.removeFirst();
-        if(positions.size() == 0) goto_home();
+        // if end not reached
+        if(positions_cur_index < positions.size() - 1) positions_cur_index++;
+        // add home coord at list end (unlike goto_home())
+        else positions.addLast(get_world().get_home());
+        
+        //if(positions.size() > 0) positions.removeFirst();
+        //if(positions.size() == 0) goto_home();
+        
+        set_place_selection((int) get_cur_position().get_x(), (int) get_cur_position().get_y());
         repaint();
+    }
+    
+    public void restore_position(){
+        if(positions_cur_index > 0){
+            positions_cur_index--;
+            set_place_selection((int) get_cur_position().get_x(), (int) get_cur_position().get_y());
+            repaint();
+        }
     }
     
     /**
@@ -513,7 +575,7 @@ public class WorldTab extends JPanel {
      * Go to the home position
      */
     public void goto_home(){
-        push_position(world.get_home().clone());
+        push_position(world.get_home());
         set_place_selection((int) Math.round(get_cur_position().get_x()), (int) Math.round(get_cur_position().get_y()));
     }
     
@@ -957,8 +1019,8 @@ public class WorldTab extends JPanel {
          * @param max_lines maximum number of lines
          * @return a list of strings
          */
-        private Deque<String> fit_line_width(String str, FontMetrics fm, int max_length, int max_lines){
-            Deque<String> ret;
+        private LinkedList<String> fit_line_width(String str, FontMetrics fm, int max_length, int max_lines){
+            LinkedList<String> ret;
             if(fm.stringWidth(str) <= max_length){ // string isn't too long, return it
                 ret = new LinkedList<String>();
                 ret.add(str);
@@ -1195,7 +1257,7 @@ public class WorldTab extends JPanel {
                             g.setColor(Color.BLACK);
 
                             // place name
-                            Deque<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
+                            LinkedList<String> line = fit_line_width(cur_place.get_name(), fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
                             for(String str: line){
                                 g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
                                 line_num++;

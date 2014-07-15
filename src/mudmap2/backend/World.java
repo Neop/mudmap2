@@ -520,6 +520,14 @@ public class World {
     }
     
     /**
+     * Gets all places
+     * @return 
+     */
+    public Collection<Place> get_places(){
+        return places.values();
+    }
+    
+    /**
      * Gets a risk level
      * @param id risk level id
      * @return risk level

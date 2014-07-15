@@ -398,7 +398,7 @@ public class Place extends LayerElement implements Comparable<Place> {
     @Override
     public int compareTo(Place arg0) {
         if(arg0 == null) throw new NullPointerException();
-        return (this.id == arg0.id) ? 0 : 1;
+        return get_name().compareTo(arg0.get_name());
     }
 
     /**

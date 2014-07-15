@@ -55,6 +55,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import mudmap2.Paths;
 import mudmap2.backend.World;
@@ -63,6 +64,7 @@ import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
+import mudmap2.frontend.dialog.PlaceListDialog;
 
 /**
  * Main class for the mudmap window
@@ -80,7 +82,7 @@ public final class Mainwindow extends JFrame {
     JMenuBar menu_bar;
     JMenu menu_file, menu_edit, menu_help;
     JMenuItem menu_file_new, menu_file_open, menu_file_save, menu_file_save_as_image, menu_file_quit;
-    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world;
+    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world, menu_edit_list_places;
     JMenuItem menu_help_help, menu_help_about;
     
     JTabbedPane tabbed_pane;
@@ -173,6 +175,18 @@ public final class Mainwindow extends JFrame {
             }
         });
         
+        menu_edit_edit_world = new JMenuItem("Edit world");
+        menu_edit.add(menu_edit_edit_world);
+        menu_edit_edit_world.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                WorldTab tab = get_selected_tab();
+                if(tab != null){
+                    (new EditWorldDialog(tab.parent, tab.get_world())).setVisible(true);
+                }
+            }
+        });
+        
         menu_edit_add_area = new JMenuItem("Add area");
         menu_edit.add(menu_edit_add_area);
         menu_edit_add_area.addActionListener(new ActionListener() {
@@ -182,6 +196,8 @@ public final class Mainwindow extends JFrame {
                 if(wt != null) (new AreaDialog(wt.parent, wt.get_world())).setVisible(true);
             }
         });
+        
+        menu_edit.add(new JSeparator());
         
         menu_edit_set_home_position = new JMenuItem("Set home position");
         menu_edit.add(menu_edit_set_home_position);
@@ -202,16 +218,18 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_edit_edit_world = new JMenuItem("Edit world");
-        menu_edit.add(menu_edit_edit_world);
-        menu_edit_edit_world.addActionListener(new ActionListener() {
+        menu_edit.add(new JSeparator());
+        
+        menu_edit_list_places = new JMenuItem("List places");
+        menu_edit.add(menu_edit_list_places);
+        menu_edit_list_places.addActionListener(new ActionListener(){
             @Override
-            public void actionPerformed(ActionEvent e) {
-                WorldTab tab = get_selected_tab();
-                if(tab != null){
-                    (new EditWorldDialog(tab.parent, tab.get_world())).setVisible(true);
-                }
+            public void actionPerformed(ActionEvent arg0) {
+                WorldTab wt = get_selected_tab();
+                // show place list
+                if(wt != null) (new PlaceListDialog(wt, false)).setVisible(true);
             }
+            
         });
         
         menu_help_help = new JMenuItem("Help (online)");
