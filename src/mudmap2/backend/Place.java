@@ -24,6 +24,8 @@ package mudmap2.backend;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 
@@ -420,5 +422,25 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public void remove() throws RuntimeException, PlaceNotFoundException {
         get_layer().get_world().remove(this);
+    }
+
+    /**
+     * Returns true, if a keyword is found in any of the places data
+     * it searches in name, comments and flags, keywords hve to be lower-case
+     * @param keywords in lower case
+     * @return true, if a keyword is found
+     */
+    public boolean match_keywords(String[] keywords) {
+        for(String kw: keywords){
+            // search in name
+            if(name.toLowerCase().contains(kw)) return true;
+            // search in comments
+            for(String comment: comments)
+                if(comment.toLowerCase().contains(kw)) return true;
+            // search in flags
+            for(Entry<String, Boolean> flag: flags.entrySet())
+                if(flag.getValue() && flag.getKey().toLowerCase().contains(kw)) return true;
+        }
+        return false;
     }
 }

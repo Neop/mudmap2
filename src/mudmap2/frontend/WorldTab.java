@@ -68,6 +68,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -268,6 +269,26 @@ public class WorldTab extends JPanel {
         constraints.gridx++;
         panel_south.add(button_list, constraints);
         button_list.addActionListener(new PlaceListDialog(this, passive)); // passive WorldTab creates modal PlaceListDialogs
+        
+        JTextField textfield_search = new JTextField("Search");
+        constraints.gridx++;
+        panel_south.add(textfield_search, constraints);
+        textfield_search.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                String[] keywords = ((JTextField) arg0.getSource()).getText().toLowerCase().split(" ");
+                ArrayList<Place> found_places = new ArrayList<Place>();
+                
+                // search
+                for(Place pl: get_world().get_places())
+                    if(pl.match_keywords(keywords)) found_places.add(pl);
+                
+                // display
+                if(found_places.isEmpty()) JOptionPane.showMessageDialog(parent, "No places found!", "Search - " + get_world().get_name(), JOptionPane.PLAIN_MESSAGE);
+                else (new PlaceListDialog(WorldTab.this, found_places, passive)).setVisible(true);
+            }
+        });
+        
         
         constraints.gridx++;
         constraints.weightx = 1.0;
