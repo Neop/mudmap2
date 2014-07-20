@@ -30,7 +30,12 @@ If you really need one of these things, please use MUD Map v1 or contact
 me.
 
 Installation
---tbf--
+A JRE (Java Runtime Environment) needs to be installed on your computer.
+You can get it here: https://www.java.com/de/download/index.jsp 
+Place the mudmap.jar file wherever you like. It should run after a 
+double-click on the mudmap.jar file or right click on it, select
+"open/run with", then select something siliar to "Java JRE" (It depends
+on your operating system)
 
 Updating
 Just replace the old mudmap2.jar file with a new one.
