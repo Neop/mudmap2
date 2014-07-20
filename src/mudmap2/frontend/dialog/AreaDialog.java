@@ -24,13 +24,10 @@ package mudmap2.frontend.dialog;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import mudmap2.backend.Area;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -44,7 +41,6 @@ public class AreaDialog extends ActionDialog {
 
     boolean new_area;
     
-    JFrame parent;
     JTextField textfield_name;
     ColorChooserButton colorchooserbutton;
     
@@ -140,7 +136,7 @@ public class AreaDialog extends ActionDialog {
             area.set_name(textfield_name.getText());
             area.set_color(colorchooserbutton.get_color());
         }
-        parent.repaint();
+        getParent().repaint();
     }
     
 }
