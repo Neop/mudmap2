@@ -169,7 +169,7 @@ public class PlaceDialog extends ActionDialog {
      * Saves the place data
      */
     public void save(){
-        if(!textfield_name.getText().isEmpty()){ // name not empty
+        //if(!textfield_name.getText().isEmpty()){ // name not empty
             try {
                 if(layer == null) layer = world.get_new_layer();
                 
@@ -186,7 +186,7 @@ public class PlaceDialog extends ActionDialog {
             } catch (Exception ex) {
                 Logger.getLogger(PlaceDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        //}
         getParent().repaint();
     }
     

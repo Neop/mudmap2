@@ -486,7 +486,10 @@ public class World {
      */
     private String config_get_text(int non_text, String line){
         while(non_text-- != 0){
-            line = line.substring(line.indexOf(" ")).trim();
+            int index = line.indexOf(" ");
+            // if " " not found -> entry not found in line
+            if(index < 0) return "";
+            line = line.substring(index).trim();
         }
         return line;
     }
