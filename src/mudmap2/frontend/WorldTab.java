@@ -1500,24 +1500,52 @@ public class WorldTab extends JPanel {
                         break;
 
                     // shift place selection - wasd
+                    case KeyEvent.VK_NUMPAD8:
+                        if(arg0.isShiftDown() || arg0.isControlDown()) break; // don't use numpad, if shift or ctrl is pressed
                     case KeyEvent.VK_UP:
                     case KeyEvent.VK_W:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
                         break;
+                    case KeyEvent.VK_NUMPAD4:
+                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
                     case KeyEvent.VK_LEFT:
                     case KeyEvent.VK_A:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
                         break;
+                    case KeyEvent.VK_NUMPAD2:
+                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
                     case KeyEvent.VK_DOWN:
                     case KeyEvent.VK_S:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
                         break;
+                    case KeyEvent.VK_NUMPAD6:
+                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
                     case KeyEvent.VK_RIGHT:
                     case KeyEvent.VK_D:
                         if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
                         break;
                         
+                    // diagonal movement
+                    case KeyEvent.VK_NUMPAD1:
+                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, -1);
+                        break;
+                    case KeyEvent.VK_NUMPAD3:
+                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, -1);
+                        break;
+                    case KeyEvent.VK_NUMPAD7:
+                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, +1);
+                        break;
+                    case KeyEvent.VK_NUMPAD9:
+                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, +1);
+                        break;
+                        
                     // goto home
+                    case KeyEvent.VK_NUMPAD5:
+                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
                     case KeyEvent.VK_H:
                     case KeyEvent.VK_HOME:
                         parent.goto_home();
@@ -1527,6 +1555,8 @@ public class WorldTab extends JPanel {
                     case KeyEvent.VK_L:
                         (new PlaceListDialog(parent, passive)).setVisible(true);
                         break;
+                    
+                    
                 }
             }
         }

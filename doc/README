@@ -68,6 +68,7 @@ know if you think that other keys should be used ;)
 p:								enable / disable place selection
 
 w/a/s/d 	arrow keys			shift the selection
+numpad numbers (without 5)		shift the selection
 e 			insert key			create / edit place at selection
 f								create or remove a placeholder place
 r 			delete key			remove selected place
@@ -77,5 +78,5 @@ q								modify area of selected place. Note that
 								belong to the same area. If no place is
 								selected or selection is disabled, a new
 								area will be created
-h			home key			go to home location
+h, numpad 5, home key			go to home location
 l								show place list
