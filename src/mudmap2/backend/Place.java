@@ -25,7 +25,6 @@ package mudmap2.backend;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 
@@ -112,6 +111,17 @@ public class Place extends LayerElement implements Comparable<Place> {
      */
     public void set_name(String _name){
         name = _name;
+    }
+    
+    /**
+     * Returns true, if the name of the place is unique in its world
+     * @return true if the place name is unique
+     */
+    public boolean is_name_unique(){
+        if(get_layer() != null && get_layer().get_world() != null){
+            return get_layer().get_world().get_place_name_count(get_name()) <= 1;
+        }
+        return true;
     }
     
     /**

@@ -36,8 +36,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -64,10 +64,11 @@ public class World {
     WorldCoordinate home;
     
     // ID and object
-    HashMap<Integer, RiskLevel> risk_levels;
-    HashMap<Integer, Area> areas;
-    HashMap<Integer, Place> places;
-    HashMap<Integer, Layer> layers;
+    TreeMap<Integer, RiskLevel> risk_levels;
+    TreeMap<Integer, Area> areas;
+    TreeMap<Integer, Place> places;
+    TreeMap<String, Integer> place_names;
+    TreeMap<Integer, Layer> layers;
     
     /**
      * Loads a world from a file
@@ -99,16 +100,17 @@ public class World {
         // path line colors
         path_color_nstd = path_color = new Color(0, 255, 0);
         // risk levels
-        risk_levels = new HashMap<Integer, RiskLevel>();
+        risk_levels = new TreeMap<Integer, RiskLevel>();
         risk_levels.put(0, new RiskLevel(0, "not evaluated", new Color(188, 188, 188)));
         risk_levels.put(1, new RiskLevel(1, "secure", new Color(0, 255, 0)));
         risk_levels.put(2, new RiskLevel(2, "mobs don't attack", new Color(255, 255, 0)));
         risk_levels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
         risk_levels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
         
-        areas = new HashMap<Integer, Area>();
-        layers = new HashMap<Integer, Layer>();
-        places = new HashMap<Integer, Place>();
+        areas = new TreeMap<Integer, Area>();
+        layers = new TreeMap<Integer, Layer>();
+        places = new TreeMap<Integer, Place>();
+        place_names = new TreeMap<String, Integer>();
     }
     
     /**
@@ -205,8 +207,9 @@ public class World {
                             // create place and add it to the layer and places list
                             cur_place = new Place(cur_place_id, cur_place_name, Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), layers.get(Integer.parseInt(tmp[1])));
                             cur_place.set_risk_level(risk_level_default);
-                            places.put(cur_place.get_id(), cur_place);
-                            layers.get(Integer.parseInt(tmp[1])).put(cur_place);
+                            put(cur_place);
+                            //places.put(cur_place.get_id(), cur_place);
+                            //layers.get(Integer.parseInt(tmp[1])).put(cur_place);
                         }
                     } else if(line.startsWith("par")){ // place area
                         cur_place.set_area(areas.get(Integer.parseInt(line.substring(3).trim())));
@@ -426,6 +429,8 @@ public class World {
         l.put(place, x, y);
         // add to place list
         places.put(place.get_id(), place);
+        if(!place_names.containsKey(place.get_name())) place_names.put(place.get_name(), 1);
+        else place_names.put(place.get_name(), place_names.get(place.get_name()) + 1);
     }
     
     /**
@@ -471,7 +476,19 @@ public class World {
             place.remove_connections();
             layer.remove(place);
             places.remove(place.get_id());
+            if(place_names.containsKey(place.get_name()))
+                place_names.put(place.get_name(), Math.max(0, place_names.get(place.get_name()) - 1));
         }
+    }
+    
+    /**
+     * Gets the amount of places with the same name
+     * @param name
+     * @return 
+     */
+    public int get_place_name_count(String name){
+        if(place_names.containsKey(name)) return place_names.get(name);
+        else return 0;
     }
     
     /**
