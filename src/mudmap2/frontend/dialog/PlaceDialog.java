@@ -105,7 +105,7 @@ public class PlaceDialog extends ActionDialog {
         setLayout(new GridLayout(0, 2));
         
         add(new JLabel("Name"));
-        if(place != null) textfield_name = new JTextField(place.toString());
+        if(place != null) textfield_name = new JTextField(place.get_name());
         else textfield_name = new JTextField();
         add(textfield_name);
         
