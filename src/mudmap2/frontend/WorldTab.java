@@ -1279,7 +1279,8 @@ public class WorldTab extends JPanel {
 
                             // place name
                             // gets place name if unique, else place name with ID
-                            String place_name = cur_place.is_name_unique() ? cur_place.get_name() : cur_place.toString();
+                            String place_name = ((cur_place.is_name_unique() && parent.get_world().get_show_place_id() == World.ShowPlaceID_t.UNIQUE) || parent.get_world().get_show_place_id() == World.ShowPlaceID_t.NONE) 
+                                                    ? cur_place.get_name() : cur_place.toString();
                             LinkedList<String> line = fit_line_width(place_name, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
                             for(String str: line){
                                 g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));

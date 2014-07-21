@@ -22,14 +22,19 @@
  */
 package mudmap2.frontend.dialog;
 
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import mudmap2.Pair;
 import mudmap2.backend.RiskLevel;
@@ -53,6 +58,9 @@ public class EditWorldDialog extends ActionDialog {
     JTextField risklevel_new_name; // entry to create a new risk level
     ColorChooserButton risklevel_new_color;
     
+    ButtonGroup buttongroup_place_id;
+    JRadioButton radiobutton_place_id_none, radiobutton_place_id_unique, radiobutton_place_id_all;
+    
     public EditWorldDialog(JFrame _parent, World _world) {
         super(_parent, "Edit world - " + _world.get_name(), true);
         world = _world;
@@ -60,31 +68,83 @@ public class EditWorldDialog extends ActionDialog {
     
     @Override
     void create() {
-        setLayout(new GridLayout(0, 2));
+        setLayout(new GridBagLayout());
         
-        add(new JLabel("World name"));
-        add(textfield_name = new JTextField(world.get_name()));
+        GridBagConstraints constraints = new GridBagConstraints();
+        GridBagConstraints constraints_l = new GridBagConstraints();
+        GridBagConstraints constraints_r = new GridBagConstraints();
         
-        add(new JLabel("Path color"));
-        add(colorchooser_path = new ColorChooserButton(getParent(), world.get_path_color()));
+        constraints_l.fill = GridBagConstraints.HORIZONTAL;
+        constraints_r.fill = GridBagConstraints.BOTH;
+        constraints_r.gridx = 1;
+        constraints_l.weightx = constraints_r.weightx = 1.0;
+        constraints_l.gridy = ++constraints_r.gridy;
         
-        add(new JLabel("Risk Levels"));
-        add(new JLabel());
+        add(new JLabel("World name"), constraints_l);
+        add(textfield_name = new JTextField(world.get_name()), constraints_r);
+        
+        constraints_l.gridy = ++constraints_r.gridy;
+        
+        add(new JLabel("Path color"), constraints_l);
+        add(colorchooser_path = new ColorChooserButton(getParent(), world.get_path_color()), constraints_r);
+        
+        constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        add(new JSeparator(), constraints);
+        
+        constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
+        add(new JLabel("Risk Levels"), constraints);
         
         risklevel_colors = new HashMap<RiskLevel, Pair<JTextField, ColorChooserButton>>();
         for(RiskLevel rl: world.get_risk_levels()){
+            constraints_l.gridy = ++constraints_r.gridy;
             JTextField tf_rl_name = new JTextField(rl.get_description());
-            add(tf_rl_name);
+            add(tf_rl_name, constraints_l);
             ColorChooserButton colorchooser = new ColorChooserButton(getParent(), rl.get_color());
-            add(colorchooser);
+            add(colorchooser, constraints_r);
             risklevel_colors.put(rl, new Pair<JTextField, ColorChooserButton>(tf_rl_name, colorchooser));
         }
         
-        add(risklevel_new_name = new JTextField());
-        add(risklevel_new_color = new ColorChooserButton(getParent()));
+        constraints_l.gridy = ++constraints_r.gridy;
+        
+        add(risklevel_new_name = new JTextField(), constraints_l);
+        add(risklevel_new_color = new ColorChooserButton(getParent()), constraints_r);
+        
+        constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
+        add(new JSeparator(), constraints);
+        
+        buttongroup_place_id = new ButtonGroup();
+        radiobutton_place_id_none = new JRadioButton("Don't show place ID on map");
+        radiobutton_place_id_unique = new JRadioButton("Show place ID if name isn't unique");
+        radiobutton_place_id_all = new JRadioButton("Always show place ID");
+        buttongroup_place_id.add(radiobutton_place_id_none);
+        buttongroup_place_id.add(radiobutton_place_id_unique);
+        buttongroup_place_id.add(radiobutton_place_id_all);
+        constraints_l.gridy = ++constraints_r.gridy;
+        add(radiobutton_place_id_none, constraints_l);
+        constraints_l.gridy = ++constraints_r.gridy;
+        add(radiobutton_place_id_unique, constraints_l);
+        constraints_l.gridy = ++constraints_r.gridy;
+        add(radiobutton_place_id_all, constraints_l);
+        switch(world.get_show_place_id()){
+            case NONE:
+                buttongroup_place_id.setSelected(radiobutton_place_id_none.getModel(), true);
+                break;
+            default:
+            case UNIQUE:
+                buttongroup_place_id.setSelected(radiobutton_place_id_unique.getModel(), true);
+                break;
+            case ALL:
+                buttongroup_place_id.setSelected(radiobutton_place_id_all.getModel(), true);
+                break;
+        }
+        
+        
+        constraints_l.gridy = ++constraints_r.gridy;
         
         JButton button_cancel = new JButton("Cancel");
-        add(button_cancel);
+        add(button_cancel, constraints_l);
         button_cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -93,7 +153,7 @@ public class EditWorldDialog extends ActionDialog {
         });
         
         JButton button_ok = new JButton("Ok");
-        add(button_ok);
+        add(button_ok, constraints_r);
         button_ok.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -103,6 +163,7 @@ public class EditWorldDialog extends ActionDialog {
         });
         
         pack();
+        setResizable(false);
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
@@ -133,6 +194,11 @@ public class EditWorldDialog extends ActionDialog {
             if(!name_new.isEmpty()){
                 world.add_risk_level(new RiskLevel(name_new, risklevel_new_color.get_color()));
             }
+            
+            ButtonModel selection = buttongroup_place_id.getSelection();
+            if(selection == radiobutton_place_id_none.getModel()) world.set_show_place_id(World.ShowPlaceID_t.NONE);            
+            else if(selection == radiobutton_place_id_all.getModel()) world.set_show_place_id(World.ShowPlaceID_t.ALL);
+            else world.set_show_place_id(World.ShowPlaceID_t.UNIQUE);
         }
         getParent().repaint();
     }

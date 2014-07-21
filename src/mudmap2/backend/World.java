@@ -70,6 +70,8 @@ public class World {
     TreeMap<String, Integer> place_names;
     TreeMap<Integer, Layer> layers;
     
+    ShowPlaceID_t show_place_id;
+    
     /**
      * Loads a world from a file
      * @param _file world file
@@ -111,6 +113,8 @@ public class World {
         layers = new TreeMap<Integer, Layer>();
         places = new TreeMap<Integer, Place>();
         place_names = new TreeMap<String, Integer>();
+        
+        show_place_id = ShowPlaceID_t.UNIQUE;
     }
     
     /**
@@ -183,7 +187,9 @@ public class World {
                             risk_levels.get(rlid).set_description(description);
                             risk_levels.get(rlid).set_color(new Color(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4])));
                         }
-                    } 
+                    } else if(line.startsWith("show_place_id")){ // show_place_id (on the map)
+                        show_place_id = ShowPlaceID_t.valueOf(line.split(" ")[1]);
+                    }
                     
                     else if(line.startsWith("a ")){ // area id + name
                         cur_area = Integer.parseInt(line.split(" ")[1]);
@@ -315,6 +321,7 @@ public class World {
             outstream.println("wcol " + get_path_color().getRed() + " " + get_path_color().getGreen() + " " + get_path_color().getBlue());
             outstream.println("wcnd " + get_path_color_nstd().getRed() + " " + get_path_color_nstd().getGreen() + " " + get_path_color_nstd().getBlue());
             outstream.println("home " + get_home());
+            outstream.println("show_place_id " + get_show_place_id());
             
             // risk levels
             for(RiskLevel rl: risk_levels.values())
@@ -626,6 +633,28 @@ public class World {
      */
     public void set_path_color_nstd(Color color){
         path_color_nstd = color;
+    }
+    
+    public enum ShowPlaceID_t {
+        NONE, // don't show place ID on map
+        UNIQUE, // show place ID if name isn't unique
+        ALL // always show place ID
+    }
+    
+    /**
+     * Sets whether the place ID is shown on the map
+     * @param show 
+     */
+    public void set_show_place_id(ShowPlaceID_t show){
+        show_place_id = show;
+    }
+    
+    /**
+     * Gets the in which case the place ID is shown on the map
+     * @return 
+     */
+    public ShowPlaceID_t get_show_place_id(){
+        return show_place_id;
     }
     
     /**
