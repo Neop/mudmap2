@@ -61,6 +61,9 @@ for it to be able to receive keyboard events.
 The keys used here are not final and might not be optimal. Please let me
 know if you think that other keys should be used ;)
 
+ctrl+s							save currently shown world
+ctrl+o							show open world dialog
+
 			context menu key	show the context menu of the selected
 								place (like right click on that place)
 
@@ -69,7 +72,7 @@ p:								enable / disable place selection
 
 w/a/s/d 	arrow keys			shift the selection
 numpad numbers (without 5)		shift the selection
-e 			insert key			create / edit place at selection
+e, enter,	insert key			create / edit place at selection
 f								create or remove a placeholder place
 r 			delete key			remove selected place
 c								edit place comments
@@ -80,3 +83,8 @@ q								modify area of selected place. Note that
 								area will be created
 h, numpad 5, home key			go to home location
 l								show place list
+
+path creation shortcuts:
+shift + numpad 5				show create path dialog
+shift + numpad numbers			create path to adjacent place
+shift + arrow keys or w/a/s/d	create path to adjacent place

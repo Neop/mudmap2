@@ -622,6 +622,14 @@ public class WorldTab extends JPanel {
     }
     
     /**
+     * Gets the selected place or null
+     * @return place or null
+     */
+    public Place get_selected_place(){
+        return get_place(get_place_selection_x(), get_place_selection_y());
+    }
+    
+    /**
      * Gets the current tile size
      * @return tile size
      */
@@ -1479,7 +1487,7 @@ public class WorldTab extends JPanel {
             }
             
             @Override
-            public void keyPressed(KeyEvent arg0) {
+            public void keyPressed(KeyEvent arg0) {                
                 if(!arg0.isShiftDown() && !arg0.isControlDown()){ // ctrl and shift not pressed
                     switch(arg0.getKeyCode()){
                         // zoom the map
@@ -1579,9 +1587,10 @@ public class WorldTab extends JPanel {
 
                         // edit / add place
                         case KeyEvent.VK_INSERT:
+                        case KeyEvent.VK_ENTER:
                         case KeyEvent.VK_E:
                             if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                                Place place = parent.get_selected_place();
                                 PlaceDialog dlg;
                                 if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
                                 else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
@@ -1591,7 +1600,7 @@ public class WorldTab extends JPanel {
                         // create placeholder
                         case KeyEvent.VK_F:
                             if(parent.get_place_selection_enabled()){
-                                Place place = parent.world.get(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                Place place = parent.get_selected_place();
                                 // create placeholder or remove one
                                 if(place == null){
                                     parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
@@ -1611,14 +1620,14 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_DELETE:
                         case KeyEvent.VK_R:
                             if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                                Place place = parent.get_selected_place();
                                 if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
                             }
                             break;
                         // edit place comments
                         case KeyEvent.VK_C:
                             if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                                Place place = parent.get_selected_place();
                                 if(place != null){
                                     (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
                                     parent.update_infobar();
@@ -1627,7 +1636,7 @@ public class WorldTab extends JPanel {
                             break;
                         // modify area
                         case KeyEvent.VK_Q:
-                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                            Place place = parent.get_selected_place();
                             AreaDialog dlg = null;
                             // if no place is selected or selection disabled: create new area
                             if(place == null || !parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world);
@@ -1642,16 +1651,103 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_S: // save world
                             parent.save();
                             break;
-                        case KeyEvent.VK_O:
+                        case KeyEvent.VK_O: // open world
                             (new OpenWorldDialog((Mainwindow) parent.parent)).setVisible();
                             break;
                     }
+                } else if(arg0.isShiftDown()){
+                    Place place, other;
+                    switch(arg0.getKeyCode()){
+                        case KeyEvent.VK_NUMPAD8:
+                        case KeyEvent.VK_UP:
+                        case KeyEvent.VK_W: // add path to direction 'n'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("n") == null && other.get_exit("s") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "n", other, "s"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD9: // add path to direction 'ne'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() + 1);
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("ne") == null && other.get_exit("sw") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "ne", other, "sw"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD6:
+                        case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_D: // add path to direction 'e'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y());
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("e") == null && other.get_exit("w") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "e", other, "w"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("se") == null && other.get_exit("nw") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "se", other, "nw"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD2:
+                        case KeyEvent.VK_DOWN:
+                        case KeyEvent.VK_S: // add path to direction 's'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() - 1);
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("s") == null && other.get_exit("n") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "s", other, "n"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD1: // add path to direction 'sw'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() - 1);
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("sw") == null && other.get_exit("ne") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "sw", other, "ne"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD4:
+                        case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_A: // add path to direction 'w'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y());
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("w") == null && other.get_exit("e") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "w", other, "e"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD7: // add path to direction 'nw'
+                            place = parent.get_selected_place();
+                            other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() + 1);
+                            if(place != null && other != null){ // if places exist
+                                if(place.get_exit("nw") == null && other.get_exit("se") == null){ // if exits aren't occupied
+                                    place.connect_path(new Path(place, "nw", other, "se"));
+                                }
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD5: // open add path dialog
+                            (new PathConnectDialog(parent, parent.get_selected_place())).setVisible(true);
+                            break;
+                    }
+                    parent.repaint();
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent arg0) {}
-            
         }
         
         // constructs the context menu (on right click)
