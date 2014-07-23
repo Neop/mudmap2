@@ -99,6 +99,7 @@ public class PlaceListDialog extends ActionDialog{
         constraints.gridy = 1;
         JButton button_close = new JButton("Close");
         add(button_close, constraints);
+        getRootPane().setDefaultButton(button_close);
         button_close.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {

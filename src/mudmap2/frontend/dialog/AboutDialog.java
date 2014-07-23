@@ -47,7 +47,7 @@ public class AboutDialog extends ActionDialog {
 
     @Override
     void create() {
-                setLayout(new GridLayout(0, 1));
+        setLayout(new GridLayout(0, 1));
         
         add(new JLabel("MUD Map v2"));
         add(new JLabel("Version " + mudmap2.Mudmap2.get_version() + " " + mudmap2.Mudmap2.get_version_state()));
@@ -59,6 +59,7 @@ public class AboutDialog extends ActionDialog {
         
         JButton button_ok = new JButton("Ok");
         add(button_ok);
+        getRootPane().setDefaultButton(button_ok);
         button_ok.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

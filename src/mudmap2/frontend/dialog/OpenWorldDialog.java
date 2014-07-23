@@ -78,6 +78,13 @@ public class OpenWorldDialog implements ActionListener{
         }
     }
     
+    /**
+     * Opens the dialog
+     */
+    public void setVisible(){
+        create();
+    }
+    
     @Override
     public void actionPerformed(ActionEvent arg0) {
         create();

@@ -154,6 +154,7 @@ public class EditWorldDialog extends ActionDialog {
         
         JButton button_ok = new JButton("Ok");
         add(button_ok, constraints_r);
+        getRootPane().setDefaultButton(button_ok);
         button_ok.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
