@@ -178,17 +178,13 @@ public final class ScrollLabel extends JPanel implements Runnable{
                 if(Math.abs(x) >= 1.0 * string_width) next_message();
             }
         } else if(dtime > min_message_time) next_message();
-        
-        
                 
         g.clearRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
         
-        g.setColor(Color.BLACK);
-        g.drawString(current_text, x, y);
-        
-        
-        // x berechnen (in zeichenfkt, aus disp time
-        // in der zeichenfunktion: wenn zu lang: x benutzen, sonst nicht verschieben
+        if(current_text != null && !current_text.isEmpty()){
+            g.setColor(Color.BLACK);
+            g.drawString(current_text, x, y);
+        }
     }    
     
     @Override

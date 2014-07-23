@@ -329,8 +329,15 @@ public class World {
             
             // areas
             for(Area a: areas.values()){
-                outstream.println("a " + a.get_id() + " " + a.get_name());
-                outstream.println("acol " + a.get_color().getRed() + " " + a.get_color().getGreen() + " " + a.get_color().getBlue());
+                boolean is_in_use = false;
+                for(Place place: places.values()) if(place.get_area() == a){
+                    is_in_use = true;
+                    break;
+                }
+                if(is_in_use){
+                    outstream.println("a " + a.get_id() + " " + a.get_name());
+                    outstream.println("acol " + a.get_color().getRed() + " " + a.get_color().getGreen() + " " + a.get_color().getBlue());
+                }
             }
             
             // places
