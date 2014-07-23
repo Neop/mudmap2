@@ -1657,6 +1657,8 @@ public class WorldTab extends JPanel {
                             break;
                     }
                 } else if(arg0.isControlDown()){ // ctrl key pressed
+                    Place place, other;
+                    
                     switch(arg0.getKeyCode()){
                         case KeyEvent.VK_S: // save world
                             parent.save();
@@ -1664,13 +1666,10 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_O: // open world
                             (new OpenWorldDialog((Mainwindow) parent.parent)).setVisible();
                             break;
-                    }
-                } else if(arg0.isShiftDown()){
-                    Place place, other;
-                    switch(arg0.getKeyCode()){
+                    
                         case KeyEvent.VK_NUMPAD8:
                         case KeyEvent.VK_UP:
-                        case KeyEvent.VK_W: // add path to direction 'n'
+                        //case KeyEvent.VK_W: // add path to direction 'n'
                             place = parent.get_selected_place();
                             other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
                             if(place != null && other != null){ // if places exist
@@ -1690,7 +1689,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD6:
                         case KeyEvent.VK_RIGHT:
-                        case KeyEvent.VK_D: // add path to direction 'e'
+                        //case KeyEvent.VK_D: // add path to direction 'e'
                             place = parent.get_selected_place();
                             other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y());
                             if(place != null && other != null){ // if places exist
@@ -1710,7 +1709,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD2:
                         case KeyEvent.VK_DOWN:
-                        case KeyEvent.VK_S: // add path to direction 's'
+                        //case KeyEvent.VK_S: // add path to direction 's'
                             place = parent.get_selected_place();
                             other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() - 1);
                             if(place != null && other != null){ // if places exist
@@ -1730,7 +1729,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD4:
                         case KeyEvent.VK_LEFT:
-                        case KeyEvent.VK_A: // add path to direction 'w'
+                        //case KeyEvent.VK_A: // add path to direction 'w'
                             place = parent.get_selected_place();
                             other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y());
                             if(place != null && other != null){ // if places exist

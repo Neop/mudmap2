@@ -85,6 +85,6 @@ h, numpad 5, home key			go to home location
 l								show place list
 
 path creation shortcuts:
-shift + numpad 5				show create path dialog
-shift + numpad numbers			create path to adjacent place
-shift + arrow keys or w/a/s/d	create path to adjacent place
+ctrl + numpad 5				show create path dialog
+ctrl + numpad numbers			create path to adjacent place
+ctrl + arrow keys				create path to adjacent place
