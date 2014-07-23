@@ -26,7 +26,6 @@ package mudmap2.frontend.GUIElement;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
@@ -100,6 +99,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
      * @return 
      */
     public String getText(){
+        if(default_text == null) return "";
         return default_text;
     }
     
@@ -156,32 +156,31 @@ public final class ScrollLabel extends JPanel implements Runnable{
     }
 
     @Override
-    public void paintComponent(Graphics g) {
-        Rectangle clipBounds = g.getClipBounds();
-        
-        int y = (int) ((clipBounds.getHeight() - g.getFontMetrics().getHeight()) / 2) + g.getFontMetrics().getHeight();
-        
-        int string_width = g.getFontMetrics().stringWidth(current_text);
-        int x = 0;
-        
-        long dtime = get_time_ms() - message_start_time; // time difference since message start
-        
-        // if string is too long: move the string
-        if(string_width > clipBounds.getWidth()){
-            if(dtime < wait_time){
-                x = 0;
-            } else {
-                //double dtime_perc = ((double) (dtime - wait_time) / (min_message_time - wait_time)); // time difference in percent
-                double dx_perc = (double)(dtime - wait_time) / 5000;
-                //x = (int) -((double) (string_width - clipBounds.getWidth()) * dx_perc);
-                x = (int) (-dx_perc * 200);
-                if(Math.abs(x) >= 1.0 * string_width) next_message();
-            }
-        } else if(dtime > min_message_time) next_message();
-                
-        g.clearRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
-        
+    public void paintComponent(Graphics g) {        
         if(current_text != null && !current_text.isEmpty()){
+            Rectangle clipBounds = g.getClipBounds();
+            int y = (int) ((clipBounds.getHeight() - g.getFontMetrics().getHeight()) / 2) + g.getFontMetrics().getHeight();
+
+            int string_width = g.getFontMetrics().stringWidth(current_text);
+            int x = 0;
+
+            long dtime = get_time_ms() - message_start_time; // time difference since message start
+
+            // if string is too long: move the string
+            if(string_width > clipBounds.getWidth()){
+                if(dtime < wait_time){
+                    x = 0;
+                } else {
+                    //double dtime_perc = ((double) (dtime - wait_time) / (min_message_time - wait_time)); // time difference in percent
+                    double dx_perc = (double)(dtime - wait_time) / 5000;
+                    //x = (int) -((double) (string_width - clipBounds.getWidth()) * dx_perc);
+                    x = (int) (-dx_perc * 200);
+                    if(Math.abs(x) >= 1.0 * string_width) next_message();
+                }
+            } else if(dtime > min_message_time) next_message();
+
+            g.clearRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
+
             g.setColor(Color.BLACK);
             g.drawString(current_text, x, y);
         }
