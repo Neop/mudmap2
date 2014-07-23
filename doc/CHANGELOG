@@ -1,2 +1,14 @@
 2.0.0 beta
 - first release
+
+2.0.1 beta
+- fixed: place id got added to place name in edit place dialog
+- allowed nameless places / empty names
+- place ids will be displayed on the map for places without unique name
+(change this behavior in edit world dialog)
+- new keyboard commands:
+ - selection shifting by numberpad
+ - add paths to adjacent places by ctrl + numberpad or ctrl + arrow key
+ - ctrl + s to save a world, ctr + o open a world
+- text in infobar moves, if it's too long to be displayed
+- unused areas won't be saved anymore
