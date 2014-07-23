@@ -60,7 +60,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -82,6 +81,7 @@ import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldManager;
+import mudmap2.frontend.GUIElement.ScrollLabel;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathConnectDialog;
@@ -111,7 +111,7 @@ public class WorldTab extends JPanel {
     WorldPanel worldpanel;
     JSlider slider_zoom;
     JPanel panel_south;
-    JLabel label_infobar;
+    ScrollLabel label_infobar;
     
     // history of shown position
     LinkedList<WorldCoordinate> positions;
@@ -293,8 +293,9 @@ public class WorldTab extends JPanel {
         
         constraints.gridx++;
         constraints.weightx = 1.0;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        panel_south.add(label_infobar = new JLabel(), constraints);
+        constraints.fill = GridBagConstraints.BOTH;
+        panel_south.add(label_infobar = new ScrollLabel(), constraints);
+        label_infobar.start_thread();
         
         // set default selected place to hte center place
         place_selected_x = (int) Math.round(get_cur_position().get_x());
@@ -384,6 +385,15 @@ public class WorldTab extends JPanel {
             write_meta();
             world.write_world();
         }
+        show_message("World saved");
+    }
+    
+    /**
+     * Show message in infobar
+     * @param message 
+     */
+    public void show_message(String message){
+        label_infobar.show_message(message);
     }
     
     // ========================== Place selection ==============================
