@@ -34,8 +34,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -83,6 +83,7 @@ import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AreaDialog;
+import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
@@ -863,9 +864,7 @@ public class WorldTab extends JPanel {
             passive = _passive;
             setFocusable(true);
             requestFocusInWindow();
-            addFocusListener(new FocusListener() {
-                @Override
-                public void focusGained(FocusEvent arg0) {}
+            addFocusListener(new FocusAdapter() {
                 @Override
                 public void focusLost(FocusEvent arg0) {
                     if(parent.get_forced_focus()) requestFocusInWindow();
@@ -1481,82 +1480,73 @@ public class WorldTab extends JPanel {
             
             @Override
             public void keyPressed(KeyEvent arg0) {
-                switch(arg0.getKeyCode()){
-                    // zoom the map
-                    case KeyEvent.VK_PLUS:
-                    case KeyEvent.VK_SUBTRACT:
-                    case KeyEvent.VK_PAGE_UP:
-                        parent.tile_size_increment();
-                        break;
-                    case KeyEvent.VK_ADD:
-                    case KeyEvent.VK_MINUS:
-                    case KeyEvent.VK_PAGE_DOWN:
-                        parent.tile_size_decrement();
-                        break;
+                if(!arg0.isShiftDown() && !arg0.isControlDown()){ // ctrl and shift not pressed
+                    switch(arg0.getKeyCode()){
+                        // zoom the map
+                        case KeyEvent.VK_PLUS:
+                        case KeyEvent.VK_SUBTRACT:
+                        case KeyEvent.VK_PAGE_UP:
+                            parent.tile_size_increment();
+                            break;
+                        case KeyEvent.VK_ADD:
+                        case KeyEvent.VK_MINUS:
+                        case KeyEvent.VK_PAGE_DOWN:
+                            parent.tile_size_decrement();
+                            break;
 
-                    // enable / disable place selection
-                    case KeyEvent.VK_P:
-                        parent.set_place_selection_toggle();
-                        break;
+                        // enable / disable place selection
+                        case KeyEvent.VK_P:
+                            parent.set_place_selection_toggle();
+                            break;
 
-                    // shift place selection - wasd
-                    case KeyEvent.VK_NUMPAD8:
-                        if(arg0.isShiftDown() || arg0.isControlDown()) break; // don't use numpad, if shift or ctrl is pressed
-                    case KeyEvent.VK_UP:
-                    case KeyEvent.VK_W:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
-                        break;
-                    case KeyEvent.VK_NUMPAD4:
-                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
-                    case KeyEvent.VK_LEFT:
-                    case KeyEvent.VK_A:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
-                        break;
-                    case KeyEvent.VK_NUMPAD2:
-                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
-                    case KeyEvent.VK_DOWN:
-                    case KeyEvent.VK_S:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
-                        break;
-                    case KeyEvent.VK_NUMPAD6:
-                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
-                    case KeyEvent.VK_RIGHT:
-                    case KeyEvent.VK_D:
-                        if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
-                        break;
-                        
-                    // diagonal movement
-                    case KeyEvent.VK_NUMPAD1:
-                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                        // shift place selection - wasd
+                        case KeyEvent.VK_NUMPAD8:
+                        case KeyEvent.VK_UP:
+                        case KeyEvent.VK_W:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
+                            break;
+                        case KeyEvent.VK_NUMPAD4:
+                        case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_A:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
+                            break;
+                        case KeyEvent.VK_NUMPAD2:
+                        case KeyEvent.VK_DOWN:
+                        case KeyEvent.VK_S:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
+                            break;
+                        case KeyEvent.VK_NUMPAD6:
+                        case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_D:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
+                            break;
+
+                        // diagonal movement
+                        case KeyEvent.VK_NUMPAD1:
                             if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, -1);
-                        break;
-                    case KeyEvent.VK_NUMPAD3:
-                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            break;
+                        case KeyEvent.VK_NUMPAD3:
                             if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, -1);
-                        break;
-                    case KeyEvent.VK_NUMPAD7:
-                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            break;
+                        case KeyEvent.VK_NUMPAD7:
                             if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, +1);
-                        break;
-                    case KeyEvent.VK_NUMPAD9:
-                        if(!arg0.isShiftDown() && !arg0.isControlDown()) 
+                            break;
+                        case KeyEvent.VK_NUMPAD9:
                             if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, +1);
-                        break;
-                        
-                    // goto home
-                    case KeyEvent.VK_NUMPAD5:
-                        if(arg0.isShiftDown() || arg0.isControlDown()) break;
-                    case KeyEvent.VK_H:
-                    case KeyEvent.VK_HOME:
-                        parent.goto_home();
-                        break;
-                        
-                    // show place list
-                    case KeyEvent.VK_L:
-                        (new PlaceListDialog(parent, passive)).setVisible(true);
-                        break;
-                    
-                    
+                            break;
+
+                        // goto home
+                        case KeyEvent.VK_NUMPAD5:
+                        case KeyEvent.VK_H:
+                        case KeyEvent.VK_HOME:
+                            parent.goto_home();
+                            break;
+
+                        // show place list
+                        case KeyEvent.VK_L:
+                            (new PlaceListDialog(parent, passive)).setVisible(true);
+                            break;
+                    }
                 }
             }
         }
@@ -1577,74 +1567,85 @@ public class WorldTab extends JPanel {
 
             @Override
             public void keyPressed(KeyEvent arg0) {
-                switch(arg0.getKeyCode()){
-                    // show context menu
-                    case KeyEvent.VK_CONTEXT_MENU:
-                        if(parent.get_place_selection_enabled()){
-                            TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
-                            context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
-                        }
-                        break;
+                if(!arg0.isShiftDown() && !arg0.isControlDown()){ // ctrl and shift not pressed
+                    switch(arg0.getKeyCode()){
+                        // show context menu
+                        case KeyEvent.VK_CONTEXT_MENU:
+                            if(parent.get_place_selection_enabled()){
+                                TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
+                            }
+                            break;
 
-                    // edit / add place
-                    case KeyEvent.VK_INSERT:
-                    case KeyEvent.VK_E:
-                        if(parent.get_place_selection_enabled()){
-                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
-                            PlaceDialog dlg;
-                            if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
-                            else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
-                            dlg.setVisible(true);
-                        }
-                        break;
-                    // create placeholder
-                    case KeyEvent.VK_F:
-                        if(parent.get_place_selection_enabled()){
-                            Place place = parent.world.get(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
-                            // create placeholder or remove one
-                            if(place == null){
-                                parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
-                            } else if(place.get_name().equals(Place.placeholder_name)){
-                                try {
-                                    place.remove();
-                                } catch (RuntimeException ex) {
-                                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                                } catch (PlaceNotFoundException ex) {
-                                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                        // edit / add place
+                        case KeyEvent.VK_INSERT:
+                        case KeyEvent.VK_E:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                                PlaceDialog dlg;
+                                if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
+                                else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                dlg.setVisible(true);
+                            }
+                            break;
+                        // create placeholder
+                        case KeyEvent.VK_F:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.world.get(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                // create placeholder or remove one
+                                if(place == null){
+                                    parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                } else if(place.get_name().equals(Place.placeholder_name)){
+                                    try {
+                                        place.remove();
+                                    } catch (RuntimeException ex) {
+                                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                    } catch (PlaceNotFoundException ex) {
+                                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                 }
                             }
-                        }
-                        parent.repaint();
-                        break;
-                    // remove place
-                    case KeyEvent.VK_DELETE:
-                    case KeyEvent.VK_R:
-                        if(parent.get_place_selection_enabled()){
-                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
-                            if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
-                        }
-                        break;
-                    // edit place comments
-                    case KeyEvent.VK_C:
-                        if(parent.get_place_selection_enabled()){
-                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
-                            if(place != null){
-                                (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
-                                parent.update_infobar();
+                            parent.repaint();
+                            break;
+                        // remove place
+                        case KeyEvent.VK_DELETE:
+                        case KeyEvent.VK_R:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                                if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
                             }
-                        }
-                        break;
-                    // modify area
-                    case KeyEvent.VK_Q:
-                        Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
-                        AreaDialog dlg = null;
-                        // if no place is selected or selection disabled: create new area
-                        if(place == null || !parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world);
-                        // else modify area of selected place
-                        else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
-                        // show dialog
-                        if(dlg != null) dlg.setVisible(true);
-                        break;
+                            break;
+                        // edit place comments
+                        case KeyEvent.VK_C:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                                if(place != null){
+                                    (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
+                                    parent.update_infobar();
+                                }
+                            }
+                            break;
+                        // modify area
+                        case KeyEvent.VK_Q:
+                            Place place = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y());
+                            AreaDialog dlg = null;
+                            // if no place is selected or selection disabled: create new area
+                            if(place == null || !parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world);
+                            // else modify area of selected place
+                            else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
+                            // show dialog
+                            if(dlg != null) dlg.setVisible(true);
+                            break;
+                    }
+                } else if(arg0.isControlDown()){ // ctrl key pressed
+                    switch(arg0.getKeyCode()){
+                        case KeyEvent.VK_S: // save world
+                            parent.save();
+                            break;
+                        case KeyEvent.VK_O:
+                            (new OpenWorldDialog((Mainwindow) parent.parent)).setVisible();
+                            break;
+                    }
                 }
             }
 
