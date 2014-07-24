@@ -13,7 +13,7 @@ Sourceforge (download packages, MUD Map v1 + v2): https://sourceforge.net/projec
 
 MUD Map v1 user manual / quick start guide: http://mudmap.sf.net
 
-Developer contact deatails can be found in doc/README.
+Developer contact details can be found in doc/README.
 
 If you encounter any bugs or other problems please contact me or write
 a bug report on GitHub (https://github.com/Neop/mudmap2/issues), so I
@@ -26,11 +26,7 @@ report on GitHub.
 
 Things that aren't implemented yet:
 - curved paths
-- moveable places (copy-paste)
-- areas can't be removed from the worlds
 - portable mode
-- an unimportant, but interesting feature that I don't want to talk
-about, yet ;)
 
 If you really need one of these things, please use MUD Map v1 or contact
 me.
@@ -61,8 +57,7 @@ If you've still questions, feel free to contact me ;)
 ###Keyboard commands
 Keyboard commands can be used to navigate and alter the map if keyboard
 place selection is enabled by pressing p. A red box should be visible on
-the screen. You might have to click at the map once after you opened it
-for it to be able to receive keyboard events.
+the screen. You might have to click at the map once after you opened it.
 
 The keys used here are not final and might not be optimal. Please let me
 know if you think that other keys should be used ;)

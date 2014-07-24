@@ -453,4 +453,22 @@ public class Place extends LayerElement implements Comparable<Place> {
         }
         return false;
     }
+    
+    /**
+     * Creates a new place from this place
+     * a new id will be created and connections to other places not copied
+     * @return
+     */
+    public Place duplicate(){
+        Place place = new Place(name, get_x(), get_y(), null);
+        
+        place.area = area;
+        place.rec_lvl_max = rec_lvl_max;
+        place.rec_lvl_min = rec_lvl_min;
+        place.risk_level = risk_level;
+        place.flags = (TreeMap<String, Boolean>) flags.clone();
+        place.comments = (LinkedList<String>) comments.clone();
+        
+        return place;
+    }
 }

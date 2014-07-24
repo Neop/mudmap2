@@ -42,6 +42,7 @@ public class PlaceRemoveDialog implements ActionListener {
     World world;
     Place place;
     HashSet<Place> places;
+    boolean places_removed = false;
     
     public PlaceRemoveDialog(JFrame _parent, World _world, Place _place){        
         parent = _parent;
@@ -63,6 +64,7 @@ public class PlaceRemoveDialog implements ActionListener {
             ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove " + places.size() + " places from the map? This can not be undone!", "Remove places", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             
         if(ret == 0){
+            places_removed = true;
             try {
                 if(place != null) // remove single place
                     world.remove(place);
@@ -76,6 +78,14 @@ public class PlaceRemoveDialog implements ActionListener {
                 Logger.getLogger(PlaceRemoveDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    /**
+     * Returns true, if ok was clicked
+     * @return 
+     */
+    public boolean get_places_removed(){
+        return places_removed;
     }
 
     @Override

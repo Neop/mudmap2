@@ -1,6 +1,3 @@
-2.0.0 beta
-- first release
-
 2.0.1 beta
 - fixed: place id got added to place name in edit place dialog
 - allowed nameless places / empty names
@@ -10,10 +7,14 @@
  - selection shifting by numberpad
  - add paths to adjacent places by ctrl + numberpad or ctrl + arrow key
  - ctrl + s to save a world, ctr + o open a world
-- text in infobar moves, if it's too long to be displayed
+- text in infobar moves if it's too long to be displayed
 - unused areas won't be saved anymore
 - muliple places can be selected by mouse and keyboard
  - delete multiple places
  - change their area
+ - copy-paste and cut-paste
 - AreaDialog now supports the creation of a new area, even if the place
  already has one
+
+2.0.0 beta
+- first release

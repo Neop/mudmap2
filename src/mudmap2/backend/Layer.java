@@ -54,7 +54,7 @@ public class Layer {
     }
     
     /**
-     * Sets the element at a positin
+     * Puts the element at a position but doesn't add it to the world
      * @param x x coordinate
      * @param y y coordinate
      * @param element new element
@@ -67,7 +67,7 @@ public class Layer {
     }
     
     /**
-     * Adds an element to the layer, uses the position of the element
+     * Adds an element to the layer (but not to the world), uses the position of the element
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
@@ -136,7 +136,7 @@ public class Layer {
     }
     
     /**
-     * Removes an element from the layer
+     * Removes an element from the layer but not from the world
      * @param element 
      * @throws mudmap2.backend.Layer.PlaceNotFoundException 
      */
@@ -145,7 +145,11 @@ public class Layer {
         // element on the layer before placing the new one
         LayerElement el_bef = get(element.get_x(), element.get_y());
         if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.get_x() + ", " + element.get_y() + ")");
-        elements.get(element.get_x()).remove(element.get_y());
+        if(elements != null){
+            if(elements.get(element.get_x()) != null){
+                elements.get(element.get_x()).remove(element.get_y());
+            }
+        }
     }
     
     /**

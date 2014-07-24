@@ -20,11 +20,7 @@ report on GitHub.
 
 Things that aren't implemented yet:
 - curved paths
-- moveable places (copy-paste)
-- areas can't be removed from the worlds
 - portable mode
-- an unimportant, but interesting feature that I don't want to talk
-about, yet ;)
 
 If you really need one of these things, please use MUD Map v1 or contact
 me.
@@ -90,9 +86,13 @@ ctrl + numpad numbers			create path to adjacent place
 ctrl + arrow keys				create path to adjacent place
 
 place selection (to remove / move / copy many places at once):
-ctrl + a						select everything on current layer
-ctrl + click					add / remove place to selection
+escape							deselect everything
 space							add / remove place selected by cursor
+ctrl + click					add / remove place to selection
+ctrl + a						select everything on current layer
 shift + click					box selection
 shift + arrow keys / numpad / w/a/s/d	box selection
-escape							deselect everything
+
+ctrl + x						cut places
+ctrl + c						copy places
+ctrl + v						paste places

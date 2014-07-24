@@ -1331,6 +1331,9 @@ public class WorldTab extends JPanel {
                 ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
                 tile_positions = new ArrayList<Pair<Integer, Integer>>();
             }
+            
+            // get the locations of copied places
+            HashSet<Pair<Integer, Integer>> copied_place_locations = mudmap2.Mudmap2.get_copy_place_locations();
 
             // ------------------ draw the tiles / places ----------------------
             for(int tile_x = -1; tile_x < screen_width / tile_size + 1; ++tile_x){
@@ -1513,6 +1516,36 @@ public class WorldTab extends JPanel {
                                 String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
                                 g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                             }
+                        }
+                    }
+                    
+                    if(copied_place_locations != null){
+                        boolean location_found = false;
+                        for(Pair<Integer, Integer> location: copied_place_locations){
+                            if(location.first == place_x - parent.get_place_selection_x() && location.second == place_y - parent.get_place_selection_y()){
+                                location_found = true;
+                                break;
+                            }
+                        }
+                        
+                        if(location_found){
+                            int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
+                            int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+                            
+                            g.setColor(Color.BLUE);
+                            ((Graphics2D)g).setStroke(new BasicStroke((selection_stroke_width)));
+
+                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width + tile_size / 4));
+                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width + tile_size / 4), (int) (place_y_px + selection_stroke_width));
+
+                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width + tile_size / 4));
+                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + selection_stroke_width));
+
+                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
+                            g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));                         
+
+                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
+                            g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - selection_stroke_width + tile_size));
                         }
                     }
 
@@ -1811,7 +1844,12 @@ public class WorldTab extends JPanel {
                                 }
                             } else { // places selected
                                 HashSet<Place> place_group = parent.get_place_group_selection();
-                                if(place_group != null) (new PlaceRemoveDialog(parent.parent, parent.world, place_group)).show();
+                                if(place_group != null){
+                                    PlaceRemoveDialog dlg = new PlaceRemoveDialog(parent.parent, parent.world, place_group);
+                                    dlg.show();
+                                    // reset selection, if places were removed
+                                    if(dlg.get_places_removed()) parent.place_group_reset();
+                                }
                             }
                             break;
                         // edit place comments
@@ -1854,8 +1892,52 @@ public class WorldTab extends JPanel {
                             (new OpenWorldDialog((Mainwindow) parent.parent)).setVisible();
                             break;
                     
-                        case KeyEvent.VK_A:
+                        case KeyEvent.VK_A: // select all places
                             parent.place_group_set(parent.get_world().get_layer(parent.get_cur_position().get_layer()).get_places());
+                            break;
+                        case KeyEvent.VK_X: // cut selected places
+                            if(!parent.get_place_group_selection().isEmpty()){ // cut group selection
+                                mudmap2.Mudmap2.cut(parent.place_group, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                parent.show_message(parent.place_group.size() + " places cut");
+                                parent.place_group_reset();
+                            } else if(parent.get_selected_place() != null){ // cut cursor selection
+                                HashSet<Place> tmp_selection = new HashSet<Place>();
+                                tmp_selection.add(parent.get_selected_place());
+                                mudmap2.Mudmap2.cut(tmp_selection, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                parent.show_message("1 place cut");
+                            } else parent.show_message("No places cut: selection empty");                   
+                            break;
+                        case KeyEvent.VK_C: // copy selected places
+                            if(!parent.get_place_group_selection().isEmpty()){ // copy group selection
+                                mudmap2.Mudmap2.copy(parent.place_group, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                parent.show_message(parent.place_group.size() + " places copied");
+                                parent.place_group_reset();
+                            } else if(parent.get_selected_place() != null){ // copy cursor selection
+                                HashSet<Place> tmp_selection = new HashSet<Place>();
+                                tmp_selection.add(parent.get_selected_place());
+                                mudmap2.Mudmap2.copy(tmp_selection, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                parent.show_message("1 place copied");
+                            } else {
+                                mudmap2.Mudmap2.reset_copy();
+                                parent.show_message("No places copied: selection empty");
+                            }
+                            break;
+                        case KeyEvent.VK_V: // paste copied / cut places
+                            if(mudmap2.Mudmap2.has_copy_places()){
+                                if(mudmap2.Mudmap2.can_paste(parent.get_place_selection_x(), parent.get_place_selection_y(), parent.get_world().get_layer(parent.get_cur_position().get_layer()))){
+                                    int paste_num = mudmap2.Mudmap2.get_copy_places().size();
+                                    if(mudmap2.Mudmap2.paste(parent.get_place_selection_x(), parent.get_place_selection_y(), parent.get_world().get_layer(parent.get_cur_position().get_layer()))){
+                                        parent.show_message(paste_num + " places pasted");
+                                    } else {
+                                        parent.show_message("No places pasted");
+                                    }
+                                } else {
+                                    parent.show_message("Can't paste: not enough free space on map");
+                                }
+                            } else {
+                                mudmap2.Mudmap2.reset_copy();
+                                parent.show_message("Can't paste: no places cut or copied");
+                            }
                             break;
                             
                         case KeyEvent.VK_NUMPAD8:

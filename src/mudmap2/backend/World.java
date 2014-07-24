@@ -438,10 +438,18 @@ public class World {
         Layer l = get_layer(layer);
         if(l == null) layers.put(layer, l = new Layer(layer, this));
         
+        // remove from old layer and world
+        if(place.get_layer() != null){ 
+            // if place belongs to a different world
+            if(place.get_layer().get_world() != this) place.get_layer().get_world().remove(place);
+            else place.get_layer().remove(place);
+        }
+        
         // add to layer
         place.set_layer(l);
         l.put(place, x, y);
-        // add to place list
+        
+        // add to place list of the world
         places.put(place.get_id(), place);
         if(!place_names.containsKey(place.get_name())) place_names.put(place.get_name(), 1);
         else place_names.put(place.get_name(), place_names.get(place.get_name()) + 1);
