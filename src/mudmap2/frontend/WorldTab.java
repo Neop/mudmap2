@@ -147,6 +147,10 @@ public class WorldTab extends JPanel {
     final boolean passive;
     
     LinkedList<PlaceSelectionListener> place_selection_listeners;
+    
+    // place (group) selection
+    WorldCoordinate place_group_shift_start, place_group_shift_end;
+    HashSet<Place> place_group;
 
     // ============================= Methods ===================================
     
@@ -196,6 +200,7 @@ public class WorldTab extends JPanel {
     
     /**
      * Clones the WorldTab
+     * @return 
      */
     @Override
     public Object clone(){
@@ -228,6 +233,8 @@ public class WorldTab extends JPanel {
         place_selection_enabled = place_selection_enabled_default;
         
         tile_center_color = new Color(207, 190, 134);
+        
+        place_group = new HashSet<Place>();
     }
     
     /**
@@ -757,6 +764,130 @@ public class WorldTab extends JPanel {
         public void placeSelected(Place p);
         // gets called, when the place selection changes to null
         public void placeDeselected(Layer layer, int x, int y);
+    }
+    
+    // ========================= place (group) selection =======================
+    /**
+     * Clears the shift selection box
+     */
+    private void place_group_shift_reset_selection(){
+        place_group_shift_end = place_group_shift_start = null;
+    }
+    
+    /**
+     * Modifies the shift selection box (eg on shift + direction key)
+     * @param x new coordinate
+     * @param y new coordinate
+     */
+    private void place_group_shift_modify_selection(int x, int y){
+        place_group.clear();
+        place_group_shift_end = new WorldCoordinate(get_cur_position().get_layer(), x, y);
+        // reset if layer changed
+        if(place_group_shift_start != null && place_group_shift_start.get_layer() != place_group_shift_end.get_layer()) place_group_shift_start = null;
+        // set start, if not set
+        if(place_group_shift_start == null) place_group_shift_start = place_group_shift_end;
+    }
+    
+    /**
+     * Moves the shift selectino to the selected places list
+     */
+    private void place_group_shift_selection_to_list(){
+        if(place_group_shift_end != null && place_group_shift_start != null){
+            int x1 = (int) Math.round(place_group_shift_end.get_x());
+            int x2 = (int) Math.round(place_group_shift_start.get_x());
+            int y1 = (int) Math.round(place_group_shift_end.get_y());
+            int y2 = (int) Math.round(place_group_shift_start.get_y());
+            
+            int x_min = Math.min(x1, x2);
+            int x_max = Math.max(x1, x2);
+            int y_min = Math.min(y1, y2);
+            int y_max = Math.max(y1, y2);
+            
+            Layer layer = world.get_layer(place_group_shift_end.get_layer());
+            
+            for(int x = x_min; x <= x_max; ++x){
+                for(int y = y_min; y <= y_max; ++y){
+                    Place pl = (Place) layer.get(x, y);
+                    if(pl != null) place_group.add(pl);
+                }
+            }
+        }
+        place_group_shift_reset_selection();
+    }
+    
+    /**
+     * adds a place to the place selection list (eg on ctrl + click)
+     * @param pl 
+     */
+    private void place_group_add(Place pl){
+        place_group_shift_selection_to_list();
+        // clear list, if new place is on a different layer
+        if(!place_group.isEmpty() && place_group.iterator().next().get_layer() != pl.get_layer()) place_group.clear();
+        if(pl != null){
+            if(place_group.contains(pl)) place_group.remove(pl);
+            else place_group.add(pl);
+        }
+    }
+    
+    /**
+     * Sets the selection to a new set
+     * @param set 
+     */
+    private void place_group_set(HashSet<Place> set){
+        place_group.clear();
+        place_group = set;
+    }
+    
+    /**
+     * Returns true, if places are selected
+     * @return 
+     */
+    private boolean has_place_group_selection(){
+        return (place_group_shift_start != null && place_group_shift_end != null) || !place_group.isEmpty();
+    }
+    
+    /**
+     * Clears the selected places list and the shift selection
+     */
+    private void place_group_reset(){
+        place_group.clear();
+        place_group_shift_reset_selection();
+    }
+    
+    /**
+     * gets all selected places
+     * @return 
+     */
+    private HashSet<Place> get_place_group_selection(){
+        if(place_group_shift_start != null) place_group_shift_selection_to_list();
+        return place_group;
+    }
+    
+    /**
+     * Returns true, if a place is selected by group selection
+     * @param place
+     * @return 
+     */
+    private boolean place_group_selected(Place place){
+        if(place != null){
+            if(place_group_shift_end != null && place_group_shift_start != null 
+                && place_group_shift_end.get_layer() == place.get_layer().get_id()){
+                int x1 = (int) Math.round(place_group_shift_end.get_x());
+                int x2 = (int) Math.round(place_group_shift_start.get_x());
+                int y1 = (int) Math.round(place_group_shift_end.get_y());
+                int y2 = (int) Math.round(place_group_shift_start.get_y());
+
+                int x_min = Math.min(x1, x2);
+                int x_max = Math.max(x1, x2);
+                int y_min = Math.min(y1, y2);
+                int y_max = Math.max(y1, y2);
+
+                if(place.get_x() >= x_min && place.get_x() <= x_max 
+                    && place.get_y() >= y_min && place.get_y() <= y_max) return true;
+            }
+            if(place_group.contains(place)) return true;
+        }
+        return false;
     }
     
     /**
@@ -1348,11 +1479,17 @@ public class WorldTab extends JPanel {
                                 }
                             }
                         }
+                        
+                        // mark place group selection
+                        if(parent.place_group_selected(cur_place)){
+                            g.setColor(new Color(255, 255, 255, 128));
+                            g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
+                        }
 
                         // draw exits
                         if(tile_size >= 20){
                             g.setColor(parent.world.get_path_color());
-                            Integer exit_x_offset = new Integer(0), exit_y_offset = new Integer(0);
+                            Integer exit_x_offset = 0, exit_y_offset = 0;
                             g.setColor(parent.world.get_path_color());
                             boolean up = false, down = false;
 
@@ -1414,7 +1551,6 @@ public class WorldTab extends JPanel {
                 g.drawImage(image_path, 0, 0, null);
                 graphic_path.dispose();
             }
-
         }
         
         // ========================= Listeners and context menu ================
@@ -1426,8 +1562,10 @@ public class WorldTab extends JPanel {
             @Override
             public void mouseClicked(MouseEvent arg0) {
                 if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
-                    // set place selection to coordinates if keyboard selection is enabled
-                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    if(!arg0.isShiftDown()){ // left click + hift gets handled in active listener
+                        // set place selection to coordinates if keyboard selection is enabled
+                        parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    }
                 }
             }
         }
@@ -1443,11 +1581,28 @@ public class WorldTab extends JPanel {
                     // show context menu
                     TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
+                } else if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
+                    if(arg0.isControlDown()){ // left click + ctrl
+                        Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                        if(place != null) parent.place_group_add(place);
+                    } else if(!arg0.isShiftDown()) { // left click
+                        parent.place_group_reset();
+                        if(arg0.getClickCount() > 1){ // double click
+                            Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                            if(place != null) (new PlaceDialog(parent.parent, parent.world, place)).setVisible(true);
+                        }
+                    }
                 }
+                repaint();
             }
 
             @Override
             public void mousePressed(MouseEvent arg0) {
+                if(!arg0.isControlDown() && arg0.isShiftDown()){ // left click + shift
+                    parent.place_group_shift_modify_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    // has to be used after this -> not handled by passive listener
+                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                }
                 requestFocusInWindow();
             }
 
@@ -1474,7 +1629,11 @@ public class WorldTab extends JPanel {
                 if(parent.mouse_in_panel){
                     double dx = (double) (arg0.getX() - parent.mouse_x_previous) / parent.get_tile_size();
                     double dy = (double) (arg0.getY() - parent.mouse_y_previous) / parent.get_tile_size();
-                    parent.get_cur_position().move(-dx , dy);
+                    if(!arg0.isShiftDown())
+                        parent.get_cur_position().move(-dx , dy);
+                    else {
+                        parent.place_group_shift_modify_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    }
                     parent.repaint();
                 }
                 parent.mouse_x_previous = arg0.getX();
@@ -1499,6 +1658,9 @@ public class WorldTab extends JPanel {
             @Override
             public void keyPressed(KeyEvent arg0) {                
                 if(!arg0.isShiftDown() && !arg0.isControlDown()){ // ctrl and shift not pressed
+                    int x_bef = parent.get_place_selection_x();
+                    int y_bef = parent.get_place_selection_y();
+                    
                     switch(arg0.getKeyCode()){
                         // zoom the map
                         case KeyEvent.VK_PLUS:
@@ -1564,6 +1726,19 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_L:
                             (new PlaceListDialog(parent, passive)).setVisible(true);
                             break;
+                            
+                        // reset place group selection
+                        case KeyEvent.VK_ESCAPE:
+                            parent.place_group_reset();
+                            break;
+                    }
+                    
+                    int x_sel = parent.get_place_selection_x();
+                    int y_sel = parent.get_place_selection_y();
+                    
+                    // change group selection, if place selection changed
+                    if(x_sel != x_bef || y_sel != y_bef){
+                        if(parent.place_group_shift_start != null) parent.place_group_shift_selection_to_list();
                     }
                 }
             }
@@ -1629,9 +1804,14 @@ public class WorldTab extends JPanel {
                         // remove place
                         case KeyEvent.VK_DELETE:
                         case KeyEvent.VK_R:
-                            if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_selected_place();
-                                if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
+                            if(!parent.has_place_group_selection()){ // no places selected
+                                if(parent.get_place_selection_enabled()){
+                                    Place place = parent.get_selected_place();
+                                    if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
+                                }
+                            } else { // places selected
+                                HashSet<Place> place_group = parent.get_place_group_selection();
+                                if(place_group != null) (new PlaceRemoveDialog(parent.parent, parent.world, place_group)).show();
                             }
                             break;
                         // edit place comments
@@ -1647,13 +1827,20 @@ public class WorldTab extends JPanel {
                         // modify area
                         case KeyEvent.VK_Q:
                             Place place = parent.get_selected_place();
-                            AreaDialog dlg = null;
-                            // if no place is selected or selection disabled: create new area
-                            if(place == null || !parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world);
-                            // else modify area of selected place
-                            else if(parent.get_place_selection_enabled()) dlg = new AreaDialog(parent.parent, parent.world, place);
-                            // show dialog
-                            if(dlg != null) dlg.setVisible(true);
+                            
+                            if(!parent.has_place_group_selection()){
+                                // no place selected
+                                if(place == null) (new AreaDialog(parent.parent, parent.world)).setVisible(true);
+                                // place selected
+                                else (new AreaDialog(parent.parent, parent.world, place)).setVisible(true);
+                            } else { // place group selection
+                                (new AreaDialog(parent.parent, parent.world, parent.get_place_group_selection(), place)).setVisible(true);
+                            }
+                            break;
+                            
+                        case KeyEvent.VK_SPACE: // add or remove single place to place group selection
+                            place = parent.get_selected_place();
+                            if(place != null) parent.place_group_add(place);
                             break;
                     }
                 } else if(arg0.isControlDown()){ // ctrl key pressed
@@ -1667,6 +1854,10 @@ public class WorldTab extends JPanel {
                             (new OpenWorldDialog((Mainwindow) parent.parent)).setVisible();
                             break;
                     
+                        case KeyEvent.VK_A:
+                            parent.place_group_set(parent.get_world().get_layer(parent.get_cur_position().get_layer()).get_places());
+                            break;
+                            
                         case KeyEvent.VK_NUMPAD8:
                         case KeyEvent.VK_UP:
                         //case KeyEvent.VK_W: // add path to direction 'n'
@@ -1700,7 +1891,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
+                            other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() - 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("se") == null && other.get_exit("nw") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "se", other, "nw"));
@@ -1750,9 +1941,62 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_NUMPAD5: // open add path dialog
                             (new PathConnectDialog(parent, parent.get_selected_place())).setVisible(true);
                             break;
+                    } 
+                } else if(arg0.isShiftDown()){ // shift key pressed -> modify selection
+                    int x_bef = parent.get_place_selection_x();
+                    int y_bef = parent.get_place_selection_y();
+                    
+                    switch(arg0.getKeyCode()){
+                        case KeyEvent.VK_NUMPAD8:
+                        case KeyEvent.VK_UP:
+                        case KeyEvent.VK_W:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
+                            break;
+                        case KeyEvent.VK_NUMPAD4:
+                        case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_A:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
+                            break;
+                        case KeyEvent.VK_NUMPAD2:
+                        case KeyEvent.VK_DOWN:
+                        case KeyEvent.VK_S:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
+                            break;
+                        case KeyEvent.VK_NUMPAD6:
+                        case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_D:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
+                            break;
+
+                        // diagonal movement
+                        case KeyEvent.VK_NUMPAD1:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, -1);
+                            break;
+                        case KeyEvent.VK_NUMPAD3:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, -1);
+                            break;
+                        case KeyEvent.VK_NUMPAD7:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, +1);
+                            break;
+                        case KeyEvent.VK_NUMPAD9:
+                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, +1);
+                            break;
+                            
+                        case KeyEvent.VK_SPACE: // add or remove single place to place group selection
+                            Place place = parent.get_selected_place();
+                            if(place != null) parent.place_group_add(place);
+                            break;
                     }
-                    parent.repaint();
+                    int x_sel = parent.get_place_selection_x();
+                    int y_sel = parent.get_place_selection_y();
+                    
+                    // change group selection, if place selection changed
+                    if(x_sel != x_bef || y_sel != y_bef){
+                        if(parent.place_group_shift_start == null) parent.place_group_shift_modify_selection(x_bef, y_bef);
+                        parent.place_group_shift_modify_selection(x_sel, y_sel);
+                    }
                 }
+                parent.repaint();
             }
 
             @Override
@@ -1781,17 +2025,34 @@ public class WorldTab extends JPanel {
                     mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
                     add(mi_edit);
                     
-                    JMenuItem mi_remove = new JMenuItem("Remove place");
-                    mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
+                    HashSet<Place> place_group = parent.get_place_group_selection();
+                    
+                    JMenuItem mi_remove = null;
+                    if(place_group.isEmpty()){
+                        mi_remove = new JMenuItem("Remove place");
+                        mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
+                        mi_remove.setToolTipText("Remove this place");
+                    } else {
+                        mi_remove = new JMenuItem("*Remove places");
+                        mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place_group));
+                        mi_remove.setToolTipText("Remove all selected places");
+                    }
                     add(mi_remove);
                     
                     JMenuItem mi_comments = new JMenuItem("Edit comments");
                     mi_comments.addActionListener(new PlaceCommentDialog(parent.parent, place));
                     add(mi_comments);
                     
-                    JMenuItem mi_area = new JMenuItem("Edit area");
-                    if(place.get_area() != null) mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place.get_area()));
-                    else mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
+                    JMenuItem mi_area = null;
+                    if(place_group.isEmpty()){
+                        mi_area = new JMenuItem("Edit area");;
+                        mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
+                        mi_area.setToolTipText("Edit the area of this place");
+                    } else {
+                        mi_area = new JMenuItem("*Edit area");
+                        mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place_group, place));
+                        mi_area.setToolTipText("Sets a common area for all selected places");
+                    }
                     add(mi_area);
                     
                     // ------------- Paths ------------------

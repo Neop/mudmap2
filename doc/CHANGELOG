@@ -12,3 +12,8 @@
  - ctrl + s to save a world, ctr + o open a world
 - text in infobar moves, if it's too long to be displayed
 - unused areas won't be saved anymore
+- muliple places can be selected by mouse and keyboard
+ - delete multiple places
+ - change their area
+- AreaDialog now supports the creation of a new area, even if the place
+ already has one

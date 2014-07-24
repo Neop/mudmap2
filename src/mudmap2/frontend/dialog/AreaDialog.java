@@ -21,9 +21,11 @@
  */
 package mudmap2.frontend.dialog;
 
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -47,6 +49,7 @@ public class AreaDialog extends ActionDialog {
     World world;
     Area area;
     Place place;
+    HashSet<Place> place_group;
     
     /**
      * Constructs a modify / delete dialog for existing areas
@@ -77,6 +80,12 @@ public class AreaDialog extends ActionDialog {
         place = null;
     }
     
+    /**
+     * Edits the area of a place or creates a new one and assigns it
+     * @param _parent
+     * @param _world
+     * @param _place 
+     */
     public AreaDialog(JFrame _parent, World _world, Place _place){
         super(_parent, (_place.get_area() == null) ? "New area" : ("Edit area - " + _place.get_area()), true);
         
@@ -87,23 +96,65 @@ public class AreaDialog extends ActionDialog {
     }
     
     /**
+     * Edits the area of a group of places or creates a new one and assigns it
+     * the default area will be taken from _place, if available
+     * @param _parent
+     * @param _world
+     * @param _place_group
+     * @param _place 
+     */
+    public AreaDialog(JFrame _parent, World _world, HashSet<Place> _place_group, Place _place){
+        super(_parent, (_place.get_area() == null) ? "New area" : ("Edit area - " + _place.get_area()), true);
+        
+        place = _place;
+        place_group = _place_group;
+        new_area = place.get_area() == null;
+        world = _world;
+        area = place.get_area();
+    }
+    
+    /**
      * Creates the GUI
      */
     @Override
     void create(){
-        setLayout(new GridLayout(3, 2));
+        setLayout(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
         
-        add(new JLabel("Name"));
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        
+        add(new JLabel("Name"), constraints);
+        constraints.gridx = 1;
+        constraints.gridwidth = 2;
         if(area != null) textfield_name = new JTextField(area.toString());
         else textfield_name = new JTextField();
-        add(textfield_name);
+        add(textfield_name, constraints);
         
-        add(new JLabel("Color"));
-        if(area != null) add(colorchooserbutton = new ColorChooserButton(getParent(), area.get_color())); 
-        else add(colorchooserbutton = new ColorChooserButton(getParent()));
+        constraints.gridwidth = 1;
+        constraints.gridx = 0;
+        constraints.gridy++;
+        
+        add(new JLabel("Color"), constraints);
+        
+        constraints.weighty = 4.0;
+        constraints.gridx = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridwidth = 2;
+        
+        if(area != null) colorchooserbutton = new ColorChooserButton(getParent(), area.get_color()); 
+        else colorchooserbutton = new ColorChooserButton(getParent());
+        add(colorchooserbutton, constraints);
+        
+        constraints.weighty = 1.0;
+        constraints.gridwidth = 1;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridx = 0;
+        constraints.gridy++;
         
         JButton button_cancel = new JButton("Cancel");
-        add(button_cancel);
+        add(button_cancel, constraints);
         button_cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -111,18 +162,37 @@ public class AreaDialog extends ActionDialog {
             }
         });
         
-        JButton button_ok = new JButton("Ok");
-        add(button_ok);
-        getRootPane().setDefaultButton(button_ok);
-        button_ok.addActionListener(new ActionListener() {
+        constraints.gridx++;
+        JButton button_new = new JButton("New");
+        button_new.setToolTipText("Creates a new area");
+        add(button_new, constraints);
+        getRootPane().setDefaultButton(button_new);
+        button_new.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                new_area = true;
                 save();
                 dispose();
             }
         });
+        
+        if(!new_area){ // don't show edit button when creating a new place
+            constraints.gridx++;
+            JButton button_edit = new JButton("Edit");
+            button_edit.setToolTipText("Edits the current area");
+            add(button_edit, constraints);
+            getRootPane().setDefaultButton(button_edit);
+            button_edit.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    save();
+                    dispose();
+                }
+            });
+        }
        
         pack();
+        setResizable(false);
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
@@ -131,12 +201,16 @@ public class AreaDialog extends ActionDialog {
         if(new_area){
             area = new Area(textfield_name.getText(), colorchooserbutton.get_color());
             world.add_area(area);
-            if(place != null) place.set_area(area);
+            if(place != null && place_group == null) place.set_area(area);
         } else {
             // modify area
             area.set_name(textfield_name.getText());
             area.set_color(colorchooserbutton.get_color());
         }
+        // assign to all places
+        if(place_group != null)
+            for(Place pl: place_group)
+                pl.set_area(area);
         getParent().repaint();
     }
     

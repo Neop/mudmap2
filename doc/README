@@ -61,8 +61,8 @@ for it to be able to receive keyboard events.
 The keys used here are not final and might not be optimal. Please let me
 know if you think that other keys should be used ;)
 
-ctrl+s							save currently shown world
-ctrl+o							show open world dialog
+ctrl + s						save currently shown world
+ctrl + o						show open world dialog
 
 			context menu key	show the context menu of the selected
 								place (like right click on that place)
@@ -72,7 +72,7 @@ p:								enable / disable place selection
 
 w/a/s/d 	arrow keys			shift the selection
 numpad numbers (without 5)		shift the selection
-e, enter,	insert key			create / edit place at selection
+e, enter, insert key, double click	create / edit place at selection
 f								create or remove a placeholder place
 r 			delete key			remove selected place
 c								edit place comments
@@ -85,6 +85,14 @@ h, numpad 5, home key			go to home location
 l								show place list
 
 path creation shortcuts:
-ctrl + numpad 5				show create path dialog
+ctrl + numpad 5					show create path dialog
 ctrl + numpad numbers			create path to adjacent place
 ctrl + arrow keys				create path to adjacent place
+
+place selection (to remove / move / copy many places at once):
+ctrl + a						select everything on current layer
+ctrl + click					add / remove place to selection
+space							add / remove place selected by cursor
+shift + click					box selection
+shift + arrow keys / numpad / w/a/s/d	box selection
+escape							deselect everything

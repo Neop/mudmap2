@@ -23,6 +23,7 @@
 
 package mudmap2.backend;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -155,6 +156,20 @@ public class Layer {
      */
     public boolean exist(int x, int y){
         return elements.containsKey(x) && elements.get(x).containsKey(y);
+    }
+    
+    /**
+     * Gets a collection of all elements
+     * @return set of all elements or empty set
+     */
+    public HashSet<Place> get_places(){
+        HashSet<Place> ret = new HashSet<Place>();
+        for(TreeMap<Integer, LayerElement> values: elements.values()){
+            for(LayerElement el: values.values()){
+                ret.add((Place) el);
+            }
+        }
+        return ret;
     }
     
     /**

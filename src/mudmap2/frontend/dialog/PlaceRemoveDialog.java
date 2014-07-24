@@ -23,6 +23,7 @@ package mudmap2.frontend.dialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -40,6 +41,7 @@ public class PlaceRemoveDialog implements ActionListener {
     JFrame parent;
     World world;
     Place place;
+    HashSet<Place> places;
     
     public PlaceRemoveDialog(JFrame _parent, World _world, Place _place){        
         parent = _parent;
@@ -47,11 +49,26 @@ public class PlaceRemoveDialog implements ActionListener {
         place = _place;
     }
     
+    public PlaceRemoveDialog(JFrame _parent, World _world, HashSet<Place> _places){
+        parent = _parent;
+        world = _world;
+        places = _places;
+    }
+    
     public void show(){
-        int ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove \"" + place + " from the map? This can not be undone!", "Remove place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        int ret = 1;
+        if(place != null)
+            ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove \"" + place + "\" from the map? This can not be undone!", "Remove place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        else if(places != null)
+            ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove " + places.size() + " places from the map? This can not be undone!", "Remove places", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            
         if(ret == 0){
             try {
-                world.remove(place);
+                if(place != null) // remove single place
+                    world.remove(place);
+                else if(places != null) // remove multiple places
+                    for(Place pl: places)
+                        world.remove(pl);
                 parent.repaint();
             } catch (RuntimeException ex) {
                 Logger.getLogger(PlaceRemoveDialog.class.getName()).log(Level.SEVERE, null, ex);
