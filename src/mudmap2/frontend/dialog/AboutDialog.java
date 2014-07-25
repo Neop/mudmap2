@@ -51,7 +51,7 @@ public class AboutDialog extends ActionDialog {
         
         add(new JLabel("MUD Map v2"));
         add(new JLabel("Version " + mudmap2.Mudmap2.get_version() + " " + mudmap2.Mudmap2.get_version_state()));
-        add(new JLabel("License: GLPv3"));
+        add(new JLabel("License: GPLv3"));
         add(new JLabel("Use it on your own risk!"));
         add(new LinkLabel("GitHub", Paths.github_url));
         add(new LinkLabel("Sourceforge", Paths.sourceforge_url));

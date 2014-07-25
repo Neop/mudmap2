@@ -1145,7 +1145,7 @@ public class WorldTab extends JPanel {
          * @return normal vector
          */
         private Pair<Double, Double> get_exit_normal(String dir){
-            Pair<Double, Double> ret = new Pair(0, 0);
+            Pair<Double, Double> ret = new Pair<Double, Double>(0.0, 0.0);
             if(dir.equals("n")){
                 ret.first = 0.0;
                 ret.second = 1.0;
@@ -1350,7 +1350,7 @@ public class WorldTab extends JPanel {
                         int place_x_px = (int) Math.round((tile_x + place_x_px_const) * tile_size);
                         int place_y_px = (int) Math.round((tile_y + place_y_px_const) * tile_size);
 
-                        if(tile_positions != null) tile_positions.add(new Pair(place_x_px, place_y_px));
+                        if(tile_positions != null) tile_positions.add(new Pair<Integer, Integer>(place_x_px, place_y_px));
 
                         // number of drawn text lines
                         int line_num = 0;

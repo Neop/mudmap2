@@ -249,7 +249,7 @@ public class World {
                         tmp_paths.add(new PathTmp(cur_place, Integer.parseInt(tmp[0]), tmp[1], tmp[2]));
                     } else if(line.startsWith("pchi")){ // place child
                         String[] tmp = line.split(" ");
-                        children.add(new Pair(cur_place, Integer.parseInt(tmp[1])));
+                        children.add(new Pair<Place, Integer>(cur_place, Integer.parseInt(tmp[1])));
                     } else if(line.startsWith("pdl")){ // place risk level
                         int rlid = Integer.parseInt(line.substring(3).trim());
                         RiskLevel rl = risk_levels.get(rlid);
