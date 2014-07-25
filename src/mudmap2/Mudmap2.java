@@ -43,7 +43,7 @@ public class Mudmap2 {
     
     static int version_major = 2;
     static int version_minor = 0;
-    static int version_build = 0;
+    static int version_build = 1;
     static String version_state = "beta";
     
     // copy-paste data

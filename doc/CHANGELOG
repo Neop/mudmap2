@@ -1,5 +1,6 @@
 2.0.1 beta
 - fixed: place id got added to place name in edit place dialog
+- fixed: flickering map / graphical errors on map
 - allowed nameless places / empty names
 - place ids will be displayed on the map for places without unique name
 (change this behavior in edit world dialog)
