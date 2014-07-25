@@ -1336,8 +1336,8 @@ public class WorldTab extends JPanel {
             HashSet<Pair<Integer, Integer>> copied_place_locations = mudmap2.Mudmap2.get_copy_place_locations();
 
             // ------------------ draw the tiles / places ----------------------
-            for(int tile_x = (g.getClipBounds().x / tile_size) - 1; tile_x < (g.getClipBounds().x + g.getClipBounds().width) / tile_size + 1; ++tile_x){
-                for(int tile_y = (g.getClipBounds().y / tile_size) - 1; tile_y < (g.getClipBounds().y + g.getClipBounds().height) / tile_size + 1; ++tile_y){
+            for(int tile_x = (g.getClipBounds().x / tile_size) - 1; tile_x < screen_width / tile_size + 1; ++tile_x){
+                for(int tile_y = (g.getClipBounds().y / tile_size) - 1; tile_y < screen_height / tile_size + 1; ++tile_y){
 
                     // place position on the map
                     int place_x = tile_x + place_x_offset;
