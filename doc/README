@@ -60,14 +60,14 @@ know if you think that other keys should be used ;)
 ctrl + s						save currently shown world
 ctrl + o						show open world dialog
 
-			context menu key	show the context menu of the selected
+context menu key				show the context menu of the selected
 								place (like right click on that place)
 
 +/- 		page up/down		increment and decrement the tile size
 p:								enable / disable place selection
 
-w/a/s/d 	arrow keys			shift the selection
-numpad numbers (without 5)		shift the selection
+w/a/s/d, arrow keys, numberpad	shift the selection ("direction keys")
+h, home key, numpad 5			go to home location
 e, enter, insert key, double click	create / edit place at selection
 f								create or remove a placeholder place
 r 			delete key			remove selected place
@@ -77,13 +77,13 @@ q								modify area of selected place. Note that
 								belong to the same area. If no place is
 								selected or selection is disabled, a new
 								area will be created
-h, numpad 5, home key			go to home location
 l								show place list
 
 path creation shortcuts:
 ctrl + numpad 5					show create path dialog
-ctrl + numpad numbers			create path to adjacent place
-ctrl + arrow keys				create path to adjacent place
+ctrl + direction key			create path to adjacent place 
+(no w/a/s/d)
+alt or alt-gr + direction key	remove all paths to adjacent place
 
 place selection (to remove / move / copy many places at once):
 escape							deselect everything

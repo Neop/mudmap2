@@ -1690,7 +1690,7 @@ public class WorldTab extends JPanel {
             
             @Override
             public void keyPressed(KeyEvent arg0) {                
-                if(!arg0.isShiftDown() && !arg0.isControlDown()){ // ctrl and shift not pressed
+                if(!arg0.isShiftDown() && !arg0.isControlDown() && !arg0.isAltDown() && !arg0.isAltGraphDown()){ // ctrl, shift and alt not pressed
                     int x_bef = parent.get_place_selection_x();
                     int y_bef = parent.get_place_selection_y();
                     
@@ -1793,95 +1793,7 @@ public class WorldTab extends JPanel {
 
             @Override
             public void keyPressed(KeyEvent arg0) {
-                if(!arg0.isShiftDown() && !arg0.isControlDown()){ // ctrl and shift not pressed
-                    switch(arg0.getKeyCode()){
-                        // show context menu
-                        case KeyEvent.VK_CONTEXT_MENU:
-                            if(parent.get_place_selection_enabled()){
-                                TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
-                                context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
-                            }
-                            break;
-
-                        // edit / add place
-                        case KeyEvent.VK_INSERT:
-                        case KeyEvent.VK_ENTER:
-                        case KeyEvent.VK_E:
-                            if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_selected_place();
-                                PlaceDialog dlg;
-                                if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
-                                else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
-                                dlg.setVisible(true);
-                            }
-                            break;
-                        // create placeholder
-                        case KeyEvent.VK_F:
-                            if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_selected_place();
-                                // create placeholder or remove one
-                                if(place == null){
-                                    parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
-                                } else if(place.get_name().equals(Place.placeholder_name)){
-                                    try {
-                                        place.remove();
-                                    } catch (RuntimeException ex) {
-                                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                                    } catch (PlaceNotFoundException ex) {
-                                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-                                }
-                            }
-                            parent.repaint();
-                            break;
-                        // remove place
-                        case KeyEvent.VK_DELETE:
-                        case KeyEvent.VK_R:
-                            if(!parent.has_place_group_selection()){ // no places selected
-                                if(parent.get_place_selection_enabled()){
-                                    Place place = parent.get_selected_place();
-                                    if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
-                                }
-                            } else { // places selected
-                                HashSet<Place> place_group = parent.get_place_group_selection();
-                                if(place_group != null){
-                                    PlaceRemoveDialog dlg = new PlaceRemoveDialog(parent.parent, parent.world, place_group);
-                                    dlg.show();
-                                    // reset selection, if places were removed
-                                    if(dlg.get_places_removed()) parent.place_group_reset();
-                                }
-                            }
-                            break;
-                        // edit place comments
-                        case KeyEvent.VK_C:
-                            if(parent.get_place_selection_enabled()){
-                                Place place = parent.get_selected_place();
-                                if(place != null){
-                                    (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
-                                    parent.update_infobar();
-                                }
-                            }
-                            break;
-                        // modify area
-                        case KeyEvent.VK_Q:
-                            Place place = parent.get_selected_place();
-                            
-                            if(!parent.has_place_group_selection()){
-                                // no place selected
-                                if(place == null) (new AreaDialog(parent.parent, parent.world)).setVisible(true);
-                                // place selected
-                                else (new AreaDialog(parent.parent, parent.world, place)).setVisible(true);
-                            } else { // place group selection
-                                (new AreaDialog(parent.parent, parent.world, parent.get_place_group_selection(), place)).setVisible(true);
-                            }
-                            break;
-                            
-                        case KeyEvent.VK_SPACE: // add or remove single place to place group selection
-                            place = parent.get_selected_place();
-                            if(place != null) parent.place_group_add(place);
-                            break;
-                    }
-                } else if(arg0.isControlDown()){ // ctrl key pressed
+                if(arg0.isControlDown()){ // ctrl key pressed
                     Place place, other;
                     
                     switch(arg0.getKeyCode()){
@@ -2076,6 +1988,163 @@ public class WorldTab extends JPanel {
                     if(x_sel != x_bef || y_sel != y_bef){
                         if(parent.place_group_shift_start == null) parent.place_group_shift_modify_selection(x_bef, y_bef);
                         parent.place_group_shift_modify_selection(x_sel, y_sel);
+                    }
+                } else if(arg0.isAltDown() || arg0.isAltGraphDown()){ // alt or altgr key pressed
+                    Place place, other;
+                    
+                    switch(arg0.getKeyCode()){
+                        case KeyEvent.VK_NUMPAD8:
+                        case KeyEvent.VK_UP:
+                        case KeyEvent.VK_W: // remove path to direction 'n'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD9: // remove path to direction 'ne'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() + 1);
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD6:
+                        case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_D: // remove path to direction 'e'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y());
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD3: // remove path to direction 'se'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() - 1);
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD2:
+                        case KeyEvent.VK_DOWN:
+                        case KeyEvent.VK_S: // remove path to direction 's'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() - 1);
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD1: // remove path to direction 'sw'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() - 1);
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD4:
+                        case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_A: // remove path to direction 'w'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y());
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                        case KeyEvent.VK_NUMPAD7: // remove path to direction 'nw'
+                            place = parent.get_selected_place();
+                            if(place != null){
+                                other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() + 1);
+                                for(Path path: place.get_paths(other)) place.remove_path(path);
+                            }
+                            break;
+                    }
+                } else { // ctrl, shift and alt not pressed
+                    switch(arg0.getKeyCode()){
+                        // show context menu
+                        case KeyEvent.VK_CONTEXT_MENU:
+                            if(parent.get_place_selection_enabled()){
+                                TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
+                            }
+                            break;
+
+                        // edit / add place
+                        case KeyEvent.VK_INSERT:
+                        case KeyEvent.VK_ENTER:
+                        case KeyEvent.VK_E:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.get_selected_place();
+                                PlaceDialog dlg;
+                                if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
+                                else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                dlg.setVisible(true);
+                            }
+                            break;
+                        // create placeholder
+                        case KeyEvent.VK_F:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.get_selected_place();
+                                // create placeholder or remove one
+                                if(place == null){
+                                    parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                } else if(place.get_name().equals(Place.placeholder_name)){
+                                    try {
+                                        place.remove();
+                                    } catch (RuntimeException ex) {
+                                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                    } catch (PlaceNotFoundException ex) {
+                                        Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+                            }
+                            parent.repaint();
+                            break;
+                        // remove place
+                        case KeyEvent.VK_DELETE:
+                        case KeyEvent.VK_R:
+                            if(!parent.has_place_group_selection()){ // no places selected
+                                if(parent.get_place_selection_enabled()){
+                                    Place place = parent.get_selected_place();
+                                    if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
+                                }
+                            } else { // places selected
+                                HashSet<Place> place_group = parent.get_place_group_selection();
+                                if(place_group != null){
+                                    PlaceRemoveDialog dlg = new PlaceRemoveDialog(parent.parent, parent.world, place_group);
+                                    dlg.show();
+                                    // reset selection, if places were removed
+                                    if(dlg.get_places_removed()) parent.place_group_reset();
+                                }
+                            }
+                            break;
+                        // edit place comments
+                        case KeyEvent.VK_C:
+                            if(parent.get_place_selection_enabled()){
+                                Place place = parent.get_selected_place();
+                                if(place != null){
+                                    (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
+                                    parent.update_infobar();
+                                }
+                            }
+                            break;
+                        // modify area
+                        case KeyEvent.VK_Q:
+                            Place place = parent.get_selected_place();
+                            
+                            if(!parent.has_place_group_selection()){
+                                // no place selected
+                                if(place == null) (new AreaDialog(parent.parent, parent.world)).setVisible(true);
+                                // place selected
+                                else (new AreaDialog(parent.parent, parent.world, place)).setVisible(true);
+                            } else { // place group selection
+                                (new AreaDialog(parent.parent, parent.world, parent.get_place_group_selection(), place)).setVisible(true);
+                            }
+                            break;
+                            
+                        case KeyEvent.VK_SPACE: // add or remove single place to place group selection
+                            place = parent.get_selected_place();
+                            if(place != null) parent.place_group_add(place);
+                            break;
                     }
                 }
                 parent.repaint();

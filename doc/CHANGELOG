@@ -1,3 +1,6 @@
+2.0.2 beta
+- keyboard shortcuts for removing paths
+
 2.0.1 beta
 - fixed: place id got added to place name in edit place dialog
 - fixed: flickering map / graphical errors on map
