@@ -41,10 +41,12 @@ import mudmap2.frontend.Mainwindow;
 public class Mudmap2 {
     static Mainwindow mwin;
     
-    static int version_major = 2;
-    static int version_minor = 0;
-    static int version_build = 1;
-    static String version_state = "beta";
+    static final int version_major = 2;
+    static final int version_minor = 0;
+    static final int version_build = 1;
+    static final String version_state = "beta";
+    
+    static boolean portable_mode = false;
     
     // copy-paste data
     // places to be copied or cut

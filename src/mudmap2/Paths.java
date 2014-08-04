@@ -26,8 +26,11 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.plaf.OptionPaneUI;
 
 /**
  * Helper class to get common paths and filenames
@@ -47,13 +50,35 @@ public class Paths {
      * @return user data path
      */
     public static String get_user_data_dir(){
-        // read the user data path from environment variables
-        // operating system Windows
-        if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
-            user_data_dir = System.getenv().get("APPDATA") + "/mudmap/";
-        // other operating systems
-        else user_data_dir = System.getProperty("user.home") + "/.mudmap/";
-        
+        if(user_data_dir == null || user_data_dir.isEmpty()){
+            String user_data_dir_home = null, user_data_dir_portable = null;
+            
+            // read the user data path from environment variables
+            // operating system Windows
+            if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
+                user_data_dir_home = System.getenv().get("APPDATA") + "/mudmap/";
+            // other operating systems
+            else user_data_dir_home = System.getProperty("user.home") + "/.mudmap/";
+            
+            try {
+                File file = new File(Paths.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+                user_data_dir_portable = file.getParentFile().getPath() + "/mudmap/";
+            } catch (URISyntaxException ex) {
+                Logger.getLogger(Paths.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            Mudmap2.portable_mode = false;
+            
+            if(user_data_dir_portable == null) Mudmap2.portable_mode = false; // couldn't get portable path
+            else if(is_directory(user_data_dir_portable)) Mudmap2.portable_mode = true; // portable mode detected
+            else if(!is_directory(user_data_dir_home)){ // ask user whether to use portable mode, if data directory doesn't exist
+                int ret = JOptionPane.showConfirmDialog(null, "Would you like to use the portable mode? This is recommended if you want to use MUD Map on a portable device like an USB flash drive. The data will then be stored in the same directory as the mudmap2.jar", "portable mode", JOptionPane.YES_NO_OPTION);
+                mudmap2.Mudmap2.portable_mode = (ret == JOptionPane.YES_OPTION);
+            } else mudmap2.Mudmap2.portable_mode = false;
+            
+            if(mudmap2.Mudmap2.portable_mode) user_data_dir = user_data_dir_portable;
+            else user_data_dir = user_data_dir_home;
+        }
         return user_data_dir;
     }
     
