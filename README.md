@@ -19,18 +19,6 @@ If you encounter any bugs or other problems please contact me or write
 a bug report on GitHub (https://github.com/Neop/mudmap2/issues), so I
 can fix it.
 
-##Some notes about the beta version:
-Everything important (except for moving places) should be implemented.
-If you think I forgot something, please contact me or write a short bug
-report on GitHub.
-
-Things that aren't implemented yet:
-- curved paths
-- portable mode
-
-If you really need one of these things, please use MUD Map v1 or contact
-me.
-
 ##Installation
 A JRE (Java Runtime Environment) needs to be installed on your computer.
 You can get it here: https://www.java.com/de/download/index.jsp 
@@ -38,6 +26,15 @@ Place the mudmap.jar file wherever you like. It should run after a
 double-click on the mudmap.jar file or right click on it, select
 "open/run with", then select something siliar to "Java JRE" (It depends
 on your operating system)
+
+Portable mode
+When you start MUD Map for the first time you will be asked whether
+you'd like to use MUD Map in portable mode. In this case the world files
+will be stored in the same directory as the mudmap2.jar.
+
+If you don't use portable mode, you can find the files here:
+Linux: ~/.mudmap/
+Windows: %appdata%\mudmap\
 
 ##Updating
 Just replace the old mudmap2.jar file with a new one.
