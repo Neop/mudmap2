@@ -1381,7 +1381,6 @@ public class WorldTab extends JPanel {
                                     Pair<Integer, Integer> exit_offset = get_exit_offset(path.get_exit(cur_place));
                                     Pair<Integer, Integer> exit_offset_other = get_exit_offset(path.get_exit(other_place));
 
-                                    // TODO: lines are drawn twice
                                     boolean draw_curves = get_show_paths_curved();
 
                                     if(draw_curves){
@@ -1437,9 +1436,6 @@ public class WorldTab extends JPanel {
                             g.setColor(cur_place.get_risk_level().get_color());
                             ((Graphics2D)g).setStroke(new BasicStroke(risk_level_stroke_width));
                             g.drawRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
-                            // TODO: this has to be done after the path rendering:
-                            // mask out place location on path graphic
-                            //if(show_path_lines) graphic_path.clearRect((int) (place_x_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (place_y_px + get_tile_border_area() - risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2), (int) (tile_size - 2 * get_tile_border_area() + risk_level_stroke_width / 2));
                         } else System.out.println("Error: Can't draw risk level, reference is null");
 
                         // draw text, if tiles are large enough

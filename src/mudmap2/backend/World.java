@@ -160,9 +160,10 @@ public class World {
                         file_minor = Integer.parseInt(tmp[1]);
                         file_build = Integer.parseInt(tmp[2]);
 
-                        if(file_major > file_version_major || (file_major == file_version_major && (file_minor > file_version_minor || (file_minor == file_version_minor && file_build > file_version_build))))
-                            throw new Exception("World file version is greater than file reader version. Please update mudmap or consult the developer.");
-                            // TODO: Show message dialog
+                        if(file_major > file_version_major || (file_major == file_version_major && (file_minor > file_version_minor || (file_minor == file_version_minor && file_build > file_version_build)))){
+                            int ret = JOptionPane.showConfirmDialog(null, "World file version is greater than file reader version. Please update MUD Map.\nIf you'd like to continue using this version of MUD Map, you can click on 'yes'. This might cause data-loss!", "Loading world", JOptionPane.YES_NO_OPTION);
+                            if(ret != JOptionPane.YES_OPTION) throw new Exception("World file version is greater than file reader version. Please update mudmap or consult the developer.");
+                        }
                     } else if(line.startsWith("wname")){ // world name
                         name = line.substring(6).trim();
                     } else if(line.startsWith("wcol")){ // path line color

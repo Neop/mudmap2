@@ -92,7 +92,7 @@ public final class Mainwindow extends JFrame {
     AvailableWorldsTab available_worlds_tab;
     
     public Mainwindow(){
-        super("MUD Map 2 " + "(" + mudmap2.Mudmap2.get_version_state() + ")");
+        super("MUD Map 2 " + (!mudmap2.Mudmap2.get_version_state().isEmpty() ? ("(" + mudmap2.Mudmap2.get_version_state() + ")") : ""));
         
         // set program icon
         try {

@@ -43,8 +43,8 @@ public class Mudmap2 {
     
     static final int version_major = 2;
     static final int version_minor = 0;
-    static final int version_build = 1;
-    static final String version_state = "beta";
+    static final int version_build = 2;
+    static final String version_state = "";
     
     static boolean portable_mode = false;
     
@@ -64,6 +64,8 @@ public class Mudmap2 {
         try {
             // TODO code application logic here
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            
+            mwin = new Mainwindow();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
@@ -73,8 +75,6 @@ public class Mudmap2 {
         } catch (UnsupportedLookAndFeelException ex) {
             Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, ex);
         }
-                
-        mwin = new Mainwindow();
     }
     
     // ========================== Version info =================================
