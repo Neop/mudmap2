@@ -7,10 +7,12 @@
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/backend/Place.java</file>
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/frontend/WorldTab.java</file>
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/backend/World.java</file>
+            <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/frontend/Mainwindow.java</file>
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/Mudmap2.java</file>
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/backend/Layer.java</file>
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/Paths.java</file>
             <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/frontend/dialog/PlaceListDialog.java</file>
+            <file>file:/media/Dateien/dev/mudmap/mudmap2/src/mudmap2/frontend/dialog/EditWorldDialog.java</file>
         </group>
     </open-files>
 </project-private>

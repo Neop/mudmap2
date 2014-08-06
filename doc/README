@@ -13,17 +13,6 @@ If you encounter any bugs or other problems please contact me or write
 a bug report on GitHub (https://github.com/Neop/mudmap2/issues), so I
 can fix it.
 
-Some notes about the beta version:
-Everything important (except for moving places) should be implemented.
-If you think I forgot something, please contact me or write a short bug
-report on GitHub.
-
-Things that aren't implemented yet:
-- curved paths
-
-If you really need one of these things, please use MUD Map v1 or contact
-me.
-
 Installation
 A JRE (Java Runtime Environment) needs to be installed on your computer.
 You can get it here: https://www.java.com/de/download/index.jsp 

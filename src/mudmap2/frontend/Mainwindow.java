@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -57,6 +58,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import mudmap2.Paths;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
@@ -82,7 +85,7 @@ public final class Mainwindow extends JFrame {
     JMenuBar menu_bar;
     JMenu menu_file, menu_edit, menu_help;
     JMenuItem menu_file_new, menu_file_open, menu_file_save, menu_file_save_as_image, menu_file_quit;
-    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world, menu_edit_list_places;
+    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world, menu_edit_list_places, menu_edit_curved_paths;
     JMenuItem menu_help_help, menu_help_about;
     
     JTabbedPane tabbed_pane;
@@ -232,6 +235,21 @@ public final class Mainwindow extends JFrame {
             
         });
         
+        menu_edit.add(new JSeparator());
+        
+        menu_edit_curved_paths = new JCheckBoxMenuItem("Curved paths");
+        menu_edit.add(menu_edit_curved_paths);
+        // will be set after the config file is read
+        //menu_edit_curved_paths.setSelected(WorldTab.get_show_paths_curved());
+        menu_edit_curved_paths.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                WorldTab.set_show_paths_curved(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                WorldTab cur_tab = get_selected_tab();
+                if(cur_tab != null) cur_tab.repaint();
+            }
+        });
+        
         menu_help_help = new JMenuItem("Help (online)");
         menu_help.add(menu_help_help);
         menu_help_help.addActionListener(new ActionListener() {
@@ -293,9 +311,11 @@ public final class Mainwindow extends JFrame {
      * @return WorldTab or null
      */
     private WorldTab get_selected_tab(){
-        Component ret = tabbed_pane.getSelectedComponent();
-        if(ret instanceof WorldTab) return (WorldTab) ret;
-        else return null;
+        if(tabbed_pane != null){
+            Component ret = tabbed_pane.getSelectedComponent();
+            if(ret instanceof WorldTab) return (WorldTab) ret;
+        }
+        return null;
     }
     
     /**
@@ -344,6 +364,8 @@ public final class Mainwindow extends JFrame {
             System.out.println("Couldn't open config file \"" + mudmap2.Paths.get_config_file() + "\", file not found");
             //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
+        
+        if(menu_edit_curved_paths != null) menu_edit_curved_paths.setSelected(WorldTab.get_show_paths_curved());
     }
     
     /**

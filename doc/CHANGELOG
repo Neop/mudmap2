@@ -1,6 +1,7 @@
-2.0.2 beta
+2.0.2
 - keyboard shortcuts for removing paths
 - portable mode implemented
+- curved paths implemented
 
 2.0.1 beta
 - fixed: place id got added to place name in edit place dialog

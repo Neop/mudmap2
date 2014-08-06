@@ -1280,6 +1280,20 @@ public class WorldTab extends JPanel {
             return (int)((-place_y + place_y_offset - remint(screen_center_y) + remint(parent.get_cur_position().get_y())) * tile_size + screen_height);
         }
         
+        /**
+         * Checks whether a place is currently drawn on the screen
+         * @param place
+         * @return 
+         */
+        private boolean is_on_screen(Place place){
+            int x = get_screen_pos_x(place.get_x());
+            if(x < 0 || x > get_screen_width()) return false;
+            
+            int y = get_screen_pos_y(place.get_y());
+            if(y < 0 || y > get_screen_height()) return false;
+            else return true;
+        }
+        
         // ======================= DRAW WORLD HERE =============================
         
         /**
@@ -1361,8 +1375,9 @@ public class WorldTab extends JPanel {
                             for(Path path: cur_place.get_paths()){
                                 Place other_place = path.get_other_place(cur_place);
                                 
-                                // if both places of a path are on the same layer
-                                if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer()){
+                                // if both places of a path are on the same layer and at least one of the two places is on the screen
+                                // usually the main place (path.get_places()[0]) draws the path. If it isn't on screen, the other place draws it
+                                if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer() && (path.get_places()[0] == cur_place || !is_on_screen(other_place))){
                                     Pair<Integer, Integer> exit_offset = get_exit_offset(path.get_exit(cur_place));
                                     Pair<Integer, Integer> exit_offset_other = get_exit_offset(path.get_exit(other_place));
 
