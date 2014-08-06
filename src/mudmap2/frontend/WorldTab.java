@@ -43,6 +43,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -1150,25 +1151,25 @@ public class WorldTab extends JPanel {
                 ret.first = 0.0;
                 ret.second = 1.0;
             } else if(dir.equals("e")){
-                ret.first = -1.0;
+                ret.first = 1.0;
                 ret.second = 0.0;
             } else if(dir.equals("s")){
                 ret.first = 0.0;
                 ret.second = -1.0;
             } else if(dir.equals("w")){
-                ret.first = 1.0;
+                ret.first = -1.0;
                 ret.second = 0.0;
             } else if(dir.equals("ne")){
-                ret.first = -1.0;
+                ret.first = 1.0;
                 ret.second = 1.0;
             } else if(dir.equals("se")){
-                ret.first = -1.0;
+                ret.first = 1.0;
                 ret.second = -1.0;
             } else if(dir.equals("nw")){
-                ret.first = 1.0;
+                ret.first = -1.0;
                 ret.second = 1.0;
             } else if(dir.equals("sw")){
-                ret.first = 1.0;
+                ret.first = -1.0;
                 ret.second = -1.0;
             }
             // normalize it
@@ -1357,20 +1358,20 @@ public class WorldTab extends JPanel {
 
                         // draw path lines here
                         if(get_show_paths()){
-                            for(Path p: cur_place.get_paths()){
-                                Place other_place = p.get_other_place(cur_place);
+                            for(Path path: cur_place.get_paths()){
+                                Place other_place = path.get_other_place(cur_place);
+                                
                                 // if both places of a path are on the same layer
                                 if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer()){
-                                    Pair<Integer, Integer> exit_offset = get_exit_offset(p.get_exit(cur_place));
-                                    Pair<Integer, Integer> exit_offset_other = get_exit_offset(p.get_exit(other_place));
+                                    Pair<Integer, Integer> exit_offset = get_exit_offset(path.get_exit(cur_place));
+                                    Pair<Integer, Integer> exit_offset_other = get_exit_offset(path.get_exit(other_place));
 
-                                    // TODO: implement curved lines, normals dont fit yet and lines are drawn twice
-                                    boolean draw_curves = false;//get_show_paths_curved();
+                                    // TODO: lines are drawn twice
+                                    boolean draw_curves = get_show_paths_curved();
 
                                     if(draw_curves){
-                                        /* not implemented yet
-                                        Pair<Double, Double> normal1 = get_exit_normal(p.get_exit(cur_place));
-                                        Pair<Double, Double> normal2 = get_exit_normal(p.get_exit(other_place));
+                                        Pair<Double, Double> normal1 = get_exit_normal(path.get_exit(cur_place));
+                                        Pair<Double, Double> normal2 = get_exit_normal(path.get_exit(other_place));
 
                                         double exit_1_x = place_x_px + exit_offset.first;
                                         double exit_1_y = place_y_px + exit_offset.second;
@@ -1382,15 +1383,17 @@ public class WorldTab extends JPanel {
 
                                         if(draw_curves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tile_size){
                                             CubicCurve2D c = new CubicCurve2D.Double();
-                                            c.setCurve(exit_1_x, 
-                                                    exit_1_y,
-                                                    place_x_px + normal1.first * tile_size, place_y_px + normal1.second * tile_size,
-                                                    place_x_px + (other_place.get_x() - cur_place.get_x() + normal2.first) * tile_size + exit_offset_other.first,
-                                                    place_y_px - (other_place.get_y() - cur_place.get_y() + normal2.second) * tile_size + exit_offset_other.second,
-                                                    exit_2_x, 
-                                                    exit_2_y);
+                                            c.setCurve(
+                                                    // point 1
+                                                    exit_1_x, exit_1_y,
+                                                    // point 2
+                                                    exit_1_x + normal1.first * tile_size, exit_1_y - normal1.second * tile_size,
+                                                    // point 3
+                                                    exit_2_x + normal2.first * tile_size, exit_2_y - normal2.second * tile_size,
+                                                    // point 4
+                                                    exit_2_x, exit_2_y);
                                             ((Graphics2D) graphic_path).draw(c);
-                                        }*/
+                                        }
                                     }
 
                                     if(!draw_curves){
