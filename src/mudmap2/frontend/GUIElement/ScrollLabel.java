@@ -157,8 +157,10 @@ public final class ScrollLabel extends JPanel implements Runnable{
 
     @Override
     public void paintComponent(Graphics g) {        
+        Rectangle clipBounds = g.getClipBounds();
+        g.clearRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
+                    
         if(current_text != null && !current_text.isEmpty()){
-            Rectangle clipBounds = g.getClipBounds();
             int y = (int) ((clipBounds.getHeight() - g.getFontMetrics().getHeight()) / 2) + g.getFontMetrics().getHeight();
 
             int string_width = g.getFontMetrics().stringWidth(current_text);
@@ -178,8 +180,6 @@ public final class ScrollLabel extends JPanel implements Runnable{
                     if(Math.abs(x) >= 1.0 * string_width) next_message();
                 }
             } else if(dtime > min_message_time) next_message();
-
-            g.clearRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
 
             g.setColor(Color.BLACK);
             g.drawString(current_text, x, y);
