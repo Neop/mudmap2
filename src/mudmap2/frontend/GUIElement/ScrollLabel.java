@@ -158,10 +158,15 @@ public final class ScrollLabel extends JPanel implements Runnable{
     @Override
     public void paintComponent(Graphics g) {        
         Rectangle clipBounds = g.getClipBounds();
-        g.clearRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
+        
+        final int border = 5;
+        final int width = (int) (Math.ceil(clipBounds.getWidth())) - 2 * border;
+               
+        g.setColor(getBackground());
+        g.fillRect(0, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
                     
         if(current_text != null && !current_text.isEmpty()){
-            int y = (int) ((clipBounds.getHeight() - g.getFontMetrics().getHeight()) / 2) + g.getFontMetrics().getHeight();
+            int y = (int) ((clipBounds.getHeight() + g.getFontMetrics().getHeight() * 0.75) / 2);
 
             int string_width = g.getFontMetrics().stringWidth(current_text);
             int x = 0;
@@ -169,7 +174,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
             long dtime = get_time_ms() - message_start_time; // time difference since message start
 
             // if string is too long: move the string
-            if(string_width > clipBounds.getWidth()){
+            if(string_width > width){
                 if(dtime < wait_time){
                     x = 0;
                 } else {
@@ -182,8 +187,11 @@ public final class ScrollLabel extends JPanel implements Runnable{
             } else if(dtime > min_message_time) next_message();
 
             g.setColor(Color.BLACK);
-            g.drawString(current_text, x, y);
+            g.drawString(current_text, x + border, y);
         }
+        
+        g.setColor(getBackground());
+        g.fillRect(width + border, 0, (int) clipBounds.getWidth() + 1, (int) clipBounds.getHeight() + 1);
     }    
     
     @Override
