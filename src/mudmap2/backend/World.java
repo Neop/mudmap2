@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -43,12 +44,13 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Layer.PlaceNotInsertedException;
+import mudmap2.backend.sssp.BreadthSearchGraph;
 
 /**
  *
  * @author neop
  */
-public class World {
+public class World implements BreadthSearchGraph {
     
     public static final int file_version_major = 1;
     public static final int file_version_minor = 5;
@@ -378,6 +380,36 @@ public class World {
             System.out.printf("Couldn't write config file " + mudmap2.Paths.get_config_file());
             Logger.getLogger(World.class.getName()).log(Level.WARNING, null, ex);
         }
+    }
+
+    /**
+     * does a breadth search
+     * @param start start place
+     * @param end end place
+     * @return 
+     */
+    @Override
+    public Place breadth_search(Place start, Place end) {
+        for(Place pl: get_places()) pl.breadth_search_reset();
+        start.get_breadth_search_data().marked = true;
+        
+        LinkedList<Place> queue = new LinkedList<Place>();
+        queue.add(start);
+        
+        while(!queue.isEmpty()){
+            Place v = queue.pollFirst();
+            if(v == end) return v;
+            
+            for(Path pa: v.get_paths()){
+                Place vi = pa.get_other_place(v);
+                if(!vi.get_breadth_search_data().marked && vi != v){
+                    vi.get_breadth_search_data().marked = true;
+                    vi.get_breadth_search_data().predecessor = v;
+                    queue.addLast(vi);
+                }
+            }
+        }
+        return null;
     }
     
     // Path creation helper class

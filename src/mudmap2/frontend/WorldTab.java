@@ -2283,6 +2283,33 @@ public class WorldTab extends JPanel {
                             m_path_remove.add(mi_path_remove);
                             mi_path_remove.addActionListener(new RemovePathActionListener(path));
                         }
+                        
+                        JMenuItem mi_shortest_path = new JMenuItem("Find shortest path");
+                        add(mi_shortest_path);
+                        mi_shortest_path.addActionListener(new ActionListener() {
+
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                PlaceSelectionDialog dlg = new PlaceSelectionDialog((JFrame) parent.parent, parent.world, parent.get_cur_position(), true);
+                                dlg.setVisible(true);
+                                Place end = dlg.get_selection();
+                                if(end != null){
+                                    parent.place_group_reset();
+                                    Place place_it = parent.world.breadth_search(place, end);
+                                    if(place_it == null) parent.label_infobar.show_message("No Path found");
+                                    else {
+                                        int path_length = 0;
+                                        while(place_it != null){
+                                            parent.place_group.add((Place) place_it);
+                                            place_it = place_it.get_breadth_search_data().predecessor;
+                                            ++path_length;
+                                        }
+                                        parent.label_infobar.show_message("Path found, length: " + (path_length - 1));
+                                    }
+                                    
+                                } 
+                            }
+                        });
                     }
                     
                     // ------------- sub-areas ------------------

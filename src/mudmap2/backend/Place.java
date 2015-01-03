@@ -27,12 +27,13 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import mudmap2.backend.Layer.PlaceNotFoundException;
+import mudmap2.backend.sssp.BreadthSearch;
 
 /**
  * A place in the world
  * @author neop
  */
-public class Place extends LayerElement implements Comparable<Place> {
+public class Place extends LayerElement implements Comparable<Place>, BreadthSearch {
     
     public static final String placeholder_name = "?";
     
@@ -49,6 +50,8 @@ public class Place extends LayerElement implements Comparable<Place> {
     HashSet<Path> connected_places;
     TreeMap<String, Boolean> flags;
     LinkedList<String> comments;
+    
+    BreadthSearchData breadth_search_data;
     
     public Place(int _id, String _name, int pos_x, int pos_y, Layer l){
         super(pos_x, pos_y, l);
@@ -87,6 +90,8 @@ public class Place extends LayerElement implements Comparable<Place> {
         connected_places = new HashSet<Path>();
         flags = new TreeMap<String, Boolean>();
         comments = new LinkedList<String>();
+        
+        breadth_search_data = null;
     }
     
     /**
@@ -471,4 +476,23 @@ public class Place extends LayerElement implements Comparable<Place> {
         
         return place;
     }
+
+    /**
+     * Resets the breadth search data
+     */
+    @Override
+    public void breadth_search_reset() {
+        get_breadth_search_data().reset();
+    }
+
+    /**
+     * Gets the breadth search data
+     * @return 
+     */
+    @Override
+    public BreadthSearchData get_breadth_search_data() {
+        if(breadth_search_data == null) breadth_search_data = new BreadthSearchData();
+        return breadth_search_data;
+    }
+    
 }
