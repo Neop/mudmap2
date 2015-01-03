@@ -1629,13 +1629,14 @@ public class WorldTab extends JPanel {
                     TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
                 } else if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
-                    if(arg0.isControlDown()){ // left click + ctrl
-                        Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    if(arg0.getClickCount() == 2){ // double click
+                        if(place != null && !place.get_children().isEmpty()) parent.push_position(place.get_children().iterator().next().get_coordinate()); // go to child place
+                    } else if(arg0.isControlDown()){ // left click + ctrl
                         if(place != null) parent.place_group_add(place);
                     } else if(!arg0.isShiftDown()) { // left click
                         parent.place_group_reset();
                         if(arg0.getClickCount() > 1){ // double click
-                            Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                             if(place != null) (new PlaceDialog(parent.parent, parent.world, place)).setVisible(true);
                         }
                     }
@@ -2192,7 +2193,7 @@ public class WorldTab extends JPanel {
                     
                     HashSet<Place> place_group = parent.get_place_group_selection();
                     
-                    JMenuItem mi_remove = null;
+                    JMenuItem mi_remove;
                     if(place_group.isEmpty()){
                         mi_remove = new JMenuItem("Remove place");
                         mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));

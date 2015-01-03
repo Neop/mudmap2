@@ -6,9 +6,13 @@
         <group>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/LayerElement.java</file>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/World.java</file>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/frontend/WorldTab.java</file>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/Layer.java</file>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/sssp/BreadthSearch.java</file>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/Path.java</file>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/quadtree/Quadtree.java</file>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/Place.java</file>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/sssp/BreadthSearchGraph.java</file>
         </group>
     </open-files>
 </project-private>
