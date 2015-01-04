@@ -27,6 +27,7 @@ package mudmap2.frontend;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -1448,7 +1449,7 @@ public class WorldTab extends JPanel {
                                                     ? cur_place.get_name() : cur_place.toString();
                             LinkedList<String> line = fit_line_width(place_name, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
                             for(String str: line){
-                                g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width /*+ (int) tile_selection_stroke_width */+ fm.getHeight() * (1 + line_num));
                                 line_num++;
                             }
 
@@ -1456,7 +1457,7 @@ public class WorldTab extends JPanel {
                                 // recommended level
                                 int reclvlmin = cur_place.get_rec_lvl_min(), reclvlmax = cur_place.get_rec_lvl_max();
                                 if(reclvlmin > -1 || reclvlmax > -1){
-                                    g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                    g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width /*+ (int) tile_selection_stroke_width*/ + fm.getHeight() * (1 + line_num));
                                     line_num++;
                                 }
 
@@ -1472,7 +1473,7 @@ public class WorldTab extends JPanel {
                                     }
                                     line = fit_line_width(sa_str, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines - line_num);
                                     for(String str: line){
-                                        g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width + (int) tile_selection_stroke_width + fm.getHeight() * (1 + line_num));
+                                        g.drawString(str, place_x_px + border_width + (int) tile_selection_stroke_width + (int) Math.ceil(risk_level_stroke_width), place_y_px + border_width /*+ (int) tile_selection_stroke_width*/ + fm.getHeight() * (1 + line_num));
                                         line_num++;
                                     }
                                 }
@@ -1527,7 +1528,7 @@ public class WorldTab extends JPanel {
                             if((up || down) && get_tile_draw_text() && line_num < max_lines){
                                 g.setColor(Color.BLACK);
                                 // have some arrows: ⬆⬇ ￪￬ ↑↓
-                                String updownstr = "" + (up ? "⬆" : "") + (down ? "⬇" : "");
+                                String updownstr = "" + (up ? "↑" : "") + (down ? "↓" : "");
                                 g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                             }
                         }
@@ -1608,7 +1609,11 @@ public class WorldTab extends JPanel {
         private class TabMousePassiveListener extends TabMouseListener implements MouseListener {
             @Override
             public void mouseClicked(MouseEvent arg0) {
-                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
+                if(arg0.getButton() == MouseEvent.BUTTON3){ // right click
+                    // show context menu
+                    TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
+                } else if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
                     if(!arg0.isShiftDown()){ // left click + hift gets handled in active listener
                         // set place selection to coordinates if keyboard selection is enabled
                         parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
@@ -1624,11 +1629,7 @@ public class WorldTab extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent arg0) {
-                if(arg0.getButton() == MouseEvent.BUTTON3){ // right click
-                    // show context menu
-                    TabContextMenu context_menu = new TabContextMenu(parent, get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                    context_menu.show(arg0.getComponent(), arg0.getX(), arg0.getY());
-                } else if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
+                if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
                     Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     if(arg0.getClickCount() == 2){ // double click
                         if(place != null && !place.get_children().isEmpty()) parent.push_position(place.get_children().iterator().next().get_coordinate()); // go to child place
@@ -1712,12 +1713,12 @@ public class WorldTab extends JPanel {
                     switch(arg0.getKeyCode()){
                         // zoom the map
                         case KeyEvent.VK_PLUS:
-                        case KeyEvent.VK_SUBTRACT:
+                        case KeyEvent.VK_ADD:
                         case KeyEvent.VK_PAGE_UP:
                             parent.tile_size_increment();
                             break;
-                        case KeyEvent.VK_ADD:
                         case KeyEvent.VK_MINUS:
+                        case KeyEvent.VK_SUBTRACT:
                         case KeyEvent.VK_PAGE_DOWN:
                             parent.tile_size_decrement();
                             break;
@@ -2187,79 +2188,84 @@ public class WorldTab extends JPanel {
                 
                 final Place place = (layer != null ? (Place) layer.get(px, py) : null);
                 if(layer != null && place != null){ // if place exists
-                    JMenuItem mi_edit = new JMenuItem("Edit place");
-                    mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
-                    add(mi_edit);
-                    
-                    HashSet<Place> place_group = parent.get_place_group_selection();
-                    
-                    JMenuItem mi_remove;
-                    if(place_group.isEmpty()){
-                        mi_remove = new JMenuItem("Remove place");
-                        mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
-                        mi_remove.setToolTipText("Remove this place");
-                    } else {
-                        mi_remove = new JMenuItem("*Remove places");
-                        mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place_group));
-                        mi_remove.setToolTipText("Remove all selected places");
+                    if(!parent.passive){
+                        JMenuItem mi_edit = new JMenuItem("Edit place");
+                        mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
+                        add(mi_edit);
+
+                        HashSet<Place> place_group = parent.get_place_group_selection();
+
+                        JMenuItem mi_remove;
+                        if(place_group.isEmpty()){
+                            mi_remove = new JMenuItem("Remove place");
+                            mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place));
+                            mi_remove.setToolTipText("Remove this place");
+                        } else {
+                            mi_remove = new JMenuItem("*Remove places");
+                            mi_remove.addActionListener(new PlaceRemoveDialog(parent.parent, parent.world, place_group));
+                            mi_remove.setToolTipText("Remove all selected places");
+                        }
+                        add(mi_remove);
+
+                        JMenuItem mi_comments = new JMenuItem("Edit comments");
+                        mi_comments.addActionListener(new PlaceCommentDialog(parent.parent, place));
+                        add(mi_comments);
+
+                        JMenuItem mi_area = null;
+                        if(place_group.isEmpty()){
+                            mi_area = new JMenuItem("Edit area");;
+                            mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
+                            mi_area.setToolTipText("Edit the area of this place");
+                        } else {
+                            mi_area = new JMenuItem("*Edit area");
+                            mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place_group, place));
+                            mi_area.setToolTipText("Sets a common area for all selected places");
+                        }
+                        add(mi_area);
                     }
-                    add(mi_remove);
-                    
-                    JMenuItem mi_comments = new JMenuItem("Edit comments");
-                    mi_comments.addActionListener(new PlaceCommentDialog(parent.parent, place));
-                    add(mi_comments);
-                    
-                    JMenuItem mi_area = null;
-                    if(place_group.isEmpty()){
-                        mi_area = new JMenuItem("Edit area");;
-                        mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
-                        mi_area.setToolTipText("Edit the area of this place");
-                    } else {
-                        mi_area = new JMenuItem("*Edit area");
-                        mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place_group, place));
-                        mi_area.setToolTipText("Sets a common area for all selected places");
-                    }
-                    add(mi_area);
                     
                     // ------------- Paths ------------------
                     JMenu m_paths = new JMenu("Paths / Exits");
-                    add(m_paths);
+                    if(!parent.passive || !place.get_paths().isEmpty())
+                        add(m_paths);
                     
-                    JMenu m_path_connect = new JMenu("Connect");
-                    m_paths.add(m_path_connect);
-                    m_path_connect.setToolTipText("Connect a path from this place to another one");
-                    
-                    JMenuItem mi_path_connect_select = new JMenuItem("Select");
-                    m_path_connect.add(mi_path_connect_select);
-                    mi_path_connect_select.setToolTipText("Select any place from the map");
-                    mi_path_connect_select.addActionListener(new PathConnectDialog(parent, place));
-                    
-                    JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
-                    m_path_connect.add(mi_path_connect_neighbors);
-                    mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
-                    mi_path_connect_neighbors.addActionListener(new PathConnectNeighborsDialog(parent.parent, place));
+                    if(!parent.passive){
+                        JMenu m_path_connect = new JMenu("Connect");
+                        m_paths.add(m_path_connect);
+                        m_path_connect.setToolTipText("Connect a path from this place to another one");
 
-                    LinkedList<Place> places = layer.get_neighbors(px, py, 1);
-                    if(!places.isEmpty()){
-                        m_path_connect.add(new JSeparator());
+                        JMenuItem mi_path_connect_select = new JMenuItem("Select");
+                        m_path_connect.add(mi_path_connect_select);
+                        mi_path_connect_select.setToolTipText("Select any place from the map");
+                        mi_path_connect_select.addActionListener(new PathConnectDialog(parent, place));
 
-                        for(Place neighbor: places){
-                            // only show, if no connection exists, yet
-                            if(place.get_paths(neighbor).isEmpty()){
-                                String dir1 = "", dir2 = "";
+                        JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
+                        m_path_connect.add(mi_path_connect_neighbors);
+                        mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
+                        mi_path_connect_neighbors.addActionListener(new PathConnectNeighborsDialog(parent.parent, place));
 
-                                if(neighbor.get_y() > place.get_y())
-                                    {dir1 = "n"; dir2 = "s";}
-                                else if(neighbor.get_y() < place.get_y())
-                                    {dir1 = "s"; dir2 = "n";}
-                                if(neighbor.get_x() > place.get_x())
-                                    {dir1 = dir1 + "e"; dir2 = dir2 + "w";}
-                                else if(neighbor.get_x() < place.get_x())
-                                    {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
+                        LinkedList<Place> places = layer.get_neighbors(px, py, 1);
+                        if(!places.isEmpty()){
+                            m_path_connect.add(new JSeparator());
 
-                                JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
-                                m_path_connect.add(mi_path_connect);
-                                mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                            for(Place neighbor: places){
+                                // only show, if no connection exists, yet
+                                if(place.get_paths(neighbor).isEmpty()){
+                                    String dir1 = "", dir2 = "";
+
+                                    if(neighbor.get_y() > place.get_y())
+                                        {dir1 = "n"; dir2 = "s";}
+                                    else if(neighbor.get_y() < place.get_y())
+                                        {dir1 = "s"; dir2 = "n";}
+                                    if(neighbor.get_x() > place.get_x())
+                                        {dir1 = dir1 + "e"; dir2 = dir2 + "w";}
+                                    else if(neighbor.get_x() < place.get_x())
+                                        {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
+
+                                    JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
+                                    m_path_connect.add(mi_path_connect);
+                                    mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                                }
                             }
                         }
                     }
@@ -2268,104 +2274,116 @@ public class WorldTab extends JPanel {
                     HashSet<Path> paths = place.get_paths();
                     
                     if(!paths.isEmpty()){
-                        JMenu m_path_remove = new JMenu("Remove");
-                        m_paths.add(m_path_remove);
-                        m_path_remove.setToolTipText("Remove a path");
-                        
-                        m_paths.add(new JSeparator());
+                        JMenu m_path_remove = null;
+                        if(!parent.passive){
+                            m_path_remove = new JMenu("Remove");
+                            m_paths.add(m_path_remove);
+                            m_path_remove.setToolTipText("Remove a path");
 
+                            m_paths.add(new JSeparator());
+                        }
+                        
                         for(Path path: paths){
                             Place other_place = path.get_other_place(place);
                             JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.get_exit(place) + "] " + other_place.get_name());
                             m_paths.add(mi_path_goto);
                             mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
                             
-                            JMenuItem mi_path_remove = new JMenuItem("Remove [" + path.get_exit(place) + "] " + other_place.get_name());
-                            m_path_remove.add(mi_path_remove);
-                            mi_path_remove.addActionListener(new RemovePathActionListener(path));
+                            if(!parent.passive){
+                                JMenuItem mi_path_remove = new JMenuItem("Remove [" + path.get_exit(place) + "] " + other_place.get_name());
+                                m_path_remove.add(mi_path_remove);
+                                mi_path_remove.addActionListener(new RemovePathActionListener(path));
+                            }
                         }
                         
-                        JMenuItem mi_shortest_path = new JMenuItem("Find shortest path");
-                        add(mi_shortest_path);
-                        mi_shortest_path.addActionListener(new ActionListener() {
+                        if(!parent.passive){
+                            JMenuItem mi_shortest_path = new JMenuItem("Find shortest path");
+                            add(mi_shortest_path);
+                            mi_shortest_path.addActionListener(new ActionListener() {
 
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                PlaceSelectionDialog dlg = new PlaceSelectionDialog((JFrame) parent.parent, parent.world, parent.get_cur_position(), true);
-                                dlg.setVisible(true);
-                                Place end = dlg.get_selection();
-                                if(end != null){
-                                    parent.place_group_reset();
-                                    Place place_it = parent.world.breadth_search(place, end);
-                                    if(place_it == null) parent.label_infobar.show_message("No Path found");
-                                    else {
-                                        int path_length = 0;
-                                        while(place_it != null){
-                                            parent.place_group.add((Place) place_it);
-                                            place_it = place_it.get_breadth_search_data().predecessor;
-                                            ++path_length;
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    PlaceSelectionDialog dlg = new PlaceSelectionDialog((JFrame) parent.parent, parent.world, parent.get_cur_position(), true);
+                                    dlg.setVisible(true);
+                                    Place end = dlg.get_selection();
+                                    if(end != null){
+                                        parent.place_group_reset();
+                                        Place place_it = parent.world.breadth_search(place, end);
+                                        if(place_it == null) parent.label_infobar.show_message("No Path found");
+                                        else {
+                                            int path_length = 0;
+                                            while(place_it != null){
+                                                parent.place_group.add((Place) place_it);
+                                                place_it = place_it.get_breadth_search_data().predecessor;
+                                                ++path_length;
+                                            }
+                                            parent.label_infobar.show_message("Path found, length: " + (path_length - 1));
                                         }
-                                        parent.label_infobar.show_message("Path found, length: " + (path_length - 1));
-                                    }
-                                    
-                                } 
-                            }
-                        });
+
+                                    } 
+                                }
+                            });
+                        }
                     }
                     
                     // ------------- sub-areas ------------------
                     JMenu m_subareas = new JMenu("Sub-areas");
                     m_subareas.setToolTipText("Not to be confused with areas, sub-areas usually connect a place to another layer of the map, eg. a building <-> rooms inside it");
-                    add(m_subareas);
+                    if(!parent.passive || !place.get_children().isEmpty())
+                        add(m_subareas);
                     
-                    JMenuItem mi_sa_connect = new JMenuItem("Connect with place");
-                    m_subareas.add(mi_sa_connect);
-                    mi_sa_connect.setToolTipText("Connects another place to this place as sub-area");
-                    mi_sa_connect.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            PlaceSelectionDialog dlg = new PlaceSelectionDialog((JFrame) parent.parent, parent.world, parent.get_cur_position(), true);
-                            dlg.setVisible(true);
-                            Place child = dlg.get_selection();
-                            if(child != null && child != place){
-                                int ret = JOptionPane.showConfirmDialog(parent, "Connect \"" + child.get_name() + "\" to \"" + place.get_name() + "\"?", "Connect sub-area", JOptionPane.YES_NO_OPTION);
-                                if(ret == JOptionPane.YES_OPTION){
-                                    place.connect_child(child);
-                                    parent.repaint();
+                    if(!parent.passive){
+                        JMenuItem mi_sa_connect = new JMenuItem("Connect with place");
+                        m_subareas.add(mi_sa_connect);
+                        mi_sa_connect.setToolTipText("Connects another place to this place as sub-area");
+                        mi_sa_connect.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                PlaceSelectionDialog dlg = new PlaceSelectionDialog((JFrame) parent.parent, parent.world, parent.get_cur_position(), true);
+                                dlg.setVisible(true);
+                                Place child = dlg.get_selection();
+                                if(child != null && child != place){
+                                    int ret = JOptionPane.showConfirmDialog(parent, "Connect \"" + child.get_name() + "\" to \"" + place.get_name() + "\"?", "Connect sub-area", JOptionPane.YES_NO_OPTION);
+                                    if(ret == JOptionPane.YES_OPTION){
+                                        place.connect_child(child);
+                                        parent.repaint();
+                                    }
                                 }
                             }
-                        }
-                    });
-                    
-                    JMenuItem mi_sa_new_layer = new JMenuItem("Add on new layer");
-                    mi_sa_new_layer.setToolTipText("Creates a new place on a new layer and connects it with \"" + place.get_name() + "\" as a sub-area");
-                    m_subareas.add(mi_sa_new_layer);
-                    mi_sa_new_layer.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent arg0) {
-                            // create new place
-                            PlaceDialog dlg = new PlaceDialog(parent.parent, parent.get_world(), null, 0, 0);
-                            dlg.setVisible(true);
-                            
-                            Place place_new = dlg.get_place();
-                            if(place_new != null){
-                                // connect new place with place as a child
-                                place.connect_child(place_new);
-                                // go to new place
-                                parent.push_position(place_new.get_coordinate());
+                        });
+
+                        JMenuItem mi_sa_new_layer = new JMenuItem("Add on new layer");
+                        mi_sa_new_layer.setToolTipText("Creates a new place on a new layer and connects it with \"" + place.get_name() + "\" as a sub-area");
+                        m_subareas.add(mi_sa_new_layer);
+                        mi_sa_new_layer.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent arg0) {
+                                // create new place
+                                PlaceDialog dlg = new PlaceDialog(parent.parent, parent.get_world(), null, 0, 0);
+                                dlg.setVisible(true);
+
+                                Place place_new = dlg.get_place();
+                                if(place_new != null){
+                                    // connect new place with place as a child
+                                    place.connect_child(place_new);
+                                    // go to new place
+                                    parent.push_position(place_new.get_coordinate());
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                     
                     HashSet<Place> children = place.get_children();
                     if(!children.isEmpty()){
-                        JMenu m_sa_remove = new JMenu("Remove");
-                        m_subareas.add(m_sa_remove);
-                    
-                        for(Place child: children){
-                            JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.get_name());
-                            m_sa_remove.add(mi_sa_remove);
-                            mi_sa_remove.addActionListener(new RemoveSubAreaActionListener(place, child));
+                        if(!parent.passive){
+                            JMenu m_sa_remove = new JMenu("Remove");
+                            m_subareas.add(m_sa_remove);
+
+                            for(Place child: children){
+                                JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.get_name());
+                                m_sa_remove.add(mi_sa_remove);
+                                mi_sa_remove.addActionListener(new RemoveSubAreaActionListener(place, child));
+                            }
                         }
                         
                         m_subareas.add(new JSeparator());
