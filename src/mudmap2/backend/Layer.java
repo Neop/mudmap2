@@ -25,7 +25,7 @@ package mudmap2.backend;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.TreeMap;
+import mudmap2.backend.prquadtree.Quadtree;
 
 /**
  * A layer stores places relatively to each other by position on the map.
@@ -38,19 +38,49 @@ public class Layer {
     World world;
     static int next_id;
     int id;
-    TreeMap<Integer, TreeMap<Integer, LayerElement>> elements;
+    Quadtree elements;
+    
+    // for quadtree optimization
+    int max_x, min_x, max_y, min_y;
     
     public Layer(int _id, World _world){
         id = _id;
         if(id >= next_id) next_id = id + 1;
         world = _world;
-        elements = new TreeMap<Integer, TreeMap<Integer, LayerElement>>();
+        max_x = min_x = max_y = min_y = 0;
+        elements = new Quadtree();
     }
     
     public Layer(World _world){
         id = next_id++;
         world = _world;
-        elements = new TreeMap<Integer, TreeMap<Integer, LayerElement>>();
+        max_x = min_x = max_y = min_y = 0;
+        elements = new Quadtree();
+    }
+    
+    /**
+     * Use this only to set an optimized quadtree after construction
+     * @param center_x
+     * @param center_y 
+     */
+    public void set_quadtree(int center_x, int center_y){
+        elements = new Quadtree<Place>(center_x, center_y);
+    }
+    
+    /**
+     * Gets the center x coordinate (estimation)
+     * @return 
+     */
+    public int get_center_x(){
+        return max_x - min_x;
+    }
+      
+    /**
+     * Gets the center y coordinate (estimation)
+     * @return 
+     */
+    public int get_center_y(){
+        return max_y - min_y;
     }
     
     /**
@@ -61,6 +91,11 @@ public class Layer {
      * @throws java.lang.Exception
      */
     public void put(LayerElement element, int x, int y) throws Exception{
+        min_x = Math.min(min_x, x);
+        max_x = Math.max(max_x, x);
+        min_y = Math.min(min_y, y);
+        max_y = Math.max(max_y, y);
+        
         //element.get_layer().remove(element);
         element.set_position(x, y, this);
         put(element);
@@ -72,10 +107,16 @@ public class Layer {
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
     public void put(LayerElement element) throws PlaceNotInsertedException {
-        if(exist(element.get_x(), element.get_y())) throw new PlaceNotInsertedException(element.get_x(), element.get_y());
-        // create map if it doesn't exist
-        if(!elements.containsKey(element.get_x())) elements.put(element.get_x(), new TreeMap<Integer, LayerElement>());
-        elements.get(element.get_x()).put(element.get_y(), element);
+        try {
+            min_x = Math.min(min_x, element.get_x());
+            max_x = Math.max(max_x, element.get_x());
+            min_y = Math.min(min_y, element.get_y());
+            max_y = Math.max(max_y, element.get_y());
+            
+            elements.insert(element, element.get_x(), element.get_y());
+        } catch (Exception ex) {
+            throw new PlaceNotInsertedException(element.get_x(), element.get_y());
+        }
     }
     
     /**
@@ -85,8 +126,7 @@ public class Layer {
      * @return element at that position or null
      */
     public LayerElement get(int x, int y){
-        TreeMap<Integer, LayerElement> foo = elements.get(x);
-        return foo != null ? foo.get(y) : null;
+        return (LayerElement) elements.get(x, y);
     }
     
     /**
@@ -132,7 +172,7 @@ public class Layer {
      */
     @Override
     public String toString(){
-        return "" + get_id();
+        return String.valueOf(get_id());
     }
     
     /**
@@ -145,11 +185,7 @@ public class Layer {
         // element on the layer before placing the new one
         LayerElement el_bef = get(element.get_x(), element.get_y());
         if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.get_x() + ", " + element.get_y() + ")");
-        if(elements != null){
-            if(elements.get(element.get_x()) != null){
-                elements.get(element.get_x()).remove(element.get_y());
-            }
-        }
+        elements.remove(element.get_x(), element.get_y());
     }
     
     /**
@@ -159,7 +195,7 @@ public class Layer {
      * @return true, if an element exists
      */
     public boolean exist(int x, int y){
-        return elements.containsKey(x) && elements.get(x).containsKey(y);
+        return elements.exist(x, y);
     }
     
     /**
@@ -167,13 +203,7 @@ public class Layer {
      * @return set of all elements or empty set
      */
     public HashSet<Place> get_places(){
-        HashSet<Place> ret = new HashSet<Place>();
-        for(TreeMap<Integer, LayerElement> values: elements.values()){
-            for(LayerElement el: values.values()){
-                ret.add((Place) el);
-            }
-        }
-        return ret;
+        return elements.values();
     }
     
     /**

@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -133,6 +134,9 @@ public class World implements BreadthSearchGraph {
             int cur_area = -1;
             Place cur_place = new Place(-1, "", 0, 0, new Layer(-1, this));
             final RiskLevel risk_level_default = get_risk_level(0);
+            
+            // temporary data for layer quadtree optimization
+            HashMap<Integer, Pair<Integer, Integer>> layer_center = new HashMap<Integer, Pair<Integer, Integer>>();
 
             // temporary data for creating a place
             int cur_place_id = -1;
@@ -202,6 +206,11 @@ public class World implements BreadthSearchGraph {
                         areas.get(cur_area).set_color(new Color(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3])));
                     } 
                     
+                    else if(line.startsWith("lc ")){ // layer center (for quadtree optimization)
+                        String[] tmp = line.split(" ");
+                        layer_center.put(Integer.parseInt(tmp[1]), new Pair<Integer, Integer>(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3])));
+                    }
+                    
                     else if(line.startsWith("p ")){ // place id + name
                         cur_place_id = Integer.parseInt(line.split(" ")[1]);
                         cur_place_name = config_get_text(2, line);
@@ -210,7 +219,14 @@ public class World implements BreadthSearchGraph {
                         int layer = Integer.parseInt(tmp[1]);
                         
                         // create the layer, if it doesn't exist
-                        if(!layers.containsKey(layer)) layers.put(layer, new Layer(layer, this));
+                        if(!layers.containsKey(layer)){
+                            Layer l = new Layer(layer, this);
+                            if(layer_center.containsKey(layer)){
+                                Pair<Integer, Integer> p = layer_center.get(layer);
+                                l.set_quadtree(p.first, p.second);
+                            }
+                            layers.put(layer, l);
+                        }
                         
                         if(cur_place_id != -1){
                             // create place and add it to the layer and places list
@@ -265,6 +281,8 @@ public class World implements BreadthSearchGraph {
                     } else if(line.startsWith("pcom")){ // place comment
                         cur_place.add_comment(line.substring(4).trim());
                     }
+                    
+                    else if(!line.startsWith("mver")) System.out.println("Unrecognized line in world data: " + line);
                 }
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -341,6 +359,12 @@ public class World implements BreadthSearchGraph {
                     outstream.println("a " + a.get_id() + " " + a.get_name());
                     outstream.println("acol " + a.get_color().getRed() + " " + a.get_color().getGreen() + " " + a.get_color().getBlue());
                 }
+            }
+            System.out.println("layers");
+            // layers (for quadtree optimization)
+            for(Layer l: layers.values()){
+                outstream.println("lc " + l.get_id() + " " + l.get_center_x() + " " + l.get_center_y());
+                System.out.println("lc " + l.get_id() + " " + l.get_center_x() + " " + l.get_center_y());
             }
             
             // places
@@ -475,7 +499,7 @@ public class World implements BreadthSearchGraph {
         if(place.get_layer() != null){ 
             // if place belongs to a different world
             if(place.get_layer().get_world() != this) place.get_layer().get_world().remove(place);
-            else place.get_layer().remove(place);
+            else if(place.get_layer().get_id() != layer) place.get_layer().remove(place);
         }
         
         // add to layer
