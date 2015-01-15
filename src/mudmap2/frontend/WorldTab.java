@@ -27,7 +27,6 @@ package mudmap2.frontend;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -1631,9 +1630,10 @@ public class WorldTab extends JPanel {
             public void mouseClicked(MouseEvent arg0) {
                 if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
                     Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    /* double click -> go to child place deactivated
                     if(arg0.getClickCount() == 2){ // double click
                         if(place != null && !place.get_children().isEmpty()) parent.push_position(place.get_children().iterator().next().get_coordinate()); // go to child place
-                    } else if(arg0.isControlDown()){ // left click + ctrl
+                    } else*/ if(arg0.isControlDown()){ // left click + ctrl
                         if(place != null) parent.place_group_add(place);
                     } else if(!arg0.isShiftDown()) { // left click
                         parent.place_group_reset();
