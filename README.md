@@ -1,17 +1,17 @@
 #MUD Map v2 (mudmap2)
 
-A mapping tool for text-based games, like text adventures, MUDs and MUSHs
+A mapping tool for text-based games, like text adventures, MUDs and MUSHs.
 An improved and compatible rewrite of MUD Map v1
 
 license: GPLv3
 use it on your own risk!
 
 ##MUD Map Websites:
-GitHub (Sources, Information, etc): https://github.com/Neop/mudmap2
+**GitHub** (Sources, Information, etc): https://github.com/Neop/mudmap2
 
-Sourceforge (download packages, MUD Map v1 + v2): https://sourceforge.net/projects/mudmap/
+**Sourceforge** (download packages, MUD Map v1 + v2): https://sourceforge.net/projects/mudmap/
 
-MUD Map v1 user manual / quick start guide: http://mudmap.sf.net
+MUD Map v1 user manual / **quick start guide**: http://mudmap.sf.net
 
 Developer contact details can be found in doc/README.
 

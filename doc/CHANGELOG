@@ -1,3 +1,10 @@
+2.0.3
+- pr-quadtree (layer) implemented
+- sssp path finding implemented
+- changed key assignment (+/-)
+- fixed bug: no context menu in passive WorldTab
+- fixed bugs
+
 2.0.2
 - keyboard shortcuts for removing paths
 - portable mode implemented
