@@ -32,6 +32,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -1344,6 +1345,7 @@ public class WorldTab extends JPanel {
                 graphic_path = image_path.getGraphics();
                 graphic_path.setColor(parent.world.get_path_color());
                 ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
+                ((Graphics2D) graphic_path).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 tile_positions = new ArrayList<Pair<Integer, Integer>>();
             }
             
@@ -1409,8 +1411,8 @@ public class WorldTab extends JPanel {
                                             ((Graphics2D) graphic_path).draw(c);
                                         }
                                     }
-
-                                    if(!draw_curves){
+                                    
+                                    if(!draw_curves) {
                                         graphic_path.drawLine(place_x_px + exit_offset.first, place_y_px + exit_offset.second, 
                                                               place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first, 
                                                               place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second);
@@ -1630,15 +1632,13 @@ public class WorldTab extends JPanel {
             public void mouseClicked(MouseEvent arg0) {
                 if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
                     Place place = parent.get_place(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                    /* double click -> go to child place deactivated
-                    if(arg0.getClickCount() == 2){ // double click
-                        if(place != null && !place.get_children().isEmpty()) parent.push_position(place.get_children().iterator().next().get_coordinate()); // go to child place
-                    } else*/ if(arg0.isControlDown()){ // left click + ctrl
+                    if(arg0.isControlDown()){ // left click + ctrl
                         if(place != null) parent.place_group_add(place);
-                    } else if(!arg0.isShiftDown()) { // left click
+                    } else if(!arg0.isShiftDown()) { // left click and not shift
                         parent.place_group_reset();
                         if(arg0.getClickCount() > 1){ // double click
-                            if(place != null) (new PlaceDialog(parent.parent, parent.world, place)).setVisible(true);
+                            if(place != null) (new PlaceDialog(parent.parent, parent.get_world(), place)).setVisible(true);
+                            else (new PlaceDialog(parent.parent, parent.world, parent.get_world().get_layer(parent.get_cur_position().get_layer()), get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()))).setVisible(true);
                         }
                     }
                 }
