@@ -30,7 +30,6 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.plaf.OptionPaneUI;
 
 /**
  * Helper class to get common paths and filenames
@@ -51,11 +50,11 @@ public class Paths {
      */
     public static String get_user_data_dir(){
         if(user_data_dir == null || user_data_dir.isEmpty()){
-            String user_data_dir_home = null, user_data_dir_portable = null;
+            String user_data_dir_home, user_data_dir_portable = null;
             
             // read the user data path from environment variables
             // operating system Windows
-            if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
+            if(System.getProperty("os.name").toLowerCase().contains("win"))
                 user_data_dir_home = System.getenv().get("APPDATA") + "/mudmap/";
             // other operating systems
             else user_data_dir_home = System.getProperty("user.home") + "/.mudmap/";
