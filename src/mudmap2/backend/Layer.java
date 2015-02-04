@@ -198,6 +198,10 @@ public class Layer {
         return elements.exist(x, y);
     }
     
+    public boolean isEmpty(){
+        return elements.isEmpty();
+    }
+    
     /**
      * Gets a collection of all elements
      * @return set of all elements or empty set

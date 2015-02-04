@@ -74,6 +74,11 @@ public class Quadtree<T> {
         return root.get(x, y) != null;
     }
     
+    public boolean isEmpty(){
+        if(root == null) return true;
+        else return root.isEmpty();
+    }
+    
     /**
      * Inserts obj at x, y
      * @param obj
