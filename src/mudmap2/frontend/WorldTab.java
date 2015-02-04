@@ -999,6 +999,8 @@ public class WorldTab extends JPanel {
         static final int tile_border_width = 10;
         static final int exit_circle_radius = 5;
         
+        static final int draw_text_threshold = 40;
+        
         double screen_width, screen_height;
         
         WorldTab parent;
@@ -1099,7 +1101,7 @@ public class WorldTab extends JPanel {
          * @return 
          */
         private boolean get_tile_draw_text(){
-            return parent.get_tile_size() >= 60;
+            return parent.get_tile_size() >= draw_text_threshold;
         }
         
         /**
