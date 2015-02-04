@@ -92,7 +92,7 @@ public class PlaceSelectionDialog extends ActionDialog {
         worldtab.set_place_selection_forced(true);
         worldtab.reset_history(default_coordinate.clone());
         
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
