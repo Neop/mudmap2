@@ -206,7 +206,7 @@ public class World implements BreadthSearchGraph {
             try{
                 // if place belongs to a different world
                 if(place.get_layer().get_world() != this) place.get_layer().get_world().remove(place);
-                else if(place.get_layer().get_id() != layer) place.get_layer().remove(place);
+                else place.get_layer().remove(place);
             } catch(Exception ex){
                 Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
             }

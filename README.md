@@ -3,14 +3,12 @@
 A mapping tool for text-based games, like text adventures, MUDs and MUSHs.
 An improved and compatible rewrite of MUD Map v1
 
-license: GPLv3
+license: GPLv3  
 use it on your own risk!
 
 ##MUD Map Websites:
-**GitHub** (Sources, Information, etc): https://github.com/Neop/mudmap2
-
-**Sourceforge** (download packages, MUD Map v1 + v2): https://sourceforge.net/projects/mudmap/
-
+**GitHub** (Sources, Information, etc): https://github.com/Neop/mudmap2  
+**Sourceforge** (download packages, MUD Map v1 + v2): https://sourceforge.net/projects/mudmap/  
 MUD Map v1 user manual / **quick start guide**: http://mudmap.sf.net
 
 Developer contact details can be found in doc/README.
@@ -32,9 +30,9 @@ When you start MUD Map for the first time you will be asked whether
 you'd like to use MUD Map in portable mode. In this case the world files
 will be stored in the same directory as the mudmap2.jar.
 
-If you don't use portable mode, you can find the files here:
-Linux: ~/.mudmap/
-Windows: %appdata%\mudmap\
+If you don't use portable mode, you can find the files here:  
+Linux: ~/.mudmap/  
+Windows: %appdata%\mudmap\  
 
 ##Updating
 Just replace the old mudmap2.jar file with a new one.
