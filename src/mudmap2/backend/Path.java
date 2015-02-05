@@ -30,7 +30,7 @@ package mudmap2.backend;
  */
 public class Path {
     
-    public static final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw"};
+    public static final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw", "-"};
     
     private Place[] places;
     private String[] exitdirections;

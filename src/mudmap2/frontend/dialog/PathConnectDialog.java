@@ -153,14 +153,19 @@ public class PathConnectDialog extends ActionDialog{
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
     
+    private final static String one_way_str = "one way";
+    
     /**
      * Fills the combo box only with directions thar aren't occupied yet
      */
     private void update_direction_combo_box2() {
         direction_combo_box2.removeAllItems();
         if(other != null)
-            for(String s: Path.directions)
-                if(other.get_exit(s) == null) direction_combo_box2.addItem(s);
+            for(String s: Path.directions){
+                Path pa = other.get_exit(s);
+                if(s.equals("-")) s = one_way_str;
+                if(pa == null) direction_combo_box2.addItem(s);
+            }
     }    
     
     /**
@@ -170,6 +175,9 @@ public class PathConnectDialog extends ActionDialog{
         if(other != null){ // if a place is selected
             String dir1 = (String) direction_combo_box1.getSelectedItem();
             String dir2 = (String) direction_combo_box2.getSelectedItem();
+            
+            if(dir1.equals(one_way_str)) dir1 = "-";
+            if(dir2.equals(one_way_str)) dir2 = "-";
             
             boolean exit_available_1 = place.get_exit(dir1) == null;
             boolean exit_available_2 = other.get_exit(dir2) == null;
