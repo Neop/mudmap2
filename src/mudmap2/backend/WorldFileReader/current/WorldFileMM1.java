@@ -227,7 +227,8 @@ public class WorldFileMM1 implements WorldFile {
     private void read_path_color_user(String line){
         int i = 0, r = 0, g = 0, b;
         Color col = null;
-        for(String str: line.substring(5).split("[\\s;]*")){
+        String[] data = line.substring(5).split("[\\s;]");
+        for(String str: data){
             switch(++i){
                 case 1:
                     r = Integer.parseInt(str);
@@ -350,7 +351,7 @@ public class WorldFileMM1 implements WorldFile {
     }
     
     private void read_place_path(String line){
-        String[] tmp = line.substring(3).split("\\$");
+        String[] tmp = line.substring(3).split("[\\$;]");
         tmp_paths.add(new WorldFileMM1.PathTmp(cur_place, Integer.parseInt(tmp[0]), tmp[1], tmp[2]));
     }
     
@@ -441,7 +442,10 @@ public class WorldFileMM1 implements WorldFile {
             HashMap<Color, String> pcol = new HashMap<Color, String>();
             for(Map.Entry<String, Color> entry: world.get_path_colors().entrySet()){
                 if(pcol.containsKey(entry.getValue())){ // if value is already in pcol
-                    pcol.put(entry.getValue(), pcol.get(entry.getValue()) + ";" + entry.getKey().replaceAll(" ", "\\_"));
+                    if(pcol.isEmpty())
+                        pcol.put(entry.getValue(), entry.getKey().replaceAll(" ", "\\_"));
+                    else
+                        pcol.put(entry.getValue(), pcol.get(entry.getValue()) + ";" + entry.getKey().replaceAll(" ", "\\_"));
                 } else {
                     pcol.put(entry.getValue(), entry.getKey().replaceAll(" ", "\\_"));
                 }

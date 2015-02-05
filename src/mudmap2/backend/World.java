@@ -417,7 +417,8 @@ public class World implements BreadthSearchGraph {
     public Color get_path_color(String dir){
         if(!path_colors.containsKey(dir)){
             if(dir.equals("n") || dir.equals("s") || dir.equals("e") || dir.equals("q") ||
-               dir.equals("ne") || dir.equals("nw") || dir.equals("se") || dir.equals("sw"))
+               dir.equals("ne") || dir.equals("nw") || dir.equals("se") || dir.equals("sw") ||
+               dir.equals("w") || dir.equals("e"))
                 return path_color_cardinal;
             else return path_color_non_cardinal;
         } else {
@@ -552,6 +553,16 @@ public class World implements BreadthSearchGraph {
         // remove from places
         for(Place place: places.values())
             if(place.get_risk_level().get_id() == rl.get_id()) place.set_risk_level(null);
+    }
+    
+    /**
+     * Don't create multiple instances of the same world
+     * @return
+     * @throws CloneNotSupportedException 
+     */
+    @Override
+    protected Object clone() throws CloneNotSupportedException{
+        throw new CloneNotSupportedException();
     }
 
 }

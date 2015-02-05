@@ -346,9 +346,6 @@ public final class Mainwindow extends JFrame {
                         String[] tmp = line.substring(4).split("\\.");
                         file_major = Integer.parseInt(tmp[0]);
                         file_minor = Integer.parseInt(tmp[1]);
-                    } else if(line.startsWith("show_paths ")){ // show path lines
-                        String[] tmp = line.split(" ");
-                        WorldTab.set_show_paths(Boolean.parseBoolean(tmp[1]));
                     } else if(line.startsWith("show_paths_curved")){ // show curved path lines - if path lines are enabled
                         String[] tmp = line.split(" ");
                         WorldTab.set_show_paths_curved(Boolean.parseBoolean(tmp[1]));
@@ -379,7 +376,6 @@ public final class Mainwindow extends JFrame {
 
             outstream.println("# MUD Map 2 config file");
             outstream.println("ver " + config_file_version_major + "." + config_file_version_minor);
-            outstream.println("show_paths " + WorldTab.get_show_paths());
             outstream.println("show_paths_curved " + WorldTab.get_show_paths_curved());
             outstream.println("compat_mudmap_1 " + World.compatibility_mudmap_1);
             

@@ -28,6 +28,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FontMetrics;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
@@ -105,7 +106,6 @@ public class WorldTab extends JPanel {
     
     Color tile_center_color;
     
-    static boolean show_paths = true;
     static boolean show_paths_curved = true;
     
     // GUI elements
@@ -352,22 +352,6 @@ public class WorldTab extends JPanel {
      */
     public World get_world(){
         return world;
-    }
-    
-    /**
-     * Returns true if the path lines are enabled
-     * @return 
-     */
-    public static boolean get_show_paths(){
-        return show_paths;
-    }
-    
-    /**
-     * Enables or disables the path lines
-     * @param b 
-     */
-    public static void set_show_paths(boolean b){
-        show_paths = b;
     }
     
     /**
@@ -1334,26 +1318,20 @@ public class WorldTab extends JPanel {
             final double place_x_px_const = remint(screen_center_x) - remint(cur_pos.get_x());
             final double place_y_px_const = remint(screen_center_y) + remint(cur_pos.get_y());
 
-            // clear screen
-            g.clearRect(0, 0, (int) screen_width + 1, (int) screen_height + 1);
-
             // prepare graphic for paths
             // Paths will be drawn on this graphic and later on copied to g
-            BufferedImage image_path = null;
-            Graphics graphic_path = null;
-            ArrayList<Pair<Integer, Integer>> tile_positions = null; // to mask out the tile positions on graphic_path
-            if(get_show_paths()){
-                image_path = new BufferedImage((int) screen_width, (int) screen_height, BufferedImage.TYPE_INT_ARGB);
-                graphic_path = image_path.getGraphics();
-                graphic_path.setColor(parent.world.get_path_color());
-                ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
-                ((Graphics2D) graphic_path).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                tile_positions = new ArrayList<Pair<Integer, Integer>>();
-            }
+            ArrayList<Pair<Integer, Integer>> tile_positions = new ArrayList<Pair<Integer, Integer>>(); // to mask out the tile positions on graphic_path
+            BufferedImage image_path = new BufferedImage((int) screen_width, (int) screen_height, BufferedImage.TYPE_INT_ARGB);
+            Graphics graphic_path = image_path.getGraphics();
+            ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
+            ((Graphics2D) graphic_path).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             
             // get the locations of copied places
             HashSet<Pair<Integer, Integer>> copied_place_locations = mudmap2.Mudmap2.get_copy_place_locations();
 
+            // clear screen
+            g.clearRect(0, 0, (int) screen_width + 1, (int) screen_height + 1);
+            
             // ------------------ draw the tiles / places ----------------------
             for(int tile_x = (g.getClipBounds().x / tile_size) - 1; tile_x < screen_width / tile_size + 1; ++tile_x){
                 for(int tile_y = (g.getClipBounds().y / tile_size) - 1; tile_y < screen_height / tile_size + 1; ++tile_y){
@@ -1369,59 +1347,10 @@ public class WorldTab extends JPanel {
                         int place_x_px = (int) Math.round((tile_x + place_x_px_const) * tile_size);
                         int place_y_px = (int) Math.round((tile_y + place_y_px_const) * tile_size);
 
-                        if(tile_positions != null) tile_positions.add(new Pair<Integer, Integer>(place_x_px, place_y_px));
+                        tile_positions.add(new Pair<Integer, Integer>(place_x_px, place_y_px));
 
                         // number of drawn text lines
                         int line_num = 0;
-
-                        // draw path lines here
-                        if(get_show_paths()){
-                            for(Path path: cur_place.get_paths()){
-                                Place other_place = path.get_other_place(cur_place);
-                                
-                                // if both places of a path are on the same layer and at least one of the two places is on the screen
-                                // usually the main place (path.get_places()[0]) draws the path. If it isn't on screen, the other place draws it
-                                if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer() && (path.get_places()[0] == cur_place || !is_on_screen(other_place))){
-                                    Pair<Integer, Integer> exit_offset = get_exit_offset(path.get_exit(cur_place));
-                                    Pair<Integer, Integer> exit_offset_other = get_exit_offset(path.get_exit(other_place));
-
-                                    boolean draw_curves = get_show_paths_curved();
-
-                                    if(draw_curves){
-                                        Pair<Double, Double> normal1 = get_exit_normal(path.get_exit(cur_place));
-                                        Pair<Double, Double> normal2 = get_exit_normal(path.get_exit(other_place));
-
-                                        double exit_1_x = place_x_px + exit_offset.first;
-                                        double exit_1_y = place_y_px + exit_offset.second;
-                                        double exit_2_x = place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first;
-                                        double exit_2_y = place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second;
-
-                                        double dx = exit_2_x - exit_1_x;
-                                        double dy = exit_2_y - exit_1_y;
-
-                                        if(draw_curves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tile_size){
-                                            CubicCurve2D c = new CubicCurve2D.Double();
-                                            c.setCurve(
-                                                    // point 1
-                                                    exit_1_x, exit_1_y,
-                                                    // point 2
-                                                    exit_1_x + normal1.first * tile_size, exit_1_y - normal1.second * tile_size,
-                                                    // point 3
-                                                    exit_2_x + normal2.first * tile_size, exit_2_y - normal2.second * tile_size,
-                                                    // point 4
-                                                    exit_2_x, exit_2_y);
-                                            ((Graphics2D) graphic_path).draw(c);
-                                        }
-                                    }
-                                    
-                                    if(!draw_curves) {
-                                        graphic_path.drawLine(place_x_px + exit_offset.first, place_y_px + exit_offset.second, 
-                                                              place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first, 
-                                                              place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second);
-                                    }
-                                }
-                            }
-                        }
 
                         // draw area color
                         if(cur_place.get_area() != null){
@@ -1506,18 +1435,74 @@ public class WorldTab extends JPanel {
                             g.setColor(new Color(255, 255, 255, 128));
                             g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
                         }
+                        
+                        // draw path lines here
+                        boolean exit_up = false, exit_down = false;
+                        for(Path path: cur_place.get_paths()){
+                            Place other_place = path.get_other_place(cur_place);
 
-                        // draw exits
-                        if(tile_size >= 20){
-                            g.setColor(parent.world.get_path_color());
-                            Integer exit_x_offset = 0, exit_y_offset = 0;
-                            g.setColor(parent.world.get_path_color());
-                            boolean up = false, down = false;
+                            Color color_place1 = parent.world.get_path_color(path.get_exit_directions()[0]);
+                            Color color_place2 = parent.world.get_path_color(path.get_exit_directions()[1]);
+                            if(path.get_places()[0] != cur_place) {
+                                Color tmp = color_place1;
+                                color_place1 = color_place2;
+                                color_place2 = tmp;
+                            }
+                            
+                            // if both places of a path are on the same layer and at least one of the two places is on the screen
+                            // usually the main place (path.get_places()[0]) draws the path. If it isn't on screen, the other place draws it
+                            if(other_place.get_layer().get_id() == parent.get_cur_position().get_layer() && (path.get_places()[0] == cur_place || !is_on_screen(other_place))){
+                                Pair<Integer, Integer> exit_offset = get_exit_offset(path.get_exit(cur_place));
+                                Pair<Integer, Integer> exit_offset_other = get_exit_offset(path.get_exit(other_place));
 
-                            for(Path p: cur_place.get_paths()){
-                                String exit = p.get_exit(cur_place);
-                                if(exit.equals("u")) up = true;
-                                else if(exit.equals("d")) down = true;
+                                boolean draw_curves = get_show_paths_curved();
+
+                                // exit positions on the map
+                                double exit1x = place_x_px + exit_offset.first;
+                                double exit1y = place_y_px + exit_offset.second;
+                                double exit2x = place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first;
+                                double exit2y = place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second;
+
+                                if(color_place1.equals(color_place2)){ // same color
+                                    ((Graphics2D) graphic_path).setPaint(color_place1);
+                                } else { // draw gradient
+                                    GradientPaint gp = new GradientPaint((float) exit1x, (float) exit1y, color_place1,
+                                                                         (float) exit2x, (float) exit2y, color_place2);
+                                    ((Graphics2D) graphic_path).setPaint(gp);
+                                }
+
+                                if(draw_curves){
+                                    Pair<Double, Double> normal1 = get_exit_normal(path.get_exit(cur_place));
+                                    Pair<Double, Double> normal2 = get_exit_normal(path.get_exit(other_place));
+
+                                    double dx = exit2x - exit1x;
+                                    double dy = exit2y - exit1y;
+
+                                    if(draw_curves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tile_size){
+                                        CubicCurve2D c = new CubicCurve2D.Double();
+                                        c.setCurve(// point 1
+                                                exit1x, exit1y,
+                                                // point 2
+                                                exit1x + normal1.first * tile_size, exit1y - normal1.second * tile_size,
+                                                // point 3
+                                                exit2x + normal2.first * tile_size, exit2y - normal2.second * tile_size,
+                                                // point 4
+                                                exit2x, exit2y);
+                                        ((Graphics2D) graphic_path).draw(c);
+                                    }
+                                }
+
+                                if(!draw_curves) {
+                                    graphic_path.drawLine((int) exit1x, (int) exit1y, (int) exit2x, (int) exit2y);
+                                }
+                            }
+                            
+                            // draw exit dots, if tiles are larger than 20
+                            if(tile_size >= 20){
+                                g.setColor(color_place1);
+                                String exit = path.get_exit(cur_place);
+                                if(exit.equals("u")) exit_up = true;
+                                else if(exit.equals("d")) exit_down = true;
                                 else {
                                     Pair<Integer, Integer> exit_offset = get_exit_offset(exit);
                                     if(exit_offset.first != tile_size / 2 || exit_offset.second != tile_size / 2){
@@ -1525,13 +1510,16 @@ public class WorldTab extends JPanel {
                                     }
                                 }
                             }
+                        }
 
+                        // draw exits
+                        if(tile_size >= 20){
                             // the up / down flags have to be drawn after the 
                             // exits to know whether they have to be drawn
-                            if((up || down) && get_tile_draw_text() && line_num < max_lines){
+                            if((exit_up || exit_down) && get_tile_draw_text() && line_num <= max_lines){
                                 g.setColor(Color.BLACK);
-                                // have some arrows: ⬆⬇ ￪￬ ↑↓
-                                String updownstr = "" + (up ? "↑" : "") + (down ? "↓" : "");
+                                // have some arrows: ￪￬ ↑↓
+                                String updownstr = "" + (exit_up ? "↑" : "") + (exit_down ? "↓" : "");
                                 g.drawString(updownstr, place_x_px + tile_size - border_width - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), place_y_px + tile_size - border_width - (int) Math.ceil(2 * selection_stroke_width));
                             }
                         }
@@ -1590,18 +1578,16 @@ public class WorldTab extends JPanel {
                 }
             }
 
-            if(get_show_paths()){
-                // mask out tile positions on graphic_path
-                ((Graphics2D) graphic_path).setBackground(new Color(0,0,0,0));
-                int clear_tile_size = tile_size - 2 * border_width;
-                for(Pair<Integer, Integer> p: tile_positions)
-                    //graphic_path.clearRect(p.first, p.second, p.first + tile_size, p.second + tile_size);
-                    graphic_path.clearRect(p.first + border_width, p.second + border_width, clear_tile_size, clear_tile_size);
+            // mask out tile positions on graphic_path
+            ((Graphics2D) graphic_path).setBackground(new Color(0,0,0,0));
+            int clear_tile_size = tile_size - 2 * border_width;
+            for(Pair<Integer, Integer> p: tile_positions)
+                //graphic_path.clearRect(p.first, p.second, p.first + tile_size, p.second + tile_size);
+                graphic_path.clearRect(p.first + border_width, p.second + border_width, clear_tile_size, clear_tile_size);
 
-                // draw graphic_path to g
-                g.drawImage(image_path, 0, 0, null);
-                graphic_path.dispose();
-            }
+            // draw graphic_path to g
+            g.drawImage(image_path, 0, 0, null);
+            graphic_path.dispose();
         }
         
         // ========================= Listeners and context menu ================
