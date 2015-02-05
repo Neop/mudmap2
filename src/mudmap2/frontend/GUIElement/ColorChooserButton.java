@@ -54,13 +54,17 @@ public class ColorChooserButton extends JButton {
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                color = JColorChooser.showDialog(parent, "Choose area color", color);
+                Color col = JColorChooser.showDialog(parent, "Choose area color", color);
+                if(col != null) color = col;
             }
         });
     }
     
     @Override
     public void paintComponent(Graphics g){
+        g.setColor(getBackground());
+        g.fillRect(0, 0, (int) g.getClipBounds().getWidth() + 1, (int) g.getClipBounds().getHeight() + 1);
+        
         g.setColor(color);
         g.fillRect(2, 2, getSize().width - 4, getSize().height - 4);
         g.setColor(Color.LIGHT_GRAY);

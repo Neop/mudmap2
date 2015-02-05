@@ -67,6 +67,7 @@ import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
+import mudmap2.frontend.dialog.PathColorDialog;
 import mudmap2.frontend.dialog.PlaceListDialog;
 
 /**
@@ -85,7 +86,7 @@ public final class Mainwindow extends JFrame {
     JMenuBar menu_bar;
     JMenu menu_file, menu_edit, menu_help;
     JMenuItem menu_file_new, menu_file_open, menu_file_save, menu_file_save_as_image, menu_file_quit;
-    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world, menu_edit_list_places, menu_edit_curved_paths;
+    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world, menu_edit_list_places, menu_edit_curved_paths, menu_edit_path_colors;
     JMenuItem menu_help_help, menu_help_about;
     
     JTabbedPane tabbed_pane;
@@ -186,6 +187,20 @@ public final class Mainwindow extends JFrame {
                 WorldTab tab = get_selected_tab();
                 if(tab != null){
                     (new EditWorldDialog(tab.parent, tab.get_world())).setVisible(true);
+                }
+            }
+        });
+        
+        menu_edit_path_colors = new JMenuItem("Path colors");
+        menu_edit.add(menu_edit_path_colors);
+        menu_edit_path_colors.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                WorldTab tab = get_selected_tab();
+                if(tab != null){
+                    (new PathColorDialog(tab.parent, tab.get_world())).setVisible(true);
+                    tab.repaint();
                 }
             }
         });

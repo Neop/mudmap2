@@ -23,6 +23,7 @@ package mudmap2.frontend.dialog;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -121,6 +122,7 @@ public class AreaDialog extends ActionDialog {
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         
+        constraints.insets = new Insets(2, 2, 2, 2);
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.fill = GridBagConstraints.HORIZONTAL;

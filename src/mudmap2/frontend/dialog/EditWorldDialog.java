@@ -24,6 +24,7 @@ package mudmap2.frontend.dialog;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -74,6 +75,8 @@ public class EditWorldDialog extends ActionDialog {
         GridBagConstraints constraints_l = new GridBagConstraints();
         GridBagConstraints constraints_r = new GridBagConstraints();
         
+        constraints.insets = constraints_l.insets = constraints_r.insets = new Insets(2, 2, 2, 2);
+        
         constraints_l.fill = GridBagConstraints.HORIZONTAL;
         constraints_r.fill = GridBagConstraints.BOTH;
         constraints_r.gridx = 1;
@@ -84,10 +87,6 @@ public class EditWorldDialog extends ActionDialog {
         add(textfield_name = new JTextField(world.get_name()), constraints_r);
         
         constraints_l.gridy = ++constraints_r.gridy;
-        
-        add(new JLabel("Path color"), constraints_l);
-        add(colorchooser_path = new ColorChooserButton(getParent(), world.get_path_color()), constraints_r);
-        
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
         constraints.gridwidth = 2;
         constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -140,7 +139,7 @@ public class EditWorldDialog extends ActionDialog {
                 break;
         }
         
-        
+        constraints_l.insets = constraints_r.insets = new Insets(0, 2, 0, 2);
         constraints_l.gridy = ++constraints_r.gridy;
         
         JButton button_cancel = new JButton("Cancel");
@@ -177,8 +176,6 @@ public class EditWorldDialog extends ActionDialog {
         // if textfield is not empty and name is unique
         if(!name.isEmpty() && (name.equals(world.get_name()) || WorldManager.get_world_file(name) == null)){
             world.set_name(name);
-            
-            world.set_path_color(colorchooser_path.get_color());
             
             // modify risk levels
             for(Map.Entry<RiskLevel,Pair<JTextField, ColorChooserButton>> foo: risklevel_colors.entrySet()){

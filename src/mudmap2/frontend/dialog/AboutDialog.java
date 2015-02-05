@@ -22,7 +22,9 @@
 
 package mudmap2.frontend.dialog;
 
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -42,23 +44,36 @@ public class AboutDialog extends ActionDialog {
      * @param parent 
      */
     public AboutDialog(JFrame parent){
-        super(parent, "bout MUD Map", true);
+        super(parent, "About MUD Map", true);
     }
 
     @Override
     void create() {
-        setLayout(new GridLayout(0, 1));
+        setLayout(new GridBagLayout());
         
-        add(new JLabel("MUD Map v2"));
-        add(new JLabel("Version " + mudmap2.Mudmap2.get_version() + " " + mudmap2.Mudmap2.get_version_state()));
-        add(new JLabel("License: GPLv3"));
-        add(new JLabel("Use it on your own risk!"));
-        add(new LinkLabel("GitHub", Paths.github_url));
-        add(new LinkLabel("Sourceforge", Paths.sourceforge_url));
-        add(new JLabel("by Neop (mneop@web.de)"));
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(3, 5, 4, 5);
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
+        
+        ++constraints.gridy;
+        add(new JLabel("<html><h1>MUD Map v2</h1></html>"), constraints);
+        ++constraints.gridy;
+        add(new JLabel("Version " + mudmap2.Mudmap2.get_version() + " " + mudmap2.Mudmap2.get_version_state()), constraints);
+        ++constraints.gridy;
+        add(new JLabel("License: GPLv3"), constraints);
+        ++constraints.gridy;
+        add(new JLabel("Use it on your own risk!"), constraints);
+        ++constraints.gridy;
+        add(new LinkLabel("GitHub", Paths.github_url), constraints);
+        ++constraints.gridy;
+        add(new LinkLabel("Sourceforge", Paths.sourceforge_url), constraints);
+        ++constraints.gridy;
+        add(new JLabel("by Neop (mneop@web.de)"), constraints);
+        ++constraints.gridy;
         
         JButton button_ok = new JButton("Ok");
-        add(button_ok);
+        add(button_ok, constraints);
         getRootPane().setDefaultButton(button_ok);
         button_ok.addActionListener(new ActionListener() {
             @Override
