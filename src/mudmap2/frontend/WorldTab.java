@@ -105,8 +105,6 @@ public class WorldTab extends JPanel {
     
     World world;
     
-    Color tile_center_color;
-    
     static boolean show_paths_curved = true;
     
     // GUI elements
@@ -234,8 +232,6 @@ public class WorldTab extends JPanel {
         
         force_selection = false;
         place_selection_enabled = place_selection_enabled_default;
-        
-        tile_center_color = new Color(207, 190, 134);
         
         place_group = new HashSet<Place>();
     }
@@ -1362,7 +1358,7 @@ public class WorldTab extends JPanel {
 
                         // draw tile center color
                         if(get_tile_draw_text()){
-                            g.setColor(parent.tile_center_color);
+                            g.setColor(layer.get_world().get_tile_center_color());
                             g.fillRect(place_x_px + border_width, place_y_px + border_width, tile_size - 2 * border_width, tile_size - 2 * border_width);
                         }
 
@@ -1379,7 +1375,7 @@ public class WorldTab extends JPanel {
 
                             // place name
                             // gets place name if unique, else place name with ID
-                            String place_name = ((cur_place.is_name_unique() && parent.get_world().get_show_place_id() == World.ShowPlaceID_t.UNIQUE) || parent.get_world().get_show_place_id() == World.ShowPlaceID_t.NONE) 
+                            String place_name = ((cur_place.is_name_unique() && layer.get_world().get_show_place_id() == World.ShowPlaceID_t.UNIQUE) || layer.get_world().get_show_place_id() == World.ShowPlaceID_t.NONE) 
                                                     ? cur_place.get_name() : cur_place.toString();
                             LinkedList<String> line = fit_line_width(place_name, fm, (int) (tile_size - 2 * (border_width + selection_stroke_width)), max_lines);
                             for(String str: line){
@@ -1443,8 +1439,8 @@ public class WorldTab extends JPanel {
                         for(Path path: cur_place.get_paths()){
                             Place other_place = path.get_other_place(cur_place);
 
-                            Color color_place1 = parent.world.get_path_color(path.get_exit_directions()[0]);
-                            Color color_place2 = parent.world.get_path_color(path.get_exit_directions()[1]);
+                            Color color_place1 = layer.get_world().get_path_color(path.get_exit_directions()[0]);
+                            Color color_place2 = layer.get_world().get_path_color(path.get_exit_directions()[1]);
                             if(path.get_places()[0] != cur_place) {
                                 Color tmp = color_place1;
                                 color_place1 = color_place2;

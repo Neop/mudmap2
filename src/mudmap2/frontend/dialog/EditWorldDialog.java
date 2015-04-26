@@ -57,7 +57,7 @@ public class EditWorldDialog extends ActionDialog {
     
     HashMap<RiskLevel, Pair<JTextField, ColorChooserButton>> risklevel_colors;
     JTextField risklevel_new_name; // entry to create a new risk level
-    ColorChooserButton risklevel_new_color;
+    ColorChooserButton risklevel_new_color, tile_center_color;
     
     ButtonGroup buttongroup_place_id;
     JRadioButton radiobutton_place_id_none, radiobutton_place_id_unique, radiobutton_place_id_all;
@@ -109,6 +109,11 @@ public class EditWorldDialog extends ActionDialog {
         
         add(risklevel_new_name = new JTextField(), constraints_l);
         add(risklevel_new_color = new ColorChooserButton(getParent()), constraints_r);
+        
+        constraints_l.gridy = ++constraints_r.gridy;
+        
+        add(new JLabel("Tile center color"), constraints_l);
+        add(tile_center_color = new ColorChooserButton(getParent(), world.get_tile_center_color()), constraints_r);
         
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
         add(new JSeparator(), constraints);
@@ -186,6 +191,8 @@ public class EditWorldDialog extends ActionDialog {
                     foo.getKey().set_color(foo.getValue().second.get_color());
                 }
             }
+            
+            world.set_tile_center_color(tile_center_color.get_color());
             
             // add new risk level, if name not empty
             String name_new = risklevel_new_name.getText();

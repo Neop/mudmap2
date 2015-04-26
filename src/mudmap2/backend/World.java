@@ -53,6 +53,7 @@ public class World implements BreadthSearchGraph {
     // color of path lines and self-defined path colors
     Color path_color_cardinal, path_color_non_cardinal;
     HashMap<String, Color> path_colors;
+    Color tile_center_color;
     // Coordinates of the home position
     WorldCoordinate home;
     
@@ -95,6 +96,7 @@ public class World implements BreadthSearchGraph {
         // path line colors
         path_color_non_cardinal = path_color_cardinal = new Color(0, 255, 0);
         path_colors = new HashMap<String, Color>();
+        tile_center_color = new Color(207, 190, 134);
         
         // risk levels
         risk_levels = new TreeMap<Integer, RiskLevel>();
@@ -457,6 +459,22 @@ public class World implements BreadthSearchGraph {
      */
     public void set_path_color_nstd(Color color){
         path_color_non_cardinal = color;
+    }
+    
+    /**
+     * Gets the tile center color
+     * @return 
+     */
+    public Color get_tile_center_color(){
+        return tile_center_color;
+    }
+    
+    /**
+     * Sets the tile center color
+     * @param color 
+     */
+    public void set_tile_center_color(Color color){
+        tile_center_color = color;
     }
     
     public enum ShowPlaceID_t {

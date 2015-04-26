@@ -59,7 +59,7 @@ public class WorldFileMM1 implements WorldFile {
      * file version was always equal to the program version
      */
     public static final int reader_major = 1;
-    public static final int reader_minor = 6;
+    public static final int reader_minor = 7;
     private boolean version_mismatch, version_mismatch_confirmed;
     
     RiskLevel risk_level_default;
@@ -138,6 +138,7 @@ public class WorldFileMM1 implements WorldFile {
                         else if(line.startsWith("wcol "))   read_path_color_cardinal(line);
                         else if(line.startsWith("wcnd "))   read_path_color_non_cardinal(line);
                         else if(line.startsWith("pcol "))   read_path_color_user(line);
+                        else if(line.startsWith("tccol "))  read_tile_center_color(line);
                         else if(line.startsWith("home "))   read_home(line);
                         else if(line.startsWith("dlc "))    read_risk_level(line);
                         else if(line.startsWith("show_place_id ")) read_show_place_id(line);
@@ -224,6 +225,12 @@ public class WorldFileMM1 implements WorldFile {
         world.set_path_color_nstd(new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2])));
     }
 
+    private void read_tile_center_color(String line){
+        String[] tmp = line.substring(6).split("\\s");
+        Color color = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
+        world.set_tile_center_color(color);
+    }
+    
     private void read_path_color_user(String line){
         int i = 0, r = 0, g = 0, b;
         Color col = null;
@@ -438,6 +445,7 @@ public class WorldFileMM1 implements WorldFile {
             outstream.println("wname " + world.get_name());
             outstream.println("wcol " + world.get_path_color().getRed() + " " + world.get_path_color().getGreen() + " " + world.get_path_color().getBlue());
             outstream.println("wcnd " + world.get_path_color_nstd().getRed() + " " + world.get_path_color_nstd().getGreen() + " " + world.get_path_color_nstd().getBlue());
+            outstream.println("tccol " + world.get_tile_center_color().getRed() + " " + world.get_tile_center_color().getGreen() + " " + world.get_tile_center_color().getBlue());
             
             HashMap<Color, String> pcol = new HashMap<Color, String>();
             for(Map.Entry<String, Color> entry: world.get_path_colors().entrySet()){

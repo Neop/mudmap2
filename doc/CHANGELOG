@@ -1,6 +1,6 @@
 2.0.4
 - anti-aliasing enabled for paths
-- multi-colored paths / user-defined colors per exit direction implpemented
+- multi-colored paths / user-defined colors per exit direction implemented
 - lowered threshold for drawing text on small tiles
 - fixed bugs
 - minor changes (dialogs etc)
