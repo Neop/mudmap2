@@ -1,3 +1,8 @@
+2.0.5
+- made the tile center color changeable
+- linearised scaling of the map
+- extracted painting method from WorldTab
+
 2.0.4
 - anti-aliasing enabled for paths
 - multi-colored paths / user-defined colors per exit direction implemented

@@ -126,7 +126,7 @@ public class WorldTab extends JPanel {
     static final int meta_file_ver_minor = 1;
     
     // tile size in pixel
-    int tile_size;
+    double tile_size;
     static final int tile_size_min = 10;
     static final int tile_size_max = 200;
     
@@ -625,14 +625,14 @@ public class WorldTab extends JPanel {
      * @return tile size
      */
     private int get_tile_size(){
-        return tile_size;
+        return (int) tile_size;
     }
     
     /**
      * sets the tile size
      * @param ts new tile size
      */
-    public void set_tile_size(int ts){
+    public void set_tile_size(double ts){
         tile_size = Math.min(Math.max(ts, tile_size_min), tile_size_max);
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         repaint();
@@ -642,7 +642,12 @@ public class WorldTab extends JPanel {
      * increases the tile size
      */
     public void tile_size_increment(){
-        if(tile_size < tile_size_max) tile_size++;
+        double ts = tile_size;
+        ts = Math.exp(Math.log(ts / 10) + 0.03) * 10;
+        ts = Math.min(ts, tile_size_max);
+        tile_size = Math.min(Math.max(ts, tile_size + 1), tile_size_max);
+        
+        //if(tile_size < tile_size_max) tile_size++;
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         repaint();
     }
@@ -651,7 +656,13 @@ public class WorldTab extends JPanel {
      * decreases the tile size
      */
     public void tile_size_decrement(){
-        if(tile_size > tile_size_min) tile_size--;
+        double ts = tile_size;
+        ts = Math.exp(Math.log(ts / 10) - 0.02) * 10;
+        ts = Math.max(ts, tile_size_min);
+        tile_size = Math.max(Math.min(ts, tile_size - 1), tile_size_min);
+        
+        //if(tile_size > tile_size_min) tile_size--;
+        
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         repaint();
     }
@@ -997,7 +1008,12 @@ public class WorldTab extends JPanel {
             addMouseWheelListener(new MouseWheelListener() {
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent e) {
-                    parent.set_tile_size(parent.get_tile_size() + e.getWheelRotation());
+                    double ts = parent.get_tile_size();
+                    ts = Math.exp(Math.log(ts / 10) + e.getWheelRotation() * 0.05) * 10;
+                    if(e.getWheelRotation() > 0) ts = Math.max(ts, parent.get_tile_size() + 1);
+                    else if(e.getWheelRotation() < 0) ts = Math.min(ts, parent.get_tile_size() - 1);
+                    parent.set_tile_size(ts);
+                    //parent.set_tile_size(parent.get_tile_size() + e.getWheelRotation());
                 }
             });
             addMouseMotionListener(new TabMouseMotionListener());
@@ -1078,7 +1094,7 @@ public class WorldTab extends JPanel {
             mappainter.set_place_selection(parent.get_place_selection_x(), parent.get_place_selection_y());
             mappainter.set_place_selection_enabled(parent.get_place_selection_enabled());
             
-            mappainter.paint(g, parent.tile_size, screen_width = getWidth(), screen_height = getHeight(), parent.get_world().get_layer(parent.get_cur_position().get_layer()), parent.get_cur_position());
+            mappainter.paint(g, parent.get_tile_size(), screen_width = getWidth(), screen_height = getHeight(), parent.get_world().get_layer(parent.get_cur_position().get_layer()), parent.get_cur_position());
         }
         
         // ========================= Listeners and context menu ================
