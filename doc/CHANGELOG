@@ -1,4 +1,5 @@
-2.0.5
+2.1.0
+- implemented image export
 - made the tile center color changeable
 - linearised scaling of the map
 - extracted painting method from WorldTab

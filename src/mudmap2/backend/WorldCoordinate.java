@@ -50,6 +50,14 @@ public class WorldCoordinate {
     }
 
     /**
+     * Sets the layer
+     * @param l 
+     */
+    public void set_layer(int l){
+        layer = l;
+    }
+    
+    /**
      * Gets the x coordinate
      * @return x coordinate
      */

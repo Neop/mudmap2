@@ -7,6 +7,7 @@ package mudmap2.frontend;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -37,7 +38,7 @@ public class MapPainterDefault implements MapPainter {
     static final float tile_selection_stroke_width = 3;
     static final java.awt.Color tile_selection_color = new java.awt.Color(255, 0, 0);
 
-    static final float tile_risk_level_stroke_width = 3;
+    static final float tile_risk_level_stroke_width = 2;
     static final int tile_border_width = 10;
     static final int exit_circle_radius = 5;
     
@@ -51,11 +52,14 @@ public class MapPainterDefault implements MapPainter {
     double graphics_width, graphics_height;
     int tile_size;
     WorldCoordinate cur_pos;
+    
+    Font last_tile_font;
 
     public MapPainterDefault() {
         place_group = null;
         place_selected_x = place_selected_y = 0;
         place_selection_enabled = false;
+        last_tile_font = null;
     }
     
     @Override
@@ -125,6 +129,10 @@ public class MapPainterDefault implements MapPainter {
         return path_stroke_width * (float) (1.0 + tile_size / 200.0);
     }
     
+    public Font get_tile_font(){
+        return last_tile_font;
+    }
+    
     /**
      * Returns true, if a place is selected by group selection
      * @param place
@@ -147,7 +155,7 @@ public class MapPainterDefault implements MapPainter {
                 if(place.get_x() >= x_min && place.get_x() <= x_max 
                     && place.get_y() >= y_min && place.get_y() <= y_max) return true;
             }
-            if(place_group.contains(place)) return true;
+            if(place_group != null && place_group.contains(place)) return true;
         }
         return false;
     }
@@ -334,6 +342,8 @@ public class MapPainterDefault implements MapPainter {
         this.tile_size = tile_size;
         this.cur_pos = cur_pos;
         
+        last_tile_font = g.getFont();
+        
         final float selection_stroke_width = get_tile_selection_stroke_width();
         final int tile_border_width_scaled = get_tile_border_width();
         
@@ -359,7 +369,8 @@ public class MapPainterDefault implements MapPainter {
         Graphics graphic_path = image_path.getGraphics();
         ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
         ((Graphics2D) graphic_path).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
         // get the locations of copied places
         HashSet<Pair<Integer, Integer>> copied_place_locations = mudmap2.Mudmap2.get_copy_place_locations();
 
@@ -395,14 +406,17 @@ public class MapPainterDefault implements MapPainter {
                     // draw tile center color
                     if(get_tile_draw_text()){
                         g.setColor(layer.get_world().get_tile_center_color());
-                        g.fillRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled, tile_size - 2 * tile_border_width_scaled, tile_size - 2 * tile_border_width_scaled);
+                        g.fillRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled,
+                                tile_size - 2 * tile_border_width_scaled, tile_size - 2 * tile_border_width_scaled);
                     }
 
                     // draw risk level border
                     if(cur_place.get_risk_level() != null){
                         g.setColor(cur_place.get_risk_level().get_color());
                         ((Graphics2D)g).setStroke(new BasicStroke(get_risk_level_stroke_width()));
-                        g.drawRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled, tile_size - 2 * tile_border_width_scaled, tile_size - 2 * tile_border_width_scaled);
+                        g.drawRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled,
+                                tile_size - 2 * tile_border_width_scaled - (int) (0.5 * get_risk_level_stroke_width()),
+                                tile_size - 2 * tile_border_width_scaled - (int) (0.5 * get_risk_level_stroke_width()));
                     } else System.out.println("Error: Can't draw risk level, reference is null");
 
                     // draw text, if tiles are large enough

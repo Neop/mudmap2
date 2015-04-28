@@ -127,8 +127,8 @@ public class WorldTab extends JPanel {
     
     // tile size in pixel
     double tile_size;
-    static final int tile_size_min = 10;
-    static final int tile_size_max = 200;
+    public static final int tile_size_min = 10;
+    public static final int tile_size_max = 200;
     
     // true, if a context menu is shown (to disable forced focus)
     boolean is_context_menu_shown;
@@ -340,6 +340,22 @@ public class WorldTab extends JPanel {
      */
     public World get_world(){
         return world;
+    }
+    
+    /**
+     * Gets the panel width / width of the actually drawn map
+     * @return 
+     */
+    public int get_panel_width(){
+        return (int) worldpanel.get_screen_width();
+    }
+    
+    /**
+     * Gets the panel height / height of the actually drawn map
+     * @return 
+     */
+    public int get_panel_height(){
+        return (int) worldpanel.get_screen_height();
     }
     
     /**
@@ -624,7 +640,7 @@ public class WorldTab extends JPanel {
      * Gets the current tile size
      * @return tile size
      */
-    private int get_tile_size(){
+    public int get_tile_size(){
         return (int) tile_size;
     }
     
@@ -843,7 +859,7 @@ public class WorldTab extends JPanel {
      * gets all selected places
      * @return 
      */
-    private HashSet<Place> get_place_group_selection(){
+    public HashSet<Place> get_place_group_selection(){
         if(place_group_shift_start != null) place_group_shift_selection_to_list();
         return place_group;
     }

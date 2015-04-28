@@ -4,8 +4,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/Mudmap2.java</file>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/backend/World.java</file>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/frontend/dialog/EditWorldDialog.java</file>
             <file>file:/Z:/dev/mudmap2/src/mudmap2/frontend/MapPainterDefault.java</file>
+            <file>file:/Z:/dev/mudmap2/src/mudmap2/frontend/dialog/ExportImageDialog.java</file>
         </group>
     </open-files>
 </project-private>

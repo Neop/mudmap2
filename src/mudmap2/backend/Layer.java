@@ -84,6 +84,58 @@ public class Layer {
     }
     
     /**
+     * Gets the max x coordinate
+     * @return 
+     */
+    public int get_x_min(){
+        HashSet<Place> places = get_places();
+        if(places.isEmpty()) return 0;
+        int ret = places.iterator().next().get_x();
+        for(Place place: places)
+            ret = Math.min(ret, place.get_x());
+        return ret;
+    }
+    
+    /**
+     * Gets the min x coordinate
+     * @return 
+     */
+    public int get_x_max(){
+        HashSet<Place> places = get_places();
+        if(places.isEmpty()) return 0;
+        int ret = places.iterator().next().get_x();
+        for(Place place: places)
+            ret = Math.max(ret, place.get_x());
+        return ret;
+    }
+    
+    /**
+     * Gets the max y coordinate
+     * @return 
+     */
+    public int get_y_min(){
+        HashSet<Place> places = get_places();
+        if(places.isEmpty()) return 0;
+        int ret = places.iterator().next().get_y();
+        for(Place place: places)
+            ret = Math.min(ret, place.get_y());
+        return ret;
+    }
+    
+    /**
+     * Gets the min y coordinate
+     * @return 
+     */
+    public int get_y_max(){
+        HashSet<Place> places = get_places();
+        if(places.isEmpty()) return 0;
+        int ret = places.iterator().next().get_y();
+        for(Place place: places)
+            ret = Math.max(ret, place.get_y());
+        return ret;
+    }
+    
+    /**
      * Puts the element at a position but doesn't add it to the world
      * @param x x coordinate
      * @param y y coordinate

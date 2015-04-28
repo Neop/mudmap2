@@ -66,6 +66,7 @@ import mudmap2.backend.WorldManager;
 import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
+import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathColorDialog;
 import mudmap2.frontend.dialog.PlaceListDialog;
@@ -167,8 +168,20 @@ public final class Mainwindow extends JFrame {
         });
         
         // TODO: implement save as image
-        /*menu_file_save_as_image = new JMenuItem("Save as image");
-        menu_file.add(menu_file_save_as_image);*/
+        menu_file_save_as_image = new JMenuItem("Export as image");
+        menu_file.add(menu_file_save_as_image);
+        menu_file_save_as_image.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                WorldTab wt = get_selected_tab();
+                if(wt != null){
+                    ExportImageDialog dlg = new ExportImageDialog(wt.parent, wt);
+                    dlg.setVisible(true);
+                }
+            }
+        });
+        
         menu_file.addSeparator();
         menu_file_quit = new JMenuItem("Quit");
         menu_file.add(menu_file_quit);

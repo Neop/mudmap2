@@ -37,13 +37,12 @@ Compatibility to MUD Map 1
 MUD Map 2 uses an improved version of the file format of MUD Map 1. It
 can read worlds that were created with MUD Map 1 and saves them in a
 compatible format if compatibility is enabled (is enabled by 
-default) Note that MUD Map 1 might be updated to use the same file
-format after version 1.4
+default)
 
 How to use MUD Map:
 I didn't create a manual for MUD Map 2 yet, so please refer to the 
 manual of MUD Map 1, which is very similar: http://mudmap.sf.net
-If you've still questions, feel free to contact me ;)
+If you still have questions, feel free to contact me ;)
 
 Keyboard commands
 Keyboard commands can be used to navigate and alter the map if keyboard
@@ -54,42 +53,42 @@ for it to be able to receive keyboard events.
 The keys used here are not final and might not be optimal. Please let me
 know if you think that other keys should be used ;)
 
-ctrl + s						save currently shown world
-ctrl + o						show open world dialog
+ctrl + s							save currently shown world
+ctrl + o							show open world dialog
 
-context menu key				show the context menu of the selected
-								place (like right click on that place)
+context menu key			show the context menu of the selected
+									place (like right click on that place)
 
 +/- 		page up/down		increment and decrement the tile size
-p:								enable / disable place selection
+p:									enable / disable place selection
 
 w/a/s/d, arrow keys, numberpad	shift the selection ("direction keys")
-h, home key, numpad 5			go to home location
+h, home key, numpad 5		go to home location
 e, enter, insert key, double click	create / edit place at selection
-f								create or remove a placeholder place
+f									create or remove a placeholder place
 r 			delete key			remove selected place
-c								edit place comments
-q								modify area of selected place. Note that
-								this also affects other places that
-								belong to the same area. If no place is
-								selected or selection is disabled, a new
-								area will be created
-l								show place list
+c									edit place comments
+q									modify area of selected place. Note that
+									this also affects other places that
+									belong to the same area. If no place is
+									selected or selection is disabled, a new
+									area will be created
+l									show place list
 
 path creation shortcuts:
 ctrl + numpad 5					show create path dialog
-ctrl + direction key			create path to adjacent place 
+ctrl + direction key				create path to adjacent place 
 (no w/a/s/d)
 alt or alt-gr + direction key	remove all paths to adjacent place
 
 place selection (to remove / move / copy many places at once):
 escape							deselect everything
 space							add / remove place selected by cursor
-ctrl + click					add / remove place to selection
-ctrl + a						select everything on current layer
-shift + click					box selection
+ctrl + click						add / remove place to selection
+ctrl + a							select everything on current layer
+shift + click						box selection
 shift + arrow keys / numpad / w/a/s/d	box selection
 
-ctrl + x						cut places
-ctrl + c						copy places
-ctrl + v						paste places
+ctrl + x							cut places
+ctrl + c							copy places
+ctrl + v							paste places
