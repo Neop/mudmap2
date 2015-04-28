@@ -5,6 +5,7 @@
  */
 package mudmap2.frontend.dialog;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -12,8 +13,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -21,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,6 +34,7 @@ import javax.swing.filechooser.FileFilter;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.WorldCoordinate;
+import mudmap2.frontend.GUIElement.ColorChooserButton;
 import mudmap2.frontend.MapPainterDefault;
 import mudmap2.frontend.WorldTab;
 
@@ -51,6 +52,8 @@ public class ExportImageDialog extends ActionDialog {
     ButtonGroup rb_group;
     JSpinner spinner_tile_size;
     JLabel label_image_width;
+    JCheckBox checkbox_transparent;
+    ColorChooserButton colorchooser;
     
     int image_width, image_height;
     WorldCoordinate center_position;
@@ -112,7 +115,7 @@ public class ExportImageDialog extends ActionDialog {
                 update_image_width();
             }
         });
-        
+        /*
         rb_cur_view.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent e) {
@@ -122,8 +125,9 @@ public class ExportImageDialog extends ActionDialog {
                 
                 spinner_tile_size.setEnabled(enable);
             }
-        });
+        });*/
         rb_cur_view.setSelected(true);
+        spinner_tile_size.setEnabled(false);
         rb_cur_view.addActionListener(new RadioButtonActionListener());
         rb_each_layer.addActionListener(new RadioButtonActionListener());
         rb_layer.addActionListener(new RadioButtonActionListener());
@@ -131,13 +135,30 @@ public class ExportImageDialog extends ActionDialog {
         
         ++constraints.gridx;
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridwidth = GridBagConstraints.REMAINDER;
+        
         add(label_image_width = new JLabel(), constraints);
         update_image_width();
+        
+        constraints.gridx = 1;
+        constraints.gridwidth = 2;
+        ++constraints.gridy;
+        add(checkbox_transparent = new JCheckBox("Transparent Background"), constraints);
+        checkbox_transparent.setSelected(true);
+        
+        constraints.gridwidth = 1;
+        constraints.gridx += 2;
+        add(new JLabel("Background color:"), constraints);
+        
+        ++constraints.gridx;
+        constraints.fill = GridBagConstraints.BOTH;
+        add(colorchooser = new ColorChooserButton(this, Color.white), constraints);
         
         constraints.fill = GridBagConstraints.NONE;
         constraints.gridx = 1;
         ++constraints.gridy;
-        constraints.gridwidth = 5;
+        constraints.gridwidth = constraints.gridheight = GridBagConstraints.REMAINDER;
+        constraints.fill = GridBagConstraints.BOTH;
         
         add(filechooser = new JFileChooser(), constraints);
         filechooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -222,10 +243,20 @@ public class ExportImageDialog extends ActionDialog {
         if(file.canWrite()){
             Integer tile_size = (Integer) spinner_tile_size.getValue();
 
-            BufferedImage image = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D graphics = image.createGraphics();
-            graphics.setClip(0, 0, image_width, image_height);
-            graphics.setBackground(new java.awt.Color(255, 255, 255, 0));
+            BufferedImage image;
+            Graphics2D graphics;
+            
+            if(checkbox_transparent.isSelected()){
+                image = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_ARGB);
+                graphics = image.createGraphics();
+                graphics.setClip(0, 0, image_width, image_height);
+                graphics.setBackground(new java.awt.Color(255, 255, 255, 0));
+            } else {
+                image = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_RGB);
+                graphics = image.createGraphics();
+                graphics.setClip(0, 0, image_width, image_height);
+                graphics.setBackground(colorchooser.get_color());
+            }
             graphics.setFont(worldtab.getFont());
 
             MapPainterDefault mappainter = new MapPainterDefault();
@@ -289,6 +320,8 @@ public class ExportImageDialog extends ActionDialog {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            spinner_tile_size.setEnabled(e.getSource() != rb_cur_view);
+            
             update_image_width();
         }
     }
