@@ -133,6 +133,7 @@ public class AreaDialog extends ActionDialog {
         if(area != null) textfield_name = new JTextField(area.toString());
         else textfield_name = new JTextField();
         add(textfield_name, constraints);
+        textfield_name.setColumns(20);
         
         constraints.gridwidth = 1;
         constraints.gridx = 0;

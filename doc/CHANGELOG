@@ -1,3 +1,7 @@
+2.1.1
+- fixed major bug: can't read worlds that are created with v2.1.0
+- increased size of some GUI elements
+
 2.1.0
 - implemented image export
 - made the tile center color changeable

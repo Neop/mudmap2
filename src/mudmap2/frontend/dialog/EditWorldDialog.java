@@ -85,6 +85,7 @@ public class EditWorldDialog extends ActionDialog {
         
         add(new JLabel("World name"), constraints_l);
         add(textfield_name = new JTextField(world.get_name()), constraints_r);
+        textfield_name.setColumns(20);
         
         constraints_l.gridy = ++constraints_r.gridy;
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;

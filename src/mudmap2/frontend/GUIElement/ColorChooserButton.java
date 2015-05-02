@@ -41,11 +41,13 @@ public class ColorChooserButton extends JButton {
     Color color;
     
     public ColorChooserButton(Component _parent){
+        super("A"); // set text to enlarge the button
         color = new Color(128, 128, 128);
         create();
     }
     
     public ColorChooserButton(Component _parent, Color _color){
+        super("A"); // set text to enlarge the button
         color = _color;
         create();
     }
@@ -59,7 +61,7 @@ public class ColorChooserButton extends JButton {
             }
         });
     }
-    
+
     @Override
     public void paintComponent(Graphics g){
         g.setColor(getBackground());
