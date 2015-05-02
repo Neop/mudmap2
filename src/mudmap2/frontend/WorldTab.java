@@ -931,7 +931,7 @@ public class WorldTab extends JPanel {
                         if(positions.size() == 0 || !get_cur_position().equals(newcoord)) push_position(newcoord);
                     } else if(line.startsWith("tile_size")){
                         String[] tmp = line.split(" ");
-                        tile_size = Integer.parseInt(tmp[1]);
+                        tile_size = Double.parseDouble(tmp[1]);
                     } else if(line.startsWith("enable_place_selection")){
                         String[] tmp = line.split(" ");
                         place_selection_enabled = Boolean.parseBoolean(tmp[1]) || force_selection;
@@ -965,7 +965,7 @@ public class WorldTab extends JPanel {
                 outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
 
                 // tile size
-                outstream.println("tile_size " + tile_size);
+                outstream.println("tile_size " + (int) tile_size);
 
                 // write whether the place selection is shown
                 outstream.println("enable_place_selection " + get_place_selection_enabled());

@@ -106,8 +106,7 @@ public class WorldManager {
         // read from directory
         // get file list
         File dir = new File(Paths.get_worlds_dir());
-        File[] fileList = null;
-        if(dir != null) fileList = dir.listFiles();
+        File[] fileList = dir.listFiles();
 
         if(fileList != null){
             // find world files in file list
@@ -269,12 +268,16 @@ public class WorldManager {
                     // delete world file
                     try {
                         (new File(file)).delete();
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(null, "Could not delete world file: " + e.getLocalizedMessage(), "Deleting world", JOptionPane.ERROR_MESSAGE);
+                    }
 
                     // delete world meta file
                     try {
                         (new File(file + "_meta")).delete();
-                    } catch (Exception e) {}    
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(null, "Could not delete world meta file: " + e.getLocalizedMessage(), "Deleting world", JOptionPane.ERROR_MESSAGE);
+                    }    
                 }
             }
         }
