@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import mudmap2.backend.WorldFileReader.WorldReadException;
 
 /**
  *
@@ -100,7 +101,7 @@ public class WorldManager {
             
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
-            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
         
         // read from directory
@@ -112,7 +113,9 @@ public class WorldManager {
             // find world files in file list
             for(File file : fileList){
                 // exclude meta and backup files
-                if(!file.getName().endsWith("_meta") && !file.getName().endsWith(".backup")){
+                if(!file.getName().endsWith("_meta") 
+                        && !file.getName().endsWith(".backup") 
+                        && !file.getName().endsWith(".bak")){
                     try {
                         BufferedReader reader = new BufferedReader(new FileReader(file));
                         try {
@@ -127,7 +130,7 @@ public class WorldManager {
                                 }
                             }
                         } catch (IOException ex) {
-                            Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(WorldManager.class.getName()).log(Level.WARNING, null, ex);
                         }
                     } catch (FileNotFoundException ex) {
                         Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
@@ -167,7 +170,10 @@ public class WorldManager {
             outstream.close();
         } catch (IOException ex) {
             System.out.printf("Couldn't write worlds file " + file);
-            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            JOptionPane.showMessageDialog(null, "Could not write worlds list file " 
+                    + file + ".\nYou might have to open your worlds manually from " 
+                    + Paths.get_worlds_dir(), "MUD Map WorldManager", JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -186,10 +192,13 @@ public class WorldManager {
      * @return a world
      */
     public static World get_world(String file){
-        if(!loaded_worlds.containsKey(file)) try {
-            loaded_worlds.put(file, new World(file));
-        } catch (Exception ex) {
-            Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+        if(!loaded_worlds.containsKey(file)){
+            try {
+                loaded_worlds.put(file, new World(file));
+            } catch (WorldReadException ex) {
+                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Loading world", JOptionPane.ERROR_MESSAGE);
+            }
         }
         return loaded_worlds.get(file);
     }
@@ -225,6 +234,7 @@ public class WorldManager {
     /**
      * Creates a new world and adds it to the available worlds list
      * @param name world name
+     * @throws java.lang.Exception
      */
     public static void create_world(String name) throws Exception{
         String path = Paths.get_worlds_dir();
@@ -245,6 +255,7 @@ public class WorldManager {
      * Adds a world file to the list
      * @param file 
      * @return world name
+     * @throws java.lang.Exception
      */
     public static String add_world(String file) throws Exception{
         String name = read_world_name(file);

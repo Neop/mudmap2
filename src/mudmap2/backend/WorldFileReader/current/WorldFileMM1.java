@@ -129,7 +129,7 @@ public class WorldFileMM1 implements WorldFile {
             
             path_connection_error_dep_double = 0;
             
-            try {    
+            try {
                 String line;
                 while((line = reader.readLine()) != null){
                     line = line.trim();
@@ -167,6 +167,10 @@ public class WorldFileMM1 implements WorldFile {
                 }
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
+                int ret = JOptionPane.showConfirmDialog(null, 
+                        "Error while parsing worlds file, places might be missing. Continue? \n" + ex.getMessage(), 
+                        "Loading world", JOptionPane.YES_NO_OPTION);
+                if(ret == JOptionPane.NO_OPTION) throw new WorldReadException();
             }
             
             // connect children and parent places
@@ -187,25 +191,24 @@ public class WorldFileMM1 implements WorldFile {
                     path.place_a.connect_path(new Path(path.place_a, path.exits[0], world.get_place(path.place_b), (path.exits[1] != null) ? path.exits[1] : "unknown"));
                 }
                 // error messages
-                if(path_connection_error_dep_double > 0) 
+                if(path_connection_error_dep_double > 0){
                     System.out.println("Warning: " + path_connection_error_dep_double + " paths might not be properly reconstructed (exit mispairings might occur at places with more than two connections to each other)");
-                if(error_not_paired_cnt > 0)
-                    System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
-                
-                // show error message dialog
-                if(path_connection_error_dep_double > 0)
                     JOptionPane.showMessageDialog(null, path_connection_error_dep_double + " paths might not be properly reconstructed from a MUD Map v1 world file.\nExit mispairings might occur at places that are directly connected via more than one path.", "World reconstruction warning", JOptionPane.WARNING_MESSAGE);
-                if(error_not_paired_cnt > 0)
+                }
+                if(error_not_paired_cnt > 0){
+                    System.out.println("Warning: " + error_not_paired_cnt + " paths could not be properly reconstructed (an exit is unknown for each error place pair)");
                     JOptionPane.showMessageDialog(null, error_not_paired_cnt + " paths could not be properly reconstructed.\nThis means that one exit of each faulty path is unknown.", "World reconstruction warning", JOptionPane.WARNING_MESSAGE);
+                }
             }
             
         } catch (FileNotFoundException ex) {
-            System.out.println("Couldn't open world file \"" + Paths.get_available_worlds_file() + "\", file not found");
+            System.out.println("Could not open world file \"" + Paths.get_available_worlds_file() + "\", file not found");
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
+            JOptionPane.showMessageDialog(null, "Could not open world file \"" + Paths.get_available_worlds_file() + "\", file not found", "Loading world", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void read_file_version(String line){
+    private void read_file_version(String line) throws WorldReadException{
         // remove tag and split version                      
         String[] tmp = line.substring(4).split("\\.");
     
@@ -213,6 +216,12 @@ public class WorldFileMM1 implements WorldFile {
         file_minor = Integer.parseInt(tmp[1]);
 
         version_mismatch = (file_major > reader_major || (file_major == reader_major && (file_minor > reader_minor)));
+        if(file_major > reader_major){
+            int ret = JOptionPane.showConfirmDialog(null, 
+                    "World file version is greater than the reader version. Please update MUD Map. Continuing might cause data loss?", 
+                    "Loading world", JOptionPane.OK_CANCEL_OPTION);
+            if(ret == JOptionPane.CANCEL_OPTION) throw new WorldReadException();
+        }
     }
     
     private void read_path_color_cardinal(String line){
@@ -301,7 +310,7 @@ public class WorldFileMM1 implements WorldFile {
         cur_place_name = config_get_text(2, line);
     }
     
-    private void read_place_position(String line){
+    private void read_place_position(String line) throws WorldReadException{
         String tmp[] = line.split("\\s");
         int layer = Integer.parseInt(tmp[1]);
 
@@ -321,6 +330,8 @@ public class WorldFileMM1 implements WorldFile {
                 world.put(cur_place);
             } catch (Exception ex) {
                 Logger.getLogger(WorldFileMM1.class.getName()).log(Level.SEVERE, null, ex);
+                int ret = JOptionPane.showConfirmDialog(null, "Could not add place " + cur_place.get_name() + " to world. Continue?", "Loading world", JOptionPane.YES_NO_OPTION);
+                if(ret == JOptionPane.NO_OPTION) throw new WorldReadException();
             }
         }
     }
@@ -509,7 +520,7 @@ public class WorldFileMM1 implements WorldFile {
             // places
             for(Place p: world.get_places()){
                 outstream.println("p " + p.get_id() + " " + p.get_name());
-                outstream.println("ppos " + p.get_layer() + " " + p.get_x() + " " + p.get_y());
+                outstream.println("ppos " + p.get_layer().get_id() + " " + p.get_x() + " " + p.get_y());
                 if(p.get_area() != null) outstream.println("par " + p.get_area().get_id());
                 
                 // paths

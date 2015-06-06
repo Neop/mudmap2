@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.Mainwindow;
@@ -74,6 +75,7 @@ public class OpenWorldDialog implements ActionListener{
                 parent.open_world(name);
             } catch (Exception ex) {
                 Logger.getLogger(OpenWorldDialog.class.getName()).log(Level.WARNING, null, ex);
+                JOptionPane.showMessageDialog(parent, ex.getMessage(), "Adding world", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

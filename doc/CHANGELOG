@@ -1,3 +1,6 @@
+2.2.2
+- more verbose on errors
+
 2.2.1
 - fixed bug: first places after world creation on wrong layer
 - world files will be backed up once per session (when the world is saved for the first time)

@@ -1609,8 +1609,10 @@ public class WorldTab extends JPanel {
                                         place.remove();
                                     } catch (RuntimeException ex) {
                                         Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                        JOptionPane.showMessageDialog(parent, "Could not remove place: " + ex.getMessage());
                                     } catch (PlaceNotFoundException ex) {
                                         Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                                        JOptionPane.showMessageDialog(parent, "Could not remove place: Place not found.");
                                     }
                                 }
                             }

@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Layer.PlaceNotInsertedException;
+import mudmap2.backend.WorldFileReader.WorldReadException;
 import mudmap2.backend.WorldFileReader.current.WorldFileMM1;
 import mudmap2.backend.sssp.BreadthSearchGraph;
 
@@ -71,9 +72,9 @@ public class World implements BreadthSearchGraph {
     /**
      * Loads a world from a file
      * @param _file world file
-     * @throws java.lang.Exception
+     * @throws mudmap2.backend.WorldFileReader.WorldReadException
      */
-    public World(String _file) throws Exception{
+    public World(String _file) throws WorldReadException{
         file = _file;
         initialize();
         load_world();
@@ -121,7 +122,7 @@ public class World implements BreadthSearchGraph {
     /**
      * Loads the world
      */
-    private void load_world() throws Exception{
+    private void load_world() throws WorldReadException{
         WorldFileMM1 worldfile = new WorldFileMM1(this);
         worldfile.readFile(file);
     }
