@@ -206,11 +206,13 @@ public class WorldManager {
      * Creates a new world and adds it to the available worlds list
      * @param name name of the world
      * @param file file of the world
+     * @throws java.lang.Exception
      */
     public static void create_world(String name, String file) throws Exception{
         // check if name already exists
         if(!available_worlds.containsKey(name)){
             // check if the file already exists
+            file = file.replaceAll("\\s", "_");
             if(!Paths.file_exists(file)){
                 loaded_worlds.put(file, new World(file, name));
                 available_worlds.put(name, file);

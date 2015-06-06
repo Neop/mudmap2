@@ -30,4 +30,6 @@ public interface WorldFile {
     public void readFile(String file) throws WorldReadException;
     // Writes the world to file
     public void writeFile(String file);
+    // saves a backup copy of hte world
+    public void backup(String file_orig);
 }

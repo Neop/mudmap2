@@ -24,11 +24,13 @@ package mudmap2.backend.WorldFileReader.current;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -412,6 +414,24 @@ public class WorldFileMM1 implements WorldFile {
         }
         return line;
     }
+
+    @Override
+    public void backup(String file_orig) {
+        try {
+            File fileold = new File(file_orig);
+            File filenew = new File(file_orig + ".bak");
+            
+            if(fileold.canRead()){
+                if(filenew.exists()) filenew.delete();
+                Files.copy(fileold.toPath(), filenew.toPath());
+            }
+            
+        } catch (IOException ex) {
+            Logger.getLogger(WorldFileMM1.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null, "Could not create world backup file", "World backup", JOptionPane.INFORMATION_MESSAGE);
+        }
+        
+    }
     
     // Path creation helper class
     private class PathTmp {
@@ -521,7 +541,7 @@ public class WorldFileMM1 implements WorldFile {
             outstream.close();
         } catch (IOException ex) {
             System.out.printf("Couldn't write world file " + mudmap2.Paths.get_config_file());
-            JOptionPane.showMessageDialog(null, "Couldn't write world file!", "Saving world", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Could not write world file!", "Saving world", JOptionPane.ERROR_MESSAGE);
             Logger.getLogger(World.class.getName()).log(Level.WARNING, null, ex);
         }
     }

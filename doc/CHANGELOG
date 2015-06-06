@@ -1,3 +1,13 @@
+2.2.1
+- fixed bug: first places after world creation on wrong layer
+- world files will be backed up once per session (when the world is saved for the first time)
+
+2.2.0
+- added accelerators to the context menu and file menu
+- fixed path connect bug in context menu (showed occupied paths)
+- fixed path removal behaviour (alt + direction keys)
+- fixed some box selection usability quirks
+
 2.1.1
 - fixed major bug: can't read worlds that are created with v2.1.0
 - increased size of some GUI elements

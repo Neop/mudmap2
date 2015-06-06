@@ -1586,9 +1586,15 @@ public class WorldTab extends JPanel {
                             if(parent.get_cursor_enabled()){
                                 Place place = parent.get_selected_place();
                                 PlaceDialog dlg;
+                                
+                                Layer layer = null;
+                                if(parent.get_cur_position() != null) layer = parent.get_world().get_layer(parent.get_cur_position().get_layer());
+                                
                                 if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
                                 else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_cursor_x(), parent.get_cursor_y());
                                 dlg.setVisible(true);
+                                
+                                if(layer == null) parent.push_position(dlg.get_place().get_coordinate());
                             }
                             break;
                         // create placeholder
@@ -1687,7 +1693,10 @@ public class WorldTab extends JPanel {
                 if(has_place){ // if place exists
                     if(!parent.passive){
                         JMenuItem mi_edit = new JMenuItem("Edit place");
-                        mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
+                        PlaceDialog pdlg = new PlaceDialog(parent.parent, parent.world, place);
+                        mi_edit.addActionListener(pdlg);
+                        if(layer == null) parent.push_position(pdlg.get_place().get_coordinate());
+                        
                         add(mi_edit);
                         mi_edit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0));
                         

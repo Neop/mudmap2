@@ -48,6 +48,8 @@ public class World implements BreadthSearchGraph {
     
     public static boolean compatibility_mudmap_1 = true;
     
+    boolean file_backed_up;
+    
     // name and file of the world
     String name, file;
     // color of path lines and self-defined path colors
@@ -75,6 +77,7 @@ public class World implements BreadthSearchGraph {
         file = _file;
         initialize();
         load_world();
+        file_backed_up = false;
     }
     
     /**
@@ -86,6 +89,7 @@ public class World implements BreadthSearchGraph {
         name = _name;
         file = _file;
         initialize();
+        file_backed_up = true;
     }
     
     /**
@@ -127,6 +131,10 @@ public class World implements BreadthSearchGraph {
      */
     public void write_world(){
         WorldFileMM1 worldfile = new WorldFileMM1(this);
+        if(!file_backed_up){
+            worldfile.backup(file);
+            file_backed_up = true;
+        }
         worldfile.writeFile(file);
     }
 
