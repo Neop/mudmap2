@@ -90,7 +90,7 @@ public class ExportImageDialog extends ActionDialog {
         add(rb_layer = new JRadioButton("everything on layer"), constraints);
         ++constraints.gridx;
         add(rb_selection = new JRadioButton("selection"), constraints);
-        if(worldtab.get_place_group_selection().isEmpty()) rb_selection.setEnabled(false);
+        if(worldtab.place_group_get_selection().isEmpty()) rb_selection.setEnabled(false);
         ++constraints.gridx;
         add(rb_each_layer = new JRadioButton("each layer"), constraints);
         
@@ -285,7 +285,7 @@ public class ExportImageDialog extends ActionDialog {
             layer_y_max = y_max;
             layer_y_min = y_min;
         } else if(rb_selection.isSelected()){
-            HashSet<Place> places = worldtab.get_place_group_selection();
+            HashSet<Place> places = worldtab.place_group_get_selection();
             if(!places.isEmpty()){
                 layer_x_max = layer_x_min = places.iterator().next().get_x();
                 layer_y_max = layer_y_min = places.iterator().next().get_y();

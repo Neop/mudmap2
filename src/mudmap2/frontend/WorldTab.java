@@ -117,8 +117,8 @@ public class WorldTab extends JPanel {
     
     // the position of the selected place (selected by mouse or keyboard)
     static boolean place_selection_enabled_default = true; // default value
-    boolean place_selection_enabled;
-    int place_selected_x, place_selected_y;
+    boolean cursor_enabled;
+    int cursor_x, cursor_y;
     boolean force_selection;
     
     // world_meta file version supported by this WorldTab
@@ -137,10 +137,10 @@ public class WorldTab extends JPanel {
     // passive worldtabs don't modify the world
     final boolean passive;
     
-    LinkedList<PlaceSelectionListener> place_selection_listeners;
+    LinkedList<CursorListener> cursor_listeners;
     
     // place (group) selection
-    WorldCoordinate place_group_shift_start, place_group_shift_end;
+    WorldCoordinate place_group_box_start, place_group_box_end;
     HashSet<Place> place_group;
 
     // ============================= Methods ===================================
@@ -182,7 +182,7 @@ public class WorldTab extends JPanel {
         create_variables();
         
         tile_size = wt.tile_size;
-        place_selection_enabled = wt.place_selection_enabled;
+        cursor_enabled = wt.cursor_enabled;
         // copy positions
         for(WorldCoordinate pos: wt.positions) positions.add(pos);
         
@@ -221,7 +221,7 @@ public class WorldTab extends JPanel {
         mouse_x_previous = mouse_y_previous = 0;
         
         force_selection = false;
-        place_selection_enabled = place_selection_enabled_default;
+        cursor_enabled = place_selection_enabled_default;
         
         place_group = new HashSet<Place>();
     }
@@ -295,8 +295,8 @@ public class WorldTab extends JPanel {
         label_infobar.start_thread();
         
         // set default selected place to hte center place
-        place_selected_x = (int) Math.round(get_cur_position().get_x());
-        place_selected_y = (int) Math.round(get_cur_position().get_y());
+        cursor_x = (int) Math.round(get_cur_position().get_x());
+        cursor_y = (int) Math.round(get_cur_position().get_y());
         
         slider_zoom = new JSlider(0, 100, (int) (100.0 / tile_size_max * tile_size));
         constraints.gridx++;
@@ -311,7 +311,7 @@ public class WorldTab extends JPanel {
         });
         // ---
         
-        place_selection_listeners = new LinkedList<PlaceSelectionListener>();
+        cursor_listeners = new LinkedList<CursorListener>();
     }
     
     /**
@@ -398,16 +398,16 @@ public class WorldTab extends JPanel {
      * Gets the x coordinate of the selected place
      * @return x coordinate
      */
-    public int get_place_selection_x(){
-        return place_selected_x;
+    public int get_cursor_x(){
+        return cursor_x;
     }
     
     /**
      * Gets the y coordinate of the selected place 
      * @return y coordinate
      */
-    public int get_place_selection_y(){
-        return place_selected_y;
+    public int get_cursor_y(){
+        return cursor_y;
     }
     
     /**
@@ -415,13 +415,13 @@ public class WorldTab extends JPanel {
      * @param x x coordinate
      * @param y y coordinate
      */
-    public void set_place_selection(int x, int y){
-        place_selected_x = x;
-        place_selected_y = y;
+    public void set_cursor(int x, int y){
+        cursor_x = x;
+        cursor_y = y;
         update_infobar();
-        move_screen_to_place_selection();
+        move_screen_to_cursor();
         repaint();
-        call_place_selection_listeners();
+        call_cursor_listeners();
     }
     
     /**
@@ -429,22 +429,22 @@ public class WorldTab extends JPanel {
      * @param dx x movement
      * @param dy y movement
      */
-    private void move_place_selection(int dx, int dy){
-        place_selected_x += dx;
-        place_selected_y += dy;
+    private void move_cursor(int dx, int dy){
+        cursor_x += dx;
+        cursor_y += dy;
         update_infobar();
-        move_screen_to_place_selection();
+        move_screen_to_cursor();
         repaint();
-        call_place_selection_listeners();
+        call_cursor_listeners();
     }
     
     /**
      * moves the shown places so the selection is on the screen
      */
-    private void move_screen_to_place_selection(){
+    private void move_screen_to_cursor(){
         if(worldpanel != null){
-            int screen_x = worldpanel.get_screen_pos_x(place_selected_x);
-            int screen_y = worldpanel.get_screen_pos_y(place_selected_y);
+            int screen_x = worldpanel.get_screen_pos_x(cursor_x);
+            int screen_y = worldpanel.get_screen_pos_y(cursor_y);
             int tilesize = get_tile_size();
 
             double dx = 0, dy = 0;
@@ -460,49 +460,49 @@ public class WorldTab extends JPanel {
     }
     
     /**
-     * Sets the place selection enabled state (if true, the selection will be shown)
+     * Sets the cursor state (if true, the selection will be shown)
      * @param b 
      */
-    public void set_place_selection_enabled(boolean b){
-        place_selection_enabled = b || force_selection;
+    public void set_cursor_enabled(boolean b){
+        cursor_enabled = b || force_selection;
         update_infobar();
         repaint();
     }
     
     /**
-     * Toggles the place selection enabled state
+     * Toggles the cursor enabled state
      */
-    public void set_place_selection_toggle(){
+    public void set_cursor_toggle(){
         if(!force_selection){
-            place_selection_enabled = !place_selection_enabled;
+            cursor_enabled = !cursor_enabled;
             update_infobar();
             repaint();
         }
     }
     
     /**
-     * Gets the place selection enabled state
+     * Gets the cursor state
      * @return 
      */
-    public boolean get_place_selection_enabled(){
-        return place_selection_enabled || force_selection;
+    public boolean get_cursor_enabled(){
+        return cursor_enabled || force_selection;
     }
     
     /**
-     * Enables or disables the place selection
-     * @param b new place selection state
+     * Enables or disables the cursor
+     * @param b
      */
-    private void set_place_selection(boolean b){
-        place_selection_enabled = b || force_selection;
+    private void set_cursor(boolean b){
+        cursor_enabled = b || force_selection;
         repaint();
     }
     
     /**
-     * Forces the place selection to be enabled, if true
+     * Forces the cursor to be enabled, if true
      * @param b 
      */
-    public void set_place_selection_forced(boolean b){
-        if(force_selection = b) set_place_selection(true);
+    public void set_cursor_forced(boolean b){
+        if(force_selection = b) set_cursor(true);
     }
     
     /**
@@ -529,7 +529,7 @@ public class WorldTab extends JPanel {
         positions.push(pos);
         
         // move place selection
-        set_place_selection((int) pos.get_x(), (int) pos.get_y());
+        set_cursor((int) pos.get_x(), (int) pos.get_y());
         while(positions.size() > history_max_length) positions.removeLast();
         repaint();
     }
@@ -547,14 +547,14 @@ public class WorldTab extends JPanel {
         //if(positions.size() > 0) positions.removeFirst();
         //if(positions.size() == 0) goto_home();
         
-        set_place_selection((int) get_cur_position().get_x(), (int) get_cur_position().get_y());
+        set_cursor((int) get_cur_position().get_x(), (int) get_cur_position().get_y());
         repaint();
     }
     
     public void restore_position(){
         if(positions_cur_index > 0){
             positions_cur_index--;
-            set_place_selection((int) get_cur_position().get_x(), (int) get_cur_position().get_y());
+            set_cursor((int) get_cur_position().get_x(), (int) get_cur_position().get_y());
             repaint();
         }
     }
@@ -564,11 +564,11 @@ public class WorldTab extends JPanel {
      */
     private void update_infobar(){
         if(label_infobar != null ){ 
-            if(get_place_selection_enabled()){
+            if(get_cursor_enabled()){
                 Layer layer = world.get_layer(get_cur_position().get_layer());
-                if(layer != null && layer.exist(get_place_selection_x(), get_place_selection_y())){
+                if(layer != null && layer.exist(get_cursor_x(), get_cursor_y())){
                     Place pl;
-                        pl = (Place) layer.get(get_place_selection_x(), get_place_selection_y());
+                        pl = (Place) layer.get(get_cursor_x(), get_cursor_y());
 
                         boolean has_area = pl.get_area() != null;
                         boolean has_comments = pl.get_comments().size() != 0;
@@ -594,8 +594,8 @@ public class WorldTab extends JPanel {
     public void reset_history(WorldCoordinate pos){
         positions.clear();
         positions.add(pos);
-        place_selected_x = (int) Math.round(pos.get_x());
-        place_selected_y = (int) Math.round(pos.get_y());
+        cursor_x = (int) Math.round(pos.get_x());
+        cursor_y = (int) Math.round(pos.get_y());
         update_infobar();
         repaint();
     }
@@ -605,7 +605,7 @@ public class WorldTab extends JPanel {
      */
     public void goto_home(){
         push_position(world.get_home());
-        set_place_selection((int) Math.round(get_cur_position().get_x()), (int) Math.round(get_cur_position().get_y()));
+        set_cursor((int) Math.round(get_cur_position().get_x()), (int) Math.round(get_cur_position().get_y()));
     }
     
     /**
@@ -633,7 +633,7 @@ public class WorldTab extends JPanel {
      * @return place or null
      */
     public Place get_selected_place(){
-        return get_place(get_place_selection_x(), get_place_selection_y());
+        return get_place(get_cursor_x(), get_cursor_y());
     }
     
     /**
@@ -729,82 +729,82 @@ public class WorldTab extends JPanel {
      * Adds a place selection listener
      * @param listener 
      */
-    public void add_place_selection_listener(PlaceSelectionListener listener){
-        if(!place_selection_listeners.contains(listener))
-            place_selection_listeners.add(listener);
+    public void add_cursor_listener(CursorListener listener){
+        if(!cursor_listeners.contains(listener))
+            cursor_listeners.add(listener);
     }
     
     /**
      * Removes a place selection listener
      * @param listener 
      */
-    public void remove_place_selection_listener(PlaceSelectionListener listener){
-        place_selection_listeners.remove(listener);
+    public void remove_cursor_listener(CursorListener listener){
+        cursor_listeners.remove(listener);
     }
     
     /**
      * calls all place selection listeners
      */
-    private void call_place_selection_listeners(){
-        Place place = get_place(get_place_selection_x(), get_place_selection_y());
+    private void call_cursor_listeners(){
+        Place place = get_place(get_cursor_x(), get_cursor_y());
 
-        if(place_selection_listeners != null) {
+        if(cursor_listeners != null) {
             if(place != null) 
-                for(PlaceSelectionListener listener: place_selection_listeners) 
+                for(CursorListener listener: cursor_listeners) 
                     listener.placeSelected(place);
             else{
                 Layer layer = get_world().get_layer(get_cur_position().get_layer());
-                for(PlaceSelectionListener listener: place_selection_listeners) 
-                    listener.placeDeselected(layer, get_place_selection_x(), get_place_selection_y());
+                for(CursorListener listener: cursor_listeners) 
+                    listener.placeDeselected(layer, get_cursor_x(), get_cursor_y());
             }
         }
     }
     
-    public interface PlaceSelectionListener{
-        // gets called, when the place selection changes to another place
+    public interface CursorListener{
+        // gets called, when the cursor moves to another place
         public void placeSelected(Place p);
-        // gets called, when the place selection changes to null
+        // gets called, when the cursor changes to null
         public void placeDeselected(Layer layer, int x, int y);
     }
     
     // ========================= place (group) selection =======================
     /**
-     * Clears the shift selection box
+     * Clears the box/shift selection box
      */
-    private void place_group_shift_reset_selection(){
-        place_group_shift_end = place_group_shift_start = null;
+    private void place_group_box_reset_selection(){
+        place_group_box_end = place_group_box_start = null;
     }
     
     /**
-     * Modifies the shift selection box (eg on shift + direction key)
+     * Modifies the box/shift selection box (eg on shift + direction key)
      * @param x new coordinate
      * @param y new coordinate
      */
-    private void place_group_shift_modify_selection(int x, int y){
+    private void place_group_box_modify_selection(int x, int y){
         place_group.clear();
-        place_group_shift_end = new WorldCoordinate(get_cur_position().get_layer(), x, y);
+        place_group_box_end = new WorldCoordinate(get_cur_position().get_layer(), x, y);
         // reset if layer changed
-        if(place_group_shift_start != null && place_group_shift_start.get_layer() != place_group_shift_end.get_layer()) place_group_shift_start = null;
+        if(place_group_box_start != null && place_group_box_start.get_layer() != place_group_box_end.get_layer()) place_group_box_start = null;
         // set start, if not set
-        if(place_group_shift_start == null) place_group_shift_start = place_group_shift_end;
+        if(place_group_box_start == null) place_group_box_start = place_group_box_end;
     }
     
     /**
-     * Moves the shift selectino to the selected places list
+     * Moves the box/shift selection to the selected places list
      */
-    private void place_group_shift_selection_to_list(){
-        if(place_group_shift_end != null && place_group_shift_start != null){
-            int x1 = (int) Math.round(place_group_shift_end.get_x());
-            int x2 = (int) Math.round(place_group_shift_start.get_x());
-            int y1 = (int) Math.round(place_group_shift_end.get_y());
-            int y2 = (int) Math.round(place_group_shift_start.get_y());
+    private void place_group_box_selection_to_list(){
+        if(place_group_box_end != null && place_group_box_start != null){
+            int x1 = (int) Math.round(place_group_box_end.get_x());
+            int x2 = (int) Math.round(place_group_box_start.get_x());
+            int y1 = (int) Math.round(place_group_box_end.get_y());
+            int y2 = (int) Math.round(place_group_box_start.get_y());
             
             int x_min = Math.min(x1, x2);
             int x_max = Math.max(x1, x2);
             int y_min = Math.min(y1, y2);
             int y_max = Math.max(y1, y2);
             
-            Layer layer = world.get_layer(place_group_shift_end.get_layer());
+            Layer layer = world.get_layer(place_group_box_end.get_layer());
             
             for(int x = x_min; x <= x_max; ++x){
                 for(int y = y_min; y <= y_max; ++y){
@@ -813,7 +813,7 @@ public class WorldTab extends JPanel {
                 }
             }
         }
-        place_group_shift_reset_selection();
+        place_group_box_reset_selection();
     }
     
     /**
@@ -821,7 +821,7 @@ public class WorldTab extends JPanel {
      * @param pl 
      */
     private void place_group_add(Place pl){
-        place_group_shift_selection_to_list();
+        place_group_box_selection_to_list();
         // clear list, if new place is on a different layer
         if(!place_group.isEmpty() && place_group.iterator().next().get_layer() != pl.get_layer()) place_group.clear();
         if(pl != null){
@@ -840,27 +840,27 @@ public class WorldTab extends JPanel {
     }
     
     /**
-     * Returns true, if places are selected
-     * @return 
-     */
-    private boolean has_place_group_selection(){
-        return (place_group_shift_start != null && place_group_shift_end != null) || !place_group.isEmpty();
-    }
-    
-    /**
      * Clears the selected places list and the shift selection
      */
     private void place_group_reset(){
         place_group.clear();
-        place_group_shift_reset_selection();
+        place_group_box_reset_selection();
+    }
+    
+    /**
+     * Returns true, if places are selected
+     * @return 
+     */
+    public boolean place_group_has_selection(){
+        return (place_group_box_start != null && place_group_box_end != null) || !place_group.isEmpty();
     }
     
     /**
      * gets all selected places
      * @return 
      */
-    public HashSet<Place> get_place_group_selection(){
-        if(place_group_shift_start != null) place_group_shift_selection_to_list();
+    public HashSet<Place> place_group_get_selection(){
+        if(place_group_box_start != null) place_group_box_selection_to_list();
         return place_group;
     }
     
@@ -869,14 +869,14 @@ public class WorldTab extends JPanel {
      * @param place
      * @return 
      */
-    private boolean place_group_selected(Place place){
+    private boolean place_group_is_selected(Place place){
         if(place != null){
-            if(place_group_shift_end != null && place_group_shift_start != null 
-                && place_group_shift_end.get_layer() == place.get_layer().get_id()){
-                int x1 = (int) Math.round(place_group_shift_end.get_x());
-                int x2 = (int) Math.round(place_group_shift_start.get_x());
-                int y1 = (int) Math.round(place_group_shift_end.get_y());
-                int y2 = (int) Math.round(place_group_shift_start.get_y());
+            if(place_group_box_end != null && place_group_box_start != null 
+                && place_group_box_end.get_layer() == place.get_layer().get_id()){
+                int x1 = (int) Math.round(place_group_box_end.get_x());
+                int x2 = (int) Math.round(place_group_box_start.get_x());
+                int y1 = (int) Math.round(place_group_box_end.get_y());
+                int y2 = (int) Math.round(place_group_box_start.get_y());
 
                 int x_min = Math.min(x1, x2);
                 int x_max = Math.max(x1, x2);
@@ -910,31 +910,32 @@ public class WorldTab extends JPanel {
                 while((line = reader.readLine()) != null){
                     line = line.trim();
 
-                    if(line.isEmpty() || line.startsWith("//") || line.startsWith("#")) continue;
-                    else if(line.startsWith("lp")){ // last position
-                        String[] tmp = line.split(" ");
-                        layer_id = Integer.parseInt(tmp[1]);
-                        // the x coordinate has to be negated for backward compatibility to mudmap 1.x
-                        pos_x = -Double.parseDouble(tmp[2]);
-                        pos_y = Double.parseDouble(tmp[3]);
-                        
-                        
-                    } else if(line.startsWith("pcv")){ // previously shown places
-                        String[] tmp = line.split(" ");
-                        int tmp_layer_id = Integer.parseInt(tmp[1]);
-                        
-                        // the x coordinate has to be negated for backward compatibility to mudmap 1.x
-                        double tmp_pos_x = -Double.parseDouble(tmp[2]);
-                        double tmp_pos_y = Double.parseDouble(tmp[3]);
-                        
-                        WorldCoordinate newcoord = new WorldCoordinate(tmp_layer_id, tmp_pos_x, tmp_pos_y);
-                        if(positions.size() == 0 || !get_cur_position().equals(newcoord)) push_position(newcoord);
-                    } else if(line.startsWith("tile_size")){
-                        String[] tmp = line.split(" ");
-                        tile_size = Double.parseDouble(tmp[1]);
-                    } else if(line.startsWith("enable_place_selection")){
-                        String[] tmp = line.split(" ");
-                        place_selection_enabled = Boolean.parseBoolean(tmp[1]) || force_selection;
+                    if(!line.isEmpty() && !line.startsWith("//") && !line.startsWith("#")){
+                        if(line.startsWith("lp")){ // last position
+                            String[] tmp = line.split(" ");
+                            layer_id = Integer.parseInt(tmp[1]);
+                            // the x coordinate has to be negated for backward compatibility to mudmap 1.x
+                            pos_x = -Double.parseDouble(tmp[2]);
+                            pos_y = Double.parseDouble(tmp[3]);
+
+
+                        } else if(line.startsWith("pcv")){ // previously shown places
+                            String[] tmp = line.split(" ");
+                            int tmp_layer_id = Integer.parseInt(tmp[1]);
+
+                            // the x coordinate has to be negated for backward compatibility to mudmap 1.x
+                            double tmp_pos_x = -Double.parseDouble(tmp[2]);
+                            double tmp_pos_y = Double.parseDouble(tmp[3]);
+
+                            WorldCoordinate newcoord = new WorldCoordinate(tmp_layer_id, tmp_pos_x, tmp_pos_y);
+                            if(positions.size() == 0 || !get_cur_position().equals(newcoord)) push_position(newcoord);
+                        } else if(line.startsWith("tile_size")){
+                            String[] tmp = line.split(" ");
+                            tile_size = Double.parseDouble(tmp[1]);
+                        } else if(line.startsWith("enable_place_selection")){
+                            String[] tmp = line.split(" ");
+                            cursor_enabled = Boolean.parseBoolean(tmp[1]) || force_selection;
+                        }
                     }
                 }
             } catch (IOException ex) {
@@ -968,7 +969,7 @@ public class WorldTab extends JPanel {
                 outstream.println("tile_size " + (int) tile_size);
 
                 // write whether the place selection is shown
-                outstream.println("enable_place_selection " + get_place_selection_enabled());
+                outstream.println("enable_place_selection " + get_cursor_enabled());
 
                 // write current position and position history
                 outstream.println("lp " + get_cur_position().get_meta_String());
@@ -1106,9 +1107,9 @@ public class WorldTab extends JPanel {
         
         @Override
         public void paintComponent(Graphics g){ 
-            mappainter.set_place_group(parent.place_group, parent.place_group_shift_start, parent.place_group_shift_end);
-            mappainter.set_place_selection(parent.get_place_selection_x(), parent.get_place_selection_y());
-            mappainter.set_place_selection_enabled(parent.get_place_selection_enabled());
+            mappainter.set_place_group(parent.place_group, parent.place_group_box_start, parent.place_group_box_end);
+            mappainter.set_place_selection(parent.get_cursor_x(), parent.get_cursor_y());
+            mappainter.set_place_selection_enabled(parent.get_cursor_enabled());
             
             mappainter.paint(g, parent.get_tile_size(), screen_width = getWidth(), screen_height = getHeight(), parent.get_world().get_layer(parent.get_cur_position().get_layer()), parent.get_cur_position());
         }
@@ -1128,14 +1129,14 @@ public class WorldTab extends JPanel {
                 } else if(arg0.getButton() == MouseEvent.BUTTON1){ // left click
                     if(!arg0.isShiftDown()){ // left click + hift gets handled in active listener
                         // set place selection to coordinates if keyboard selection is enabled
-                        parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                        parent.set_cursor(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     }
                 }
             }
         }
         
         /**
-         * This listener contains actions, that modify the world
+         * This listener contains actions that modify the world
          */
         private class TabMouseListener implements MouseListener {
 
@@ -1151,6 +1152,12 @@ public class WorldTab extends JPanel {
                             if(place != null) (new PlaceDialog(parent.parent, parent.get_world(), place)).setVisible(true);
                             else (new PlaceDialog(parent.parent, parent.world, parent.get_world().get_layer(parent.get_cur_position().get_layer()), get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()))).setVisible(true);
                         }
+                    } else {
+                        if(!parent.place_group_has_selection())
+                            parent.place_group_box_modify_selection(parent.get_cursor_x(), parent.get_cursor_y());
+                        parent.place_group_box_modify_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                        // cursor has to be set after the selection -> not handled by passive listener
+                        parent.set_cursor(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     }
                 }
                 repaint();
@@ -1158,11 +1165,6 @@ public class WorldTab extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent arg0) {
-                if(!arg0.isControlDown() && arg0.isShiftDown()){ // left click + shift
-                    parent.place_group_shift_modify_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                    // has to be used after this -> not handled by passive listener
-                    parent.set_place_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
-                }
                 requestFocusInWindow();
             }
 
@@ -1189,10 +1191,10 @@ public class WorldTab extends JPanel {
                 if(parent.mouse_in_panel){
                     double dx = (double) (arg0.getX() - parent.mouse_x_previous) / parent.get_tile_size();
                     double dy = (double) (arg0.getY() - parent.mouse_y_previous) / parent.get_tile_size();
-                    if(!arg0.isShiftDown())
+                    if(!arg0.isShiftDown()) // shift not pressed: move view
                         parent.get_cur_position().move(-dx , dy);
-                    else {
-                        parent.place_group_shift_modify_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
+                    else { // shift pressed: box selection
+                        parent.place_group_box_modify_selection(get_place_pos_x(arg0.getX()), get_place_pos_y(arg0.getY()));
                     }
                     parent.repaint();
                 }
@@ -1218,8 +1220,8 @@ public class WorldTab extends JPanel {
             @Override
             public void keyPressed(KeyEvent arg0) {                
                 if(!arg0.isShiftDown() && !arg0.isControlDown() && !arg0.isAltDown() && !arg0.isAltGraphDown()){ // ctrl, shift and alt not pressed
-                    int x_bef = parent.get_place_selection_x();
-                    int y_bef = parent.get_place_selection_y();
+                    int x_bef = parent.get_cursor_x();
+                    int y_bef = parent.get_cursor_y();
                     
                     switch(arg0.getKeyCode()){
                         // zoom the map
@@ -1234,45 +1236,45 @@ public class WorldTab extends JPanel {
                             parent.tile_size_decrement();
                             break;
 
-                        // enable / disable place selection
+                        // enable / disable cursor
                         case KeyEvent.VK_P:
-                            parent.set_place_selection_toggle();
+                            parent.set_cursor_toggle();
                             break;
 
                         // shift place selection - wasd
                         case KeyEvent.VK_NUMPAD8:
                         case KeyEvent.VK_UP:
                         case KeyEvent.VK_W:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(0, +1);
                             break;
                         case KeyEvent.VK_NUMPAD4:
                         case KeyEvent.VK_LEFT:
                         case KeyEvent.VK_A:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(-1, 0);
                             break;
                         case KeyEvent.VK_NUMPAD2:
                         case KeyEvent.VK_DOWN:
                         case KeyEvent.VK_S:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(0, -1);
                             break;
                         case KeyEvent.VK_NUMPAD6:
                         case KeyEvent.VK_RIGHT:
                         case KeyEvent.VK_D:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(+1, 0);
                             break;
 
                         // diagonal movement
                         case KeyEvent.VK_NUMPAD1:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, -1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(-1, -1);
                             break;
                         case KeyEvent.VK_NUMPAD3:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, -1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(+1, -1);
                             break;
                         case KeyEvent.VK_NUMPAD7:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, +1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(-1, +1);
                             break;
                         case KeyEvent.VK_NUMPAD9:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, +1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(+1, +1);
                             break;
 
                         // goto home
@@ -1293,12 +1295,12 @@ public class WorldTab extends JPanel {
                             break;
                     }
                     
-                    int x_sel = parent.get_place_selection_x();
-                    int y_sel = parent.get_place_selection_y();
+                    int x_sel = parent.get_cursor_x();
+                    int y_sel = parent.get_cursor_y();
                     
                     // change group selection, if place selection changed
                     if(x_sel != x_bef || y_sel != y_bef){
-                        if(parent.place_group_shift_start != null) parent.place_group_shift_selection_to_list();
+                        if(parent.place_group_box_start != null) parent.place_group_box_selection_to_list();
                     }
                 }
             }
@@ -1335,26 +1337,26 @@ public class WorldTab extends JPanel {
                             parent.place_group_set(parent.get_world().get_layer(parent.get_cur_position().get_layer()).get_places());
                             break;
                         case KeyEvent.VK_X: // cut selected places
-                            if(!parent.get_place_group_selection().isEmpty()){ // cut group selection
-                                mudmap2.Mudmap2.cut(parent.place_group, parent.get_place_selection_x(), parent.get_place_selection_y());
+                            if(!parent.place_group_get_selection().isEmpty()){ // cut group selection
+                                mudmap2.Mudmap2.cut(parent.place_group, parent.get_cursor_x(), parent.get_cursor_y());
                                 parent.show_message(parent.place_group.size() + " places cut");
                                 parent.place_group_reset();
                             } else if(parent.get_selected_place() != null){ // cut cursor selection
                                 HashSet<Place> tmp_selection = new HashSet<Place>();
                                 tmp_selection.add(parent.get_selected_place());
-                                mudmap2.Mudmap2.cut(tmp_selection, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                mudmap2.Mudmap2.cut(tmp_selection, parent.get_cursor_x(), parent.get_cursor_y());
                                 parent.show_message("1 place cut");
                             } else parent.show_message("No places cut: selection empty");                   
                             break;
                         case KeyEvent.VK_C: // copy selected places
-                            if(!parent.get_place_group_selection().isEmpty()){ // copy group selection
-                                mudmap2.Mudmap2.copy(parent.place_group, parent.get_place_selection_x(), parent.get_place_selection_y());
+                            if(!parent.place_group_get_selection().isEmpty()){ // copy group selection
+                                mudmap2.Mudmap2.copy(parent.place_group, parent.get_cursor_x(), parent.get_cursor_y());
                                 parent.show_message(parent.place_group.size() + " places copied");
                                 parent.place_group_reset();
                             } else if(parent.get_selected_place() != null){ // copy cursor selection
                                 HashSet<Place> tmp_selection = new HashSet<Place>();
                                 tmp_selection.add(parent.get_selected_place());
-                                mudmap2.Mudmap2.copy(tmp_selection, parent.get_place_selection_x(), parent.get_place_selection_y());
+                                mudmap2.Mudmap2.copy(tmp_selection, parent.get_cursor_x(), parent.get_cursor_y());
                                 parent.show_message("1 place copied");
                             } else {
                                 mudmap2.Mudmap2.reset_copy();
@@ -1363,9 +1365,9 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_V: // paste copied / cut places
                             if(mudmap2.Mudmap2.has_copy_places()){
-                                if(mudmap2.Mudmap2.can_paste(parent.get_place_selection_x(), parent.get_place_selection_y(), parent.get_world().get_layer(parent.get_cur_position().get_layer()))){
+                                if(mudmap2.Mudmap2.can_paste(parent.get_cursor_x(), parent.get_cursor_y(), parent.get_world().get_layer(parent.get_cur_position().get_layer()))){
                                     int paste_num = mudmap2.Mudmap2.get_copy_places().size();
-                                    if(mudmap2.Mudmap2.paste(parent.get_place_selection_x(), parent.get_place_selection_y(), parent.get_world().get_layer(parent.get_cur_position().get_layer()))){
+                                    if(mudmap2.Mudmap2.paste(parent.get_cursor_x(), parent.get_cursor_y(), parent.get_world().get_layer(parent.get_cur_position().get_layer()))){
                                         parent.show_message(paste_num + " places pasted");
                                     } else {
                                         parent.show_message("No places pasted");
@@ -1383,7 +1385,7 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_UP:
                         //case KeyEvent.VK_W: // add path to direction 'n'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
+                            other = parent.get_place(parent.get_cursor_x(), parent.get_cursor_y() + 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("n") == null && other.get_exit("s") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "n", other, "s"));
@@ -1392,7 +1394,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD9: // add path to direction 'ne'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() + 1);
+                            other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y() + 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("ne") == null && other.get_exit("sw") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "ne", other, "sw"));
@@ -1403,7 +1405,7 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_RIGHT:
                         //case KeyEvent.VK_D: // add path to direction 'e'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y());
+                            other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y());
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("e") == null && other.get_exit("w") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "e", other, "w"));
@@ -1412,7 +1414,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() - 1);
+                            other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y() - 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("se") == null && other.get_exit("nw") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "se", other, "nw"));
@@ -1423,7 +1425,7 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_DOWN:
                         //case KeyEvent.VK_S: // add path to direction 's'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() - 1);
+                            other = parent.get_place(parent.get_cursor_x(), parent.get_cursor_y() - 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("s") == null && other.get_exit("n") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "s", other, "n"));
@@ -1432,7 +1434,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD1: // add path to direction 'sw'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() - 1);
+                            other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y() - 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("sw") == null && other.get_exit("ne") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "sw", other, "ne"));
@@ -1443,7 +1445,7 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_LEFT:
                         //case KeyEvent.VK_A: // add path to direction 'w'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y());
+                            other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y());
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("w") == null && other.get_exit("e") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "w", other, "e"));
@@ -1452,7 +1454,7 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_NUMPAD7: // add path to direction 'nw'
                             place = parent.get_selected_place();
-                            other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() + 1);
+                            other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y() + 1);
                             if(place != null && other != null){ // if places exist
                                 if(place.get_exit("nw") == null && other.get_exit("se") == null){ // if exits aren't occupied
                                     place.connect_path(new Path(place, "nw", other, "se"));
@@ -1464,43 +1466,43 @@ public class WorldTab extends JPanel {
                             break;
                     } 
                 } else if(arg0.isShiftDown()){ // shift key pressed -> modify selection
-                    int x_bef = parent.get_place_selection_x();
-                    int y_bef = parent.get_place_selection_y();
+                    int x_bef = parent.get_cursor_x();
+                    int y_bef = parent.get_cursor_y();
                     
                     switch(arg0.getKeyCode()){
                         case KeyEvent.VK_NUMPAD8:
                         case KeyEvent.VK_UP:
                         case KeyEvent.VK_W:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, +1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(0, +1);
                             break;
                         case KeyEvent.VK_NUMPAD4:
                         case KeyEvent.VK_LEFT:
                         case KeyEvent.VK_A:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, 0);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(-1, 0);
                             break;
                         case KeyEvent.VK_NUMPAD2:
                         case KeyEvent.VK_DOWN:
                         case KeyEvent.VK_S:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(0, -1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(0, -1);
                             break;
                         case KeyEvent.VK_NUMPAD6:
                         case KeyEvent.VK_RIGHT:
                         case KeyEvent.VK_D:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, 0);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(+1, 0);
                             break;
 
                         // diagonal movement
                         case KeyEvent.VK_NUMPAD1:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, -1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(-1, -1);
                             break;
                         case KeyEvent.VK_NUMPAD3:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, -1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(+1, -1);
                             break;
                         case KeyEvent.VK_NUMPAD7:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(-1, +1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(-1, +1);
                             break;
                         case KeyEvent.VK_NUMPAD9:
-                            if(parent.get_place_selection_enabled()) parent.move_place_selection(+1, +1);
+                            if(parent.get_cursor_enabled()) parent.move_cursor(+1, +1);
                             break;
                             
                         case KeyEvent.VK_SPACE: // add or remove single place to place group selection
@@ -1508,13 +1510,13 @@ public class WorldTab extends JPanel {
                             if(place != null) parent.place_group_add(place);
                             break;
                     }
-                    int x_sel = parent.get_place_selection_x();
-                    int y_sel = parent.get_place_selection_y();
+                    int x_sel = parent.get_cursor_x();
+                    int y_sel = parent.get_cursor_y();
                     
                     // change group selection, if place selection changed
                     if(x_sel != x_bef || y_sel != y_bef){
-                        if(parent.place_group_shift_start == null) parent.place_group_shift_modify_selection(x_bef, y_bef);
-                        parent.place_group_shift_modify_selection(x_sel, y_sel);
+                        if(parent.place_group_box_start == null) parent.place_group_box_modify_selection(x_bef, y_bef);
+                        parent.place_group_box_modify_selection(x_sel, y_sel);
                     }
                 } else if(arg0.isAltDown() || arg0.isAltGraphDown()){ // alt or altgr key pressed
                     Place place, other;
@@ -1525,14 +1527,14 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_W: // remove path to direction 'n'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() + 1);
+                                other = parent.get_place(parent.get_cursor_x(), parent.get_cursor_y() + 1);
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
                         case KeyEvent.VK_NUMPAD9: // remove path to direction 'ne'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() + 1);
+                                other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y() + 1);
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
@@ -1541,14 +1543,14 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_D: // remove path to direction 'e'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y());
+                                other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y());
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
                         case KeyEvent.VK_NUMPAD3: // remove path to direction 'se'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x() + 1, parent.get_place_selection_y() - 1);
+                                other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y() - 1);
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
@@ -1557,14 +1559,14 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_S: // remove path to direction 's'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x(), parent.get_place_selection_y() - 1);
+                                other = parent.get_place(parent.get_cursor_x(), parent.get_cursor_y() - 1);
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
                         case KeyEvent.VK_NUMPAD1: // remove path to direction 'sw'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() - 1);
+                                other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y() - 1);
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
@@ -1573,14 +1575,14 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_A: // remove path to direction 'w'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y());
+                                other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y());
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
                         case KeyEvent.VK_NUMPAD7: // remove path to direction 'nw'
                             place = parent.get_selected_place();
                             if(place != null){
-                                other = parent.get_place(parent.get_place_selection_x() - 1, parent.get_place_selection_y() + 1);
+                                other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y() + 1);
                                 for(Path path: place.get_paths(other)) place.remove_path(path);
                             }
                             break;
@@ -1589,9 +1591,9 @@ public class WorldTab extends JPanel {
                     switch(arg0.getKeyCode()){
                         // show context menu
                         case KeyEvent.VK_CONTEXT_MENU:
-                            if(parent.get_place_selection_enabled()){
-                                TabContextMenu context_menu = new TabContextMenu(parent, parent.get_place_selection_x(), parent.get_place_selection_y());
-                                context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_place_selection_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_place_selection_y()) + worldpanel.parent.get_tile_size() / 2);
+                            if(parent.get_cursor_enabled()){
+                                TabContextMenu context_menu = new TabContextMenu(parent, parent.get_cursor_x(), parent.get_cursor_y());
+                                context_menu.show(arg0.getComponent(), get_screen_pos_x(parent.get_cursor_x()) + worldpanel.parent.get_tile_size() / 2, get_screen_pos_y(parent.get_cursor_y()) + worldpanel.parent.get_tile_size() / 2);
                             }
                             break;
 
@@ -1599,21 +1601,21 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_INSERT:
                         case KeyEvent.VK_ENTER:
                         case KeyEvent.VK_E:
-                            if(parent.get_place_selection_enabled()){
+                            if(parent.get_cursor_enabled()){
                                 Place place = parent.get_selected_place();
                                 PlaceDialog dlg;
                                 if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
-                                else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.get_layer(parent.get_cur_position().get_layer()), parent.get_cursor_x(), parent.get_cursor_y());
                                 dlg.setVisible(true);
                             }
                             break;
                         // create placeholder
                         case KeyEvent.VK_F:
-                            if(parent.get_place_selection_enabled()){
+                            if(parent.get_cursor_enabled()){
                                 Place place = parent.get_selected_place();
                                 // create placeholder or remove one
                                 if(place == null){
-                                    parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_place_selection_x(), parent.get_place_selection_y());
+                                    parent.world.put_placeholder(parent.get_cur_position().get_layer(), parent.get_cursor_x(), parent.get_cursor_y());
                                 } else if(place.get_name().equals(Place.placeholder_name)){
                                     try {
                                         place.remove();
@@ -1629,13 +1631,13 @@ public class WorldTab extends JPanel {
                         // remove place
                         case KeyEvent.VK_DELETE:
                         case KeyEvent.VK_R:
-                            if(!parent.has_place_group_selection()){ // no places selected
-                                if(parent.get_place_selection_enabled()){
+                            if(!parent.place_group_has_selection()){ // no places selected
+                                if(parent.get_cursor_enabled()){
                                     Place place = parent.get_selected_place();
                                     if(place != null) (new PlaceRemoveDialog(parent.parent, parent.world, place)).show();
                                 }
                             } else { // places selected
-                                HashSet<Place> place_group = parent.get_place_group_selection();
+                                HashSet<Place> place_group = parent.place_group_get_selection();
                                 if(place_group != null){
                                     PlaceRemoveDialog dlg = new PlaceRemoveDialog(parent.parent, parent.world, place_group);
                                     dlg.show();
@@ -1646,7 +1648,7 @@ public class WorldTab extends JPanel {
                             break;
                         // edit place comments
                         case KeyEvent.VK_C:
-                            if(parent.get_place_selection_enabled()){
+                            if(parent.get_cursor_enabled()){
                                 Place place = parent.get_selected_place();
                                 if(place != null){
                                     (new PlaceCommentDialog(parent.parent, place)).setVisible(true);
@@ -1658,13 +1660,13 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_Q:
                             Place place = parent.get_selected_place();
                             
-                            if(!parent.has_place_group_selection()){
+                            if(!parent.place_group_has_selection()){
                                 // no place selected
                                 if(place == null) (new AreaDialog(parent.parent, parent.world)).setVisible(true);
                                 // place selected
                                 else (new AreaDialog(parent.parent, parent.world, place)).setVisible(true);
                             } else { // place group selection
-                                (new AreaDialog(parent.parent, parent.world, parent.get_place_group_selection(), place)).setVisible(true);
+                                (new AreaDialog(parent.parent, parent.world, parent.place_group_get_selection(), place)).setVisible(true);
                             }
                             break;
                             
@@ -1704,7 +1706,7 @@ public class WorldTab extends JPanel {
                         mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
                         add(mi_edit);
 
-                        HashSet<Place> place_group = parent.get_place_group_selection();
+                        HashSet<Place> place_group = parent.place_group_get_selection();
 
                         JMenuItem mi_remove;
                         if(place_group.isEmpty()){

@@ -65,7 +65,7 @@ public class PathConnectDialog extends ActionDialog{
         
         // world tab
         worldtab = (WorldTab) wt_parent.clone();
-        worldtab.set_place_selection_forced(true);
+        worldtab.set_cursor_forced(true);
         worldtab.reset_history(place.get_coordinate());
         worldtab.set_forced_focus_disabled(true);
         
@@ -135,7 +135,7 @@ public class PathConnectDialog extends ActionDialog{
             }
         });
         
-        worldtab.add_place_selection_listener(new WorldTab.PlaceSelectionListener() {
+        worldtab.add_cursor_listener(new WorldTab.CursorListener() {
             @Override
             public void placeSelected(Place p) {
                 if(p != place){ 
