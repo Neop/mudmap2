@@ -25,6 +25,7 @@
 package mudmap2.frontend;
 
 import java.awt.BorderLayout;
+import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -63,6 +64,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -1518,74 +1520,54 @@ public class WorldTab extends JPanel {
                         if(parent.place_group_box_start == null) parent.place_group_box_modify_selection(x_bef, y_bef);
                         parent.place_group_box_modify_selection(x_sel, y_sel);
                     }
-                } else if(arg0.isAltDown() || arg0.isAltGraphDown()){ // alt or altgr key pressed
-                    Place place, other;
+                } else if(arg0.isAltDown() || arg0.isAltGraphDown()){ // alt or altgr key pressed                    
+                    Place place = parent.get_selected_place();
+                    Place other;
+                    Path path;
                     
-                    switch(arg0.getKeyCode()){
-                        case KeyEvent.VK_NUMPAD8:
-                        case KeyEvent.VK_UP:
-                        case KeyEvent.VK_W: // remove path to direction 'n'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x(), parent.get_cursor_y() + 1);
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD9: // remove path to direction 'ne'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y() + 1);
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD6:
-                        case KeyEvent.VK_RIGHT:
-                        case KeyEvent.VK_D: // remove path to direction 'e'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y());
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD3: // remove path to direction 'se'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x() + 1, parent.get_cursor_y() - 1);
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD2:
-                        case KeyEvent.VK_DOWN:
-                        case KeyEvent.VK_S: // remove path to direction 's'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x(), parent.get_cursor_y() - 1);
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD1: // remove path to direction 'sw'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y() - 1);
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD4:
-                        case KeyEvent.VK_LEFT:
-                        case KeyEvent.VK_A: // remove path to direction 'w'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y());
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD7: // remove path to direction 'nw'
-                            place = parent.get_selected_place();
-                            if(place != null){
-                                other = parent.get_place(parent.get_cursor_x() - 1, parent.get_cursor_y() + 1);
-                                for(Path path: place.get_paths(other)) place.remove_path(path);
-                            }
-                            break;
+                    if(place != null){
+                        switch(arg0.getKeyCode()){
+                            case KeyEvent.VK_NUMPAD8:
+                            case KeyEvent.VK_UP:
+                            case KeyEvent.VK_W: // remove path to direction 'n'
+                                    path = place.get_path_to("n");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD9: // remove path to direction 'ne'
+                                    path = place.get_path_to("ne");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD6:
+                            case KeyEvent.VK_RIGHT:
+                            case KeyEvent.VK_D: // remove path to direction 'e'
+                                    path = place.get_path_to("e");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD3: // remove path to direction 'se'
+                                    path = place.get_path_to("se");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD2:
+                            case KeyEvent.VK_DOWN:
+                            case KeyEvent.VK_S: // remove path to direction 's'
+                                    path = place.get_path_to("s");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD1: // remove path to direction 'sw'
+                                    path = place.get_path_to("sw");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD4:
+                            case KeyEvent.VK_LEFT:
+                            case KeyEvent.VK_A: // remove path to direction 'w'
+                                    path = place.get_path_to("w");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                            case KeyEvent.VK_NUMPAD7: // remove path to direction 'nw'
+                                    path = place.get_path_to("nw");
+                                    if(path != null) place.remove_path(path);
+                                break;
+                        }
                     }
                 } else { // ctrl, shift and alt not pressed
                     switch(arg0.getKeyCode()){
@@ -1697,15 +1679,18 @@ public class WorldTab extends JPanel {
                 addPopupMenuListener(new TabContextPopMenuListener());
                 
                 parent = _parent;
-                Layer layer = parent.world.get_layer(parent.get_cur_position().get_layer());
+                final Layer layer = parent.world.get_layer(parent.get_cur_position().get_layer());
                 
                 final Place place = (layer != null ? (Place) layer.get(px, py) : null);
-                if(layer != null && place != null){ // if place exists
+                final boolean has_place = layer != null && place != null;
+                
+                if(has_place){ // if place exists
                     if(!parent.passive){
                         JMenuItem mi_edit = new JMenuItem("Edit place");
                         mi_edit.addActionListener(new PlaceDialog(parent.parent, parent.world, place));
                         add(mi_edit);
-
+                        mi_edit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0));
+                        
                         HashSet<Place> place_group = parent.place_group_get_selection();
 
                         JMenuItem mi_remove;
@@ -1719,14 +1704,16 @@ public class WorldTab extends JPanel {
                             mi_remove.setToolTipText("Remove all selected places");
                         }
                         add(mi_remove);
+                        mi_remove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 
                         JMenuItem mi_comments = new JMenuItem("Edit comments");
                         mi_comments.addActionListener(new PlaceCommentDialog(parent.parent, place));
+                        mi_comments.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0));
                         add(mi_comments);
 
-                        JMenuItem mi_area = null;
+                        JMenuItem mi_area;
                         if(place_group.isEmpty()){
-                            mi_area = new JMenuItem("Edit area");;
+                            mi_area = new JMenuItem("Edit area");
                             mi_area.addActionListener(new AreaDialog(parent.parent, parent.world, place));
                             mi_area.setToolTipText("Edit the area of this place");
                         } else {
@@ -1751,7 +1738,8 @@ public class WorldTab extends JPanel {
                         m_path_connect.add(mi_path_connect_select);
                         mi_path_connect_select.setToolTipText("Select any place from the map");
                         mi_path_connect_select.addActionListener(new PathConnectDialog(parent, place));
-
+                        mi_path_connect_select.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, Event.CTRL_MASK));
+                        
                         JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
                         m_path_connect.add(mi_path_connect_neighbors);
                         mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
@@ -1775,9 +1763,17 @@ public class WorldTab extends JPanel {
                                     else if(neighbor.get_x() < place.get_x())
                                         {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
 
-                                    JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
-                                    m_path_connect.add(mi_path_connect);
-                                    mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                                    // if exits aren't occupied yet -> add menu item
+                                    if(place.get_path_to(dir1) == null && neighbor.get_path_to(dir2) == null){
+                                        JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.get_name());
+                                        m_path_connect.add(mi_path_connect);
+                                        mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+
+                                        // add accelerator
+                                        int dirnum = Path.get_dir_num(dir1);
+                                        if(dirnum > 0 & dirnum <= 9)
+                                            mi_path_connect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0 + dirnum, Event.CTRL_MASK));
+                                    }
                                 }
                             }
                         }
@@ -1803,15 +1799,22 @@ public class WorldTab extends JPanel {
                             mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
                             
                             if(!parent.passive){
-                                JMenuItem mi_path_remove = new JMenuItem("Remove [" + path.get_exit(place) + "] " + other_place.get_name());
-                                m_path_remove.add(mi_path_remove);
+                                String dir = path.get_exit(place);
+                                JMenuItem mi_path_remove = new JMenuItem("Remove [" + dir + "] " + other_place.get_name());
                                 mi_path_remove.addActionListener(new RemovePathActionListener(path));
+                                m_path_remove.add(mi_path_remove);
+                                
+                                // add accelerator
+                                int dirnum = Path.get_dir_num(dir);
+                                if(dirnum > 0 & dirnum <= 9)
+                                    mi_path_remove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0 + dirnum, Event.ALT_MASK));
                             }
                         }
                         
                         if(!parent.passive){
                             JMenuItem mi_shortest_path = new JMenuItem("Find shortest path");
-                            add(mi_shortest_path);
+                            m_paths.add(new JSeparator());
+                            m_paths.add(mi_shortest_path);
                             mi_shortest_path.addActionListener(new ActionListener() {
 
                                 @Override
@@ -1934,6 +1937,68 @@ public class WorldTab extends JPanel {
                         }
                     });
                 }
+                
+                // cut / copy / paste for selected places
+                final boolean can_paste = layer != null && mudmap2.Mudmap2.can_paste(px, py, layer);
+                final boolean has_paste_places = layer != null && mudmap2.Mudmap2.has_copy_places();
+                final boolean has_selection = parent.place_group_has_selection();
+                
+                if(has_place || has_selection || has_paste_places)
+                    add(new JSeparator());
+                
+                if(has_place || has_selection){
+                    JMenuItem mi_cut_place = new JMenuItem("Cut" + (has_selection ? " selection" : " place"));
+                    add(mi_cut_place);
+                    mi_cut_place.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            HashSet<Place> set;
+                            if(has_selection){
+                                set = parent.place_group_get_selection();
+                            } else {
+                                set = new HashSet<Place>();
+                                set.add(place);
+                            }
+                            mudmap2.Mudmap2.cut(set, px, py);
+                            parent.repaint();
+                        }
+                    });
+                    mi_cut_place.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+                    
+                    JMenuItem mi_copy_place = new JMenuItem("Copy" + (has_selection ? " selection" : " place"));
+                    add(mi_copy_place);
+                    mi_copy_place.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            HashSet<Place> set = null;
+                            if(has_selection){
+                                set = parent.place_group_get_selection();
+                            } else {
+                                set = new HashSet<Place>();
+                                set.add(place);
+                            }
+                            mudmap2.Mudmap2.copy(set, px, py);
+                            parent.repaint();
+                        }
+                    });
+                    mi_copy_place.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+                }
+                
+                if(has_paste_places){
+                    JMenuItem mi_paste_place = new JMenuItem("Paste");
+                    add(mi_paste_place);
+                    mi_paste_place.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            mudmap2.Mudmap2.paste(px, py, layer);
+                            parent.repaint();
+                        }
+                    });
+                    if(!can_paste) mi_paste_place.setEnabled(false);
+                    mi_paste_place.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
+                }
+                
             }
             
             /**

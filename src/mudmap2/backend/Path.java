@@ -109,8 +109,8 @@ public class Path {
      * Removes this path from both places
      */
     public void remove() {
-        places[0].connected_places.remove(this);
-        places[1].connected_places.remove(this);
+        places[0].paths.remove(this);
+        places[1].paths.remove(this);
     }
     
     /**
@@ -147,6 +147,24 @@ public class Path {
         
         if(x > 0) ret = ret + "e";
         else if(x < 0) ret = ret + "w";
+        return ret;
+    }
+    
+    /**
+     * Translates the default directions to numbers (like on the numberpad)
+     * @param dir
+     * @return 
+     */
+    public static int get_dir_num(String dir){
+        int ret = -1;
+        if(dir.equals("n")) ret = 8;
+        else if(dir.equals("ne")) ret = 9;
+        else if(dir.equals("e")) ret = 6;
+        else if(dir.equals("se")) ret = 3;
+        else if(dir.equals("s")) ret = 2;
+        else if(dir.equals("sw")) ret = 1;
+        else if(dir.equals("w")) ret = 4;
+        else if(dir.equals("nw")) ret = 7;
         return ret;
     }
 }

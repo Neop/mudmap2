@@ -47,7 +47,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     RiskLevel risk_level;
     
     HashSet<Place> children, parents;
-    HashSet<Path> connected_places;
+    HashSet<Path> paths;
     TreeMap<String, Boolean> flags;
     LinkedList<String> comments;
     
@@ -87,7 +87,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         
         children = new HashSet<Place>();
         parents = new HashSet<Place>();
-        connected_places = new HashSet<Path>();
+        paths = new HashSet<Path>();
         flags = new TreeMap<String, Boolean>();
         comments = new LinkedList<String>();
         
@@ -242,7 +242,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return path connected to that exit or null
      */
     public Path get_exit(String dir){
-        for(Path path: connected_places){
+        for(Path path: paths){
             if(path.get_exit(this).equals(dir)) return path;
         }
         return null;
@@ -255,7 +255,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public HashSet<Path> get_paths(Place place){
         HashSet<Path> ret = new HashSet<Path>();
-        for(Path path: connected_places)
+        for(Path path: paths)
             if(path.has_place(place)) ret.add(path);            
         return ret;
     }
@@ -271,8 +271,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         boolean ok = false;
         for(Path path: get_paths(other)){
             if(path.get_exit(this).equals(dir1) && path.get_exit(other).equals(dir2)){
-                connected_places.remove(path);
-                other.connected_places.remove(path);
+                paths.remove(path);
+                other.paths.remove(path);
                 ok = true;
             }
         }
@@ -284,8 +284,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param path 
      */
     public void remove_path(Path path){
-        connected_places.remove(path);
-        path.get_other_place(this).connected_places.remove(path);
+        paths.remove(path);
+        path.get_other_place(this).paths.remove(path);
     }
     
     /**
@@ -306,7 +306,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         String exit_this = path.get_exit(this);
         
         // check if exit is already connected with path
-        for(Path p: connected_places){
+        for(Path p: paths){
             if(p.get_exit(this).equals(exit_this)){
                 exit_occupied = true;
                 break;
@@ -314,7 +314,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         }
         if(!exit_occupied){
             exit_this = path.get_exit(other);
-            for(Path p: other.connected_places){
+            for(Path p: other.paths){
                 if(p.get_exit(other).equals(exit_this)){
                     exit_occupied = true;
                     break;
@@ -322,8 +322,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
             }
         
             if(!exit_occupied){
-                connected_places.add(path);
-                other.connected_places.add(path);
+                paths.add(path);
+                other.paths.add(path);
             }
         }
         return !exit_occupied;
@@ -334,7 +334,19 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return all paths
      */
     public HashSet<Path> get_paths(){
-        return connected_places;
+        return paths;
+    }
+    
+    /**
+     * Gets tha path that is connected to dir or null
+     * @param dir
+     * @return 
+     */
+    public Path get_path_to(String dir){
+        for(Path pa: paths){
+            if(pa.get_exit(this).equals(dir)) return pa;
+        }
+        return null;
     }
     
     /**
@@ -423,7 +435,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     void remove_connections() {
         // remove paths (buffer, becaus connected_places will be modified
-        HashSet<Path> cp_buffer = (HashSet<Path>) connected_places.clone();
+        HashSet<Path> cp_buffer = (HashSet<Path>) paths.clone();
         for(Path p: cp_buffer) p.remove();
         // remove connection to sub-areas (children / parents)
         for(Place pl: children) pl.parents.remove(this);

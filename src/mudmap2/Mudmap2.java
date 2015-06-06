@@ -42,8 +42,8 @@ public class Mudmap2 {
     static Mainwindow mwin;
     
     static final int version_major = 2;
-    static final int version_minor = 1;
-    static final int version_build = 1;
+    static final int version_minor = 2;
+    static final int version_build = 0;
     static final String version_state = "";
     
     static boolean portable_mode = false;
@@ -169,7 +169,8 @@ public class Mudmap2 {
      * @return 
      */
     public static boolean can_paste(int x, int y, Layer layer){
-        if(copy_places != null && copy_place_locations != null && layer != null){
+        if(copy_places == null || copy_places.isEmpty()) return false;
+        if(copy_place_locations != null && layer != null){
             for(Pair<Integer, Integer> coordinate: copy_place_locations)
                 if(layer.exist(x + coordinate.first, y + coordinate.second)) return false;
         }
