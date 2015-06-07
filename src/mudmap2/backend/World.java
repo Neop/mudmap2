@@ -123,6 +123,8 @@ public class World implements BreadthSearchGraph {
      * Loads the world
      */
     private void load_world() throws WorldReadException{
+        System.out.println("Loading world: " + file);
+        
         WorldFileMM1 worldfile = new WorldFileMM1(this);
         worldfile.readFile(file);
     }
