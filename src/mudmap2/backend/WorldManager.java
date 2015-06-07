@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -76,18 +75,19 @@ public class WorldManager {
                     if(line.charAt(0) == 'n'){ // world name
                         // save world if found
                         if(!name.isEmpty() && !file.isEmpty()){
-                            if(!available_worlds.containsKey(name)){
-                                if(Paths.file_exists(file)) available_worlds.put(name, file);
-                                else if(Paths.file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(name, Paths.get_worlds_dir() + file);
+                            if(name != null && file != null && !available_worlds.containsKey(file)){
+                                if(Paths.file_exists(file)) available_worlds.put(file, name);
+                                else if(Paths.file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(Paths.get_worlds_dir() + file, name);
                             }
                             relative_path = false;
-                            name = new String();
                             file = new String();
                         }
-                        name = line.substring(2).trim();
-                    } else if(line.charAt(0) == 'f' && !relative_path) // file name
+                        if(line.length() > 2)
+                            name = line.substring(2).trim();
+                        else name = null;
+                    } else if(line.charAt(0) == 'f' && !relative_path){ // file name
                         file = line.substring(2).trim();
-                    else if(line.charAt(0) == 'g'){ // file name (new, relative format)
+                    } else if(line.charAt(0) == 'g'){ // file name (new, relative format)
                         file = line.substring(2).trim();
                         relative_path = true;
                     }
@@ -97,13 +97,17 @@ public class WorldManager {
             }
             
             // save last found world
-            if(!available_worlds.containsKey(name) && Paths.file_exists(file)) available_worlds.put(name, file);
+            if(name != null && file != null && !available_worlds.containsKey(file)){
+                if(Paths.file_exists(file)) available_worlds.put(file, name);
+                else if(Paths.file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(Paths.get_worlds_dir() + file, name);
+            }
             
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
-            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
-        
+    }
+    
+    public static void find_worlds(){
         // read from directory
         // get file list
         File dir = new File(Paths.get_worlds_dir());
@@ -113,9 +117,11 @@ public class WorldManager {
             // find world files in file list
             for(File file : fileList){
                 // exclude meta and backup files
-                if(!file.getName().endsWith("_meta") 
+                if(!file.getName().equals("worlds")
+                        && !file.getName().endsWith("_meta") 
                         && !file.getName().endsWith(".backup") 
-                        && !file.getName().endsWith(".bak")){
+                        && !file.getName().endsWith(".bak")
+                        && file.isFile() && file.canRead()){
                     try {
                         BufferedReader reader = new BufferedReader(new FileReader(file));
                         try {
@@ -125,8 +131,8 @@ public class WorldManager {
                                 if(line.trim().startsWith("wname")){
                                     // world name found in file, save it
                                     String name = line.trim().substring(6).trim();
-                                    if(!available_worlds.containsKey(name))
-                                        available_worlds.put(name, file.toString());
+                                    if(!available_worlds.containsKey(file.getPath()))
+                                        available_worlds.put(file.getPath(), name);
                                 }
                             }
                         } catch (IOException ex) {
@@ -156,9 +162,9 @@ public class WorldManager {
             
             for(Entry<String, String> w: available_worlds.entrySet()){
                 // check whether the file name in file equals the name in the list
-                if(read_world_name(w.getValue()).equals(w.getKey())){
-                    outstream.println("n " + w.getKey());
-                    String w_file = w.getValue();
+                if(read_world_name(w.getKey()).equals(w.getValue())){
+                    outstream.println("n " + w.getValue());
+                    String w_file = w.getKey();
                     outstream.println("f " + w_file);
                     if(w_file.startsWith(Paths.get_worlds_dir())){
                         w_file = w_file.substring(Paths.get_worlds_dir().length());
@@ -183,7 +189,9 @@ public class WorldManager {
      * @return filename of the world
      */
     public static String get_world_file(String name){
-        return available_worlds.get(name);
+        for(Entry<String, String> e: available_worlds.entrySet())
+            if(e.getValue().equals(name)) return e.getKey();
+        return null;
     }
     
     /**
@@ -207,36 +215,41 @@ public class WorldManager {
      * Gets the names of all found worlds
      * @return list of world names
      */
-    public static Set<String> get_world_list(){
-        return available_worlds.keySet();
+    public static HashMap<String, String> get_worlds(){
+        return available_worlds;
     }
     
     /**
      * Creates a new world and adds it to the available worlds list
      * @param name name of the world
      * @param file file of the world
+     * @return 
      * @throws java.lang.Exception
      */
-    public static void create_world(String name, String file) throws Exception{
+    public static World create_world(String name, String file) throws Exception{
         // check if name already exists
-        if(!available_worlds.containsKey(name)){
+        if(!available_worlds.containsKey(file)){
             // check if the file already exists
             file = file.replaceAll("\\s", "_");
             if(!Paths.file_exists(file)){
                 loaded_worlds.put(file, new World(file, name));
-                available_worlds.put(name, file);
+                available_worlds.put(file, name);
             } else throw new Exception("File \"" + file + "\" already exists");
-        } else throw new Exception("A world with name \"" + name + "\" already exists");
+        } else throw new Exception("File \"" + file + "\" is already in list");
         
-        loaded_worlds.put(file, new World(file, name));
+        World ret;
+        loaded_worlds.put(file, ret = new World(file, name));
+        
+        return ret;
     }
     
     /**
      * Creates a new world and adds it to the available worlds list
      * @param name world name
+     * @return 
      * @throws java.lang.Exception
      */
-    public static void create_world(String name) throws Exception{
+    public static World create_world(String name) throws Exception{
         String path = Paths.get_worlds_dir();
         String file = name;
         
@@ -245,10 +258,10 @@ public class WorldManager {
         for(int num = 0; !file_ok; ++num){
             file_ok = true;
             file = (num > 0 ? "_" + num : "");
-            for(String s: available_worlds.values()) if(s.toLowerCase().equals((path + name + file).toLowerCase())) file_ok = false;
+            for(String s: available_worlds.keySet()) if(s.toLowerCase().equals((path + name + file).toLowerCase())) file_ok = false;
         }
         
-        create_world(name, path + name + file);
+        return create_world(name, path + name + file);
     }
     
     /**
@@ -259,24 +272,22 @@ public class WorldManager {
      */
     public static String add_world(String file) throws Exception{
         String name = read_world_name(file);
-        if(!available_worlds.containsKey(name)){
-            available_worlds.put(name, file);
+        if(name != null && !available_worlds.containsKey(file)){
+            available_worlds.put(file, name);
         } else throw new Exception("Can't add world, name is already in list");
         return name;
     }
     
     /**
-     * Deletes a worl, this can not be undone
-     * @param name 
+     * Deletes a world, this can not be undone
+     * @param file
      */
-    public static void delete_world(String name){
-        String file = get_world_file(name);
-        
+    public static void delete_world(String file){
         if(file != null && !file.isEmpty()){
             if(loaded_worlds.containsKey(file))
-                JOptionPane.showMessageDialog(null, "Can't delete world \"" + name + "\", it is currently loaded", "Delete world", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Can't delete world \"" + file + "\", it is currently loaded", "Delete world", JOptionPane.INFORMATION_MESSAGE);
             else {
-                int ret = JOptionPane.showConfirmDialog(null, "Do you want to delete \"" + name + "\"", "Delete world", JOptionPane.YES_NO_OPTION);
+                int ret = JOptionPane.showConfirmDialog(null, "Do you want to delete \"" + file + "\"", "Delete world", JOptionPane.YES_NO_OPTION);
                 if(ret == JOptionPane.YES_OPTION){
                     // delete world file
                     try {
@@ -302,7 +313,7 @@ public class WorldManager {
      * @return world name or ""
      */
     public static String read_world_name(String file){
-        String ret = "";
+        String ret = null;
         
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));

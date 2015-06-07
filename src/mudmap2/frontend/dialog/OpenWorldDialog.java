@@ -71,8 +71,8 @@ public class OpenWorldDialog implements ActionListener{
         if(ret == JFileChooser.APPROVE_OPTION){
             try {
                 String file = filechooser.getSelectedFile().toString();
-                String name = WorldManager.add_world(file);
-                parent.open_world(name);
+                WorldManager.add_world(file);
+                parent.open_world(file);
             } catch (Exception ex) {
                 Logger.getLogger(OpenWorldDialog.class.getName()).log(Level.WARNING, null, ex);
                 JOptionPane.showMessageDialog(parent, ex.getMessage(), "Adding world", JOptionPane.ERROR_MESSAGE);

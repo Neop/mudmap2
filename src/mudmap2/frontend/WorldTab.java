@@ -149,27 +149,27 @@ public class WorldTab extends JPanel {
     
     /**
      * Constructs the world tab, opens the world if necessary
-     * @param _parent parent frame
-     * @param _world_name name of the world
-     * @param _passive if true, everything, that modifies the world, is disabled
+     * @param parent parent frame
+     * @param world_file file of the world
+     * @param passive if true, everything, that modifies the world, is disabled
      */
-    public WorldTab(JFrame _parent, String _world_name, boolean _passive){
-        parent = _parent;
-        world = WorldManager.get_world(WorldManager.get_world_file(_world_name));
-        passive = _passive;
+    public WorldTab(JFrame parent, String world_file, boolean passive){
+        this.parent = parent;
+        world = WorldManager.get_world(world_file);
+        this.passive = passive;
         create();
     }
     
     /**
      * Constructs the world tab, opens the world if necessary
-     * @param _parent parent frame
-     * @param _world world
-     * @param _passive if true, everything, that modifies the world, is disabled
+     * @param parent parent frame
+     * @param world world
+     * @param passive if true, everything, that modifies the world, is disabled
      */
-    public WorldTab(JFrame _parent, World _world, boolean _passive){
-        parent = _parent;
-        world = _world;
-        passive = _passive;
+    public WorldTab(JFrame parent, World world, boolean passive){
+        this.parent = parent;
+        this.world = world;
+        this.passive = passive;
         create();
     }
     

@@ -1,3 +1,9 @@
+2.2.3
+- WorldManager handles worlds by their file name
+- world list shows file names
+- automatic search for worlds now has to be started manually
+- fixed bug in place id calculation
+
 2.2.2
 - more verbose on errors
 

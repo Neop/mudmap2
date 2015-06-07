@@ -57,7 +57,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         super(pos_x, pos_y, l);
         name = _name;
         id = _id;
-        if(_id >= next_id) next_id++;
+        if(_id >= next_id) next_id = _id + 1;
         
         initialize();
     }

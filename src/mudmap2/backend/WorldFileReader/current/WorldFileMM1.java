@@ -202,9 +202,9 @@ public class WorldFileMM1 implements WorldFile {
             }
             
         } catch (FileNotFoundException ex) {
-            System.out.println("Could not open world file \"" + Paths.get_available_worlds_file() + "\", file not found");
+            System.out.println("Could not open world file \"" + file + "\", file not found");
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
-            JOptionPane.showMessageDialog(null, "Could not open world file \"" + Paths.get_available_worlds_file() + "\", file not found", "Loading world", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Could not open world file \"" + file + "\", file not found", "Loading world", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -218,7 +218,7 @@ public class WorldFileMM1 implements WorldFile {
         version_mismatch = (file_major > reader_major || (file_major == reader_major && (file_minor > reader_minor)));
         if(file_major > reader_major){
             int ret = JOptionPane.showConfirmDialog(null, 
-                    "World file version is greater than the reader version. Please update MUD Map. Continuing might cause data loss?", 
+                    "World file version is greater than the reader version. Please update MUD Map. Continuing might cause data loss.", 
                     "Loading world", JOptionPane.OK_CANCEL_OPTION);
             if(ret == JOptionPane.CANCEL_OPTION) throw new WorldReadException();
         }

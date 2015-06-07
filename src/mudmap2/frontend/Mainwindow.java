@@ -47,6 +47,7 @@ import java.net.URL;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -142,9 +143,9 @@ public final class Mainwindow extends JFrame {
                     // create a new world
                     if(WorldManager.get_world_file(ret) == null) // no world with that name yet
                         try {
-                        WorldManager.create_world(ret);
+                        World w = WorldManager.create_world(ret);
                         available_worlds_tab.update();
-                        open_world(ret);
+                        open_world(w.get_file());
                     } catch (Exception ex) {
                         Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
                         JOptionPane.showMessageDialog((Component) arg0.getSource(), "Couldn't create world \"" + ret + "\":\n" + ex.getMessage());
@@ -203,6 +204,7 @@ public final class Mainwindow extends JFrame {
                 WorldTab tab = get_selected_tab();
                 if(tab != null){
                     (new EditWorldDialog(tab.parent, tab.get_world())).setVisible(true);
+                    available_worlds_tab.update();
                 }
             }
         });
@@ -307,19 +309,20 @@ public final class Mainwindow extends JFrame {
     
     /**
      * shows the tab of the world, opens the world if necessary
-     * @param world_name world name
+     * @param file world file
      */
-    public void open_world(String world_name){
+    public void open_world(String file){
         setMinimumSize(new Dimension(500, 400));
         
-        if(!world_tabs.containsKey(world_name)){ 
+        if(!world_tabs.containsKey(file)){ 
             // open new tab
-            WorldTab tab = new WorldTab(this, world_name, false);
-            world_tabs.put(world_name, tab);
+            WorldTab tab = new WorldTab(this, file, false);
+            world_tabs.put(file, tab);
             tabbed_pane.addTab(tab.get_world().get_name(), tab);
         }
         // change current tab
-        tabbed_pane.setSelectedComponent(world_tabs.get(world_name));
+        tabbed_pane.setSelectedComponent(world_tabs.get(file));
+        available_worlds_tab.update();
     }
     
     /**
@@ -436,8 +439,8 @@ public final class Mainwindow extends JFrame {
          */
         public void update(){
             // get and sort world names (can't use String array here :C)
-            Object[] worlds = WorldManager.get_world_list().toArray();
-            Arrays.sort(worlds, Collator.getInstance());
+            /*Object[] worlds = WorldManager.get_world_list().toArray();
+            Arrays.sort(worlds, Collator.getInstance());*/
             
             // reset previously created tab
             removeAll();
@@ -446,12 +449,13 @@ public final class Mainwindow extends JFrame {
             GridBagConstraints constraints = new GridBagConstraints();
             constraints.insets = new Insets(2, 2, 2, 2);
             
-            for(final Object world_name: worlds){
-                JButton b = new JButton((String) world_name);
+            //for(final Object world_name: worlds){
+            for(final Entry<String, String> world: WorldManager.get_worlds().entrySet()){
+                JButton b = new JButton(world.getValue() + " (" + world.getKey() + ")");
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        mwin.open_world((String) world_name);
+                        mwin.open_world((String) world.getKey());
                     }
                 });
                 constraints.gridx = 0;
@@ -464,13 +468,27 @@ public final class Mainwindow extends JFrame {
                 r.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        WorldManager.delete_world((String) world_name);
+                        WorldManager.delete_world((String) world.getKey());
                     }
                 });
                 constraints.gridx = 1;
                 constraints.weightx = 0.0;
                 add(r, constraints);
             }
+            
+            constraints.gridx = 0;
+            constraints.gridy++;
+            constraints.gridwidth = 2;
+            JButton search = new JButton("Search for worlds");
+            add(search, constraints);
+            search.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    WorldManager.find_worlds();
+                    update();
+                }
+            });
         }
     }
     
