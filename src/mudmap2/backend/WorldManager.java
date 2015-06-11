@@ -85,9 +85,9 @@ public class WorldManager {
                         if(line.length() > 2)
                             name = line.substring(2).trim();
                         else name = null;
-                    } else if(line.charAt(0) == 'f' && !relative_path){ // file name
+                    } else if(line.charAt(0) == 'f' && !relative_path && line.length() > 3){ // file name
                         file = line.substring(2).trim();
-                    } else if(line.charAt(0) == 'g'){ // file name (new, relative format)
+                    } else if(line.charAt(0) == 'g' && line.length() > 3){ // file name (new, relative format)
                         file = line.substring(2).trim();
                         relative_path = true;
                     }
@@ -162,7 +162,8 @@ public class WorldManager {
             
             for(Entry<String, String> w: available_worlds.entrySet()){
                 // check whether the file name in file equals the name in the list
-                if(read_world_name(w.getKey()).equals(w.getValue())){
+                String fw = read_world_name(w.getKey());
+                if(fw != null && fw.equals(w.getValue())){
                     outstream.println("n " + w.getValue());
                     String w_file = w.getKey();
                     outstream.println("f " + w_file);
@@ -232,6 +233,10 @@ public class WorldManager {
             // check if the file already exists
             file = file.replaceAll("\\s", "_");
             if(!Paths.file_exists(file)){
+                
+                System.out.println("Name: " + name);
+                System.out.println("File: " + file);
+                
                 loaded_worlds.put(file, new World(file, name));
                 available_worlds.put(file, name);
             } else throw new Exception("File \"" + file + "\" already exists");
