@@ -44,8 +44,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.text.Collator;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -87,11 +85,7 @@ public final class Mainwindow extends JFrame {
     HashMap<String, WorldTab> world_tabs;
     
     // GUI elements
-    JMenuBar menu_bar;
-    JMenu menu_file, menu_edit, menu_help;
-    JMenuItem menu_file_new, menu_file_open, menu_file_save, menu_file_save_as_image, menu_file_quit;
-    JMenuItem menu_edit_add_area, menu_edit_set_home_position, menu_edit_goto_home_position, menu_edit_edit_world, menu_edit_list_places, menu_edit_curved_paths, menu_edit_path_colors;
-    JMenuItem menu_help_help, menu_help_about;
+    JCheckBoxMenuItem menu_edit_curved_paths, menu_edit_show_cursor;
     
     JTabbedPane tabbed_pane;
     AvailableWorldsTab available_worlds_tab;
@@ -123,17 +117,17 @@ public final class Mainwindow extends JFrame {
         });
         
         // Add GUI components
-        menu_bar = new JMenuBar();
+        JMenuBar menu_bar = new JMenuBar();
         add(menu_bar, BorderLayout.NORTH);
         
-        menu_file = new JMenu("File");
+        JMenu menu_file = new JMenu("File");
         menu_bar.add(menu_file);
-        menu_edit = new JMenu("World"); // Edit renamed to World
+        JMenu menu_edit = new JMenu("World"); // Edit renamed to World
         menu_bar.add(menu_edit);
-        menu_help = new JMenu("Help");
+        JMenu menu_help = new JMenu("Help");
         menu_bar.add(menu_help);
         
-        menu_file_new = new JMenuItem("New");
+        JMenuItem menu_file_new = new JMenuItem("New");
         menu_file.add(menu_file_new);
         menu_file_new.addActionListener(new ActionListener() {
             @Override
@@ -155,12 +149,12 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_file_open = new JMenuItem("Open");
+        JMenuItem menu_file_open = new JMenuItem("Open");
         menu_file.add(menu_file_open);
         menu_file_open.addActionListener(new OpenWorldDialog(this));
         
         menu_file.addSeparator();
-        menu_file_save = new JMenuItem("Save");
+        JMenuItem menu_file_save = new JMenuItem("Save");
         menu_file_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         menu_file.add(menu_file_save);
         menu_file_save.addActionListener(new ActionListener() {
@@ -171,8 +165,7 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        // TODO: implement save as image
-        menu_file_save_as_image = new JMenuItem("Export as image");
+        JMenuItem menu_file_save_as_image = new JMenuItem("Export as image");
         menu_file.add(menu_file_save_as_image);
         menu_file_save_as_image.addActionListener(new ActionListener() {
 
@@ -187,7 +180,7 @@ public final class Mainwindow extends JFrame {
         });
         
         menu_file.addSeparator();
-        menu_file_quit = new JMenuItem("Quit");
+        JMenuItem menu_file_quit = new JMenuItem("Quit");
         menu_file.add(menu_file_quit);
         menu_file_quit.addActionListener(new ActionListener() {
             @Override
@@ -196,7 +189,7 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_edit_edit_world = new JMenuItem("Edit world");
+        JMenuItem menu_edit_edit_world = new JMenuItem("Edit world");
         menu_edit.add(menu_edit_edit_world);
         menu_edit_edit_world.addActionListener(new ActionListener() {
             @Override
@@ -209,7 +202,7 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_edit_path_colors = new JMenuItem("Path colors");
+        JMenuItem menu_edit_path_colors = new JMenuItem("Path colors");
         menu_edit.add(menu_edit_path_colors);
         menu_edit_path_colors.addActionListener(new ActionListener() {
 
@@ -223,7 +216,7 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_edit_add_area = new JMenuItem("Add area");
+        JMenuItem menu_edit_add_area = new JMenuItem("Add area");
         menu_edit.add(menu_edit_add_area);
         menu_edit_add_area.addActionListener(new ActionListener() {
             @Override
@@ -235,7 +228,7 @@ public final class Mainwindow extends JFrame {
         
         menu_edit.add(new JSeparator());
         
-        menu_edit_set_home_position = new JMenuItem("Set home position");
+        JMenuItem menu_edit_set_home_position = new JMenuItem("Set home position");
         menu_edit.add(menu_edit_set_home_position);
         menu_edit_set_home_position.addActionListener(new ActionListener() {
             @Override
@@ -244,7 +237,7 @@ public final class Mainwindow extends JFrame {
                 if(wt != null) wt.set_home();
             }
         });
-        menu_edit_goto_home_position = new JMenuItem("Go to home position");
+        JMenuItem menu_edit_goto_home_position = new JMenuItem("Go to home position");
         menu_edit.add(menu_edit_goto_home_position);
         menu_edit_goto_home_position.addActionListener(new ActionListener() {
             @Override
@@ -256,7 +249,7 @@ public final class Mainwindow extends JFrame {
         
         menu_edit.add(new JSeparator());
         
-        menu_edit_list_places = new JMenuItem("List places");
+        JMenuItem menu_edit_list_places = new JMenuItem("List places");
         menu_edit.add(menu_edit_list_places);
         menu_edit_list_places.addActionListener(new ActionListener(){
             @Override
@@ -283,7 +276,22 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_help_help = new JMenuItem("Help (online)");
+        menu_edit_show_cursor = new JCheckBoxMenuItem("Show place cursor");
+        menu_edit.add(menu_edit_show_cursor);
+        menu_edit_show_cursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
+        menu_edit_show_cursor.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                WorldTab cur_tab = get_selected_tab();
+                if(cur_tab != null){
+                    cur_tab.set_cursor_enabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                    cur_tab.repaint();
+                }
+            }
+        });
+        
+        JMenuItem menu_help_help = new JMenuItem("Help (online)");
         menu_help.add(menu_help_help);
         menu_help_help.addActionListener(new ActionListener() {
             @Override
@@ -292,7 +300,7 @@ public final class Mainwindow extends JFrame {
             }
         });
         
-        menu_help_about = new JMenuItem("About");
+        JMenuItem menu_help_about = new JMenuItem("About");
         menu_help.add(menu_help_about);
         menu_help_about.addActionListener((ActionListener) new AboutDialog(this));
         
@@ -303,6 +311,14 @@ public final class Mainwindow extends JFrame {
         tabbed_pane = new JTabbedPane();
         add(tabbed_pane);
         tabbed_pane.addTab("Available worlds", available_worlds_tab = new AvailableWorldsTab(this));
+        tabbed_pane.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent ce) {
+                WorldTab cur_tab = get_selected_tab();
+                if(cur_tab != null) cur_tab.update_cursor_enabled();
+            }
+        });
         
         setVisible(true);
     }
@@ -322,7 +338,16 @@ public final class Mainwindow extends JFrame {
         }
         // change current tab
         tabbed_pane.setSelectedComponent(world_tabs.get(file));
-        available_worlds_tab.update();
+        
+        WorldTab cur_tab = get_selected_tab();
+        if(cur_tab != null){
+            available_worlds_tab.update();
+
+            System.out.println("open");
+            if(menu_edit_show_cursor != null){
+                menu_edit_show_cursor.setState(cur_tab.get_cursor_enabled());
+            }
+        }
     }
     
     /**
@@ -350,6 +375,10 @@ public final class Mainwindow extends JFrame {
             if(ret instanceof WorldTab) return (WorldTab) ret;
         }
         return null;
+    }
+    
+    public JCheckBoxMenuItem get_mi_show_place_selection(){
+        return menu_edit_show_cursor;
     }
     
     /**

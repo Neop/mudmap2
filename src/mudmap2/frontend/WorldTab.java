@@ -55,6 +55,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -461,24 +462,35 @@ public class WorldTab extends JPanel {
         }
     }
     
+    public void update_cursor_enabled(){
+        /*if(update_check_button){
+            JCheckBoxMenuItem mi_show_place_selection = ((Mainwindow) parent).get_mi_show_place_selection();
+            if(mi_show_place_selection != null){
+                mi_show_place_selection.setState(get_cursor_enabled());
+                mi_show_place_selection.setEnabled(!force_selection);
+            }
+        }*/
+        
+        update_infobar();
+        repaint();
+    }
+
     /**
      * Sets the cursor state (if true, the selection will be shown)
      * @param b 
      */
     public void set_cursor_enabled(boolean b){
         cursor_enabled = b || force_selection;
-        update_infobar();
-        repaint();
+        update_cursor_enabled();
     }
     
     /**
      * Toggles the cursor enabled state
      */
-    public void set_cursor_toggle(){
+    private void set_cursor_toggle(){
         if(!force_selection){
             cursor_enabled = !cursor_enabled;
-            update_infobar();
-            repaint();
+            update_cursor_enabled();
         }
     }
     
@@ -491,20 +503,12 @@ public class WorldTab extends JPanel {
     }
     
     /**
-     * Enables or disables the cursor
-     * @param b
-     */
-    private void set_cursor(boolean b){
-        cursor_enabled = b || force_selection;
-        repaint();
-    }
-    
-    /**
      * Forces the cursor to be enabled, if true
      * @param b 
      */
     public void set_cursor_forced(boolean b){
-        if(force_selection = b) set_cursor(true);
+        if(force_selection = b) set_cursor_enabled(true);
+        update_cursor_enabled();
     }
     
     /**
