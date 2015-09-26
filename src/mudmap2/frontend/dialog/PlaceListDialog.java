@@ -28,9 +28,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -48,25 +50,25 @@ public class PlaceListDialog extends ActionDialog{
     ArrayList<Place> places;
     
     /**
-     * constructs a dialog, which lists all places of a world
-     * @param _parent 
+     * constructs a dialog that lists all places of a world
+     * @param parent 
      */
-    public PlaceListDialog(WorldTab _parent, boolean modal){
-        super(_parent.get_parent(), "Place list - " + _parent.get_world().get_name(), modal);
-        parent = _parent;
+    public PlaceListDialog(WorldTab parent, boolean modal){
+        super(parent.get_parent(), "Place list - " + parent.get_world().get_name(), modal);
+        this.parent = parent;
         // get places later, in case something changes
         //places = new ArrayList<Place>(parent.get_world().get_places());
     }
   
     /**
-     * constructs a dialog, which lists all places in _places
-     * @param _parent
-     * @param _places places to be shown
+     * constructs a dialog that lists all places
+     * @param parent
+     * @param places places to be shown
      */
-    public PlaceListDialog(WorldTab _parent, ArrayList<Place> _places, boolean modal){
-        super(_parent.get_parent(), "Place list - " + _parent.get_world().get_name(), modal);
-        parent = _parent;
-        places = _places;
+    public PlaceListDialog(WorldTab parent, ArrayList<Place> places, boolean modal){
+        super(parent.get_parent(), "Place list - " + parent.get_world().get_name(), modal);
+        this.parent = parent;
+        this.places = places;
     }
     
     @Override
@@ -82,7 +84,7 @@ public class PlaceListDialog extends ActionDialog{
         // show places list
         constraints.weightx = constraints.weighty = 1.0;
         constraints.fill = GridBagConstraints.BOTH;
-        JList list = new JList(places.toArray());
+        final JList<Place> list = new JList<Place>(places.toArray(new Place[places.size()]));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         add(new JScrollPane(list), constraints);
         list.addListSelectionListener(new ListSelectionListener() {
@@ -97,6 +99,25 @@ public class PlaceListDialog extends ActionDialog{
         constraints.weighty = 0.0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridy = 1;
+        
+        JTextField text_search = new JTextField("Search");
+        text_search.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                JTextField tf = (JTextField) ae.getSource();
+                String search_str = tf.getText().toLowerCase();
+                
+                LinkedList<Place> places_found = new LinkedList<Place>();
+                for(Place pl: places){
+                    if(pl.get_name().toLowerCase().contains(search_str)) places_found.add(pl);
+                }
+                
+                list.setListData((Place[]) places_found.toArray(new Place[places_found.size()]));
+            }
+        });
+        add(text_search, constraints);
+        constraints.gridy = 2;
+        
         JButton button_close = new JButton("Close");
         add(button_close, constraints);
         getRootPane().setDefaultButton(button_close);
