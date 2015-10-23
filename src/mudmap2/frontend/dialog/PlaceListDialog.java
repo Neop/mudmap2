@@ -54,10 +54,10 @@ public class PlaceListDialog extends ActionDialog{
      * @param parent 
      */
     public PlaceListDialog(WorldTab parent, boolean modal){
-        super(parent.get_parent(), "Place list - " + parent.get_world().get_name(), modal);
+        super(parent.get_parent(), "Place list - " + parent.getWorld().getName(), modal);
         this.parent = parent;
         // get places later, in case something changes
-        //places = new ArrayList<Place>(parent.get_world().get_places());
+        //places = new ArrayList<Place>(parent.getWorld().getPlaces());
     }
   
     /**
@@ -66,14 +66,14 @@ public class PlaceListDialog extends ActionDialog{
      * @param places places to be shown
      */
     public PlaceListDialog(WorldTab parent, ArrayList<Place> places, boolean modal){
-        super(parent.get_parent(), "Place list - " + parent.get_world().get_name(), modal);
+        super(parent.get_parent(), "Place list - " + parent.getWorld().getName(), modal);
         this.parent = parent;
         this.places = places;
     }
     
     @Override
     void create() {
-        if(places == null) places = new ArrayList<Place>(parent.get_world().get_places());
+        if(places == null) places = new ArrayList<Place>(parent.getWorld().getPlaces());
         
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -91,7 +91,7 @@ public class PlaceListDialog extends ActionDialog{
             @Override
             public void valueChanged(ListSelectionEvent arg0) {
                 Place selection = (Place) (((JList) arg0.getSource()).getSelectedValue());
-                if(selection != null) parent.push_position(selection.get_coordinate());
+                if(selection != null) parent.pushPosition(selection.getCoordinate());
             }
         });
         
@@ -109,7 +109,7 @@ public class PlaceListDialog extends ActionDialog{
                 
                 LinkedList<Place> places_found = new LinkedList<Place>();
                 for(Place pl: places){
-                    if(pl.get_name().toLowerCase().contains(search_str)) places_found.add(pl);
+                    if(pl.getName().toLowerCase().contains(search_str)) places_found.add(pl);
                 }
                 
                 list.setListData((Place[]) places_found.toArray(new Place[places_found.size()]));

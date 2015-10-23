@@ -29,5 +29,5 @@ import mudmap2.backend.Place;
  * @author Neop
  */
 public interface BreadthSearchGraph {
-    Place breadth_search(Place start, Place end);
+    Place breadthSearch(Place start, Place end);
 }

@@ -69,11 +69,11 @@ public class ExportImageDialog extends ActionDialog {
     
     @Override
     void create() {
-        Layer layer = worldtab.get_world().get_layer(worldtab.get_cur_position().get_layer());
-        layer_x_min = x_min = layer.get_x_min();
-        layer_x_max = x_max = layer.get_x_max();
-        layer_y_min = y_min = layer.get_y_min();
-        layer_y_max = y_max = layer.get_y_max();
+        Layer layer = worldtab.getWorld().getLayer(worldtab.getCurPosition().getLayer());
+        layer_x_min = x_min = layer.getXMin();
+        layer_x_max = x_max = layer.getXMax();
+        layer_y_min = y_min = layer.getYMin();
+        layer_y_max = y_max = layer.getYMax();
         
         setLayout(new GridBagLayout());
         
@@ -90,7 +90,7 @@ public class ExportImageDialog extends ActionDialog {
         add(rb_layer = new JRadioButton("everything on layer"), constraints);
         ++constraints.gridx;
         add(rb_selection = new JRadioButton("selection"), constraints);
-        if(worldtab.place_group_get_selection().isEmpty()) rb_selection.setEnabled(false);
+        if(worldtab.placeGroupGetSelection().isEmpty()) rb_selection.setEnabled(false);
         ++constraints.gridx;
         add(rb_each_layer = new JRadioButton("each layer"), constraints);
         
@@ -106,13 +106,13 @@ public class ExportImageDialog extends ActionDialog {
         add(new JLabel("Tile size:"), constraints);
         ++constraints.gridx;
         
-        spinner_tile_size = new JSpinner(new SpinnerNumberModel((int) worldtab.get_tile_size(), WorldTab.tile_size_min, WorldTab.tile_size_max, 1));
+        spinner_tile_size = new JSpinner(new SpinnerNumberModel((int) worldtab.getTileSize(), WorldTab.tile_size_min, WorldTab.tile_size_max, 1));
         add(spinner_tile_size, constraints);
         spinner_tile_size.addChangeListener(new ChangeListener() {
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                update_image_width();
+                updateImageWidth();
             }
         });
         /*
@@ -121,7 +121,7 @@ public class ExportImageDialog extends ActionDialog {
             public void propertyChange(PropertyChangeEvent e) {
                 JRadioButton radiobutton = (JRadioButton) e.getSource();
                 boolean enable = !(radiobutton).isSelected();
-                if(!enable) spinner_tile_size.setValue(worldtab.get_tile_size());
+                if(!enable) spinner_tile_size.setValue(worldtab.getTileSize());
                 
                 spinner_tile_size.setEnabled(enable);
             }
@@ -138,7 +138,7 @@ public class ExportImageDialog extends ActionDialog {
         constraints.gridwidth = GridBagConstraints.REMAINDER;
         
         add(label_image_width = new JLabel(), constraints);
-        update_image_width();
+        updateImageWidth();
         
         constraints.gridx = 1;
         constraints.gridwidth = 2;
@@ -201,10 +201,10 @@ public class ExportImageDialog extends ActionDialog {
 
             if(!rb_each_layer.isSelected()){ // draw current layer
                 file.createNewFile();         
-                draw_layer(file, center_position);
+                drawLayer(file, center_position);
             } else { // draw each layer
                 int ret = JOptionPane.showConfirmDialog(parent, 
-                        "Do you want to export " + worldtab.get_world().get_layers().size() + " layers?", "Export layer to image",
+                        "Do you want to export " + worldtab.getWorld().getLayers().size() + " layers?", "Export layer to image",
                         JOptionPane.OK_CANCEL_OPTION);
                 
                 if(ret == JOptionPane.OK_OPTION){
@@ -212,20 +212,20 @@ public class ExportImageDialog extends ActionDialog {
                     filename = filename.substring(0, filename.lastIndexOf('.'));
 
                     int num = 0;
-                    for(Layer layer: worldtab.get_world().get_layers()){
-                        worldtab.show_message("Exporting layer " + ++num + " of " + worldtab.get_world().get_layers().size());
+                    for(Layer layer: worldtab.getWorld().getLayers()){
+                        worldtab.showMessage("Exporting layer " + ++num + " of " + worldtab.getWorld().getLayers().size());
                         
-                        center_position.set_layer(layer.get_id());
-                        x_min = layer.get_x_min();
-                        x_max = layer.get_x_max();
-                        y_min = layer.get_y_min();
-                        y_max = layer.get_y_max();
-                        update_image_width();
+                        center_position.setLayer(layer.getId());
+                        x_min = layer.getXMin();
+                        x_max = layer.getXMax();
+                        y_min = layer.getYMin();
+                        y_max = layer.getYMax();
+                        updateImageWidth();
                         
-                        file = new File(filename + layer.get_id() + ".png");
+                        file = new File(filename + layer.getId() + ".png");
                         file.createNewFile();
                         
-                        draw_layer(file, center_position);
+                        drawLayer(file, center_position);
                     }
                 }
             }
@@ -239,7 +239,7 @@ public class ExportImageDialog extends ActionDialog {
         dispose();
     }
     
-    void draw_layer(File file, WorldCoordinate center) throws IOException{
+    void drawLayer(File file, WorldCoordinate center) throws IOException{
         if(file.canWrite()){
             Integer tile_size = (Integer) spinner_tile_size.getValue();
 
@@ -255,46 +255,46 @@ public class ExportImageDialog extends ActionDialog {
                 image = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_RGB);
                 graphics = image.createGraphics();
                 graphics.setClip(0, 0, image_width, image_height);
-                graphics.setBackground(colorchooser.get_color());
+                graphics.setBackground(colorchooser.getColor());
             }
             graphics.setFont(worldtab.getFont());
 
             MapPainterDefault mappainter = new MapPainterDefault();
             mappainter.paint(graphics, tile_size, image_width, image_height,
-                    worldtab.get_world().get_layer(center.get_layer()),
+                    worldtab.getWorld().getLayer(center.getLayer()),
                     center);
 
             ImageIO.write(image, "PNG", file);
-            worldtab.show_message("Image " + file.getName() + " exported");
+            worldtab.showMessage("Image " + file.getName() + " exported");
         } else JOptionPane.showMessageDialog(parent,
             "Could not write to file " + file.getPath(), 
             "Export layer to image", JOptionPane.ERROR_MESSAGE);
-            worldtab.show_message("Could not export image");
+            worldtab.showMessage("Could not export image");
     }
     
-    void update_image_width(){
-        if(center_position == null) center_position = worldtab.get_cur_position().clone();
+    void updateImageWidth(){
+        if(center_position == null) center_position = worldtab.getCurPosition().clone();
         
         if(rb_cur_view.isSelected()){
-            center_position = worldtab.get_cur_position().clone();
-            image_width = worldtab.get_panel_width();
-            image_height = worldtab.get_panel_height();
+            center_position = worldtab.getCurPosition().clone();
+            image_width = worldtab.getPanelWidth();
+            image_height = worldtab.getPanelHeight();
         } else if(rb_layer.isSelected() || rb_each_layer.isSelected()){
             layer_x_max = x_max;
             layer_x_min = x_min;
             layer_y_max = y_max;
             layer_y_min = y_min;
         } else if(rb_selection.isSelected()){
-            HashSet<Place> places = worldtab.place_group_get_selection();
+            HashSet<Place> places = worldtab.placeGroupGetSelection();
             if(!places.isEmpty()){
-                layer_x_max = layer_x_min = places.iterator().next().get_x();
-                layer_y_max = layer_y_min = places.iterator().next().get_y();
+                layer_x_max = layer_x_min = places.iterator().next().getX();
+                layer_y_max = layer_y_min = places.iterator().next().getY();
                 
                 for(Place place: places){
-                    layer_x_max = Math.max(layer_x_max, place.get_x());
-                    layer_x_min = Math.min(layer_x_min, place.get_x());
-                    layer_y_max = Math.max(layer_y_max, place.get_y());
-                    layer_y_min = Math.min(layer_y_min, place.get_y());
+                    layer_x_max = Math.max(layer_x_max, place.getX());
+                    layer_x_min = Math.min(layer_x_min, place.getX());
+                    layer_y_max = Math.max(layer_y_max, place.getY());
+                    layer_y_min = Math.min(layer_y_min, place.getY());
                 }
             } else layer_x_max = layer_x_min = layer_y_max = layer_y_min = 0;
         } else {
@@ -306,8 +306,8 @@ public class ExportImageDialog extends ActionDialog {
 
             image_width = layer_x_max - layer_x_min + 1;
             image_height = layer_y_max - layer_y_min + 1;
-            center_position.set_x(0.5 * (double) image_width + (double) layer_x_min);
-            center_position.set_y(0.5 * (double) image_height + (double) layer_y_min - 1);
+            center_position.setX(0.5 * (double) image_width + (double) layer_x_min);
+            center_position.setY(0.5 * (double) image_height + (double) layer_y_min - 1);
             image_width *= tile_size;
             image_height *= tile_size;
         }
@@ -322,7 +322,7 @@ public class ExportImageDialog extends ActionDialog {
         public void actionPerformed(ActionEvent e) {
             spinner_tile_size.setEnabled(e.getSource() != rb_cur_view);
             
-            update_image_width();
+            updateImageWidth();
         }
     }
 }

@@ -48,7 +48,7 @@ public class Paths {
      * Gets the user data path
      * @return user data path
      */
-    public static String get_user_data_dir(){
+    public static String getUserDataDir(){
         if(user_data_dir == null || user_data_dir.isEmpty()){
             String user_data_dir_home, user_data_dir_portable = null;
             
@@ -69,8 +69,8 @@ public class Paths {
             Mudmap2.portable_mode = false;
             
             if(user_data_dir_portable == null) Mudmap2.portable_mode = false; // couldn't get portable path
-            else if(is_directory(user_data_dir_portable)) Mudmap2.portable_mode = true; // portable mode detected
-            else if(!is_directory(user_data_dir_home)){ // ask user whether to use portable mode, if data directory doesn't exist
+            else if(isDirectory(user_data_dir_portable)) Mudmap2.portable_mode = true; // portable mode detected
+            else if(!isDirectory(user_data_dir_home)){ // ask user whether to use portable mode, if data directory doesn't exist
                 int ret = JOptionPane.showConfirmDialog(null, "Would you like to use the portable mode? This is recommended if you want to use MUD Map on a portable device like an USB flash drive. The data will then be stored in the same directory as the mudmap2.jar", "portable mode", JOptionPane.YES_NO_OPTION);
                 mudmap2.Mudmap2.portable_mode = (ret == JOptionPane.YES_OPTION);
             } else mudmap2.Mudmap2.portable_mode = false;
@@ -85,31 +85,31 @@ public class Paths {
      * Gets the directory that contains the world files
      * @return worlds directory
      */
-    public static String get_worlds_dir(){
-        return get_user_data_dir() + "worlds/";
+    public static String getWorldsDir(){
+        return getUserDataDir() + "worlds/";
     }
     
     /**
      * Gets the available worlds file (path + filename)
      * @return available worlds file
      */
-    public static String get_available_worlds_file(){
-        return get_worlds_dir() + "worlds";
+    public static String getAvailableWorldsFile(){
+        return getWorldsDir() + "worlds";
     }
     
     /**
      * Gets the config file path
      * @return 
      */
-    public static String get_config_file(){
-        return get_user_data_dir() + "config";
+    public static String getConfigFile(){
+        return getUserDataDir() + "config";
     }
     
     /**
      * Tries to open the url in a web-browser
      * @param url 
      */
-    public static void open_website(String url){
+    public static void openWebsite(String url){
         try {
             Desktop.getDesktop().browse(URI.create(url));
         } catch (IOException ex) {
@@ -122,7 +122,7 @@ public class Paths {
      * @param file file to check
      * @return true, if file exists or is a directory
      */
-    public static boolean file_exists(String file){
+    public static boolean fileExists(String file){
         File f = new File(file);
         return f.exists() || f.isDirectory();
     }
@@ -132,7 +132,7 @@ public class Paths {
      * @param path
      * @return true, if path is a file
      */
-    public static boolean is_file(String path){
+    public static boolean isFile(String path){
         File f = new File(path);
         return f.exists() && !f.isDirectory();
     }
@@ -142,7 +142,7 @@ public class Paths {
      * @param path
      * @return true, if path is a directory
      */
-    public static boolean is_directory(String path){
+    public static boolean isDirectory(String path){
         File f = new File(path);
         return f.exists() && f.isDirectory();
     }
@@ -151,7 +151,7 @@ public class Paths {
      * Creates a directory
      * @param path 
      */
-    public static void create_directory(String path){
+    public static void createDirectory(String path){
         File f = new File(path);
         if(!f.exists()) f.mkdir();
     }

@@ -29,8 +29,8 @@ import mudmap2.backend.Place;
  * @author Neop
  */
 public interface BreadthSearch {
-    void breadth_search_reset();
-    BreadthSearchData get_breadth_search_data();
+    void breadthSearchReset();
+    BreadthSearchData getBreadthSearchData();
     
     public class BreadthSearchData{
         public Place predecessor;

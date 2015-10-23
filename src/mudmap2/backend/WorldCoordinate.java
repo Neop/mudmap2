@@ -45,7 +45,7 @@ public class WorldCoordinate {
      * Gets the layer
      * @return layer
      */
-    public int get_layer(){
+    public int getLayer(){
         return layer;
     }
 
@@ -53,7 +53,7 @@ public class WorldCoordinate {
      * Sets the layer
      * @param l 
      */
-    public void set_layer(int l){
+    public void setLayer(int l){
         layer = l;
     }
     
@@ -61,7 +61,7 @@ public class WorldCoordinate {
      * Gets the x coordinate
      * @return x coordinate
      */
-    public double get_x(){
+    public double getX(){
         return x;
     }
 
@@ -69,24 +69,24 @@ public class WorldCoordinate {
      * Gets the y coordinate
      * @return y coordinate
      */
-    public double get_y(){
+    public double getY(){
         return y;
     }
 
     /**
      * Sets the x coordinate
-     * @param _x new x coordinate
+     * @param x new x coordinate
      */
-    public void set_x(double _x){
-        x = _x;
+    public void setX(double x){
+        this.x = x;
     }
 
     /**
      * Sets the y coordinate
-     * @param _y new y coordinate
+     * @param y new y coordinate
      */
-    public void set_y(double _y){
-        y = _y;
+    public void setY(double y){
+        this.y = y;
     }
 
     /**
@@ -112,7 +112,7 @@ public class WorldCoordinate {
      * Gets the position data in String format for meta files
      * @return 
      */
-    public String get_meta_String(){
+    public String getMetaString(){
         return layer + " " + -x + " " + y;
     }
     

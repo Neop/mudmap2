@@ -52,7 +52,7 @@ public class PathColorDialog extends ActionDialog {
     JTextField textfield_userdefined_new;
 
     public PathColorDialog(JFrame _parent, World _world) {
-        super(_parent, "Path colors - " + _world.get_name(), true);
+        super(_parent, "Path colors - " + _world.getName(), true);
         world = _world;
     }
     
@@ -72,18 +72,18 @@ public class PathColorDialog extends ActionDialog {
         
         constraints_l.gridy = ++constraints_r.gridy;
         add(new JLabel("Cardinal path color"), constraints_l);
-        if(colchooser_cardinal == null) colchooser_cardinal = new ColorChooserButton(getParent(), world.get_path_color());
+        if(colchooser_cardinal == null) colchooser_cardinal = new ColorChooserButton(getParent(), world.getPathColor());
         add(colchooser_cardinal, constraints_r);
         
         constraints_l.gridy = ++constraints_r.gridy;
         add(new JLabel("Non-cardinal path color"), constraints_l);
-        if(colchooser_non_cardinal == null) colchooser_non_cardinal = new ColorChooserButton(getParent(), world.get_path_color_nstd());
+        if(colchooser_non_cardinal == null) colchooser_non_cardinal = new ColorChooserButton(getParent(), world.getPathColorNstd());
         add(colchooser_non_cardinal, constraints_r);
         
         constraints_l.insets = constraints_r.insets = new Insets(2, 2, 2, 2);
         
         HashMap<Color, String> pcol = new HashMap<Color, String>();
-        for(Map.Entry<String, Color> entry: world.get_path_colors().entrySet()){
+        for(Map.Entry<String, Color> entry: world.getPathColors().entrySet()){
             if(pcol.containsKey(entry.getValue()) && !pcol.isEmpty()){ // if value is already in pcol
                 pcol.put(entry.getValue(), pcol.get(entry.getValue()) + ";" + entry.getKey());
             } else {
@@ -146,16 +146,16 @@ public class PathColorDialog extends ActionDialog {
      * Saves the changes
      */
     private void save(){
-        world.set_path_color(colchooser_cardinal.get_color());
-        world.set_path_color_nstd(colchooser_non_cardinal.get_color());
+        world.setPathColor(colchooser_cardinal.getColor());
+        world.setPathColorNstd(colchooser_non_cardinal.getColor());
         
-        world.get_path_colors().clear();
+        world.getPathColors().clear();
         for(Entry<JTextField, ColorChooserButton> entry: colchooser_userdefined.entrySet()){
             String dirs = entry.getKey().getText();
             if(!dirs.isEmpty())
                 for(String dir: dirs.split("[,;]"))
                     if(!dir.isEmpty())
-                        world.get_path_colors().put(dir, entry.getValue().get_color());
+                        world.getPathColors().put(dir, entry.getValue().getColor());
         }
     }
 }

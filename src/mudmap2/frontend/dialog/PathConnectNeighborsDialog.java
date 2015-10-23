@@ -63,19 +63,19 @@ public class PathConnectNeighborsDialog extends ActionDialog{
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.weightx = 1.0;
         
-        Layer layer = place.get_layer();
+        Layer layer = place.getLayer();
         for(int x = -1; x <= 1; ++x){
             for(int y = -1; y <= 1; ++y){
                 if(x != 0 || y != 0){
                     // diretion of the neighbor place relative to _place
-                    String dir = Path.get_dir(x, y);
+                    String dir = Path.getDir(x, y);
 
                     // if exit of _place available
-                    if(place.get_exit(dir) == null){
-                        Place neighbor = (Place) layer.get(place.get_x() + x, place.get_y() + y);
+                    if(place.getExit(dir) == null){
+                        Place neighbor = (Place) layer.get(place.getX() + x, place.getY() + y);
 
                         // if exit of neighbor available
-                        if(neighbor != null && neighbor.get_exit(Path.get_opposite_dir(dir)) == null){
+                        if(neighbor != null && neighbor.getExit(Path.getOppositeDir(dir)) == null){
                             JCheckBox checkbox = new JCheckBox("[" + dir + "] " + neighbor);
                             constraints.gridy++;
                             add(checkbox, constraints);
@@ -116,12 +116,12 @@ public class PathConnectNeighborsDialog extends ActionDialog{
     private void save(){
         for(Entry<Place, JCheckBox> entry: neighbor_checkboxes.entrySet()){
             if(entry.getValue().isSelected()){
-                int dx = entry.getKey().get_x() - place.get_x();
-                int dy = entry.getKey().get_y() - place.get_y();
+                int dx = entry.getKey().getX() - place.getX();
+                int dy = entry.getKey().getY() - place.getY();
                 // get direction
-                String dir = Path.get_dir(dx, dy);
+                String dir = Path.getDir(dx, dy);
                 // connect path
-                place.connect_path(new Path(place, dir, entry.getKey(), Path.get_opposite_dir(dir)));
+                place.connectPath(new Path(place, dir, entry.getKey(), Path.getOppositeDir(dir)));
             }
         }
         getParent().repaint();

@@ -58,7 +58,7 @@ public class Path {
      * 
      * @return the two connected places
      */
-    public Place[] get_places(){
+    public Place[] getPlaces(){
         return places;
     }
     
@@ -67,7 +67,7 @@ public class Path {
      * @param place
      * @return true if place is in this path
      */
-    public boolean has_place(Place place){
+    public boolean hasPlace(Place place){
         if(places[0] == place || places[1] == place) return true;
         return false;
     }
@@ -77,7 +77,7 @@ public class Path {
      * 
      * @return The two exit directions
      */
-    public String[] get_exit_directions(){
+    public String[] getExitDirections(){
         return exitdirections;
     }
     
@@ -87,7 +87,7 @@ public class Path {
      * @return the exit direction of p in the path
      * @throws RuntimeException if the place isn't a member of the path
      */
-    public String get_exit(Place p) throws RuntimeException{
+    public String getExit(Place p) throws RuntimeException{
         if(places[0] == p) return exitdirections[0];
         else if(places[1] == p) return exitdirections[1];
         else throw new RuntimeException("Place not found in path");
@@ -99,7 +99,7 @@ public class Path {
      * @return place of path that is not p
      * @throws RuntimeException 
      */
-    public Place get_other_place(Place p) throws RuntimeException{
+    public Place getOtherPlace(Place p) throws RuntimeException{
         if(places[0] == p) return places[1];
         else if(places[1] == p) return places[0];
         else throw new RuntimeException("Place not found in path");
@@ -118,7 +118,7 @@ public class Path {
      * @param dir
      * @return opposite direction or ""
      */
-    public static String get_opposite_dir(String dir){
+    public static String getOppositeDir(String dir){
         String ret = "";
         if(dir.equals("n")) ret = "s";
         else if(dir.equals("s")) ret = "n";
@@ -140,7 +140,7 @@ public class Path {
      * @param y coordinate relative to a place
      * @return direction or "" if x == y == 0
      */
-    public static String get_dir(int x, int y){
+    public static String getDir(int x, int y){
         String ret = "";
         if(y > 0) ret = "n";
         else if(y < 0) ret = "s";
@@ -155,7 +155,7 @@ public class Path {
      * @param dir
      * @return 
      */
-    public static int get_dir_num(String dir){
+    public static int getDirNum(String dir){
         int ret = -1;
         if(dir.equals("n")) ret = 8;
         else if(dir.equals("ne")) ret = 9;

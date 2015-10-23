@@ -78,7 +78,7 @@ public class ColorChooserButton extends JButton {
      * Gets the color
      * @return color
      */
-    public Color get_color() {
+    public Color getColor() {
         return color;
     }
     

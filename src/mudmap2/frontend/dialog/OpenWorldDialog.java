@@ -57,7 +57,7 @@ public class OpenWorldDialog implements ActionListener{
             @Override
             public boolean accept(File file) {                
                 if(file.isDirectory()) return true;
-                return !WorldManager.read_world_name(file.toString()).equals("");
+                return !WorldManager.readWorldName(file.toString()).equals("");
             }
 
             @Override
@@ -71,8 +71,8 @@ public class OpenWorldDialog implements ActionListener{
         if(ret == JFileChooser.APPROVE_OPTION){
             try {
                 String file = filechooser.getSelectedFile().toString();
-                WorldManager.add_world(file);
-                parent.open_world(file);
+                WorldManager.addWorld(file);
+                parent.openWorld(file);
             } catch (Exception ex) {
                 Logger.getLogger(OpenWorldDialog.class.getName()).log(Level.WARNING, null, ex);
                 JOptionPane.showMessageDialog(parent, ex.getMessage(), "Adding world", JOptionPane.ERROR_MESSAGE);

@@ -63,7 +63,7 @@ public class Layer {
      * @param center_x
      * @param center_y 
      */
-    public void set_quadtree(int center_x, int center_y){
+    public void setQuadtree(int center_x, int center_y){
         elements = new Quadtree<Place>(center_x, center_y);
     }
     
@@ -71,7 +71,7 @@ public class Layer {
      * Gets the center x coordinate (estimation)
      * @return 
      */
-    public int get_center_x(){
+    public int getCenterX(){
         return max_x - min_x;
     }
       
@@ -79,7 +79,7 @@ public class Layer {
      * Gets the center y coordinate (estimation)
      * @return 
      */
-    public int get_center_y(){
+    public int getCenterY(){
         return max_y - min_y;
     }
     
@@ -87,12 +87,12 @@ public class Layer {
      * Gets the max x coordinate
      * @return 
      */
-    public int get_x_min(){
-        HashSet<Place> places = get_places();
+    public int getXMin(){
+        HashSet<Place> places = getPlaces();
         if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().get_x();
+        int ret = places.iterator().next().getX();
         for(Place place: places)
-            ret = Math.min(ret, place.get_x());
+            ret = Math.min(ret, place.getX());
         return ret;
     }
     
@@ -100,12 +100,12 @@ public class Layer {
      * Gets the min x coordinate
      * @return 
      */
-    public int get_x_max(){
-        HashSet<Place> places = get_places();
+    public int getXMax(){
+        HashSet<Place> places = getPlaces();
         if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().get_x();
+        int ret = places.iterator().next().getX();
         for(Place place: places)
-            ret = Math.max(ret, place.get_x());
+            ret = Math.max(ret, place.getX());
         return ret;
     }
     
@@ -113,12 +113,12 @@ public class Layer {
      * Gets the max y coordinate
      * @return 
      */
-    public int get_y_min(){
-        HashSet<Place> places = get_places();
+    public int getYMin(){
+        HashSet<Place> places = getPlaces();
         if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().get_y();
+        int ret = places.iterator().next().getY();
         for(Place place: places)
-            ret = Math.min(ret, place.get_y());
+            ret = Math.min(ret, place.getY());
         return ret;
     }
     
@@ -126,12 +126,12 @@ public class Layer {
      * Gets the min y coordinate
      * @return 
      */
-    public int get_y_max(){
-        HashSet<Place> places = get_places();
+    public int getYMax(){
+        HashSet<Place> places = getPlaces();
         if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().get_y();
+        int ret = places.iterator().next().getY();
         for(Place place: places)
-            ret = Math.max(ret, place.get_y());
+            ret = Math.max(ret, place.getY());
         return ret;
     }
     
@@ -148,8 +148,8 @@ public class Layer {
         min_y = Math.min(min_y, y);
         max_y = Math.max(max_y, y);
         
-        //element.get_layer().remove(element);
-        element.set_position(x, y, this);
+        //element.getLayer().remove(element);
+        element.setPosition(x, y, this);
         put(element);
     }
     
@@ -160,14 +160,14 @@ public class Layer {
      */
     public void put(LayerElement element) throws PlaceNotInsertedException {
         try {
-            min_x = Math.min(min_x, element.get_x());
-            max_x = Math.max(max_x, element.get_x());
-            min_y = Math.min(min_y, element.get_y());
-            max_y = Math.max(max_y, element.get_y());
+            min_x = Math.min(min_x, element.getX());
+            max_x = Math.max(max_x, element.getX());
+            min_y = Math.min(min_y, element.getY());
+            max_y = Math.max(max_y, element.getY());
             
-            elements.insert(element, element.get_x(), element.get_y());
+            elements.insert(element, element.getX(), element.getY());
         } catch (Exception ex) {
-            throw new PlaceNotInsertedException(element.get_x(), element.get_y());
+            throw new PlaceNotInsertedException(element.getX(), element.getY());
         }
     }
     
@@ -188,7 +188,7 @@ public class Layer {
      * @param distance maximum distance in each drection
      * @return
      */
-    public LinkedList<Place> get_neighbors(int _x, int _y, int distance){
+    public LinkedList<Place> getNeighbors(int _x, int _y, int distance){
         LinkedList<Place> ret = new LinkedList<Place>();
         distance = Math.abs(distance);
         for(int x = -distance; x <= distance; ++x){
@@ -206,7 +206,7 @@ public class Layer {
      * Gets the id of the layer
      * @return layer id
      */
-    public int get_id(){
+    public int getId(){
         return id;
     }
     
@@ -214,7 +214,7 @@ public class Layer {
      * Gets the world
      * @return world
      */
-    public World get_world(){
+    public World getWorld(){
         return world;
     }
     
@@ -224,7 +224,7 @@ public class Layer {
      */
     @Override
     public String toString(){
-        return String.valueOf(get_id());
+        return String.valueOf(getId());
     }
     
     /**
@@ -233,11 +233,11 @@ public class Layer {
      * @throws mudmap2.backend.Layer.PlaceNotFoundException 
      */
     public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException{
-        if(element.get_layer() != this) throw new RuntimeException("Element not in this layer");
+        if(element.getLayer() != this) throw new RuntimeException("Element not in this layer");
         // element on the layer before placing the new one
-        LayerElement el_bef = get(element.get_x(), element.get_y());
-        if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.get_x() + ", " + element.get_y() + ")");
-        elements.remove(element.get_x(), element.get_y());
+        LayerElement el_bef = get(element.getX(), element.getY());
+        if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
+        elements.remove(element.getX(), element.getY());
     }
     
     /**
@@ -258,7 +258,7 @@ public class Layer {
      * Gets a collection of all elements
      * @return set of all elements or empty set
      */
-    public HashSet<Place> get_places(){
+    public HashSet<Place> getPlaces(){
         return elements.values();
     }
     

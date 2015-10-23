@@ -59,7 +59,7 @@ public class AboutDialog extends ActionDialog {
         ++constraints.gridy;
         add(new JLabel("<html><h1>MUD Map v2</h1></html>"), constraints);
         ++constraints.gridy;
-        add(new JLabel("Version " + mudmap2.Mudmap2.get_version() + " " + mudmap2.Mudmap2.get_version_state()), constraints);
+        add(new JLabel("Version " + mudmap2.Mudmap2.getVersion() + " " + mudmap2.Mudmap2.getVersionState()), constraints);
         ++constraints.gridy;
         add(new JLabel("License: GPLv3"), constraints);
         ++constraints.gridy;

@@ -53,21 +53,20 @@ public class RiskLevel {
 
     /**
      * Constructs the risk level
-     * @param _id identification number, unique in a world
      * @param desc description
-     * @param _color color that represents the risk level
+     * @param color color that represents the risk level
      */
-    public RiskLevel(String desc, Color _color){
+    public RiskLevel(String desc, Color color){
         id = next_id++;
         description = desc;
-        color = _color;
+        this.color = color;
     }
     
     /**
      * Gets the risk level id
      * @return id
      */
-    public int get_id(){
+    public int getId(){
         return id;
     }
     
@@ -75,7 +74,7 @@ public class RiskLevel {
      * Gets the color
      * @return color of the risk level
      */
-    public Color get_color(){
+    public Color getColor(){
         return color;
     }
     
@@ -83,7 +82,7 @@ public class RiskLevel {
      * Sets the color
      * @param c new color
      */
-    public void set_color(Color c){
+    public void setColor(Color c){
         color = c;
     }
     
@@ -91,7 +90,7 @@ public class RiskLevel {
      * Gets the description of the risk level
      * @return description
      */
-    public String get_description(){
+    public String getDescription(){
         return toString();
     }
     
@@ -99,7 +98,7 @@ public class RiskLevel {
      * Sets the description
      * @param desc new description
      */
-    public void set_description(String desc){
+    public void setDescription(String desc){
         description = desc;
     }
     

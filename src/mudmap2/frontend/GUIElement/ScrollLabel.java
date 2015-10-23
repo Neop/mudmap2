@@ -61,7 +61,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent arg0) {
-                next_message();
+                nextMessage();
             }
         });
         parent = Thread.currentThread();
@@ -78,7 +78,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
     /**
      * Starts the thread
      */
-    public void start_thread(){
+    public void startThread(){
         run = true;
         if(thread == null){
             (thread = new Thread(this)).start();
@@ -106,7 +106,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
     /**
      * Stops the thread
      */
-    public void stop_thread(){        
+    public void stopThread(){        
         if(thread != null && run){
             synchronized (Thread.currentThread()){
                 try{
@@ -121,7 +121,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
      * Adds a messsage to the message stack
      * @param message 
      */
-    synchronized public void show_message(String message){
+    synchronized public void showMessage(String message){
         // if no message on stack: display it immediately
         if(messages.isEmpty()){
             current_text = message;
@@ -131,7 +131,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
     /**
      * Removes the currently shown message from the stack and shows the next one
      */
-    synchronized private void next_message(){
+    synchronized private void nextMessage(){
         if(!(is_default_text = messages.isEmpty())){
             set_text(messages.pollFirst());
         } else set_text(getText());
@@ -144,14 +144,14 @@ public final class ScrollLabel extends JPanel implements Runnable{
     synchronized private void set_text(String s){
         if(s == null) s = getText();
         current_text = s;
-        message_start_time = get_time_ms();
+        message_start_time = getTimeMS();
         repaint();
     }
     
     /**
      * Get the current time in milliseconds
      */
-    static private long get_time_ms(){
+    static private long getTimeMS(){
         return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
@@ -171,7 +171,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
             int string_width = g.getFontMetrics().stringWidth(current_text);
             int x = 0;
 
-            long dtime = get_time_ms() - message_start_time; // time difference since message start
+            long dtime = getTimeMS() - message_start_time; // time difference since message start
 
             // if string is too long: move the string
             if(string_width > width){
@@ -182,9 +182,9 @@ public final class ScrollLabel extends JPanel implements Runnable{
                     double dx_perc = (double)(dtime - wait_time) / 5000;
                     //x = (int) -((double) (string_width - clipBounds.getWidth()) * dx_perc);
                     x = (int) (-dx_perc * 200);
-                    if(Math.abs(x) >= 1.0 * string_width) next_message();
+                    if(Math.abs(x) >= 1.0 * string_width) nextMessage();
                 }
-            } else if(dtime > min_message_time) next_message();
+            } else if(dtime > min_message_time) nextMessage();
 
             g.setColor(Color.BLACK);
             g.drawString(current_text, x + border, y);
@@ -199,7 +199,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
         long dtime;
         while(run){
             // time since the message wwas shown first
-            dtime = get_time_ms() - message_start_time;
+            dtime = getTimeMS() - message_start_time;
             // change message, if it was shown for some time
             /*if(dtime > min_message_time){
                 if(!is_default_text) next_message();

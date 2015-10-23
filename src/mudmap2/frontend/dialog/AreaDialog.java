@@ -88,12 +88,12 @@ public class AreaDialog extends ActionDialog {
      * @param _place 
      */
     public AreaDialog(JFrame _parent, World _world, Place _place){
-        super(_parent, (_place.get_area() == null) ? "New area" : ("Edit area - " + _place.get_area()), true);
+        super(_parent, (_place.getArea() == null) ? "New area" : ("Edit area - " + _place.getArea()), true);
         
         place = _place;
-        new_area = place.get_area() == null;
+        new_area = place.getArea() == null;
         world = _world;
-        area = place.get_area();
+        area = place.getArea();
     }
     
     /**
@@ -105,13 +105,13 @@ public class AreaDialog extends ActionDialog {
      * @param _place 
      */
     public AreaDialog(JFrame _parent, World _world, HashSet<Place> _place_group, Place _place){
-        super(_parent, (_place.get_area() == null) ? "New area" : ("Edit area - " + _place.get_area()), true);
+        super(_parent, (_place.getArea() == null) ? "New area" : ("Edit area - " + _place.getArea()), true);
         
         place = _place;
         place_group = _place_group;
-        new_area = place.get_area() == null;
+        new_area = place.getArea() == null;
         world = _world;
-        area = place.get_area();
+        area = place.getArea();
     }
     
     /**
@@ -146,7 +146,7 @@ public class AreaDialog extends ActionDialog {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridwidth = 2;
         
-        if(area != null) colorchooserbutton = new ColorChooserButton(getParent(), area.get_color()); 
+        if(area != null) colorchooserbutton = new ColorChooserButton(getParent(), area.getColor()); 
         else colorchooserbutton = new ColorChooserButton(getParent());
         add(colorchooserbutton, constraints);
         
@@ -202,18 +202,18 @@ public class AreaDialog extends ActionDialog {
     private void save(){
         // add new area to world and place
         if(new_area){
-            area = new Area(textfield_name.getText(), colorchooserbutton.get_color());
-            world.add_area(area);
-            if(place != null && place_group == null) place.set_area(area);
+            area = new Area(textfield_name.getText(), colorchooserbutton.getColor());
+            world.addArea(area);
+            if(place != null && place_group == null) place.setArea(area);
         } else {
             // modify area
-            area.set_name(textfield_name.getText());
-            area.set_color(colorchooserbutton.get_color());
+            area.setName(textfield_name.getText());
+            area.setColor(colorchooserbutton.getColor());
         }
         // assign to all places
         if(place_group != null)
             for(Place pl: place_group)
-                pl.set_area(area);
+                pl.setArea(area);
         getParent().repaint();
     }
     

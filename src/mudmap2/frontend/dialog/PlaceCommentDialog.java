@@ -51,7 +51,7 @@ public class PlaceCommentDialog extends ActionDialog {
         optionPane.setOptionType(JOptionPane.YES_NO_OPTION);
         
         setContentPane(optionPane);
-        optionPane.setMessage(commentarea = new JTextArea(place.get_comments_string(true)));
+        optionPane.setMessage(commentarea = new JTextArea(place.getCommentsString(true)));
         
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         
@@ -61,11 +61,11 @@ public class PlaceCommentDialog extends ActionDialog {
                 if(isVisible() && arg0.getSource() == optionPane && arg0.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)){
                     int value = ((Integer) optionPane.getValue()).intValue();
                     if(value == JOptionPane.YES_OPTION){
-                        place.delete_comments();
+                        place.deleteComments();
                         String comments = commentarea.getText();
                         if(comments.trim().length() > 0)
                             for(String line: comments.split("\n"))
-                                place.add_comment(line);
+                                place.addComment(line);
                     }
                     dispose();
                     getParent().repaint();

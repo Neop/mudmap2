@@ -57,7 +57,7 @@ public class LinkLabel extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Paths.open_website(url);
+                Paths.openWebsite(url);
             }
         });
     }

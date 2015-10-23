@@ -65,9 +65,9 @@ public class PathConnectDialog extends ActionDialog{
         
         // world tab
         worldtab = (WorldTab) wt_parent.clone();
-        worldtab.set_cursor_forced(true);
-        worldtab.reset_history(place.get_coordinate());
-        worldtab.set_forced_focus_disabled(true);
+        worldtab.setCursorForced(true);
+        worldtab.resetHistory(place.getCoordinate());
+        worldtab.setForcedFocusDisabled(true);
         
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = constraints.gridy = 0;
@@ -88,7 +88,7 @@ public class PathConnectDialog extends ActionDialog{
         
         LinkedList<String> directions1 = new LinkedList<String>();
         for(String s: Path.directions)
-            if(place.get_exit(s) == null) directions1.add(s);
+            if(place.getExit(s) == null) directions1.add(s);
         
         constraints.gridx = 1;
         constraints.weightx = 0.0;
@@ -104,7 +104,7 @@ public class PathConnectDialog extends ActionDialog{
         constraints.gridx = 1;
         constraints.weightx = 0.0;
         direction_combo_box2 = new JComboBox();
-        update_direction_combo_box2();
+        updateDirectionComboBox2();
         direction_combo_box2.setEditable(true);
         add(direction_combo_box2, constraints);
         
@@ -135,13 +135,13 @@ public class PathConnectDialog extends ActionDialog{
             }
         });
         
-        worldtab.add_cursor_listener(new WorldTab.CursorListener() {
+        worldtab.addCursorListener(new WorldTab.CursorListener() {
             @Override
             public void placeSelected(Place p) {
                 if(p != place){ 
                     other = p;
                     label_other_place.setText(other.toString());
-                    update_direction_combo_box2();
+                    updateDirectionComboBox2();
                 }
             }
 
@@ -158,11 +158,11 @@ public class PathConnectDialog extends ActionDialog{
     /**
      * Fills the combo box only with directions thar aren't occupied yet
      */
-    private void update_direction_combo_box2() {
+    private void updateDirectionComboBox2() {
         direction_combo_box2.removeAllItems();
         if(other != null)
             for(String s: Path.directions){
-                Path pa = other.get_exit(s);
+                Path pa = other.getExit(s);
                 if(s.equals("-")) s = one_way_str;
                 if(pa == null) direction_combo_box2.addItem(s);
             }
@@ -179,12 +179,12 @@ public class PathConnectDialog extends ActionDialog{
             if(dir1.equals(one_way_str)) dir1 = "-";
             if(dir2.equals(one_way_str)) dir2 = "-";
             
-            boolean exit_available_1 = place.get_exit(dir1) == null;
-            boolean exit_available_2 = other.get_exit(dir2) == null;
+            boolean exit_available_1 = place.getExit(dir1) == null;
+            boolean exit_available_2 = other.getExit(dir2) == null;
             
             // if both exits are available
             if(exit_available_1 && exit_available_2)
-                place.connect_path(new Path(place, dir1, other, dir2));
+                place.connectPath(new Path(place, dir1, other, dir2));
             // else show message
             else JOptionPane.showMessageDialog(this, "Couldn't connect path, an exit of a place is occupied");
             

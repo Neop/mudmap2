@@ -60,7 +60,7 @@ public class Quadtree<T> {
         if(root == null) return null;
         QuadtreeElement ret = root.get(x, y);
         if(ret == null) return null;
-        else return ((QuadtreeLeaf<T>) ret).get_data();
+        else return ((QuadtreeLeaf<T>) ret).getData();
     }
     
     /**
@@ -150,9 +150,9 @@ public class Quadtree<T> {
      */
     private interface QuadtreeElement<T>{
         /** Gets the x (center) coordinate of the element */
-        public int get_x();
+        public int getX();
         /** Gets the y (center) coordinate of the element */
-        public int get_y();
+        public int getY();
         
         /**
          * Gets the element at x, y or null
@@ -163,9 +163,9 @@ public class Quadtree<T> {
         public QuadtreeElement<T> get(int x, int y);
         
         /** gets the parent node or null */
-        public QuadtreeElement<T> get_parent();
+        public QuadtreeElement<T> getParent();
         /** sets the parent node */
-        public void set_parent(QuadtreeElement<T> parent);
+        public void setParent(QuadtreeElement<T> parent);
         
         /** removes the node from the quadtree */
         public void remove();
@@ -269,21 +269,21 @@ public class Quadtree<T> {
          * @throws Exception if node couldn't be splitted (shouldn't occur)
          */
         public void insert(QuadtreeElement<T> newelement) throws Exception{
-            int childnum = getChildNum(newelement.get_x(), newelement.get_y());
+            int childnum = getChildNum(newelement.getX(), newelement.getY());
             QuadtreeElement<T> predecessor = elements[childnum];
             
             if(predecessor != null){ // child node exists
                 // child node is a node and newelement's position is in that node
                 if(predecessor instanceof QuadtreeNode && 
-                   ((QuadtreeNode) predecessor).getChildNum(newelement.get_x(), newelement.get_y()) != -1)
+                   ((QuadtreeNode) predecessor).getChildNum(newelement.getX(), newelement.getY()) != -1)
                     ((QuadtreeNode) predecessor).insert(newelement);
                 
                 else { // child node is a leaf -> create split node
                     if(length < 2) throw new Exception("Can't split quadtree node"); // shouldn't occur
                     
                     int newx = x, newy = y, newlength = length;
-                    final int compx = Math.min(newelement.get_x(), predecessor.get_x());
-                    final int compy = Math.min(newelement.get_y(), predecessor.get_y());
+                    final int compx = Math.min(newelement.getX(), predecessor.getX());
+                    final int compy = Math.min(newelement.getY(), predecessor.getY());
                     // calculate new center and length
                     do {
                         newlength /= 2;
@@ -291,12 +291,12 @@ public class Quadtree<T> {
                         else newx -= newlength;
                         if(compy > newy) newy += newlength;
                         else newy -= newlength;
-                    } while(newlength > 1 && getChildNum(newelement.get_x(), newelement.get_y(), newx, newy, newlength) == getChildNum(predecessor.get_x(), predecessor.get_y(), newx, newy, newlength));
+                    } while(newlength > 1 && getChildNum(newelement.getX(), newelement.getY(), newx, newy, newlength) == getChildNum(predecessor.getX(), predecessor.getY(), newx, newy, newlength));
                     
                     // insert new node
                     QuadtreeNode newnode = new QuadtreeNode(this, newx, newy, newlength);
                     elements[childnum] = newnode;
-                    newnode.set_parent(this);
+                    newnode.setParent(this);
                     
                     newnode.insert(predecessor);
                     newnode.insert(newelement);
@@ -304,7 +304,7 @@ public class Quadtree<T> {
             } else { // child node doesn't exist
                 // insert new element
                 elements[childnum] = newelement;
-                newelement.set_parent(this);
+                newelement.setParent(this);
             }
         }
         
@@ -314,7 +314,7 @@ public class Quadtree<T> {
          */
         public void remove(QuadtreeElement element){    
             // remove node
-            int id = getChildNum(element.get_x(), element.get_y());
+            int id = getChildNum(element.getX(), element.getY());
             if(elements[id] instanceof QuadtreeLeaf || elements[id] == element) elements[id] = null;
             else ((QuadtreeNode) elements[id]).remove(element);
 
@@ -347,7 +347,7 @@ public class Quadtree<T> {
          * @return 
          */
         @Override
-        public int get_x() {
+        public int getX() {
             return x;
         }
 
@@ -356,7 +356,7 @@ public class Quadtree<T> {
          * @return 
          */
         @Override
-        public int get_y() {
+        public int getY() {
             return y;
         }
         
@@ -365,7 +365,7 @@ public class Quadtree<T> {
          * @param _parent 
          */
         @Override
-        public void set_parent(QuadtreeElement<T> _parent) {
+        public void setParent(QuadtreeElement<T> _parent) {
             parent = _parent;
         }
 
@@ -374,7 +374,7 @@ public class Quadtree<T> {
          * @return parent node or null
          */
         @Override
-        public QuadtreeElement<T> get_parent() {
+        public QuadtreeElement<T> getParent() {
             return parent;
         }
 
@@ -396,7 +396,7 @@ public class Quadtree<T> {
          */
         @Override
         public String toString(){
-            return "{(" + get_x() + ", " + get_y() + ", " + length + "), NW: " + (elements[NW] != null ? elements[NW].toString() : "null") + 
+            return "{(" + getX() + ", " + getY() + ", " + length + "), NW: " + (elements[NW] != null ? elements[NW].toString() : "null") + 
                     ", NE: " + (elements[NE] != null ? elements[NE].toString() : "null") + 
                     ", SW: " + (elements[SW] != null ? elements[SW].toString() : "null") + 
                     ", SE: " + (elements[SE] != null ? elements[SE].toString() : "null") + "}";
@@ -440,7 +440,7 @@ public class Quadtree<T> {
          * @return 
          */
         @Override
-        public int get_x(){
+        public int getX(){
             return x;
         }
         
@@ -449,7 +449,7 @@ public class Quadtree<T> {
          * @return 
          */
         @Override
-        public int get_y(){
+        public int getY(){
             return y;
         }
         
@@ -457,7 +457,7 @@ public class Quadtree<T> {
          * Gets the element data
          * @return 
          */
-        public T get_data(){
+        public T getData(){
             return data;
         }
         
@@ -475,7 +475,7 @@ public class Quadtree<T> {
          * @return 
          */
         @Override
-        public QuadtreeElement<T> get_parent() {
+        public QuadtreeElement<T> getParent() {
             return parent;
         }
         
@@ -484,7 +484,7 @@ public class Quadtree<T> {
          * @param _parent 
          */
         @Override
-        public void set_parent(QuadtreeElement<T> _parent){
+        public void setParent(QuadtreeElement<T> _parent){
             parent = _parent;
         }
 
@@ -503,7 +503,7 @@ public class Quadtree<T> {
          */
         @Override
         public String toString(){
-            return "\"" + get_data().toString() + "\"";
+            return "\"" + getData().toString() + "\"";
         }
 
         /**

@@ -48,7 +48,7 @@ public class LayerElement {
      * Gets the x position
      * @return x position
      */
-    public int get_x(){
+    public int getX(){
         return x;
     }
     
@@ -56,7 +56,7 @@ public class LayerElement {
      * Gets the y position
      * @return y position
      */
-    public int get_y(){
+    public int getY(){
         return y;
     }
     
@@ -64,7 +64,7 @@ public class LayerElement {
      * Gets the layer
      * @return layer
      */
-    public Layer get_layer(){
+    public Layer getLayer(){
         return layer;
     }
     
@@ -72,7 +72,7 @@ public class LayerElement {
      * Sets the layer
      * @param _layer layer
      */
-    public void set_layer(Layer _layer){
+    public void setLayer(Layer _layer){
         layer = _layer;
     }
     
@@ -82,7 +82,7 @@ public class LayerElement {
      * @param _y y position
      * @param l layer
      */
-    public void set_position(int _x, int _y, Layer l){
+    public void setPosition(int _x, int _y, Layer l){
         x = _x;
         y = _y;
         layer = l;

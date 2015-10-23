@@ -61,7 +61,7 @@ public class Area implements Comparable<Area> {
         color = new Color(0, 0, 0);
     }
     
-    public int get_id(){
+    public int getId(){
         return id;
     }
     
@@ -70,7 +70,7 @@ public class Area implements Comparable<Area> {
      * 
      * @return area name
      */
-    public String get_name(){
+    public String getName(){
         return name;
     }
     
@@ -78,7 +78,7 @@ public class Area implements Comparable<Area> {
      * Sets a new name
      * @param _name new area name
      */
-    public void set_name(String _name){
+    public void setName(String _name){
         name = _name;
     }
     
@@ -87,7 +87,7 @@ public class Area implements Comparable<Area> {
      * 
      * @return area color
      */
-    public Color get_color(){
+    public Color getColor(){
         return color;
     }
     
@@ -95,7 +95,7 @@ public class Area implements Comparable<Area> {
      * Sets a new area color
      * @param _color new area color
      */
-    public void set_color(Color _color) {
+    public void setColor(Color _color) {
         color = _color;
     }
     
@@ -110,7 +110,7 @@ public class Area implements Comparable<Area> {
 
     @Override
     public int compareTo(Area arg0) {
-        return -arg0.get_name().compareTo(name);
+        return -arg0.getName().compareTo(name);
     }
     /*
     @Override

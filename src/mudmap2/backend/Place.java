@@ -43,7 +43,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     int id;
     String name;
     Area area;
-    int rec_lvl_min, rec_lvl_max;
+    int rec_level_min, rec_level_max;
     RiskLevel risk_level;
     
     HashSet<Place> children, parents;
@@ -83,7 +83,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     private void initialize(){
         area = null;
         risk_level = null;
-        rec_lvl_min = rec_lvl_max = -1;
+        rec_level_min = rec_level_max = -1;
         
         children = new HashSet<Place>();
         parents = new HashSet<Place>();
@@ -98,7 +98,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the place id
      * @return place id
      */
-    public int get_id(){
+    public int getId(){
         return id;
     }
     
@@ -106,7 +106,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the name
      * @return name of the place
      */
-    public String get_name(){
+    public String getName(){
         return name;
     }
     
@@ -114,17 +114,17 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Sets the name
      * @param _name new name
      */
-    public void set_name(String _name){
-        name = _name;
+    public void setName(String _name){
+        this.name = name;
     }
     
     /**
      * Returns true, if the name of the place is unique in its world
      * @return true if the place name is unique
      */
-    public boolean is_name_unique(){
-        if(get_layer() != null && get_layer().get_world() != null){
-            return get_layer().get_world().get_place_name_count(get_name()) <= 1;
+    public boolean isNameUnique(){
+        if(getLayer() != null && getLayer().getWorld() != null){
+            return getLayer().getWorld().getPlaceNameCount(getName()) <= 1;
         }
         return true;
     }
@@ -133,86 +133,86 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the position of a place as world coordinate
      * @return place coordinate
      */
-    public WorldCoordinate get_coordinate(){
-        return new WorldCoordinate(get_layer().get_id(), get_x(), get_y());
+    public WorldCoordinate getCoordinate(){
+        return new WorldCoordinate(getLayer().getId(), getX(), getY());
     }
     
     /**
      * Gets the area
      * @return area
      */
-    public Area get_area(){
+    public Area getArea(){
         return area;
     }
     
     /**
      * Sets the area
-     * @param _area 
+     * @param area 
      */
-    public void set_area(Area _area) {
-        area = _area;
+    public void setArea(Area area) {
+        this.area = area;
     }
     
     /**
      * Gets the minimal recommended level
      * @return minimal recommended level
      */
-    public int get_rec_lvl_min(){
-        return rec_lvl_min;
+    public int getRecLevelMin(){
+        return rec_level_min;
     }
     
     /**
      * Sets the minimal recommended level
-     * @param _rec_lvl_min 
+     * @param rec_level_min 
      */
-    public void set_rec_lvl_min(int _rec_lvl_min){
-        rec_lvl_min = _rec_lvl_min;
+    public void setRecLevelMin(int rec_level_min){
+        this.rec_level_min = rec_level_min;
     }
     
     /**
      * Gets the maximal recommended level
      * @return maximal recommended level
      */
-    public int get_rec_lvl_max(){
-        return rec_lvl_max;
+    public int getRecLevelMax(){
+        return rec_level_max;
     }
     
     /**
      * Sets the maximal recommended level
-     * @param _rec_lvl_max 
+     * @param rec_level_max 
      */
-    public void set_rec_lvl_max(int _rec_lvl_max){
-        rec_lvl_max = _rec_lvl_max;
+    public void setRecLevelMax(int rec_level_max){
+        this.rec_level_max = rec_level_max;
     }
     
     /**
      * Gets the risk level
      * @return risk level
      */
-    public RiskLevel get_risk_level(){
+    public RiskLevel getRiskLevel(){
         return risk_level;
     }
     
     /**
      * sets the risk level
-     * @param _risk_level
+     * @param risk_level
      */
-    public void set_risk_level(RiskLevel _risk_level){
-        risk_level = _risk_level;
+    public void setRiskLevel(RiskLevel risk_level){
+        this.risk_level = risk_level;
     }
     
     /**
      * Adds a comment at the end of the list
      * @param comment
      */
-    public void add_comment(String comment){
+    public void addComment(String comment){
         comments.add(comment);
     }
     
     /**
      * removes all comments
      */
-    public void delete_comments(){
+    public void deleteComments(){
         comments.clear();
     }
     
@@ -220,7 +220,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the comments list
      * @return comments list
      */
-    public LinkedList<String> get_comments(){
+    public LinkedList<String> getComments(){
         return comments;
     }
     
@@ -229,7 +229,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param newlines insert \n at lineendings, if true
      * @return 
      */
-    public String get_comments_string(boolean newlines){
+    public String getCommentsString(boolean newlines){
         String ret = "";
         String lineending = newlines ? "\n" : " ";
         for(String c: comments) ret += (ret.length() == 0 ? "" : lineending) + c;
@@ -241,9 +241,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param dir exit direction
      * @return path connected to that exit or null
      */
-    public Path get_exit(String dir){
+    public Path getExit(String dir){
         for(Path path: paths){
-            if(path.get_exit(this).equals(dir)) return path;
+            if(path.getExit(this).equals(dir)) return path;
         }
         return null;
     }
@@ -253,10 +253,10 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param place a place that this place is connected to
      * @return paths to place or empty set
      */
-    public HashSet<Path> get_paths(Place place){
+    public HashSet<Path> getPaths(Place place){
         HashSet<Path> ret = new HashSet<Path>();
         for(Path path: paths)
-            if(path.has_place(place)) ret.add(path);            
+            if(path.hasPlace(place)) ret.add(path);            
         return ret;
     }
     
@@ -267,10 +267,10 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param dir2 exit direction of the other place
      * @throws java.lang.Exception if path could not be removed
      */
-    public void remove_path(String dir1, Place other, String dir2) throws Exception{
+    public void removePath(String dir1, Place other, String dir2) throws Exception{
         boolean ok = false;
-        for(Path path: get_paths(other)){
-            if(path.get_exit(this).equals(dir1) && path.get_exit(other).equals(dir2)){
+        for(Path path: Place.this.getPaths(other)){
+            if(path.getExit(this).equals(dir1) && path.getExit(other).equals(dir2)){
                 paths.remove(path);
                 other.paths.remove(path);
                 ok = true;
@@ -283,9 +283,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Removes a path
      * @param path 
      */
-    public void remove_path(Path path){
+    public void removePath(Path path){
         paths.remove(path);
-        path.get_other_place(this).paths.remove(path);
+        path.getOtherPlace(this).paths.remove(path);
     }
     
     /**
@@ -294,8 +294,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param path
      * @return true, if successfully connected
      */
-    public boolean connect_path(Path path) throws RuntimeException{
-        Place[] pp = path.get_places();
+    public boolean connectPath(Path path) throws RuntimeException{
+        Place[] pp = path.getPlaces();
         Place other;
         
         if(pp[0] == this) other = pp[1];
@@ -303,19 +303,19 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         else throw new RuntimeException("This place is not specified in given path");
         
         boolean exit_occupied = false;
-        String exit_this = path.get_exit(this);
+        String exit_this = path.getExit(this);
         
         // check if exit is already connected with path
         for(Path p: paths){
-            if(p.get_exit(this).equals(exit_this)){
+            if(p.getExit(this).equals(exit_this)){
                 exit_occupied = true;
                 break;
             }
         }
         if(!exit_occupied){
-            exit_this = path.get_exit(other);
+            exit_this = path.getExit(other);
             for(Path p: other.paths){
-                if(p.get_exit(other).equals(exit_this)){
+                if(p.getExit(other).equals(exit_this)){
                     exit_occupied = true;
                     break;
                 }
@@ -333,7 +333,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets all paths
      * @return all paths
      */
-    public HashSet<Path> get_paths(){
+    public HashSet<Path> getPaths(){
         return paths;
     }
     
@@ -342,9 +342,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param dir
      * @return 
      */
-    public Path get_path_to(String dir){
+    public Path getPathTo(String dir){
         for(Path pa: paths){
-            if(pa.get_exit(this).equals(dir)) return pa;
+            if(pa.getExit(this).equals(dir)) return pa;
         }
         return null;
     }
@@ -354,7 +354,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param key flag name
      * @return flag value
      */
-    public boolean get_flag(String key){
+    public boolean getFlag(String key){
         if(flags.containsKey(key)) return flags.get(key);
         return false;
     }
@@ -364,7 +364,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param key flag name
      * @param state value
      */
-    public void set_flag(String key, boolean state){
+    public void setFlag(String key, boolean state){
         flags.put(key, state);
     }
     
@@ -372,7 +372,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the flags of a place
      * @return 
      */
-    public TreeMap<String, Boolean> get_flags(){
+    public TreeMap<String, Boolean> getFlags(){
         return flags;
     }
     
@@ -380,7 +380,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Connects a place as child, this place will be added to it as parent
      * @param p 
      */
-    public void connect_child(Place p){
+    public void connectChild(Place p){
         children.add(p);
         p.parents.add(this);
     }
@@ -389,7 +389,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Removes a parent - child connection (subarea)
      * @param child child to be removed
      */
-    public void remove_child(Place child){
+    public void removeChild(Place child){
         children.remove(child);
         child.parents.remove(this);
     }
@@ -398,7 +398,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the child places / subareas
      * @return child places
      */
-    public HashSet<Place> get_children(){
+    public HashSet<Place> getChildren(){
         return children;
     }
     
@@ -406,7 +406,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Gets the parent places (subarea parents)
      * @return parent places
      */
-    public HashSet<Place> get_parents(){
+    public HashSet<Place> getParents(){
         return parents;
     }
     
@@ -416,7 +416,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     @Override
     public String toString(){
-        return name + " (ID: " + get_id() + ")";
+        return name + " (ID: " + getId() + ")";
     }
     
     /**
@@ -427,13 +427,13 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     @Override
     public int compareTo(Place arg0) {
         if(arg0 == null) throw new NullPointerException();
-        return get_name().compareTo(arg0.get_name());
+        return getName().compareTo(arg0.getName());
     }
 
     /**
      * Removes all connections to other places (paths, child-connections)
      */
-    void remove_connections() {
+    void removeConnections() {
         // remove paths (buffer, becaus connected_places will be modified
         HashSet<Path> cp_buffer = (HashSet<Path>) paths.clone();
         for(Path p: cp_buffer) p.remove();
@@ -448,7 +448,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @throws mudmap2.backend.Layer.PlaceNotFoundException 
      */
     public void remove() throws RuntimeException, PlaceNotFoundException {
-        get_layer().get_world().remove(this);
+        getLayer().getWorld().remove(this);
     }
 
     /**
@@ -457,7 +457,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param keywords in lower case
      * @return true, if a keyword is found
      */
-    public boolean match_keywords(String[] keywords) {
+    public boolean matchKeywords(String[] keywords) {
         for(String kw: keywords){
             // search in name
             if(name.toLowerCase().contains(kw)) return true;
@@ -477,11 +477,11 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return
      */
     public Place duplicate(){
-        Place place = new Place(name, get_x(), get_y(), null);
+        Place place = new Place(name, getX(), getY(), null);
         
         place.area = area;
-        place.rec_lvl_max = rec_lvl_max;
-        place.rec_lvl_min = rec_lvl_min;
+        place.rec_level_max = rec_level_max;
+        place.rec_level_min = rec_level_min;
         place.risk_level = risk_level;
         place.flags = (TreeMap<String, Boolean>) flags.clone();
         place.comments = (LinkedList<String>) comments.clone();
@@ -493,8 +493,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Resets the breadth search data
      */
     @Override
-    public void breadth_search_reset() {
-        get_breadth_search_data().reset();
+    public void breadthSearchReset() {
+        getBreadthSearchData().reset();
     }
 
     /**
@@ -502,7 +502,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return 
      */
     @Override
-    public BreadthSearchData get_breadth_search_data() {
+    public BreadthSearchData getBreadthSearchData() {
         if(breadth_search_data == null) breadth_search_data = new BreadthSearchData();
         return breadth_search_data;
     }

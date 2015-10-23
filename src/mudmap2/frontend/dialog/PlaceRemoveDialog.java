@@ -84,7 +84,7 @@ public class PlaceRemoveDialog implements ActionListener {
      * Returns true, if ok was clicked
      * @return 
      */
-    public boolean get_places_removed(){
+    public boolean getPlacesRemoved(){
         return places_removed;
     }
 

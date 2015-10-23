@@ -91,7 +91,7 @@ public final class Mainwindow extends JFrame {
     AvailableWorldsTab available_worlds_tab;
     
     public Mainwindow(){
-        super("MUD Map 2 " + (!mudmap2.Mudmap2.get_version_state().isEmpty() ? ("(" + mudmap2.Mudmap2.get_version_state() + ")") : ""));
+        super("MUD Map 2 " + (!mudmap2.Mudmap2.getVersionState().isEmpty() ? ("(" + mudmap2.Mudmap2.getVersionState() + ")") : ""));
         
         // set program icon
         try {
@@ -135,11 +135,11 @@ public final class Mainwindow extends JFrame {
                 String ret = JOptionPane.showInputDialog((Component) arg0.getSource(), "Enter new world name", "New world", JOptionPane.PLAIN_MESSAGE);
                 if(ret != null && !ret.isEmpty()){
                     // create a new world
-                    if(WorldManager.get_world_file(ret) == null) // no world with that name yet
+                    if(WorldManager.getWorldFile(ret) == null) // no world with that name yet
                         try {
-                        World w = WorldManager.create_world(ret);
+                        World w = WorldManager.createWorld(ret);
                         available_worlds_tab.update();
-                        open_world(w.get_file());
+                        openWorld(w.getFile());
                     } catch (Exception ex) {
                         Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
                         JOptionPane.showMessageDialog((Component) arg0.getSource(), "Couldn't create world \"" + ret + "\":\n" + ex.getMessage());
@@ -160,7 +160,7 @@ public final class Mainwindow extends JFrame {
         menu_file_save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = get_selected_tab();
+                WorldTab wt = getSelectedTab();
                 if(wt != null) wt.save();
             }
         });
@@ -171,7 +171,7 @@ public final class Mainwindow extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                WorldTab wt = get_selected_tab();
+                WorldTab wt = getSelectedTab();
                 if(wt != null){
                     ExportImageDialog dlg = new ExportImageDialog(wt.parent, wt);
                     dlg.setVisible(true);
@@ -194,9 +194,9 @@ public final class Mainwindow extends JFrame {
         menu_edit_edit_world.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                WorldTab tab = get_selected_tab();
+                WorldTab tab = getSelectedTab();
                 if(tab != null){
-                    (new EditWorldDialog(tab.parent, tab.get_world())).setVisible(true);
+                    (new EditWorldDialog(tab.parent, tab.getWorld())).setVisible(true);
                     available_worlds_tab.update();
                 }
             }
@@ -208,9 +208,9 @@ public final class Mainwindow extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                WorldTab tab = get_selected_tab();
+                WorldTab tab = getSelectedTab();
                 if(tab != null){
-                    (new PathColorDialog(tab.parent, tab.get_world())).setVisible(true);
+                    (new PathColorDialog(tab.parent, tab.getWorld())).setVisible(true);
                     tab.repaint();
                 }
             }
@@ -221,8 +221,8 @@ public final class Mainwindow extends JFrame {
         menu_edit_add_area.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = get_selected_tab();
-                if(wt != null) (new AreaDialog(wt.parent, wt.get_world())).setVisible(true);
+                WorldTab wt = getSelectedTab();
+                if(wt != null) (new AreaDialog(wt.parent, wt.getWorld())).setVisible(true);
             }
         });
         
@@ -233,8 +233,8 @@ public final class Mainwindow extends JFrame {
         menu_edit_set_home_position.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = get_selected_tab();
-                if(wt != null) wt.set_home();
+                WorldTab wt = getSelectedTab();
+                if(wt != null) wt.setHome();
             }
         });
         JMenuItem menu_edit_goto_home_position = new JMenuItem("Go to home position");
@@ -242,8 +242,8 @@ public final class Mainwindow extends JFrame {
         menu_edit_goto_home_position.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = get_selected_tab();
-                if(wt != null) wt.goto_home();
+                WorldTab wt = getSelectedTab();
+                if(wt != null) wt.gotoHome();
             }
         });
         
@@ -254,7 +254,7 @@ public final class Mainwindow extends JFrame {
         menu_edit_list_places.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = get_selected_tab();
+                WorldTab wt = getSelectedTab();
                 // show place list
                 if(wt != null) (new PlaceListDialog(wt, false)).setVisible(true);
             }
@@ -266,12 +266,12 @@ public final class Mainwindow extends JFrame {
         menu_edit_curved_paths = new JCheckBoxMenuItem("Curved paths");
         menu_edit.add(menu_edit_curved_paths);
         // will be set after the config file is read
-        //menu_edit_curved_paths.setSelected(WorldTab.get_show_paths_curved());
+        //menu_edit_curved_paths.setSelected(WorldTab.getShowPathsCurved());
         menu_edit_curved_paths.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                WorldTab.set_show_paths_curved(((JCheckBoxMenuItem) e.getSource()).isSelected());
-                WorldTab cur_tab = get_selected_tab();
+                WorldTab.setShowPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                WorldTab cur_tab = getSelectedTab();
                 if(cur_tab != null) cur_tab.repaint();
             }
         });
@@ -283,9 +283,9 @@ public final class Mainwindow extends JFrame {
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                WorldTab cur_tab = get_selected_tab();
+                WorldTab cur_tab = getSelectedTab();
                 if(cur_tab != null){
-                    cur_tab.set_cursor_enabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                    cur_tab.setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
                     cur_tab.repaint();
                 }
             }
@@ -296,7 +296,7 @@ public final class Mainwindow extends JFrame {
         menu_help_help.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                Paths.open_website(Paths.manual_url);
+                Paths.openWebsite(Paths.manual_url);
             }
         });
         
@@ -305,7 +305,7 @@ public final class Mainwindow extends JFrame {
         menu_help_about.addActionListener((ActionListener) new AboutDialog(this));
         
         // ---
-        read_config();
+        readConfig();
         
         // ---
         tabbed_pane = new JTabbedPane();
@@ -315,8 +315,8 @@ public final class Mainwindow extends JFrame {
 
             @Override
             public void stateChanged(ChangeEvent ce) {
-                WorldTab cur_tab = get_selected_tab();
-                if(cur_tab != null) cur_tab.update_cursor_enabled();
+                WorldTab cur_tab = getSelectedTab();
+                if(cur_tab != null) cur_tab.updateCursorEnabled();
             }
         });
         
@@ -327,25 +327,25 @@ public final class Mainwindow extends JFrame {
      * shows the tab of the world, opens the world if necessary
      * @param file world file
      */
-    public void open_world(String file){
+    public void openWorld(String file){
         setMinimumSize(new Dimension(500, 400));
         
         if(!world_tabs.containsKey(file)){ 
             // open new tab
             WorldTab tab = new WorldTab(this, file, false);
             world_tabs.put(file, tab);
-            tabbed_pane.addTab(tab.get_world().get_name(), tab);
+            tabbed_pane.addTab(tab.getWorld().getName(), tab);
         }
         // change current tab
         tabbed_pane.setSelectedComponent(world_tabs.get(file));
         
-        WorldTab cur_tab = get_selected_tab();
+        WorldTab cur_tab = getSelectedTab();
         if(cur_tab != null){
             available_worlds_tab.update();
 
             System.out.println("open");
             if(menu_edit_show_cursor != null){
-                menu_edit_show_cursor.setState(cur_tab.get_cursor_enabled());
+                menu_edit_show_cursor.setState(cur_tab.getCursorEnabled());
             }
         }
     }
@@ -353,7 +353,7 @@ public final class Mainwindow extends JFrame {
     /**
      * Closes all tabs
      */
-    public void close_tabs(){
+    public void closeTabs(){
         for(WorldTab tab: world_tabs.values()) tab.close();
     }
     
@@ -361,7 +361,7 @@ public final class Mainwindow extends JFrame {
      * Removes a tab without saving and closing the world in WorldManager
      * @param tab
      */
-    public void remove_tab(WorldTab tab){
+    public void removeTab(WorldTab tab){
         tabbed_pane.remove(tab);
     }
     
@@ -369,7 +369,7 @@ public final class Mainwindow extends JFrame {
      * Gets the currently shown WorldTab
      * @return WorldTab or null
      */
-    private WorldTab get_selected_tab(){
+    private WorldTab getSelectedTab(){
         if(tabbed_pane != null){
             Component ret = tabbed_pane.getSelectedComponent();
             if(ret instanceof WorldTab) return (WorldTab) ret;
@@ -377,7 +377,7 @@ public final class Mainwindow extends JFrame {
         return null;
     }
     
-    public JCheckBoxMenuItem get_mi_show_place_selection(){
+    public JCheckBoxMenuItem getMiShowPlaceSelection(){
         return menu_edit_show_cursor;
     }
     
@@ -385,18 +385,18 @@ public final class Mainwindow extends JFrame {
      * Saves all config
      */
     public void quit(){
-        write_config();
-        close_tabs();
-        WorldManager.write_world_list(); // do this after writing the world files
+        writeConfig();
+        closeTabs();
+        WorldManager.writeWorldList(); // do this after writing the world files
         System.exit(0);
     }
     
     /**
      * Reads MUD Map config file
      */
-    public void read_config(){
+    public void readConfig(){
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(mudmap2.Paths.get_config_file()));
+            BufferedReader reader = new BufferedReader(new FileReader(mudmap2.Paths.getConfigFile()));
             
             String line;
             int file_major = 0, file_minor = 0;
@@ -411,7 +411,7 @@ public final class Mainwindow extends JFrame {
                         file_minor = Integer.parseInt(tmp[1]);
                     } else if(line.startsWith("show_paths_curved")){ // show curved path lines - if path lines are enabled
                         String[] tmp = line.split(" ");
-                        WorldTab.set_show_paths_curved(Boolean.parseBoolean(tmp[1]));
+                        WorldTab.setShowPathsCurved(Boolean.parseBoolean(tmp[1]));
                     } else if(line.startsWith("compat_mudmap_1")){ // save world files compatible to mudmap 1
                         String[] tmp = line.split(" ");
                         World.compatibility_mudmap_1 = Boolean.parseBoolean(tmp[1]);
@@ -421,30 +421,30 @@ public final class Mainwindow extends JFrame {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
             }
         } catch (FileNotFoundException ex) {
-            System.out.println("Couldn't open config file \"" + mudmap2.Paths.get_config_file() + "\", file not found");
+            System.out.println("Couldn't open config file \"" + mudmap2.Paths.getConfigFile() + "\", file not found");
             //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
         }
         
-        if(menu_edit_curved_paths != null) menu_edit_curved_paths.setSelected(WorldTab.get_show_paths_curved());
+        if(menu_edit_curved_paths != null) menu_edit_curved_paths.setSelected(WorldTab.getShowPathsCurved());
     }
     
     /**
      * Writes MUD Map config file
      */
-    public void write_config(){
+    public void writeConfig(){
         try {
             // open file
-            if(!Paths.is_directory(Paths.get_user_data_dir())) Paths.create_directory(Paths.get_user_data_dir());
-            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(Paths.get_config_file())));
+            if(!Paths.isDirectory(Paths.getUserDataDir())) Paths.createDirectory(Paths.getUserDataDir());
+            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(Paths.getConfigFile())));
 
             outstream.println("# MUD Map 2 config file");
             outstream.println("ver " + config_file_version_major + "." + config_file_version_minor);
-            outstream.println("show_paths_curved " + WorldTab.get_show_paths_curved());
+            outstream.println("show_paths_curved " + WorldTab.getShowPathsCurved());
             outstream.println("compat_mudmap_1 " + World.compatibility_mudmap_1);
             
             outstream.close();
         } catch (IOException ex) {
-            System.out.printf("Couldn't write config file " + Paths.get_config_file());
+            System.out.printf("Couldn't write config file " + Paths.getConfigFile());
             Logger.getLogger(Mainwindow.class.getName()).log(Level.WARNING, null, ex);
         }
     }
@@ -459,7 +459,7 @@ public final class Mainwindow extends JFrame {
         
         public AvailableWorldsTab(Mainwindow _mwin) {
             mwin = _mwin;
-            WorldManager.read_world_list();
+            WorldManager.readWorldList();
             update();
         }
         
@@ -479,12 +479,12 @@ public final class Mainwindow extends JFrame {
             constraints.insets = new Insets(2, 2, 2, 2);
             
             //for(final Object world_name: worlds){
-            for(final Entry<String, String> world: WorldManager.get_worlds().entrySet()){
+            for(final Entry<String, String> world: WorldManager.getWorlds().entrySet()){
                 JButton b = new JButton(world.getValue() + " (" + world.getKey() + ")");
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        mwin.open_world((String) world.getKey());
+                        mwin.openWorld((String) world.getKey());
                     }
                 });
                 constraints.gridx = 0;
@@ -497,7 +497,7 @@ public final class Mainwindow extends JFrame {
                 r.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        WorldManager.delete_world((String) world.getKey());
+                        WorldManager.deleteWorld((String) world.getKey());
                     }
                 });
                 constraints.gridx = 1;
@@ -514,7 +514,7 @@ public final class Mainwindow extends JFrame {
 
                 @Override
                 public void actionPerformed(ActionEvent ae) {
-                    WorldManager.find_worlds();
+                    WorldManager.findWorlds();
                     update();
                 }
             });

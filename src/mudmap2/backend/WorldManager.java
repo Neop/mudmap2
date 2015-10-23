@@ -57,14 +57,14 @@ public class WorldManager {
     /**
      * Reads the available worlds list
      */
-    public static void read_world_list(){
+    public static void readWorldList(){
         // the available worlds will be read from the worlds file
         // files found in the world directory
         // files found in the world directory
         
         // read from available worlds file
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(Paths.get_available_worlds_file()));
+            BufferedReader reader = new BufferedReader(new FileReader(Paths.getAvailableWorldsFile()));
             
             boolean relative_path = false;
             String line, name = new String(), file = new String();
@@ -76,8 +76,8 @@ public class WorldManager {
                         // save world if found
                         if(!name.isEmpty() && !file.isEmpty()){
                             if(name != null && file != null && !available_worlds.containsKey(file)){
-                                if(Paths.file_exists(file)) available_worlds.put(file, name);
-                                else if(Paths.file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(Paths.get_worlds_dir() + file, name);
+                                if(Paths.fileExists(file)) available_worlds.put(file, name);
+                                else if(Paths.fileExists(Paths.getWorldsDir() + file)) available_worlds.put(Paths.getWorldsDir() + file, name);
                             }
                             relative_path = false;
                             file = new String();
@@ -98,19 +98,19 @@ public class WorldManager {
             
             // save last found world
             if(name != null && file != null && !available_worlds.containsKey(file)){
-                if(Paths.file_exists(file)) available_worlds.put(file, name);
-                else if(Paths.file_exists(Paths.get_worlds_dir() + file)) available_worlds.put(Paths.get_worlds_dir() + file, name);
+                if(Paths.fileExists(file)) available_worlds.put(file, name);
+                else if(Paths.fileExists(Paths.getWorldsDir() + file)) available_worlds.put(Paths.getWorldsDir() + file, name);
             }
             
         } catch (FileNotFoundException ex) {
-            System.out.println("Couldn't open available worlds file \"" + Paths.get_available_worlds_file() + "\", file not found");
+            System.out.println("Couldn't open available worlds file \"" + Paths.getAvailableWorldsFile() + "\", file not found");
         }
     }
     
-    public static void find_worlds(){
+    public static void findWorlds(){
         // read from directory
         // get file list
-        File dir = new File(Paths.get_worlds_dir());
+        File dir = new File(Paths.getWorldsDir());
         File[] fileList = dir.listFiles();
 
         if(fileList != null){
@@ -150,11 +150,11 @@ public class WorldManager {
      * Saves the available worlds list
      * do this after writing the world files or new places won't appear in list
      */
-    public static void write_world_list(){
-        final String file = Paths.get_worlds_dir() + "worlds";
+    public static void writeWorldList(){
+        final String file = Paths.getWorldsDir() + "worlds";
         try {
             // open file
-            if(!Paths.is_directory(Paths.get_worlds_dir())) Paths.create_directory(Paths.get_worlds_dir());
+            if(!Paths.isDirectory(Paths.getWorldsDir())) Paths.createDirectory(Paths.getWorldsDir());
             PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)));
 
             outstream.println("# MUD Map (v2) worlds file");
@@ -162,13 +162,13 @@ public class WorldManager {
             
             for(Entry<String, String> w: available_worlds.entrySet()){
                 // check whether the file name in file equals the name in the list
-                String fw = read_world_name(w.getKey());
+                String fw = readWorldName(w.getKey());
                 if(fw != null && fw.equals(w.getValue())){
                     outstream.println("n " + w.getValue());
                     String w_file = w.getKey();
                     outstream.println("f " + w_file);
-                    if(w_file.startsWith(Paths.get_worlds_dir())){
-                        w_file = w_file.substring(Paths.get_worlds_dir().length());
+                    if(w_file.startsWith(Paths.getWorldsDir())){
+                        w_file = w_file.substring(Paths.getWorldsDir().length());
                         outstream.println("g " + w_file);
                     }
                 }
@@ -180,7 +180,7 @@ public class WorldManager {
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
             JOptionPane.showMessageDialog(null, "Could not write worlds list file " 
                     + file + ".\nYou might have to open your worlds manually from " 
-                    + Paths.get_worlds_dir(), "MUD Map WorldManager", JOptionPane.WARNING_MESSAGE);
+                    + Paths.getWorldsDir(), "MUD Map WorldManager", JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -189,7 +189,7 @@ public class WorldManager {
      * @param name name of a world in the available worlds list
      * @return filename of the world
      */
-    public static String get_world_file(String name){
+    public static String getWorldFile(String name){
         for(Entry<String, String> e: available_worlds.entrySet())
             if(e.getValue().equals(name)) return e.getKey();
         return null;
@@ -200,7 +200,7 @@ public class WorldManager {
      * @param file file of a world
      * @return a world
      */
-    public static World get_world(String file){
+    public static World getWorld(String file){
         if(!loaded_worlds.containsKey(file)){
             try {
                 loaded_worlds.put(file, new World(file));
@@ -216,7 +216,7 @@ public class WorldManager {
      * Gets the names of all found worlds
      * @return list of world names
      */
-    public static HashMap<String, String> get_worlds(){
+    public static HashMap<String, String> getWorlds(){
         return available_worlds;
     }
     
@@ -227,12 +227,12 @@ public class WorldManager {
      * @return 
      * @throws java.lang.Exception
      */
-    public static World create_world(String name, String file) throws Exception{
+    public static World createWorld(String name, String file) throws Exception{
         // check if name already exists
         if(!available_worlds.containsKey(file)){
             // check if the file already exists
             file = file.replaceAll("\\s", "_");
-            if(!Paths.file_exists(file)){
+            if(!Paths.fileExists(file)){
                 
                 System.out.println("Name: " + name);
                 System.out.println("File: " + file);
@@ -254,8 +254,8 @@ public class WorldManager {
      * @return 
      * @throws java.lang.Exception
      */
-    public static World create_world(String name) throws Exception{
-        String path = Paths.get_worlds_dir();
+    public static World createWorld(String name) throws Exception{
+        String path = Paths.getWorldsDir();
         String file = name;
         
         // create available file path, if necessary
@@ -266,7 +266,7 @@ public class WorldManager {
             for(String s: available_worlds.keySet()) if(s.toLowerCase().equals((path + name + file).toLowerCase())) file_ok = false;
         }
         
-        return create_world(name, path + name + file);
+        return WorldManager.createWorld(name, path + name + file);
     }
     
     /**
@@ -275,8 +275,8 @@ public class WorldManager {
      * @return world name
      * @throws java.lang.Exception
      */
-    public static String add_world(String file) throws Exception{
-        String name = read_world_name(file);
+    public static String addWorld(String file) throws Exception{
+        String name = readWorldName(file);
         if(name != null && !available_worlds.containsKey(file)){
             available_worlds.put(file, name);
         } else throw new Exception("Can't add world, name is already in list");
@@ -287,7 +287,7 @@ public class WorldManager {
      * Deletes a world, this can not be undone
      * @param file
      */
-    public static void delete_world(String file){
+    public static void deleteWorld(String file){
         if(file != null && !file.isEmpty()){
             if(loaded_worlds.containsKey(file))
                 JOptionPane.showMessageDialog(null, "Can't delete world \"" + file + "\", it is currently loaded", "Delete world", JOptionPane.INFORMATION_MESSAGE);
@@ -317,7 +317,7 @@ public class WorldManager {
      * @param file world file
      * @return world name or ""
      */
-    public static String read_world_name(String file){
+    public static String readWorldName(String file){
         String ret = null;
         
         try {
@@ -348,7 +348,7 @@ public class WorldManager {
      * Removes a world from loaded worlds list
      * @param file 
      */
-    public static void close_world(String file){
+    public static void closeWorld(String file){
         loaded_worlds.remove(file);
     }
     

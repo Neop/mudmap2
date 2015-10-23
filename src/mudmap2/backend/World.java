@@ -67,7 +67,7 @@ public class World implements BreadthSearchGraph {
     TreeMap<String, Integer> place_names;
     TreeMap<Integer, Layer> layers;
     
-    ShowPlaceID_t show_place_id;
+    ShowPlaceID show_place_id;
     
     /**
      * Loads a world from a file
@@ -77,7 +77,7 @@ public class World implements BreadthSearchGraph {
     public World(String _file) throws WorldReadException{
         file = _file;
         initialize();
-        load_world();
+        loadWorld();
         file_backed_up = false;
     }
     
@@ -116,13 +116,13 @@ public class World implements BreadthSearchGraph {
         places = new TreeMap<Integer, Place>();
         place_names = new TreeMap<String, Integer>();
         
-        show_place_id = ShowPlaceID_t.UNIQUE;
+        show_place_id = ShowPlaceID.UNIQUE;
     }
     
     /**
      * Loads the world
      */
-    private void load_world() throws WorldReadException{
+    private void loadWorld() throws WorldReadException{
         System.out.println("Loading world: " + file);
         
         WorldFileMM1 worldfile = new WorldFileMM1(this);
@@ -132,7 +132,7 @@ public class World implements BreadthSearchGraph {
     /**
      * Saves the world
      */
-    public void write_world(){
+    public void writeWorld(){
         WorldFileMM1 worldfile = new WorldFileMM1(this);
         if(!file_backed_up){
             worldfile.backup(file);
@@ -148,9 +148,9 @@ public class World implements BreadthSearchGraph {
      * @return 
      */
     @Override
-    public Place breadth_search(Place start, Place end) {
-        for(Place pl: get_places()) pl.breadth_search_reset();
-        start.get_breadth_search_data().marked = true;
+    public Place breadthSearch(Place start, Place end) {
+        for(Place pl: getPlaces()) pl.breadthSearchReset();
+        start.getBreadthSearchData().marked = true;
         
         LinkedList<Place> queue = new LinkedList<Place>();
         queue.add(start);
@@ -159,11 +159,11 @@ public class World implements BreadthSearchGraph {
             Place v = queue.pollFirst();
             if(v == end) return v;
             
-            for(Path pa: v.get_paths()){
-                Place vi = pa.get_other_place(v);
-                if(!vi.get_breadth_search_data().marked && vi != v){
-                    vi.get_breadth_search_data().marked = true;
-                    vi.get_breadth_search_data().predecessor = v;
+            for(Path pa: v.getPaths()){
+                Place vi = pa.getOtherPlace(v);
+                if(!vi.getBreadthSearchData().marked && vi != v){
+                    vi.getBreadthSearchData().marked = true;
+                    vi.getBreadthSearchData().predecessor = v;
                     queue.addLast(vi);
                 }
             }
@@ -179,7 +179,7 @@ public class World implements BreadthSearchGraph {
      * @return place or null if it doesn't exist
      */
     public Place get(int layer, int x, int y){
-        Layer l = get_layer(layer);
+        Layer l = getLayer(layer);
         if(l == null) return null;
         else return (Place) l.get(x, y);
     }
@@ -192,13 +192,13 @@ public class World implements BreadthSearchGraph {
      */
     public void put(Place place) throws Exception{
         // create layer, if it doesn't exist
-        Layer layer = place.get_layer();
+        Layer layer = place.getLayer();
         if(layer == null){
             layer = new Layer(this);
-            layers.put(home.get_layer(), layer);
-            place.set_layer(layer);
+            layers.put(home.getLayer(), layer);
+            place.setLayer(layer);
         }
-        put(place, place.get_layer().get_id(), place.get_x(), place.get_y());
+        put(place, place.getLayer().getId(), place.getX(), place.getY());
     }
     
     /**
@@ -211,28 +211,28 @@ public class World implements BreadthSearchGraph {
      */
     public void put(Place place, int layer, int x, int y) throws Exception{
         // get layer, create a new one, if necessary
-        Layer l = get_layer(layer);
+        Layer l = getLayer(layer);
         if(l == null) layers.put(layer, l = new Layer(layer, this));
         
         // remove from old layer and world
-        if(place.get_layer() != null){ 
+        if(place.getLayer() != null){ 
             try{
                 // if place belongs to a different world
-                if(place.get_layer().get_world() != this) place.get_layer().get_world().remove(place);
-                else place.get_layer().remove(place);
+                if(place.getLayer().getWorld() != this) place.getLayer().getWorld().remove(place);
+                else place.getLayer().remove(place);
             } catch(Exception ex){
                 Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
         // add to layer
-        place.set_layer(l);
+        place.setLayer(l);
         l.put(place, x, y);
         
         // add to place list of the world
-        places.put(place.get_id(), place);
-        if(!place_names.containsKey(place.get_name())) place_names.put(place.get_name(), 1);
-        else place_names.put(place.get_name(), place_names.get(place.get_name()) + 1);
+        places.put(place.getId(), place);
+        if(!place_names.containsKey(place.getName())) place_names.put(place.getName(), 1);
+        else place_names.put(place.getName(), place_names.get(place.getName()) + 1);
     }
     
     /**
@@ -241,21 +241,21 @@ public class World implements BreadthSearchGraph {
      * @param x x coordinate
      * @param y y coordinate
      */
-    public void put_placeholder(int layer, int x, int y){
+    public void putPlaceholder(int layer, int x, int y){
         try {
             Place place = new Place(Place.placeholder_name, x, y, null);
             
             // find or create placeholder area
             Area area = null;
-            for(Area a: areas.values()) if(a.get_name().equals("placeholder")){
+            for(Area a: areas.values()) if(a.getName().equals("placeholder")){
                 area = a;
                 break;
             }
             // create new placeholder area
-            if(area == null) add_area(area = new Area("placeholder", Color.GREEN));
+            if(area == null) addArea(area = new Area("placeholder", Color.GREEN));
             
-            place.set_area(area);
-            place.set_risk_level(get_risk_level(0));
+            place.setArea(area);
+            place.setRiskLevel(getRiskLevel(0));
             put(place, layer, x, y);
         } catch(PlaceNotInsertedException ex){ // ignore
         } catch (Exception ex) {
@@ -270,16 +270,16 @@ public class World implements BreadthSearchGraph {
      * @throws mudmap2.backend.Layer.PlaceNotFoundException 
      */
     public void remove(Place place) throws RuntimeException, PlaceNotFoundException {
-        Layer layer = layers.get(place.get_layer().get_id());
-        if(layer == null || layer != place.get_layer()){
+        Layer layer = layers.get(place.getLayer().getId());
+        if(layer == null || layer != place.getLayer()){
             // error, wrong layer? (shouldn't occur)
             throw new RuntimeException("Couldn't remove \"" + place + ": layer mismatch");
         } else {
-            place.remove_connections();
+            place.removeConnections();
             layer.remove(place);
-            places.remove(place.get_id());
-            if(place_names.containsKey(place.get_name()))
-                place_names.put(place.get_name(), Math.max(0, place_names.get(place.get_name()) - 1));
+            places.remove(place.getId());
+            if(place_names.containsKey(place.getName()))
+                place_names.put(place.getName(), Math.max(0, place_names.get(place.getName()) - 1));
         }
     }
     
@@ -288,7 +288,7 @@ public class World implements BreadthSearchGraph {
      * @param name
      * @return 
      */
-    public int get_place_name_count(String name){
+    public int getPlaceNameCount(String name){
         if(place_names.containsKey(name)) return place_names.get(name);
         else return 0;
     }
@@ -303,7 +303,7 @@ public class World implements BreadthSearchGraph {
      * @param line raw config line
      * @return text part
      */
-    private String config_get_text(int non_text, String line){
+    private String configGetText(int non_text, String line){
         while(non_text-- != 0){
             int index = line.indexOf(" ");
             // if " " not found -> entry not found in line
@@ -318,7 +318,7 @@ public class World implements BreadthSearchGraph {
      * @param id layer id
      * @return layer or null
      */
-    public Layer get_layer(int id){
+    public Layer getLayer(int id){
         return layers.get(id);
     }
     
@@ -326,17 +326,17 @@ public class World implements BreadthSearchGraph {
      * Adds or replaces a layer
      * @param l 
      */
-    public void set_layer(Layer l){
-        layers.put(l.get_id(), l);
+    public void setLayer(Layer l){
+        layers.put(l.getId(), l);
     }
     
     /**
      * Creates a new and empty layer and returns it
      * @return new layer
      */
-    public Layer get_new_layer(){
+    public Layer getNewLayer(){
         Layer ret = new Layer(this);
-        layers.put(ret.get_id(), ret);
+        layers.put(ret.getId(), ret);
         return ret;
     }
     
@@ -345,7 +345,7 @@ public class World implements BreadthSearchGraph {
      * @param id place id
      * @return place 
      */
-    public Place get_place(int id){
+    public Place getPlace(int id){
         return places.get(id);
     }
     
@@ -353,7 +353,7 @@ public class World implements BreadthSearchGraph {
      * Gets all places
      * @return 
      */
-    public Collection<Place> get_places(){
+    public Collection<Place> getPlaces(){
         return places.values();
     }
     
@@ -362,7 +362,7 @@ public class World implements BreadthSearchGraph {
      * @param id risk level id
      * @return risk level
      */
-    public RiskLevel get_risk_level(int id){
+    public RiskLevel getRiskLevel(int id){
         return risk_levels.get(id);
     }
     
@@ -370,7 +370,7 @@ public class World implements BreadthSearchGraph {
      * Gets the world name
      * @return world name
      */
-    public String get_name(){
+    public String getName(){
         return name;
     }
     
@@ -378,7 +378,7 @@ public class World implements BreadthSearchGraph {
      * Sets the world name
      * @param n new world name
      */
-    public void set_name(String n){
+    public void setName(String n){
         name = n;
     }
     
@@ -386,7 +386,7 @@ public class World implements BreadthSearchGraph {
      * Gets the world file
      * @return world file string
      */
-    public String get_file(){
+    public String getFile(){
         return file;
     }
     
@@ -394,7 +394,7 @@ public class World implements BreadthSearchGraph {
      * Gets the home position
      * @return home coordinate
      */
-    public WorldCoordinate get_home(){
+    public WorldCoordinate getHome(){
         return home;
     }
     
@@ -402,7 +402,7 @@ public class World implements BreadthSearchGraph {
      * Sets a new home position
      * @param _home
      */
-    public void set_home(WorldCoordinate _home){
+    public void setHome(WorldCoordinate _home){
         home = _home;
     }
     
@@ -410,7 +410,7 @@ public class World implements BreadthSearchGraph {
      * Gets the path color
      * @return path color
      */
-    public Color get_path_color(){
+    public Color getPathColor(){
         return path_color_cardinal;
     }
     
@@ -418,7 +418,7 @@ public class World implements BreadthSearchGraph {
      * Gets the color for paths that aren't predefined
      * @return path color
      */
-    public Color get_path_color_nstd(){
+    public Color getPathColorNstd(){
         return path_color_non_cardinal;
     }
     
@@ -427,7 +427,7 @@ public class World implements BreadthSearchGraph {
      * @param dir
      * @return 
      */
-    public Color get_path_color(String dir){
+    public Color getPathColor(String dir){
         if(!path_colors.containsKey(dir)){
             if(dir.equals("n") || dir.equals("s") || dir.equals("e") || dir.equals("q") ||
                dir.equals("ne") || dir.equals("nw") || dir.equals("se") || dir.equals("sw") ||
@@ -444,7 +444,7 @@ public class World implements BreadthSearchGraph {
      * @param dir
      * @param color 
      */
-    public void set_path_color(String dir, Color color){
+    public void setPathColor(String dir, Color color){
         path_colors.put(dir, color);
     }
     
@@ -452,7 +452,7 @@ public class World implements BreadthSearchGraph {
      * Gets all exit direction colors
      * @return 
      */
-    public HashMap<String, Color> get_path_colors(){
+    public HashMap<String, Color> getPathColors(){
         return path_colors;
     }
     
@@ -460,7 +460,7 @@ public class World implements BreadthSearchGraph {
      * Sets the path color
      * @param color new color
      */
-    public void set_path_color(Color color){
+    public void setPathColor(Color color){
         path_color_cardinal = color;
     }
     
@@ -468,7 +468,7 @@ public class World implements BreadthSearchGraph {
      * Sets the color for paths that aren't predefined
      * @param color 
      */
-    public void set_path_color_nstd(Color color){
+    public void setPathColorNstd(Color color){
         path_color_non_cardinal = color;
     }
     
@@ -476,7 +476,7 @@ public class World implements BreadthSearchGraph {
      * Gets the tile center color
      * @return 
      */
-    public Color get_tile_center_color(){
+    public Color getTileCenterColor(){
         return tile_center_color;
     }
     
@@ -484,11 +484,11 @@ public class World implements BreadthSearchGraph {
      * Sets the tile center color
      * @param color 
      */
-    public void set_tile_center_color(Color color){
+    public void setTileCenterColor(Color color){
         tile_center_color = color;
     }
     
-    public enum ShowPlaceID_t {
+    public enum ShowPlaceID {
         NONE, // don't show place ID on map
         UNIQUE, // show place ID if name isn't unique
         ALL // always show place ID
@@ -498,7 +498,7 @@ public class World implements BreadthSearchGraph {
      * Sets whether the place ID is shown on the map
      * @param show 
      */
-    public void set_show_place_id(ShowPlaceID_t show){
+    public void setShowPlaceID(ShowPlaceID show){
         show_place_id = show;
     }
     
@@ -506,7 +506,7 @@ public class World implements BreadthSearchGraph {
      * Gets the in which case the place ID is shown on the map
      * @return 
      */
-    public ShowPlaceID_t get_show_place_id(){
+    public ShowPlaceID getShowPlaceId(){
         return show_place_id;
     }
     
@@ -514,7 +514,7 @@ public class World implements BreadthSearchGraph {
      * Gets all areas (eg. for lists)
      * @return all areas
      */
-    public ArrayList<Area> get_areas(){
+    public ArrayList<Area> getAreas(){
         ArrayList<Area> ret = new ArrayList<Area>(areas.values());
         Collections.sort(ret);
         return ret;
@@ -525,7 +525,7 @@ public class World implements BreadthSearchGraph {
      * @param id area id
      * @return area
      */
-    public Area get_area(int id){
+    public Area getArea(int id){
         return areas.get(id);
     }
     
@@ -533,27 +533,27 @@ public class World implements BreadthSearchGraph {
      * Adds an area
      * @param area new area
      */
-    public void add_area(Area area) {
-        if(!areas.containsValue(area)) areas.put(area.get_id(), area);
+    public void addArea(Area area) {
+        if(!areas.containsValue(area)) areas.put(area.getId(), area);
     }
     
     /**
      * Removes an area
      * @param area area to be removed
      */
-    public void remove_area(Area area){
+    public void removeArea(Area area){
         // remove area from places
         for(Place p: places.values()){
-            if(p.get_area() == area) p.set_area(null);
+            if(p.getArea() == area) p.setArea(null);
         }
-        areas.remove(area.get_id());
+        areas.remove(area.getId());
     }
     
     /**
      * Gets all layers
      * @return all layers
      */
-    public Collection<Layer> get_layers(){
+    public Collection<Layer> getLayers(){
         return layers.values();
     }
     
@@ -561,7 +561,7 @@ public class World implements BreadthSearchGraph {
      * Gets all risk levels (eg. for lists)
      * @return all risk levels
      */
-    public Collection<RiskLevel> get_risk_levels(){
+    public Collection<RiskLevel> getRiskLevels(){
         return risk_levels.values();
     }
     
@@ -569,19 +569,19 @@ public class World implements BreadthSearchGraph {
      * Adds a risk level
      * @param rl new risk level
      */
-    public void add_risk_level(RiskLevel rl){
-        if(!risk_levels.containsKey(rl.get_id())) risk_levels.put(rl.get_id(), rl);
+    public void addRiskLevel(RiskLevel rl){
+        if(!risk_levels.containsKey(rl.getId())) risk_levels.put(rl.getId(), rl);
     }
     
     /**
      * Removes a risk level
      * @param rl 
      */
-    public void remove_risk_level(RiskLevel rl){
-        risk_levels.remove(rl.get_id());
+    public void removeRiskLevel(RiskLevel rl){
+        risk_levels.remove(rl.getId());
         // remove from places
         for(Place place: places.values())
-            if(place.get_risk_level().get_id() == rl.get_id()) place.set_risk_level(null);
+            if(place.getRiskLevel().getId() == rl.getId()) place.setRiskLevel(null);
     }
     
     /**

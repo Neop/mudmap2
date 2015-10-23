@@ -74,9 +74,9 @@ public class PlaceDialog extends ActionDialog {
         
         world = _world;
         place = _place;
-        layer = place.get_layer();
-        px = place.get_x();
-        py = place.get_y();
+        layer = place.getLayer();
+        px = place.getX();
+        py = place.getY();
     }
     
     /**
@@ -105,7 +105,7 @@ public class PlaceDialog extends ActionDialog {
         setLayout(new GridLayout(0, 2, 4, 4));
         
         add(new JLabel("Name"));
-        if(place != null) textfield_name = new JTextField(place.get_name());
+        if(place != null) textfield_name = new JTextField(place.getName());
         else textfield_name = new JTextField();
         add(textfield_name);
         
@@ -114,24 +114,24 @@ public class PlaceDialog extends ActionDialog {
         add(new JLabel("Area"));
         combobox_area = new JComboBox<Area>();
         combobox_area.addItem(area_null);
-        for(Area a : world.get_areas()) combobox_area.addItem(a);
-        if(place != null && place.get_area() != null) combobox_area.setSelectedItem(place.get_area());
+        for(Area a : world.getAreas()) combobox_area.addItem(a);
+        if(place != null && place.getArea() != null) combobox_area.setSelectedItem(place.getArea());
         add(combobox_area);
         
         add(new JLabel("Risk level"));
         combobox_risk = new JComboBox<RiskLevel>();
-        for(RiskLevel rl : world.get_risk_levels()) combobox_risk.addItem(rl);
-        if(place != null && place.get_risk_level() != null) combobox_risk.setSelectedItem(place.get_risk_level());
+        for(RiskLevel rl : world.getRiskLevels()) combobox_risk.addItem(rl);
+        if(place != null && place.getRiskLevel() != null) combobox_risk.setSelectedItem(place.getRiskLevel());
         add(combobox_risk);
         
         add(new JLabel("Recommended level min"));
         spinner_rec_lvl_min = new JSpinner();
-        spinner_rec_lvl_min.setModel(new SpinnerNumberModel((place != null ? place.get_rec_lvl_min() : -1), -1, 1000, 1));
+        spinner_rec_lvl_min.setModel(new SpinnerNumberModel((place != null ? place.getRecLevelMin() : -1), -1, 1000, 1));
         add(spinner_rec_lvl_min);
         
         add(new JLabel("Recommended level max"));
         spinner_rec_lvl_max = new JSpinner();
-        spinner_rec_lvl_max.setModel(new SpinnerNumberModel((place != null ? place.get_rec_lvl_max() : -1), -1, 1000, 1));
+        spinner_rec_lvl_max.setModel(new SpinnerNumberModel((place != null ? place.getRecLevelMax() : -1), -1, 1000, 1));
         add(spinner_rec_lvl_max);
         
         JButton button_cancel = new JButton("Cancel");
@@ -172,18 +172,18 @@ public class PlaceDialog extends ActionDialog {
     public void save(){
         //if(!textfield_name.getText().isEmpty()){ // name not empty
             try {
-                if(layer == null) layer = world.get_new_layer();
+                if(layer == null) layer = world.getNewLayer();
                 
                 // create place if it doesn't exist else just set the name
                 if(place == null) world.put(place = new Place(textfield_name.getText(), px, py, layer));
-                else place.set_name(textfield_name.getText());
+                else place.setName(textfield_name.getText());
 
                 Area a = (Area) combobox_area.getSelectedItem();
-                place.set_area(a != area_null ? a : null); // raplce null area with null
-                place.set_risk_level((RiskLevel) combobox_risk.getSelectedItem());
+                place.setArea(a != area_null ? a : null); // raplce null area with null
+                place.setRiskLevel((RiskLevel) combobox_risk.getSelectedItem());
 
-                place.set_rec_lvl_min((Integer) spinner_rec_lvl_min.getValue());
-                place.set_rec_lvl_max((Integer) spinner_rec_lvl_max.getValue());
+                place.setRecLevelMin((Integer) spinner_rec_lvl_min.getValue());
+                place.setRecLevelMax((Integer) spinner_rec_lvl_max.getValue());
             } catch (Exception ex) {
                 Logger.getLogger(PlaceDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -195,7 +195,7 @@ public class PlaceDialog extends ActionDialog {
      * Gets the place (eg. after creation
      * @return place
      */
-    public Place get_place(){
+    public Place getPlace(){
         return place;
     }
     

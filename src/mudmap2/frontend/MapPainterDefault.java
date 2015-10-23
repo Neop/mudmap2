@@ -25,7 +25,7 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
-import static mudmap2.frontend.WorldTab.get_show_paths_curved;
+import static mudmap2.frontend.WorldTab.getShowPathsCurved;
 
 /**
  *
@@ -63,20 +63,20 @@ public class MapPainterDefault implements MapPainter {
     }
     
     @Override
-    public void set_place_group(HashSet<Place> group, WorldCoordinate shift_start, WorldCoordinate shift_end) {
+    public void setPlaceGroup(HashSet<Place> group, WorldCoordinate shift_start, WorldCoordinate shift_end) {
         place_group = group;
         place_group_shift_start = shift_start;
         place_group_shift_end = shift_end;
     }
 
     @Override
-    public void set_place_selection(int x, int y) {
+    public void setPlaceSelection(int x, int y) {
         place_selected_x = x;
         place_selected_y = y;
     }
 
     @Override
-    public void set_place_selection_enabled(boolean b) {
+    public void setPlaceSelectionEnabled(boolean b) {
         place_selection_enabled = b;
     }
 
@@ -84,7 +84,7 @@ public class MapPainterDefault implements MapPainter {
      * Returns true if the tile is large enough to draw text
      * @return 
      */
-    private boolean get_tile_draw_text(){
+    private boolean getTileDrawText(){
         return tile_size >= draw_text_threshold;
     }   
     
@@ -92,7 +92,7 @@ public class MapPainterDefault implements MapPainter {
      * Gets the current tile border area size
      * @return area border width
      */
-    private int get_tile_border_width(){
+    private int getTileBorderWidth(){
         // with interpolation for smooth transition
         return (int) Math.round(tile_border_width * Math.min(1.0, Math.max(0.5, (double) (tile_size - 20) / 80)));
     }
@@ -101,7 +101,7 @@ public class MapPainterDefault implements MapPainter {
      * Gets the radius of the exit circles / dots
      * @return 
      */
-    private int get_exit_circle_radius(){
+    private int getExitCircleRadius(){
         return (int) Math.round(exit_circle_radius * Math.min(1.0, Math.max(0.5, (double) (tile_size - 20) / 80)));
     }
 
@@ -109,7 +109,7 @@ public class MapPainterDefault implements MapPainter {
      * Gets the stroke width of the tile selection box
      * @return 
      */
-    private float get_tile_selection_stroke_width(){
+    private float getTileSelectionStrokeWidth(){
         return tile_selection_stroke_width * (float) (1.0 + tile_size / 200.0);
     }
 
@@ -117,7 +117,7 @@ public class MapPainterDefault implements MapPainter {
      * Gets the stroke width of the risk level border
      * @return 
      */
-    private float get_risk_level_stroke_width(){
+    private float getRiskLevelStrokeWidth(){
         return tile_risk_level_stroke_width * (float) (1.0 + tile_size / 200.0);
     }
 
@@ -125,11 +125,11 @@ public class MapPainterDefault implements MapPainter {
      * Gets the path stroke width
      * @return 
      */
-    private float get_path_stroke_width(){
+    private float getPathStrokeWidth(){
         return path_stroke_width * (float) (1.0 + tile_size / 200.0);
     }
     
-    public Font get_tile_font(){
+    public Font getTileFont(){
         return last_tile_font;
     }
     
@@ -138,22 +138,22 @@ public class MapPainterDefault implements MapPainter {
      * @param place
      * @return 
      */
-    private boolean place_group_is_selected(Place place){
+    private boolean placeGroupIsSelected(Place place){
         if(place != null){
             if(place_group_shift_end != null && place_group_shift_start != null 
-                && place_group_shift_end.get_layer() == place.get_layer().get_id()){
-                int x1 = (int) Math.round(place_group_shift_end.get_x());
-                int x2 = (int) Math.round(place_group_shift_start.get_x());
-                int y1 = (int) Math.round(place_group_shift_end.get_y());
-                int y2 = (int) Math.round(place_group_shift_start.get_y());
+                && place_group_shift_end.getLayer() == place.getLayer().getId()){
+                int x1 = (int) Math.round(place_group_shift_end.getX());
+                int x2 = (int) Math.round(place_group_shift_start.getX());
+                int y1 = (int) Math.round(place_group_shift_end.getY());
+                int y2 = (int) Math.round(place_group_shift_start.getY());
 
                 int x_min = Math.min(x1, x2);
                 int x_max = Math.max(x1, x2);
                 int y_min = Math.min(y1, y2);
                 int y_max = Math.max(y1, y2);
 
-                if(place.get_x() >= x_min && place.get_x() <= x_max 
-                    && place.get_y() >= y_min && place.get_y() <= y_max) return true;
+                if(place.getX() >= x_min && place.getX() <= x_max 
+                    && place.getY() >= y_min && place.getY() <= y_max) return true;
             }
             if(place_group != null && place_group.contains(place)) return true;
         }
@@ -168,9 +168,9 @@ public class MapPainterDefault implements MapPainter {
      * @param y_offset reference to the y offset
      * @return false if the dot/circle doesn't have to be drawn
      */
-    private Pair<Integer, Integer> get_exit_offset(String dir){
+    private Pair<Integer, Integer> getExitOffset(String dir){
         Pair<Integer, Integer> ret = new Pair<Integer, Integer>(0, 0);
-        int border_width = get_tile_border_width();
+        int border_width = getTileBorderWidth();
         if(dir.equals("n")){ // north
             ret.first = tile_size / 2;
             ret.second = border_width;
@@ -204,7 +204,7 @@ public class MapPainterDefault implements MapPainter {
     * @param dir exit direction
     * @return normal vector
     */
-    private Pair<Double, Double> get_exit_normal(String dir){
+    private Pair<Double, Double> getExitNormal(String dir){
         Pair<Double, Double> ret = new Pair<Double, Double>(0.0, 0.0);
         if(dir.equals("n")){
             ret.first = 0.0;
@@ -248,7 +248,7 @@ public class MapPainterDefault implements MapPainter {
      * @param max_lines maximum number of lines
      * @return a list of strings
      */
-    private LinkedList<String> fit_line_length(String str, FontMetrics fm, int max_length, int max_lines){
+    private LinkedList<String> fitLineLength(String str, FontMetrics fm, int max_length, int max_lines){
         LinkedList<String> ret;
         if(fm.stringWidth(str) <= max_length){ // string isn't too long, return it
             ret = new LinkedList<String>();
@@ -277,7 +277,7 @@ public class MapPainterDefault implements MapPainter {
 
             // cut the next part and return it, abbreviate the string if the max line number is reached
             if(max_lines > 0){
-                ret = fit_line_length(str.substring(strlen).trim(), fm, max_length, max_lines - 1);
+                ret = fitLineLength(str.substring(strlen).trim(), fm, max_length, max_lines - 1);
                 ret.addFirst(str.substring(0, strlen));
             } else {
                 ret = new LinkedList<String>();
@@ -293,10 +293,10 @@ public class MapPainterDefault implements MapPainter {
      * @param place_x a world (place) coordinate (x axis)
      * @return a screen coordinate x
      */
-    private int get_screen_pos_x(int place_x){
+    private int getScreenPosX(int place_x){
         double screen_center_x = ((double) graphics_width / tile_size) / 2; // note: wdtwd2
-        int place_x_offset = (int) (Math.round((double) cur_pos.get_x()) - Math.round(screen_center_x));
-        return (int)((place_x - place_x_offset + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size);
+        int place_x_offset = (int) (Math.round((double) cur_pos.getX()) - Math.round(screen_center_x));
+        return (int)((place_x - place_x_offset + remint(screen_center_x) - remint(cur_pos.getX())) * tile_size);
     }
 
     /**
@@ -304,10 +304,10 @@ public class MapPainterDefault implements MapPainter {
      * @param place_y a world (place) coordinate (y axis)
      * @return a screen coordinate y
      */
-    private int get_screen_pos_y(int place_y){
+    private int getScreenPosY(int place_y){
         double screen_center_y = ((double) graphics_height / tile_size) / 2;
-        int place_y_offset = (int) (Math.round(cur_pos.get_y()) - Math.round(screen_center_y));
-        return (int)((-place_y + place_y_offset - remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size + graphics_height);
+        int place_y_offset = (int) (Math.round(cur_pos.getY()) - Math.round(screen_center_y));
+        return (int)((-place_y + place_y_offset - remint(screen_center_y) + remint(cur_pos.getY())) * tile_size + graphics_height);
     }
 
     /**
@@ -315,11 +315,11 @@ public class MapPainterDefault implements MapPainter {
      * @param place
      * @return 
      */
-    private boolean is_on_screen(Place place){
-        int x = get_screen_pos_x(place.get_x());
+    private boolean isOnScreen(Place place){
+        int x = getScreenPosX(place.getX());
         if(x < 0 || x > graphics_width) return false;
 
-        int y = get_screen_pos_y(place.get_y());
+        int y = getScreenPosY(place.getY());
         /*
         if(y < 0 || y > graphics_height) return false;
         else return true;*/
@@ -344,30 +344,30 @@ public class MapPainterDefault implements MapPainter {
         
         last_tile_font = g.getFont();
         
-        final float selection_stroke_width = get_tile_selection_stroke_width();
-        final int tile_border_width_scaled = get_tile_border_width();
+        final float selection_stroke_width = getTileSelectionStrokeWidth();
+        final int tile_border_width_scaled = getTileBorderWidth();
         
         // max number of text lines tht fit in a tile
         FontMetrics fm = g.getFontMetrics();
-        final int max_lines = (int) Math.floor((double)(tile_size - 3 * (tile_border_width_scaled + (int) Math.ceil(get_risk_level_stroke_width()))) / fm.getHeight());
+        final int max_lines = (int) Math.floor((double)(tile_size - 3 * (tile_border_width_scaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
 
         // screen center in world coordinates
         final double screen_center_x = ((double) graphics_width / tile_size) / 2; // note: wdtwd2
         final double screen_center_y = ((double) graphics_height / tile_size) / 2;
 
-        final int place_x_offset = (int) (Math.round((float) cur_pos.get_x()) - Math.round(screen_center_x));
-        final int place_y_offset = (int) (Math.round((float) cur_pos.get_y()) - Math.floor(screen_center_y));
+        final int place_x_offset = (int) (Math.round((float) cur_pos.getX()) - Math.round(screen_center_x));
+        final int place_y_offset = (int) (Math.round((float) cur_pos.getY()) - Math.floor(screen_center_y));
 
         // more precalculation
-        final double place_x_px_const = remint(screen_center_x) - remint(cur_pos.get_x());
-        final double place_y_px_const = remint(screen_center_y) + remint(cur_pos.get_y());
+        final double place_x_px_const = remint(screen_center_x) - remint(cur_pos.getX());
+        final double place_y_px_const = remint(screen_center_y) + remint(cur_pos.getY());
 
         // prepare graphic for paths
         // Paths will be drawn on this graphic and later on copied to g
         ArrayList<Pair<Integer, Integer>> tile_positions = new ArrayList<Pair<Integer, Integer>>(); // to mask out the tile positions on graphic_path
         BufferedImage image_path = new BufferedImage((int) graphics_width, (int) graphics_height, BufferedImage.TYPE_INT_ARGB);
         Graphics graphic_path = image_path.getGraphics();
-        ((Graphics2D) graphic_path).setStroke(new BasicStroke(get_path_stroke_width()));
+        ((Graphics2D) graphic_path).setStroke(new BasicStroke(getPathStrokeWidth()));
         ((Graphics2D) graphic_path).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
@@ -398,67 +398,67 @@ public class MapPainterDefault implements MapPainter {
                     int line_num = 0;
 
                     // draw area color
-                    if(cur_place.get_area() != null){
-                        g.setColor(cur_place.get_area().get_color());
+                    if(cur_place.getArea() != null){
+                        g.setColor(cur_place.getArea().getColor());
                         g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
                     }
 
                     // draw tile center color
-                    if(get_tile_draw_text()){
-                        g.setColor(layer.get_world().get_tile_center_color());
+                    if(getTileDrawText()){
+                        g.setColor(layer.getWorld().getTileCenterColor());
                         g.fillRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled,
                                 tile_size - 2 * tile_border_width_scaled, tile_size - 2 * tile_border_width_scaled);
                     }
 
                     // draw risk level border
-                    if(cur_place.get_risk_level() != null){
-                        g.setColor(cur_place.get_risk_level().get_color());
-                        ((Graphics2D)g).setStroke(new BasicStroke(get_risk_level_stroke_width()));
+                    if(cur_place.getRiskLevel() != null){
+                        g.setColor(cur_place.getRiskLevel().getColor());
+                        ((Graphics2D)g).setStroke(new BasicStroke(getRiskLevelStrokeWidth()));
                         g.drawRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled,
-                                tile_size - 2 * tile_border_width_scaled - (int) (0.5 * get_risk_level_stroke_width()),
-                                tile_size - 2 * tile_border_width_scaled - (int) (0.5 * get_risk_level_stroke_width()));
+                                tile_size - 2 * tile_border_width_scaled - (int) (0.5 * getRiskLevelStrokeWidth()),
+                                tile_size - 2 * tile_border_width_scaled - (int) (0.5 * getRiskLevelStrokeWidth()));
                     } else System.out.println("Error: Can't draw risk level, reference is null");
 
                     // draw text, if tiles are large enough
-                    if(get_tile_draw_text()){
+                    if(getTileDrawText()){
                         g.setColor(Color.BLACK);
 
                         // place name
                         // gets place name if unique, else place name with ID
-                        String place_name = ((cur_place.is_name_unique() && layer.get_world().get_show_place_id() == World.ShowPlaceID_t.UNIQUE) || layer.get_world().get_show_place_id() == World.ShowPlaceID_t.NONE) 
-                                                ? cur_place.get_name() : cur_place.toString();
-                        LinkedList<String> line = fit_line_length(place_name, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines);
+                        String place_name = ((cur_place.isNameUnique() && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE) 
+                                                ? cur_place.getName() : cur_place.toString();
+                        LinkedList<String> line = fitLineLength(place_name, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines);
                         for(String str: line){
                             g.drawString(str, 
-                                    place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(get_risk_level_stroke_width()), 
+                                    place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()), 
                                     place_y_px + tile_border_width_scaled + fm.getHeight() * (1 + line_num));
                             line_num++;
                         }
 
                         if(line_num < max_lines){ // it isn't unusual for some places to fill up all the lines
                             // recommended level
-                            int reclvlmin = cur_place.get_rec_lvl_min(), reclvlmax = cur_place.get_rec_lvl_max();
+                            int reclvlmin = cur_place.getRecLevelMin(), reclvlmax = cur_place.getRecLevelMax();
                             if(reclvlmin > -1 || reclvlmax > -1){
                                 g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), 
-                                        place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(get_risk_level_stroke_width()),
+                                        place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()),
                                         place_y_px + tile_border_width_scaled + fm.getHeight() * (1 + line_num));
                                 line_num++;
                             }
 
                             // sub areas / children
-                            if(line_num < max_lines && !cur_place.get_children().isEmpty()){
-                                int children_num = cur_place.get_children().size();
-                                String sa_str = "sa" + (children_num > 1 ? " (" + cur_place.get_children().size() + "): " : ": ");
+                            if(line_num < max_lines && !cur_place.getChildren().isEmpty()){
+                                int children_num = cur_place.getChildren().size();
+                                String sa_str = "sa" + (children_num > 1 ? " (" + cur_place.getChildren().size() + "): " : ": ");
 
                                 boolean first_child = true;
-                                for(Place child: cur_place.get_children()){
-                                    sa_str += (first_child ? "" : ", ") + child.get_name();
+                                for(Place child: cur_place.getChildren()){
+                                    sa_str += (first_child ? "" : ", ") + child.getName();
                                     first_child = false;
                                 }
-                                line = fit_line_length(sa_str, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines - line_num);
+                                line = fitLineLength(sa_str, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines - line_num);
                                 for(String str: line){
                                     g.drawString(str, 
-                                            place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(get_risk_level_stroke_width()), 
+                                            place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()), 
                                             place_y_px + tile_border_width_scaled + fm.getHeight() * (1 + line_num));
                                     line_num++;
                                 }
@@ -468,12 +468,12 @@ public class MapPainterDefault implements MapPainter {
                             if(line_num < max_lines){
                                 String flags = "";                                    
                                 // place has comments
-                                if(!cur_place.get_comments().isEmpty()) flags += "C";
-                                if(!cur_place.get_children().isEmpty()) flags += "Sa";
-                                if(!cur_place.get_parents().isEmpty()) flags += "Pa";
+                                if(!cur_place.getComments().isEmpty()) flags += "C";
+                                if(!cur_place.getChildren().isEmpty()) flags += "Sa";
+                                if(!cur_place.getParents().isEmpty()) flags += "Pa";
 
                                 // other flags
-                                for(Map.Entry<String, Boolean> flag: cur_place.get_flags().entrySet()){
+                                for(Map.Entry<String, Boolean> flag: cur_place.getFlags().entrySet()){
                                     if(flag.getValue()) flags += flag.getKey().toUpperCase();
                                     if(fm.stringWidth(flags) >= tile_size - 2 * tile_border_width_scaled) break;
                                 }
@@ -487,37 +487,37 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // mark place group selection
-                    if(place_group_is_selected(cur_place)){
+                    if(placeGroupIsSelected(cur_place)){
                         g.setColor(new Color(255, 255, 255, 128));
                         g.fillRect(place_x_px, place_y_px, tile_size, tile_size);
                     }
 
                     // draw path lines here
                     boolean exit_up = false, exit_down = false;
-                    for(Path path: cur_place.get_paths()){
-                        Place other_place = path.get_other_place(cur_place);
+                    for(Path path: cur_place.getPaths()){
+                        Place other_place = path.getOtherPlace(cur_place);
 
-                        Color color_place1 = layer.get_world().get_path_color(path.get_exit_directions()[0]);
-                        Color color_place2 = layer.get_world().get_path_color(path.get_exit_directions()[1]);
-                        if(path.get_places()[0] != cur_place) {
+                        Color color_place1 = layer.getWorld().getPathColor(path.getExitDirections()[0]);
+                        Color color_place2 = layer.getWorld().getPathColor(path.getExitDirections()[1]);
+                        if(path.getPlaces()[0] != cur_place) {
                             Color tmp = color_place1;
                             color_place1 = color_place2;
                             color_place2 = tmp;
                         }
 
                         // if both places of a path are on the same layer and at least one of the two places is on the screen
-                        // usually the main place (path.get_places()[0]) draws the path. If it isn't on screen, the other place draws it
-                        if(other_place.get_layer().get_id() == layer.get_id() && (path.get_places()[0] == cur_place || !is_on_screen(other_place))){
-                            Pair<Integer, Integer> exit_offset = get_exit_offset(path.get_exit(cur_place));
-                            Pair<Integer, Integer> exit_offset_other = get_exit_offset(path.get_exit(other_place));
+                        // usually the main place (path.getPlaces()[0]) draws the path. If it isn't on screen, the other place draws it
+                        if(other_place.getLayer().getId() == layer.getId() && (path.getPlaces()[0] == cur_place || !isOnScreen(other_place))){
+                            Pair<Integer, Integer> exit_offset = getExitOffset(path.getExit(cur_place));
+                            Pair<Integer, Integer> exit_offset_other = getExitOffset(path.getExit(other_place));
 
-                            boolean draw_curves = get_show_paths_curved();
+                            boolean draw_curves = getShowPathsCurved();
 
                             // exit positions on the map
                             double exit1x = place_x_px + exit_offset.first;
                             double exit1y = place_y_px + exit_offset.second;
-                            double exit2x = place_x_px + (other_place.get_x() - cur_place.get_x()) * tile_size + exit_offset_other.first;
-                            double exit2y = place_y_px - (other_place.get_y() - cur_place.get_y()) * tile_size + exit_offset_other.second;
+                            double exit2x = place_x_px + (other_place.getX() - cur_place.getX()) * tile_size + exit_offset_other.first;
+                            double exit2y = place_y_px - (other_place.getY() - cur_place.getY()) * tile_size + exit_offset_other.second;
 
                             if(color_place1.equals(color_place2)){ // same color
                                 ((Graphics2D) graphic_path).setPaint(color_place1);
@@ -528,8 +528,8 @@ public class MapPainterDefault implements MapPainter {
                             }
 
                             if(draw_curves){
-                                Pair<Double, Double> normal1 = get_exit_normal(path.get_exit(cur_place));
-                                Pair<Double, Double> normal2 = get_exit_normal(path.get_exit(other_place));
+                                Pair<Double, Double> normal1 = getExitNormal(path.getExit(cur_place));
+                                Pair<Double, Double> normal2 = getExitNormal(path.getExit(other_place));
 
                                 double dx = exit2x - exit1x;
                                 double dy = exit2y - exit1y;
@@ -556,13 +556,13 @@ public class MapPainterDefault implements MapPainter {
                         // draw exit dots, if tiles are larger than 20
                         if(tile_size >= 20){
                             g.setColor(color_place1);
-                            String exit = path.get_exit(cur_place);
+                            String exit = path.getExit(cur_place);
                             if(exit.equals("u")) exit_up = true;
                             else if(exit.equals("d")) exit_down = true;
                             else {
-                                Pair<Integer, Integer> exit_offset = get_exit_offset(exit);
+                                Pair<Integer, Integer> exit_offset = getExitOffset(exit);
                                 if(exit_offset.first != tile_size / 2 || exit_offset.second != tile_size / 2){
-                                    int exit_circle_radius2 = get_exit_circle_radius();
+                                    int exit_circle_radius2 = getExitCircleRadius();
                                     g.fillOval(place_x_px + exit_offset.first - exit_circle_radius2, place_y_px + exit_offset.second - exit_circle_radius2, 2 * exit_circle_radius2, 2 * exit_circle_radius2);
                                 }
                             }
@@ -573,7 +573,7 @@ public class MapPainterDefault implements MapPainter {
                     if(tile_size >= 20){
                         // the up / down flags have to be drawn after the 
                         // exits to know whether they have to be drawn
-                        if((exit_up || exit_down) && get_tile_draw_text() && line_num <= max_lines){
+                        if((exit_up || exit_down) && getTileDrawText() && line_num <= max_lines){
                             g.setColor(Color.BLACK);
                             // have some arrows: ￪￬ ↑↓
                             String updownstr = "" + (exit_up ? "↑" : "") + (exit_down ? "↓" : "");
@@ -594,8 +594,8 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     if(location_found){
-                        int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
-                        int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+                        int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.getX())) * tile_size); // alternative: get_screen_pos_x();
+                        int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.getY())) * tile_size);
 
                         g.setColor(Color.BLUE);
                         ((Graphics2D)g).setStroke(new BasicStroke(selection_stroke_width));
@@ -617,8 +617,8 @@ public class MapPainterDefault implements MapPainter {
 
                 // draw cursor / place selection
                 if(place_selection_enabled && place_x == place_selected_x && place_y == place_selected_y){
-                    int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.get_x())) * tile_size); // alternative: get_screen_pos_x();
-                    int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.get_y())) * tile_size);
+                    int place_x_px = (int)((tile_x + remint(screen_center_x) - remint(cur_pos.getX())) * tile_size); // alternative: get_screen_pos_x();
+                    int place_y_px = (int)((tile_y + remint(screen_center_y) + remint(cur_pos.getY())) * tile_size);
 
                     g.setColor(tile_selection_color);
                     ((Graphics2D)g).setStroke(new BasicStroke((selection_stroke_width)));

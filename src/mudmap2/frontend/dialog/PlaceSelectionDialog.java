@@ -50,7 +50,7 @@ public class PlaceSelectionDialog extends ActionDialog {
     WorldTab worldtab;
     
     public PlaceSelectionDialog(JFrame _parent, World _world, WorldCoordinate _default_coordinate, boolean _layer_change_allowed) {
-        super(_parent, "Select a place - " + _world.get_name(), true);
+        super(_parent, "Select a place - " + _world.getName(), true);
         parent = _parent;
         world = _world;
         
@@ -62,23 +62,23 @@ public class PlaceSelectionDialog extends ActionDialog {
      * Gets the selected place
      * @return 
      */
-    public Place get_selection(){
-        return worldtab.get_place(worldtab.get_cursor_x(), worldtab.get_cursor_y());
+    public Place getSelection(){
+        return worldtab.getPlace(worldtab.getCursorX(), worldtab.getCursorY());
     }
     
     /**
      * Gets the world coordinate of the selected place
      * @return 
      */
-    public WorldCoordinate get_coordinate(){
-        return new WorldCoordinate(worldtab.get_cur_position().get_layer(), worldtab.get_cursor_x(), worldtab.get_cursor_y());
+    public WorldCoordinate getCoordinate(){
+        return new WorldCoordinate(worldtab.getCurPosition().getLayer(), worldtab.getCursorX(), worldtab.getCursorY());
     }
     
     /**
      * Is true, if the ok button was clicked
      * @return 
      */
-    public boolean get_selected(){
+    public boolean getSelected(){
         return ok;
     }
 
@@ -89,8 +89,8 @@ public class PlaceSelectionDialog extends ActionDialog {
         
         setContentPane(optionPane);
         optionPane.setMessage(worldtab = new WorldTab(parent, world, true));
-        worldtab.set_cursor_forced(true);
-        worldtab.reset_history(default_coordinate.clone());
+        worldtab.setCursorForced(true);
+        worldtab.resetHistory(default_coordinate.clone());
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
