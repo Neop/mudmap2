@@ -55,9 +55,11 @@ public class OpenWorldDialog implements ActionListener{
         filechooser.setMultiSelectionEnabled(false);
         filechooser.addChoosableFileFilter(new FileFilter() {    
             @Override
-            public boolean accept(File file) {                
+            public boolean accept(File file) {
+                if(file == null) return false;
                 if(file.isDirectory()) return true;
-                return !WorldManager.readWorldName(file.toString()).equals("");
+                String worldname = WorldManager.readWorldName(file.toString());
+                return worldname != null && !worldname.equals("");
             }
 
             @Override

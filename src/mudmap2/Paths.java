@@ -55,13 +55,13 @@ public class Paths {
             // read the user data path from environment variables
             // operating system Windows
             if(System.getProperty("os.name").toLowerCase().contains("win"))
-                user_data_dir_home = System.getenv().get("APPDATA") + "/mudmap/";
+                user_data_dir_home = System.getenv().get("APPDATA") + File.separator + "mudmap" + File.separator;
             // other operating systems
-            else user_data_dir_home = System.getProperty("user.home") + "/.mudmap/";
+            else user_data_dir_home = System.getProperty("user.home") + File.separator + ".mudmap" + File.separator;
             
             try {
                 File file = new File(Paths.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-                user_data_dir_portable = file.getParentFile().getPath() + "/mudmap/";
+                user_data_dir_portable = file.getParentFile().getPath() + File.separator + "mudmap" + File.separator;
             } catch (URISyntaxException ex) {
                 Logger.getLogger(Paths.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -86,7 +86,7 @@ public class Paths {
      * @return worlds directory
      */
     public static String getWorldsDir(){
-        return getUserDataDir() + "worlds/";
+        return getUserDataDir() + "worlds" + File.separator;
     }
     
     /**

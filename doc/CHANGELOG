@@ -1,3 +1,7 @@
+2.2.5
+- fixed: windows path separators
+- fixed: null pointer exceptions in open world dialog
+
 2.2.4
 - fixed: can not close mudmap after a new world is created (probably since 2.2.3)
 - added menu item for enabling the place cursor
