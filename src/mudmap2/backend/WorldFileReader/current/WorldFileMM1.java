@@ -128,8 +128,8 @@ public class WorldFileMM1 implements WorldFile {
             
             path_connection_error_dep_double = 0;
             
-            try {
                 String line;
+                try {
                 while((line = reader.readLine()) != null){
                     line = line.trim();
 
@@ -203,14 +203,26 @@ public class WorldFileMM1 implements WorldFile {
         } catch (FileNotFoundException ex) {
             System.out.println("Could not open world file \"" + file + "\", file not found");
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
-            JOptionPane.showMessageDialog(null, "Could not open world file \"" + file + "\", file not found", "Loading world", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    "Could not open world file \"" + file + "\": file not found",
+                    "Loading world", JOptionPane.ERROR_MESSAGE);
+        } catch (WorldReadException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Could not open world file \"" + file + "\", please contact the developer: " + ex.toString(),
+                    "Loading world", JOptionPane.ERROR_MESSAGE);
+            throw ex;
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Could not open world file \"" + file + "\", please contact the developer: " + ex.toString(),
+                    "Loading world", JOptionPane.ERROR_MESSAGE);
+            throw ex;
         }
     }
     
     private void readFileVersion(String line) throws WorldReadException{
-        // remove tag and split version                      
-        String[] tmp = line.substring(4).split("\\.");
-    
+        // remove tag and split version
+        String[] tmp = safeSplit(line.substring(4), ".", 2);
+
         file_major = Integer.parseInt(tmp[0]);
         file_minor = Integer.parseInt(tmp[1]);
 
@@ -224,19 +236,19 @@ public class WorldFileMM1 implements WorldFile {
     }
     
     private void readPathColorCardinal(String line){
-        String[] tmp = line.substring(5).split("\\s");
+        String[] tmp = safeSplit(line.substring(5), " ", 3);
         Color color = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
         if(world.getPathColor() == world.getPathColorNstd()) world.setPathColorNstd(new Color(color.getRGB()));
         world.setPathColor(color);
     }
 
     private void readPathColorNonCardinal(String line){
-        String[] tmp = line.substring(5).split("\\s");
+        String[] tmp = safeSplit(line.substring(5), " ", 3);
         world.setPathColorNstd(new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2])));
     }
 
     private void readTileCenterColor(String line){
-        String[] tmp = line.substring(6).split("\\s");
+        String[] tmp = safeSplit(line.substring(6), " ", 3);
         Color color = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
         world.setTileCenterColor(color);
     }
@@ -265,12 +277,12 @@ public class WorldFileMM1 implements WorldFile {
     }
     
     private void readHome(String line){
-        String[] tmp = line.substring(5).split("\\s");
+        String[] tmp = safeSplit(line.substring(5), " ", 3);
         world.setHome(new WorldCoordinate(Integer.parseInt(tmp[0]), Double.parseDouble(tmp[1]), Double.parseDouble(tmp[2])));
     }
     
     private void readRiskLevel(String line){
-        String[] tmp = line.split("\\s");
+        String[] tmp = safeSplit(line, " ", 5);
         int rlid = Integer.parseInt(tmp[1]);
         String description = configGetText(5, line);
 
@@ -310,7 +322,7 @@ public class WorldFileMM1 implements WorldFile {
     }
     
     private void readPlacePosition(String line) throws WorldReadException{
-        String tmp[] = line.split("\\s");
+        String[] tmp = safeSplit(line, " ", 4);
         int layer = Integer.parseInt(tmp[1]);
 
         // create the layer, if it doesn't exist
@@ -350,7 +362,7 @@ public class WorldFileMM1 implements WorldFile {
         * corresponding tags, but a path might not be reconstructable
         * if there are more than on connections between two places
         */
-        String[] tmp = line.split("\\s");
+        String[] tmp = safeSplit(line, " ", 3);
         int other_place_id = Integer.parseInt(tmp[1]);
 
         boolean found_path = false;
@@ -370,12 +382,13 @@ public class WorldFileMM1 implements WorldFile {
     }
     
     private void readPlacePath(String line){
-        String[] tmp = line.substring(3).split("[\\$;]");
+        String tmp[] = safeSplit(line.substring(3).trim(), "$", 3);
+
         tmp_paths.add(new WorldFileMM1.PathTmp(cur_place, Integer.parseInt(tmp[0]), tmp[1], tmp[2]));
     }
     
     private void readPlaceChild(String line){
-        String[] tmp = line.split(" ");
+        String[] tmp = safeSplit(line, " ", 2);
         children.add(new Pair<Place, Integer>(cur_place, Integer.parseInt(tmp[1])));
     }
     
@@ -425,6 +438,10 @@ public class WorldFileMM1 implements WorldFile {
         return line;
     }
 
+    /**
+     * Create a backup copy of the world file
+     * @param file_orig 
+     */
     @Override
     public void backup(String file_orig) {
         try {
@@ -441,6 +458,39 @@ public class WorldFileMM1 implements WorldFile {
             JOptionPane.showMessageDialog(null, "Could not create world backup file", "World backup", JOptionPane.INFORMATION_MESSAGE);
         }
         
+    }
+    /**
+     * Splits a string in exactly num substrings separated by separator
+     * Additional substrings will be empty if less than num-1 separators
+     * are found
+     * 
+     * @param line
+     * @param separator
+     * @param num
+     * @return 
+     */
+    private String[] safeSplit(String line, String separator, Integer num) {
+        String tmp[] = new String[num];
+        int index[] = new int[num];
+        
+        int i = 0;
+        for(; i < num; ++i){
+            if(i == 0){ // first
+                index[0] = line.indexOf(separator); // find next separator
+                tmp[0] = line.substring(0, (index[0]!=-1?index[0]:0));
+            } else {
+                index[i] = line.indexOf(separator, index[i-1] + 1);
+                if(index[i] == -1) // reached end of string
+                    tmp[i] = line.substring(index[i-1] + 1);
+                else tmp[i] = line.substring(index[i-1] + 1, index[i]);
+            }
+            // break if no more separators are found
+            if(index[i] == -1) break;
+        }
+        // fill remaining elements with empty strings
+        for(++i;i < num; ++i) tmp[i] = new String();
+        
+        return tmp;
     }
     
     // Path creation helper class

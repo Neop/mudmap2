@@ -1,3 +1,6 @@
+2.2.6
+- fixed: could not open worlds with empty path names
+
 2.2.5
 - fixed: windows path separators
 - fixed: null pointer exceptions in open world dialog
