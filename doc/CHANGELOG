@@ -1,3 +1,6 @@
+2.2.7
+- fixed: could not change place names
+
 2.2.6
 - fixed: could not open worlds with empty path names
 

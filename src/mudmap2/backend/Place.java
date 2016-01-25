@@ -53,25 +53,25 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     
     BreadthSearchData breadth_search_data;
     
-    public Place(int _id, String _name, int pos_x, int pos_y, Layer l){
+    public Place(int id, String name, int pos_x, int pos_y, Layer l){
         super(pos_x, pos_y, l);
-        name = _name;
-        id = _id;
-        if(_id >= next_id) next_id = _id + 1;
+        this.name = name;
+        this.id = id;
+        if(id >= next_id) next_id = id + 1;
         
         initialize();
     }
     
     /**
      * Constructs new a place a certain position
-     * @param _name name
+     * @param name name
      * @param pos_x x coordinate
      * @param pos_y y coordinate
      * @param l
      */
-    public Place(String _name, int pos_x, int pos_y, Layer l){
+    public Place(String name, int pos_x, int pos_y, Layer l){
         super(pos_x, pos_y, l);
-        name = _name;
+        this.name = name;
         id = next_id++;
         
         initialize();
@@ -112,9 +112,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     
     /**
      * Sets the name
-     * @param _name new name
+     * @param name new name
      */
-    public void setName(String _name){
+    public void setName(String name){
         this.name = name;
     }
     
