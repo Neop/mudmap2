@@ -21,24 +21,26 @@
  */
 package mudmap2.backend;
 
+import static java.lang.Math.abs;
+
 /**
  * This class describes a position in the world
  * @author neop
  */
-public class WorldCoordinate {
+public class WorldCoordinate implements Comparable<WorldCoordinate> {
     int layer;
     double x, y;
 
     /**
      * describes a position in the world
-     * @param _layer current layer
-     * @param _x x coordinate
-     * @param _y y coordinate
+     * @param layer current layer
+     * @param x x coordinate
+     * @param y y coordinate
      */
-    public WorldCoordinate(int _layer, double _x, double _y){
-        layer = _layer;
-        x = _x;
-        y = _y;
+    public WorldCoordinate(int layer, double x, double y){
+        this.layer = layer;
+        this.x = x;
+        this.y = y;
     }
 
     /**
@@ -51,12 +53,12 @@ public class WorldCoordinate {
 
     /**
      * Sets the layer
-     * @param l 
+     * @param l
      */
     public void setLayer(int l){
         layer = l;
     }
-    
+
     /**
      * Gets the x coordinate
      * @return x coordinate
@@ -101,7 +103,7 @@ public class WorldCoordinate {
 
     /**
      * Gets the position data in String format
-     * @return 
+     * @return
      */
     @Override
     public String toString(){
@@ -110,12 +112,13 @@ public class WorldCoordinate {
 
     /**
      * Gets the position data in String format for meta files
-     * @return 
+     * @return
      */
     public String getMetaString(){
+        // -x since the x coordinate is flipped in mudmap v1
         return layer + " " + -x + " " + y;
     }
-    
+
     /**
      * creates a new instance of this world coordinate
      * @return world coordinate
@@ -123,5 +126,15 @@ public class WorldCoordinate {
     @Override
     public WorldCoordinate clone(){
         return new WorldCoordinate(layer, x, y);
+    }
+
+    @Override
+    public int compareTo(WorldCoordinate t) {
+        final double d = 0.001;
+        if(layer == t.layer && abs(x - t.x) < d && abs(y - t.y) < d)
+            return 0;
+        else if(x*x + y*y > t.x*t.x + t.y*t.y)
+            return 1;
+        else return -1;
     }
 }

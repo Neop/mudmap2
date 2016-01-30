@@ -40,24 +40,24 @@ public class Area implements Comparable<Area> {
     
     /**
      * Constructs a new Area
-     * @param _name Name of the area
-     * @param col 
+     * @param name Name of the area
+     * @param color
      */
-    public Area(String _name, Color col) {
+    public Area(String name, Color color) {
         id = next_id++;
-        name = _name;
-        color = col;
+        this.name = name;
+        this.color = color;
     }
 
     /**
      * Constructs a new Area
-     * @param _id area id
-     * @param _name Name of the area
+     * @param id area id
+     * @param name Name of the area
      */
-    public Area(int _id, String _name) {
-        id = _id;
-        if(id >= next_id) next_id = id + 1;
-        name = _name;
+    public Area(int id, String name) {
+        this.id = id;
+        if(this.id >= next_id) next_id = this.id + 1;
+        this.name = name;
         color = new Color(0, 0, 0);
     }
     
@@ -93,10 +93,10 @@ public class Area implements Comparable<Area> {
     
     /**
      * Sets a new area color
-     * @param _color new area color
+     * @param color new area color
      */
-    public void setColor(Color _color) {
-        color = _color;
+    public void setColor(Color color){
+        this.color = color;
     }
     
     /**
@@ -109,12 +109,7 @@ public class Area implements Comparable<Area> {
     }
 
     @Override
-    public int compareTo(Area arg0) {
-        return -arg0.getName().compareTo(name);
+    public int compareTo(Area arg0){
+        return name.compareTo(arg0.getName());
     }
-    /*
-    @Override
-    public Object clone(){
-        return new Area(name, color);
-    }*/
 }

@@ -40,15 +40,15 @@ public class RiskLevel {
     
     /**
      * Constructs the risk level
-     * @param _id identification number, unique in a world
+     * @param id identification number, unique in a world
      * @param desc description
-     * @param _color color that represents the risk level
+     * @param color color that represents the risk level
      */
-    public RiskLevel(int _id, String desc, Color _color){
-        id = _id;
+    public RiskLevel(int id, String desc, Color color){
+        this.id = id;
         if(id >= next_id) next_id = id + 1;
         description = desc;
-        color = _color;
+        this.color = color;
     }
 
     /**

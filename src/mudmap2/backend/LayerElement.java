@@ -34,13 +34,13 @@ public class LayerElement {
     
     /**
      * constructs a layer element
-     * @param _x x position
-     * @param _y y position
+     * @param x x position
+     * @param y y position
      * @param l layer
      */
-    public LayerElement(int _x, int _y, Layer l){
-        x = _x;
-        y = _y;
+    public LayerElement(int x, int y, Layer l){
+        this.x = x;
+        this.y = y;
         layer = l;
     }
     
@@ -70,21 +70,21 @@ public class LayerElement {
     
     /**
      * Sets the layer
-     * @param _layer layer
+     * @param layer layer
      */
-    public void setLayer(Layer _layer){
-        layer = _layer;
+    public void setLayer(Layer layer){
+        this.layer = layer;
     }
     
     /**
      * Sets the position
-     * @param _x x position
-     * @param _y y position
+     * @param x x position
+     * @param y y position
      * @param l layer
      */
-    public void setPosition(int _x, int _y, Layer l){
-        x = _x;
-        y = _y;
+    public void setPosition(int x, int y, Layer l){
+        this.x = x;
+        this.y = y;
         layer = l;
     }
     

@@ -73,6 +73,7 @@ import javax.swing.event.PopupMenuListener;
 import mudmap2.Paths;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Layer.PlaceNotFoundException;
+import mudmap2.backend.LayerElement;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -91,63 +92,63 @@ import mudmap2.frontend.dialog.PlaceSelectionDialog;
 
 /**
  * A tab in the main window that displays a world
- * 
+ *
  * @author neop
  */
 public class WorldTab extends JPanel {
-    
+
     World world;
-    
+
     static boolean show_paths_curved = true;
-    
+
     // GUI elements
     JFrame parent;
     WorldPanel worldpanel;
     JSlider slider_zoom;
     JPanel panel_south;
     ScrollLabel label_infobar;
-    
+
     // history of shown position
     LinkedList<WorldCoordinate> positions;
     int positions_cur_index; // index of currently shown position
     // max amount of elements in the list
     static final int history_max_length = 25;
-    
+
     // true, if the mouse is in the panel, for relative motion calculation
     boolean mouse_in_panel;
     // previous position of the mouse
     int mouse_x_previous, mouse_y_previous;
-    
+
     // the position of the selected place (selected by mouse or keyboard)
     static boolean place_selection_enabled_default = true; // default value
     boolean cursor_enabled;
     int cursor_x, cursor_y;
     boolean force_selection;
-    
+
     // world_meta file version supported by this WorldTab
     static final int meta_file_ver_major = 1;
     static final int meta_file_ver_minor = 1;
-    
+
     // tile size in pixel
     double tile_size;
     public static final int tile_size_min = 10;
     public static final int tile_size_max = 200;
-    
+
     // true, if a context menu is shown (to disable forced focus)
     boolean is_context_menu_shown;
     boolean forced_focus_disabled;
-    
+
     // passive worldtabs don't modify the world
     final boolean passive;
-    
+
     LinkedList<CursorListener> cursor_listeners;
-    
+
     // place (group) selection
     WorldCoordinate place_group_box_start, place_group_box_end;
     HashSet<Place> place_group;
 
     // ============================= Methods ===================================
-    
+
     /**
      * Constructs the world tab, opens the world if necessary
      * @param parent parent frame
@@ -160,7 +161,7 @@ public class WorldTab extends JPanel {
         this.passive = passive;
         create();
     }
-    
+
     /**
      * Constructs the world tab, opens the world if necessary
      * @param parent parent frame
@@ -173,34 +174,34 @@ public class WorldTab extends JPanel {
         this.passive = passive;
         create();
     }
-    
+
     /**
      * Copies a WorldTab and creates a new passive one
-     * @param wt 
+     * @param wt
      */
     public WorldTab(WorldTab wt){
         parent = wt.get_parent();
         passive = true;
         world = wt.getWorld();
         createVariables();
-        
+
         tile_size = wt.tile_size;
         cursor_enabled = wt.cursor_enabled;
         // copy positions
         for(WorldCoordinate pos: wt.positions) positions.add(pos);
-        
+
         createGui();
     }
-    
+
     /**
      * Clones the WorldTab
-     * @return 
+     * @return
      */
     @Override
     public Object clone(){
         return new WorldTab(this);
     }
-    
+
     /**
      * Creates the WorldTab from scratch
      */
@@ -209,41 +210,41 @@ public class WorldTab extends JPanel {
         loadMeta();
         createGui();
     }
-    
+
     /**
      * Sets the initial values of the member variables
      */
     private void createVariables(){
         positions = new LinkedList<WorldCoordinate>();
         tile_size = 120;
-        
+
         is_context_menu_shown = false;
         forced_focus_disabled = true;
 
         mouse_in_panel = false;
         mouse_x_previous = mouse_y_previous = 0;
-        
+
         force_selection = false;
         cursor_enabled = place_selection_enabled_default;
-        
+
         place_group = new HashSet<Place>();
     }
-    
+
     /**
      * Creates the GUI elements
      */
     private void createGui(){
         setLayout(new BorderLayout());
-        
+
         worldpanel = new WorldPanel(this, passive);
         add(worldpanel, BorderLayout.CENTER);
-                        
+
         add(panel_south = new JPanel(), BorderLayout.SOUTH);
         panel_south.setLayout(new GridBagLayout());
-        
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(1, 2, 0, 2);
-                
+
         // add bottom panel elements
         // previous / next buttons for the history
         JButton button_prev = new JButton("Prev");
@@ -265,12 +266,12 @@ public class WorldTab extends JPanel {
                 restorePosition();
             }
         });
-        
+
         JButton button_list = new JButton("List");
         constraints.gridx++;
         panel_south.add(button_list, constraints);
         button_list.addActionListener(new PlaceListDialog(this, passive)); // passive WorldTab creates modal PlaceListDialogs
-        
+
         JTextField textfield_search = new JTextField("Search");
         constraints.gridx++;
         panel_south.add(textfield_search, constraints);
@@ -279,28 +280,28 @@ public class WorldTab extends JPanel {
             public void actionPerformed(ActionEvent arg0) {
                 String[] keywords = ((JTextField) arg0.getSource()).getText().toLowerCase().split(" ");
                 ArrayList<Place> found_places = new ArrayList<Place>();
-                
+
                 // search
                 for(Place pl: getWorld().getPlaces())
                     if(pl.matchKeywords(keywords)) found_places.add(pl);
-                
+
                 // display
                 if(found_places.isEmpty()) JOptionPane.showMessageDialog(parent, "No places found!", "Search - " + getWorld().getName(), JOptionPane.PLAIN_MESSAGE);
                 else (new PlaceListDialog(WorldTab.this, found_places, passive)).setVisible(true);
             }
         });
-        
-        
+
+
         constraints.gridx++;
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.BOTH;
         panel_south.add(label_infobar = new ScrollLabel(), constraints);
         label_infobar.startThread();
-        
+
         // set default selected place to hte center place
         cursor_x = (int) Math.round(getCurPosition().getX());
         cursor_y = (int) Math.round(getCurPosition().getY());
-        
+
         slider_zoom = new JSlider(0, 100, (int) (100.0 / tile_size_max * tile_size));
         constraints.gridx++;
         constraints.weightx = 0.0;
@@ -313,18 +314,18 @@ public class WorldTab extends JPanel {
             }
         });
         // ---
-        
+
         cursor_listeners = new LinkedList<CursorListener>();
     }
-    
+
     /**
      * Gets the parent frame
-     * @return 
+     * @return
      */
     public JFrame get_parent(){
         return parent;
     }
-    
+
     /**
      * Closes the tab
      */
@@ -336,7 +337,7 @@ public class WorldTab extends JPanel {
             ((Mainwindow) parent).removeTab(this);
         }
     }
-    
+
     /**
      * Gets the world
      * @return world
@@ -344,39 +345,39 @@ public class WorldTab extends JPanel {
     public World getWorld(){
         return world;
     }
-    
+
     /**
      * Gets the panel width / width of the actually drawn map
-     * @return 
+     * @return
      */
     public int getPanelWidth(){
         return (int) worldpanel.getScreenWidth();
     }
-    
+
     /**
      * Gets the panel height / height of the actually drawn map
-     * @return 
+     * @return
      */
     public int getPanelHeight(){
         return (int) worldpanel.getScreenHeight();
     }
-    
+
     /**
      * Returns true if curved path lines are enabled
-     * @return 
+     * @return
      */
     public static boolean getShowPathsCurved(){
         return show_paths_curved;
     }
-    
+
     /**
      * Enables or disables curved path lines
-     * @param b 
+     * @param b
      */
     public static void setShowPathsCurved(boolean b){
         show_paths_curved = b;
     }
-    
+
     /**
      * Saves the changes in the world
      */
@@ -387,15 +388,15 @@ public class WorldTab extends JPanel {
         }
         showMessage("World saved");
     }
-    
+
     /**
      * Show message in infobar
-     * @param message 
+     * @param message
      */
     public void showMessage(String message){
         label_infobar.showMessage(message);
     }
-    
+
     // ========================== Place selection ==============================
     /**
      * Gets the x coordinate of the selected place
@@ -404,15 +405,15 @@ public class WorldTab extends JPanel {
     public int getCursorX(){
         return cursor_x;
     }
-    
+
     /**
-     * Gets the y coordinate of the selected place 
+     * Gets the y coordinate of the selected place
      * @return y coordinate
      */
     public int getCursorY(){
         return cursor_y;
     }
-    
+
     /**
      * Sets the coordinates of the selected place
      * @param x x coordinate
@@ -426,7 +427,7 @@ public class WorldTab extends JPanel {
         repaint();
         callCursorListeners();
     }
-    
+
     /**
      * Moves the place selection coordinates
      * @param dx x movement
@@ -440,7 +441,7 @@ public class WorldTab extends JPanel {
         repaint();
         callCursorListeners();
     }
-    
+
     /**
      * moves the shown places so the selection is on the screen
      */
@@ -461,7 +462,7 @@ public class WorldTab extends JPanel {
             repaint();
         }
     }
-    
+
     public void updateCursorEnabled(){
         /*if(update_check_button){
             JCheckBoxMenuItem mi_show_place_selection = ((Mainwindow) parent).getMiShowPlaceSelection();
@@ -470,20 +471,20 @@ public class WorldTab extends JPanel {
                 mi_show_place_selection.setEnabled(!force_selection);
             }
         }*/
-        
+
         updateInfobar();
         repaint();
     }
 
     /**
      * Sets the cursor state (if true, the selection will be shown)
-     * @param b 
+     * @param b
      */
     public void setCursorEnabled(boolean b){
         cursor_enabled = b || force_selection;
         updateCursorEnabled();
     }
-    
+
     /**
      * Toggles the cursor enabled state
      */
@@ -493,24 +494,24 @@ public class WorldTab extends JPanel {
             updateCursorEnabled();
         }
     }
-    
+
     /**
      * Gets the cursor state
-     * @return 
+     * @return
      */
     public boolean getCursorEnabled(){
         return cursor_enabled || force_selection;
     }
-    
+
     /**
      * Forces the cursor to be enabled, if true
-     * @param b 
+     * @param b
      */
     public void setCursorForced(boolean b){
         if(force_selection = b) setCursorEnabled(true);
         updateCursorEnabled();
     }
-    
+
     /**
      * Gets the currently shown position
      * @return current position
@@ -519,7 +520,7 @@ public class WorldTab extends JPanel {
         return positions.get(positions_cur_index);
         //return positions.getFirst();
     }
-    
+
     /**
      * Pushes a new position on the position stack ("goto")
      * @param _pos new position
@@ -533,13 +534,13 @@ public class WorldTab extends JPanel {
         }
         // add new position
         positions.push(pos);
-        
+
         // move place selection
         setCursor((int) pos.getX(), (int) pos.getY());
         while(positions.size() > history_max_length) positions.removeLast();
         repaint();
     }
-    
+
     /**
      * Removes the first position from the position stack,
      * go to home position if the stack is empty
@@ -549,14 +550,14 @@ public class WorldTab extends JPanel {
         if(positions_cur_index < positions.size() - 1) positions_cur_index++;
         // add home coord at list end (unlike gotoHome())
         else positions.addLast(getWorld().getHome());
-        
+
         //if(positions.size() > 0) positions.removeFirst();
         //if(positions.size() == 0) gotoHome();
-        
+
         setCursor((int) getCurPosition().getX(), (int) getCurPosition().getY());
         repaint();
     }
-    
+
     public void restorePosition(){
         if(positions_cur_index > 0){
             positions_cur_index--;
@@ -564,12 +565,12 @@ public class WorldTab extends JPanel {
             repaint();
         }
     }
-    
+
     /**
      * Updates the infobar
      */
     private void updateInfobar(){
-        if(label_infobar != null ){ 
+        if(label_infobar != null ){
             if(getCursorEnabled()){
                 Layer layer = world.getLayer(getCurPosition().getLayer());
                 if(layer != null && layer.exist(getCursorX(), getCursorY())){
@@ -592,7 +593,7 @@ public class WorldTab extends JPanel {
             } else label_infobar.setText("");
         }
     }
-    
+
     /**
      * Removes all previously visited positions from history and sets pos
      * @param pos new position
@@ -605,7 +606,7 @@ public class WorldTab extends JPanel {
         updateInfobar();
         repaint();
     }
-    
+
     /**
      * Go to the home position
      */
@@ -613,14 +614,14 @@ public class WorldTab extends JPanel {
         pushPosition(world.getHome());
         setCursor((int) Math.round(getCurPosition().getX()), (int) Math.round(getCurPosition().getY()));
     }
-    
+
     /**
      * Sets a new home position
      */
     public void setHome(){
         world.setHome(getCurPosition().clone());
     }
-    
+
     /**
      * Gets a place on the current layer
      * @param x x coordinate
@@ -633,7 +634,7 @@ public class WorldTab extends JPanel {
         if(layer != null) ret = (Place) layer.get(x, y);
         return ret;
     }
-    
+
     /**
      * Gets the selected place or null
      * @return place or null
@@ -641,7 +642,7 @@ public class WorldTab extends JPanel {
     public Place getSelectedPlace(){
         return getPlace(getCursorX(), getCursorY());
     }
-    
+
     /**
      * Gets the current tile size
      * @return tile size
@@ -649,7 +650,7 @@ public class WorldTab extends JPanel {
     public int getTileSize(){
         return (int) tile_size;
     }
-    
+
     /**
      * sets the tile size
      * @param ts new tile size
@@ -659,7 +660,7 @@ public class WorldTab extends JPanel {
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         repaint();
     }
-    
+
     /**
      * increases the tile size
      */
@@ -668,12 +669,12 @@ public class WorldTab extends JPanel {
         ts = Math.exp(Math.log(ts / 10) + 0.03) * 10;
         ts = Math.min(ts, tile_size_max);
         tile_size = Math.min(Math.max(ts, tile_size + 1), tile_size_max);
-        
+
         //if(tile_size < tile_size_max) tile_size++;
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         repaint();
     }
-    
+
     /**
      * decreases the tile size
      */
@@ -682,72 +683,72 @@ public class WorldTab extends JPanel {
         ts = Math.exp(Math.log(ts / 10) - 0.02) * 10;
         ts = Math.max(ts, tile_size_min);
         tile_size = Math.max(Math.min(ts, tile_size - 1), tile_size_min);
-        
+
         //if(tile_size > tile_size_min) tile_size--;
-        
+
         slider_zoom.setValue((int) (100.0 / tile_size_max * tile_size));
         repaint();
     }
-    
-    
+
+
     /**
      * Sets whether a context menu is shown, to disable forced focus
-     * @param b 
+     * @param b
      */
     private void setContextMenu(boolean b) {
         is_context_menu_shown = b;
     }
-    
+
     /**
      * Returns true, if a context menu is shown and forced focus is disabled
-     * @return 
+     * @return
      */
     private boolean hasContextMenu(){
         return is_context_menu_shown;
     }
-    
+
     /**
      * Manually disables the forced focus
-     * @param b 
+     * @param b
      */
     public void setForcedFocusDisabled(boolean b){
         forced_focus_disabled = b;
     }
-    
+
     /**
      * Returns true, if forced focus is disabled manually
-     * @return 
+     * @return
      */
     public boolean getForcedFocusDisabled(){
         return forced_focus_disabled;
     }
-    
+
     /**
      * Returs true, if forced focus can be enabled
-     * @return 
+     * @return
      */
     private boolean getForcedFocus(){
         return !forced_focus_disabled && !is_context_menu_shown;
     }
-    
+
     // ========================= selection listener ============================
     /**
      * Adds a place selection listener
-     * @param listener 
+     * @param listener
      */
     public void addCursorListener(CursorListener listener){
         if(!cursor_listeners.contains(listener))
             cursor_listeners.add(listener);
     }
-    
+
     /**
      * Removes a place selection listener
-     * @param listener 
+     * @param listener
      */
     public void removeCursorListener(CursorListener listener){
         cursor_listeners.remove(listener);
     }
-    
+
     /**
      * calls all place selection listeners
      */
@@ -755,24 +756,24 @@ public class WorldTab extends JPanel {
         Place place = getPlace(getCursorX(), getCursorY());
 
         if(cursor_listeners != null) {
-            if(place != null) 
-                for(CursorListener listener: cursor_listeners) 
+            if(place != null)
+                for(CursorListener listener: cursor_listeners)
                     listener.placeSelected(place);
             else{
                 Layer layer = getWorld().getLayer(getCurPosition().getLayer());
-                for(CursorListener listener: cursor_listeners) 
+                for(CursorListener listener: cursor_listeners)
                     listener.placeDeselected(layer, getCursorX(), getCursorY());
             }
         }
     }
-    
+
     public interface CursorListener{
         // gets called, when the cursor moves to another place
         public void placeSelected(Place p);
         // gets called, when the cursor changes to null
         public void placeDeselected(Layer layer, int x, int y);
     }
-    
+
     // ========================= place (group) selection =======================
     /**
      * Clears the box/shift selection box
@@ -780,7 +781,7 @@ public class WorldTab extends JPanel {
     private void placeGroupBoxResetSelection(){
         place_group_box_end = place_group_box_start = null;
     }
-    
+
     /**
      * Modifies the box/shift selection box (eg on shift + direction key)
      * @param x new coordinate
@@ -794,7 +795,7 @@ public class WorldTab extends JPanel {
         // set start, if not set
         if(place_group_box_start == null) place_group_box_start = place_group_box_end;
     }
-    
+
     /**
      * Moves the box/shift selection to the selected places list
      */
@@ -804,14 +805,14 @@ public class WorldTab extends JPanel {
             int x2 = (int) Math.round(place_group_box_start.getX());
             int y1 = (int) Math.round(place_group_box_end.getY());
             int y2 = (int) Math.round(place_group_box_start.getY());
-            
+
             int x_min = Math.min(x1, x2);
             int x_max = Math.max(x1, x2);
             int y_min = Math.min(y1, y2);
             int y_max = Math.max(y1, y2);
-            
+
             Layer layer = world.getLayer(place_group_box_end.getLayer());
-            
+
             for(int x = x_min; x <= x_max; ++x){
                 for(int y = y_min; y <= y_max; ++y){
                     Place pl = (Place) layer.get(x, y);
@@ -821,10 +822,10 @@ public class WorldTab extends JPanel {
         }
         placeGroupBoxResetSelection();
     }
-    
+
     /**
      * adds a place to the place selection list (eg on ctrl + click)
-     * @param pl 
+     * @param pl
      */
     private void placeGroupAdd(Place pl){
         placeGroupBoxSelectionToList();
@@ -835,16 +836,16 @@ public class WorldTab extends JPanel {
             else place_group.add(pl);
         }
     }
-    
+
     /**
      * Sets the selection to a new set
-     * @param set 
+     * @param set
      */
     private void placeGroupSet(HashSet<Place> set){
         place_group.clear();
         place_group = set;
     }
-    
+
     /**
      * Clears the selected places list and the shift selection
      */
@@ -852,32 +853,32 @@ public class WorldTab extends JPanel {
         place_group.clear();
         placeGroupBoxResetSelection();
     }
-    
+
     /**
      * Returns true, if places are selected
-     * @return 
+     * @return
      */
     public boolean placeGroupHasSelection(){
         return (place_group_box_start != null && place_group_box_end != null) || !place_group.isEmpty();
     }
-    
+
     /**
      * gets all selected places
-     * @return 
+     * @return
      */
     public HashSet<Place> placeGroupGetSelection(){
         if(place_group_box_start != null) placeGroupBoxSelectionToList();
         return place_group;
     }
-    
+
     /**
      * Returns true, if a place is selected by group selection
      * @param place
-     * @return 
+     * @return
      */
     private boolean placeGroupIsSelected(Place place){
         if(place != null){
-            if(place_group_box_end != null && place_group_box_start != null 
+            if(place_group_box_end != null && place_group_box_start != null
                 && place_group_box_end.getLayer() == place.getLayer().getId()){
                 int x1 = (int) Math.round(place_group_box_end.getX());
                 int x2 = (int) Math.round(place_group_box_start.getX());
@@ -889,14 +890,14 @@ public class WorldTab extends JPanel {
                 int y_min = Math.min(y1, y2);
                 int y_max = Math.max(y1, y2);
 
-                if(place.getX() >= x_min && place.getX() <= x_max 
+                if(place.getX() >= x_min && place.getX() <= x_max
                     && place.getY() >= y_min && place.getY() <= y_max) return true;
             }
             if(place_group.contains(place)) return true;
         }
         return false;
     }
-    
+
     /**
      * Loads the world meta data file
      * this file describes the coordinates of the last shown positions
@@ -907,11 +908,11 @@ public class WorldTab extends JPanel {
         String file = world.getFile() + "_meta";
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
-            
+
             String line;
             int layer_id = -1;
             double pos_x = 0, pos_y = 0;
-            
+
             try {
                 while((line = reader.readLine()) != null){
                     line = line.trim();
@@ -947,17 +948,17 @@ public class WorldTab extends JPanel {
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
             pushPosition(new WorldCoordinate(layer_id, pos_x, pos_y));
-            
+
         } catch (FileNotFoundException ex) {
             System.out.println("Couldn't open world meta file \"" + file + "\", file not found");
             //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
-            
+
             pushPosition(new WorldCoordinate(0, 0, 0));
         }
     }
-    
+
     /**
      * Saves the world meta file
      */
@@ -993,17 +994,17 @@ public class WorldTab extends JPanel {
             }
         }
     }
-    
+
     private static class WorldPanel extends JPanel {
-        
+
         double screen_width, screen_height;
-        
+
         WorldTab parent;
         MapPainter mappainter;
 
         // passive worldpanels don't modify the world
         final boolean passive;
-        
+
         /**
          * Constructs a world panel
          * @param _parent parent world tab
@@ -1012,7 +1013,7 @@ public class WorldTab extends JPanel {
             parent = _parent;
             passive = _passive;
             mappainter = new MapPainterDefault();
-                    
+
             setFocusable(true);
             requestFocusInWindow();
             addFocusListener(new FocusAdapter() {
@@ -1021,7 +1022,7 @@ public class WorldTab extends JPanel {
                     if(parent.getForcedFocus()) requestFocusInWindow();
                 }
             });
-               
+
             addKeyListener(new TabKeyPassiveListener(this));
             addMouseListener(new TabMousePassiveListener());
             if(!passive){
@@ -1041,7 +1042,7 @@ public class WorldTab extends JPanel {
             });
             addMouseMotionListener(new TabMouseMotionListener());
         }
-        
+
         /**
          * Gets the screen width
          * @return screen width
@@ -1049,7 +1050,7 @@ public class WorldTab extends JPanel {
         public double getScreenWidth(){
             return screen_width;
         }
-        
+
         /**
          * Gets the screen height
          * @return screen height
@@ -1057,16 +1058,16 @@ public class WorldTab extends JPanel {
         public double getScreenHeight(){
             return screen_height;
         }
-                
+
         /**
          * Remove integer part, the part after the point remains
          * @param val
-         * @return 
+         * @return
          */
         private double remint(double val){
             return val - Math.round(val);
         }
-        
+
         /**
          * Converts screen coordinates to world coordinates
          * @param screen_x a screen coordinate (x-axis)
@@ -1075,7 +1076,7 @@ public class WorldTab extends JPanel {
         private int getPlacePosX(int screen_x){
             return (int) Math.ceil((double) (screen_x - screen_width / 2) / parent.getTileSize() + parent.getCurPosition().getX()) - 1;
         }
-        
+
         /**
          * Converts screen coordinates to world coordinates
          * @param mouse_y a screen coordinate (y-axis)
@@ -1084,7 +1085,7 @@ public class WorldTab extends JPanel {
         private int getPlacePosY(int screen_y){
             return (int) -Math.ceil((double) (screen_y - screen_height / 2) / parent.getTileSize() - parent.getCurPosition().getY()) + 1;
         }
-        
+
         /**
          * Converts world coordinates to screen coordinates
          * @param place_x a world (place) coordinate (x axis)
@@ -1096,7 +1097,7 @@ public class WorldTab extends JPanel {
             int place_x_offset = (int) (Math.round((double) parent.getCurPosition().getX()) - Math.round(screen_center_x));
             return (int)((place_x - place_x_offset + remint(screen_center_x) - remint(parent.getCurPosition().getX())) * tile_size);
         }
-        
+
         /**
          * Converts world coordinates to screen coordinates
          * @param place_y a world (place) coordinate (y axis)
@@ -1108,20 +1109,20 @@ public class WorldTab extends JPanel {
             int place_y_offset = (int) (Math.round(parent.getCurPosition().getY()) - Math.round(screen_center_y));
             return (int)((-place_y + place_y_offset - remint(screen_center_y) + remint(parent.getCurPosition().getY())) * tile_size + screen_height);
         }
-        
+
         // ======================= DRAW WORLD HERE =============================
-        
+
         @Override
-        public void paintComponent(Graphics g){ 
+        public void paintComponent(Graphics g){
             mappainter.setPlaceGroup(parent.place_group, parent.place_group_box_start, parent.place_group_box_end);
             mappainter.setPlaceSelection(parent.getCursorX(), parent.getCursorY());
             mappainter.setPlaceSelectionEnabled(parent.getCursorEnabled());
-            
+
             mappainter.paint(g, parent.getTileSize(), screen_width = getWidth(), screen_height = getHeight(), parent.getWorld().getLayer(parent.getCurPosition().getLayer()), parent.getCurPosition());
         }
-        
+
         // ========================= Listeners and context menu ================
-        
+
         /**
          * This listener only contains actions, that don't modify the world
          */
@@ -1140,7 +1141,7 @@ public class WorldTab extends JPanel {
                 }
             }
         }
-        
+
         /**
          * This listener contains actions that modify the world
          */
@@ -1189,7 +1190,7 @@ public class WorldTab extends JPanel {
                 parent.mouse_in_panel = false;
             }
         }
-                
+
         private class TabMouseMotionListener implements MouseMotionListener {
 
             @Override
@@ -1212,9 +1213,9 @@ public class WorldTab extends JPanel {
             public void mouseMoved(MouseEvent arg0) {
                 parent.mouse_x_previous = arg0.getX();
                 parent.mouse_y_previous = arg0.getY();
-            }   
+            }
         }
-        
+
         /**
          * This listener only contains actions, that don't modify the world
          */
@@ -1222,13 +1223,13 @@ public class WorldTab extends JPanel {
             public TabKeyPassiveListener(WorldPanel parent){
                 super(parent);
             }
-            
+
             @Override
-            public void keyPressed(KeyEvent arg0) {                
+            public void keyPressed(KeyEvent arg0) {
                 if(!arg0.isShiftDown() && !arg0.isControlDown() && !arg0.isAltDown() && !arg0.isAltGraphDown()){ // ctrl, shift and alt not pressed
                     int x_bef = parent.getCursorX();
                     int y_bef = parent.getCursorY();
-                    
+
                     switch(arg0.getKeyCode()){
                         // zoom the map
                         case KeyEvent.VK_PLUS:
@@ -1294,16 +1295,16 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_L:
                             (new PlaceListDialog(parent, passive)).setVisible(true);
                             break;
-                            
+
                         // reset place group selection
                         case KeyEvent.VK_ESCAPE:
                             parent.placeGroupReset();
                             break;
                     }
-                    
+
                     int x_sel = parent.getCursorX();
                     int y_sel = parent.getCursorY();
-                    
+
                     // change group selection, if place selection changed
                     if(x_sel != x_bef || y_sel != y_bef){
                         if(parent.place_group_box_start != null) parent.placeGroupBoxSelectionToList();
@@ -1311,14 +1312,14 @@ public class WorldTab extends JPanel {
                 }
             }
         }
-        
+
         /**
          * This listener contains actions, that modify the world
          */
         private class TabKeyListener implements KeyListener {
-            
+
             WorldPanel worldpanel;
-            
+
             public TabKeyListener(WorldPanel parent){
                 worldpanel = parent;
             }
@@ -1330,7 +1331,7 @@ public class WorldTab extends JPanel {
             public void keyPressed(KeyEvent arg0) {
                 if(arg0.isControlDown()){ // ctrl key pressed
                     Place place, other;
-                    
+
                     switch(arg0.getKeyCode()){
                         case KeyEvent.VK_S: // save world
                             parent.save();
@@ -1338,7 +1339,7 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_O: // open world
                             (new OpenWorldDialog((Mainwindow) parent.parent)).setVisible();
                             break;
-                    
+
                         case KeyEvent.VK_A: // select all places
                             parent.placeGroupSet(parent.getWorld().getLayer(parent.getCurPosition().getLayer()).getPlaces());
                             break;
@@ -1352,7 +1353,7 @@ public class WorldTab extends JPanel {
                                 tmp_selection.add(parent.getSelectedPlace());
                                 mudmap2.Mudmap2.cut(tmp_selection, parent.getCursorX(), parent.getCursorY());
                                 parent.showMessage("1 place cut");
-                            } else parent.showMessage("No places cut: selection empty");                   
+                            } else parent.showMessage("No places cut: selection empty");
                             break;
                         case KeyEvent.VK_C: // copy selected places
                             if(!parent.placeGroupGetSelection().isEmpty()){ // copy group selection
@@ -1386,7 +1387,7 @@ public class WorldTab extends JPanel {
                                 parent.showMessage("Can't paste: no places cut or copied");
                             }
                             break;
-                            
+
                         case KeyEvent.VK_NUMPAD8:
                         case KeyEvent.VK_UP:
                         //case KeyEvent.VK_W: // add path to direction 'n'
@@ -1470,11 +1471,11 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_NUMPAD5: // open add path dialog
                             (new PathConnectDialog(parent, parent.getSelectedPlace())).setVisible(true);
                             break;
-                    } 
+                    }
                 } else if(arg0.isShiftDown()){ // shift key pressed -> modify selection
                     int x_bef = parent.getCursorX();
                     int y_bef = parent.getCursorY();
-                    
+
                     switch(arg0.getKeyCode()){
                         case KeyEvent.VK_NUMPAD8:
                         case KeyEvent.VK_UP:
@@ -1510,7 +1511,7 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_NUMPAD9:
                             if(parent.getCursorEnabled()) parent.moveCursor(+1, +1);
                             break;
-                            
+
                         case KeyEvent.VK_SPACE: // add or remove single place to place group selection
                             Place place = parent.getSelectedPlace();
                             if(place != null) parent.placeGroupAdd(place);
@@ -1518,17 +1519,17 @@ public class WorldTab extends JPanel {
                     }
                     int x_sel = parent.getCursorX();
                     int y_sel = parent.getCursorY();
-                    
+
                     // change group selection, if place selection changed
                     if(x_sel != x_bef || y_sel != y_bef){
                         if(parent.place_group_box_start == null) parent.placeGroupBoxModifySelection(x_bef, y_bef);
                         parent.placeGroupBoxModifySelection(x_sel, y_sel);
                     }
-                } else if(arg0.isAltDown() || arg0.isAltGraphDown()){ // alt or altgr key pressed                    
+                } else if(arg0.isAltDown() || arg0.isAltGraphDown()){ // alt or altgr key pressed
                     Place place = parent.getSelectedPlace();
                     Place other;
                     Path path;
-                    
+
                     if(place != null){
                         switch(arg0.getKeyCode()){
                             case KeyEvent.VK_NUMPAD8:
@@ -1590,14 +1591,14 @@ public class WorldTab extends JPanel {
                             if(parent.getCursorEnabled()){
                                 Place place = parent.getSelectedPlace();
                                 PlaceDialog dlg;
-                                
+
                                 Layer layer = null;
                                 if(parent.getCurPosition() != null) layer = parent.getWorld().getLayer(parent.getCurPosition().getLayer());
-                                
+
                                 if(place != null) dlg = new PlaceDialog(parent.parent, parent.world, place);
                                 else dlg = new PlaceDialog(parent.parent, parent.world, parent.world.getLayer(parent.getCurPosition().getLayer()), parent.getCursorX(), parent.getCursorY());
                                 dlg.setVisible(true);
-                                
+
                                 if(layer == null) parent.pushPosition(dlg.getPlace().getCoordinate());
                             }
                             break;
@@ -1653,7 +1654,7 @@ public class WorldTab extends JPanel {
                         // modify area
                         case KeyEvent.VK_Q:
                             Place place = parent.getSelectedPlace();
-                            
+
                             if(!parent.placeGroupHasSelection()){
                                 // no place selected
                                 if(place == null) (new AreaDialog(parent.parent, parent.world)).setVisible(true);
@@ -1663,7 +1664,7 @@ public class WorldTab extends JPanel {
                                 (new AreaDialog(parent.parent, parent.world, parent.placeGroupGetSelection(), place)).setVisible(true);
                             }
                             break;
-                            
+
                         case KeyEvent.VK_SPACE: // add or remove single place to place group selection
                             place = parent.getSelectedPlace();
                             if(place != null) parent.placeGroupAdd(place);
@@ -1676,12 +1677,12 @@ public class WorldTab extends JPanel {
             @Override
             public void keyReleased(KeyEvent arg0) {}
         }
-        
+
         // constructs the context menu (on right click)
         private static class TabContextMenu extends JPopupMenu {
-            
+
             WorldTab parent;
-            
+
             /**
              * Constructs a context menu at position (x,y)
              * @param x screen / panel coordinate x
@@ -1689,23 +1690,23 @@ public class WorldTab extends JPanel {
              */
             public TabContextMenu(WorldTab _parent, final int px, final int py) {
                 addPopupMenuListener(new TabContextPopMenuListener());
-                
+
                 parent = _parent;
                 final Layer layer = parent.world.getLayer(parent.getCurPosition().getLayer());
-                
+
                 final Place place = (layer != null ? (Place) layer.get(px, py) : null);
                 final boolean has_place = layer != null && place != null;
-                
+
                 if(has_place){ // if place exists
                     if(!parent.passive){
                         JMenuItem mi_edit = new JMenuItem("Edit place");
                         PlaceDialog pdlg = new PlaceDialog(parent.parent, parent.world, place);
                         mi_edit.addActionListener(pdlg);
                         if(layer == null) parent.pushPosition(pdlg.getPlace().getCoordinate());
-                        
+
                         add(mi_edit);
                         mi_edit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0));
-                        
+
                         HashSet<Place> place_group = parent.placeGroupGetSelection();
 
                         JMenuItem mi_remove;
@@ -1738,12 +1739,12 @@ public class WorldTab extends JPanel {
                         }
                         add(mi_area);
                     }
-                    
+
                     // ------------- Paths ------------------
                     JMenu m_paths = new JMenu("Paths / Exits");
                     if(!parent.passive || !place.getPaths().isEmpty())
                         add(m_paths);
-                    
+
                     if(!parent.passive){
                         JMenu m_path_connect = new JMenu("Connect");
                         m_paths.add(m_path_connect);
@@ -1754,19 +1755,19 @@ public class WorldTab extends JPanel {
                         mi_path_connect_select.setToolTipText("Select any place from the map");
                         mi_path_connect_select.addActionListener(new PathConnectDialog(parent, place));
                         mi_path_connect_select.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, Event.CTRL_MASK));
-                        
+
                         JMenuItem mi_path_connect_neighbors = new JMenuItem("Neighbors");
                         m_path_connect.add(mi_path_connect_neighbors);
                         mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
                         mi_path_connect_neighbors.addActionListener(new PathConnectNeighborsDialog(parent.parent, place));
 
-                        LinkedList<Place> places = layer.getNeighbors(px, py, 1);
+                        LinkedList<LayerElement> places = layer.getNeighbors(px, py, 1);
                         if(!places.isEmpty()){
                             m_path_connect.add(new JSeparator());
 
-                            for(Place neighbor: places){
+                            for(LayerElement neighbor: places){
                                 // only show, if no connection exists, yet
-                                if(place.getPaths(neighbor).isEmpty()){
+                                if(place.getPaths((Place) neighbor).isEmpty()){
                                     String dir1 = "", dir2 = "";
 
                                     if(neighbor.getY() > place.getY())
@@ -1779,10 +1780,10 @@ public class WorldTab extends JPanel {
                                         {dir1 = dir1 + "w"; dir2 = dir2 + "e";}
 
                                     // if exits aren't occupied yet -> add menu item
-                                    if(place.getPathTo(dir1) == null && neighbor.getPathTo(dir2) == null){
-                                        JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + neighbor.getName());
+                                    if(place.getPathTo(dir1) == null && ((Place) neighbor).getPathTo(dir2) == null){
+                                        JMenuItem mi_path_connect = new JMenuItem("[" + dir1 + "] " + ((Place) neighbor).getName());
                                         m_path_connect.add(mi_path_connect);
-                                        mi_path_connect.addActionListener(new ConnectPathActionListener(place, neighbor, dir1, dir2));
+                                        mi_path_connect.addActionListener(new ConnectPathActionListener(place, ((Place) neighbor), dir1, dir2));
 
                                         // add accelerator
                                         int dirnum = Path.getDirNum(dir1);
@@ -1793,10 +1794,10 @@ public class WorldTab extends JPanel {
                             }
                         }
                     }
-                    
+
                     // get all connected places
                     HashSet<Path> paths = place.getPaths();
-                    
+
                     if(!paths.isEmpty()){
                         JMenu m_path_remove = null;
                         if(!parent.passive){
@@ -1806,26 +1807,26 @@ public class WorldTab extends JPanel {
 
                             m_paths.add(new JSeparator());
                         }
-                        
+
                         for(Path path: paths){
                             Place other_place = path.getOtherPlace(place);
                             JMenuItem mi_path_goto = new JMenuItem("Go to [" + path.getExit(place) + "] " + other_place.getName());
                             m_paths.add(mi_path_goto);
                             mi_path_goto.addActionListener(new GotoPlaceActionListener(parent, other_place));
-                            
+
                             if(!parent.passive){
                                 String dir = path.getExit(place);
                                 JMenuItem mi_path_remove = new JMenuItem("Remove [" + dir + "] " + other_place.getName());
                                 mi_path_remove.addActionListener(new RemovePathActionListener(path));
                                 m_path_remove.add(mi_path_remove);
-                                
+
                                 // add accelerator
                                 int dirnum = Path.getDirNum(dir);
                                 if(dirnum > 0 & dirnum <= 9)
                                     mi_path_remove.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0 + dirnum, Event.ALT_MASK));
                             }
                         }
-                        
+
                         if(!parent.passive){
                             JMenuItem mi_shortest_path = new JMenuItem("Find shortest path");
                             m_paths.add(new JSeparator());
@@ -1851,18 +1852,18 @@ public class WorldTab extends JPanel {
                                             parent.label_infobar.showMessage("Path found, length: " + (path_length - 1));
                                         }
 
-                                    } 
+                                    }
                                 }
                             });
                         }
                     }
-                    
+
                     // ------------- sub-areas ------------------
                     JMenu m_subareas = new JMenu("Sub-areas");
                     m_subareas.setToolTipText("Not to be confused with areas, sub-areas usually connect a place to another layer of the map, eg. a building <-> rooms inside it");
                     if(!parent.passive || !place.getChildren().isEmpty())
                         add(m_subareas);
-                    
+
                     if(!parent.passive){
                         JMenuItem mi_sa_connect = new JMenuItem("Connect with place");
                         m_subareas.add(mi_sa_connect);
@@ -1903,7 +1904,7 @@ public class WorldTab extends JPanel {
                             }
                         });
                     }
-                    
+
                     HashSet<Place> children = place.getChildren();
                     if(!children.isEmpty()){
                         if(!parent.passive){
@@ -1916,27 +1917,27 @@ public class WorldTab extends JPanel {
                                 mi_sa_remove.addActionListener(new RemoveSubAreaActionListener(place, child));
                             }
                         }
-                        
+
                         m_subareas.add(new JSeparator());
-                        
+
                         for(Place child: children){
                             JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.getName());
                             m_subareas.add(mi_sa_goto);
                             mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                         }
                     }
-                    
+
                     HashSet<Place> parents = place.getParents();
-                    if(!parents.isEmpty()){                        
+                    if(!parents.isEmpty()){
                         m_subareas.add(new JSeparator());
-                        
+
                         for(Place child: parents){
                             JMenuItem mi_sa_goto = new JMenuItem("Go to parent " + child.getName());
                             m_subareas.add(mi_sa_goto);
                             mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                         }
                     }
-                    
+
                 }  else { // if layer doesn't exist or no place exists at position x,y
                     JMenuItem mi_new = new JMenuItem("New place");
                     mi_new.addActionListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
@@ -1952,15 +1953,15 @@ public class WorldTab extends JPanel {
                         }
                     });
                 }
-                
+
                 // cut / copy / paste for selected places
                 final boolean can_paste = layer != null && mudmap2.Mudmap2.canPaste(px, py, layer);
                 final boolean has_paste_places = layer != null && mudmap2.Mudmap2.hasCopyPlaces();
                 final boolean has_selection = parent.placeGroupHasSelection();
-                
+
                 if(has_place || has_selection || has_paste_places)
                     add(new JSeparator());
-                
+
                 if(has_place || has_selection){
                     JMenuItem mi_cut_place = new JMenuItem("Cut" + (has_selection ? " selection" : " place"));
                     add(mi_cut_place);
@@ -1979,7 +1980,7 @@ public class WorldTab extends JPanel {
                         }
                     });
                     mi_cut_place.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-                    
+
                     JMenuItem mi_copy_place = new JMenuItem("Copy" + (has_selection ? " selection" : " place"));
                     add(mi_copy_place);
                     mi_copy_place.addActionListener(new ActionListener() {
@@ -1998,7 +1999,7 @@ public class WorldTab extends JPanel {
                     });
                     mi_copy_place.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
                 }
-                
+
                 if(has_paste_places){
                     JMenuItem mi_paste_place = new JMenuItem("Paste");
                     add(mi_paste_place);
@@ -2013,9 +2014,9 @@ public class WorldTab extends JPanel {
                     if(!can_paste) mi_paste_place.setEnabled(false);
                     mi_paste_place.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
                 }
-                
+
             }
-            
+
             /**
              * redraws the world tab after the popup is closed
              */
@@ -2038,14 +2039,14 @@ public class WorldTab extends JPanel {
                     parent.repaint();
                 }
             }
-            
+
             /**
              * Moves the map to the place, if action is performed
              */
             private class GotoPlaceActionListener implements ActionListener{
                 WorldTab worldtab;
                 Place place;
-                
+
                 public GotoPlaceActionListener(WorldTab _worldtab, Place _place){
                     worldtab = _worldtab;
                     place = _place;
@@ -2056,29 +2057,29 @@ public class WorldTab extends JPanel {
                     if(place != null) worldtab.pushPosition(place.getCoordinate());
                 }
             }
-            
+
             /**
              * Removes a subarea child from a place, if action performed
              */
             private class RemoveSubAreaActionListener implements ActionListener{
                 Place place, child;
-                
+
                 public RemoveSubAreaActionListener(Place _place, Place _child) {
                     place = _place;
                     child = _child;
                 }
-                
+
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if(place != null && child != null) place.removeChild(child);
                 }
             }
-            
+
             /**
              * Connects a new path, if called
              */
             private class ConnectPathActionListener implements ActionListener{
-                
+
                 Place pl1, pl2;
                 String dir1, dir2;
 
@@ -2094,7 +2095,7 @@ public class WorldTab extends JPanel {
                     pl1.connectPath(new Path(pl1, dir1, pl2, dir2));
                 }
             }
-            
+
             /**
              * removes a path, if called
              */
@@ -2104,13 +2105,13 @@ public class WorldTab extends JPanel {
                 private RemovePathActionListener(Path _path) {
                     path = _path;
                 }
-                
+
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     path.remove();
-                }   
+                }
             }
-            
+
         }
     }
 }

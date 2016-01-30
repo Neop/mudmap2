@@ -30,62 +30,62 @@ import mudmap2.backend.prquadtree.Quadtree;
 /**
  * A layer stores places relatively to each other by position on the map.
  * Each world can consist of multiple layers
- * 
+ *
  * @author neop
  */
 public class Layer {
-    
+
     World world;
     static int next_id;
-    int id;
+    Integer id;
     Quadtree elements;
-    
+
     // for quadtree optimization
     int max_x, min_x, max_y, min_y;
-    
-    public Layer(int _id, World _world){
-        id = _id;
+
+    public Layer(int id, World world){
+        this.id = id;
         if(id >= next_id) next_id = id + 1;
-        world = _world;
+        this.world = world;
         max_x = min_x = max_y = min_y = 0;
         elements = new Quadtree();
     }
-    
-    public Layer(World _world){
+
+    public Layer(World world){
         id = next_id++;
-        world = _world;
+        this.world = world;
         max_x = min_x = max_y = min_y = 0;
         elements = new Quadtree();
     }
-    
+
     /**
      * Use this only to set an optimized quadtree after construction
      * @param center_x
-     * @param center_y 
+     * @param center_y
      */
     public void setQuadtree(int center_x, int center_y){
         elements = new Quadtree<Place>(center_x, center_y);
     }
-    
+
     /**
      * Gets the center x coordinate (estimation)
-     * @return 
+     * @return
      */
     public int getCenterX(){
-        return max_x - min_x;
+        return (max_x + min_x) / 2;
     }
-      
+
     /**
      * Gets the center y coordinate (estimation)
-     * @return 
+     * @return
      */
     public int getCenterY(){
-        return max_y - min_y;
+        return (max_y + min_y) / 2;
     }
-    
+
     /**
      * Gets the max x coordinate
-     * @return 
+     * @return
      */
     public int getXMin(){
         HashSet<Place> places = getPlaces();
@@ -95,10 +95,10 @@ public class Layer {
             ret = Math.min(ret, place.getX());
         return ret;
     }
-    
+
     /**
      * Gets the min x coordinate
-     * @return 
+     * @return
      */
     public int getXMax(){
         HashSet<Place> places = getPlaces();
@@ -108,10 +108,10 @@ public class Layer {
             ret = Math.max(ret, place.getX());
         return ret;
     }
-    
+
     /**
      * Gets the max y coordinate
-     * @return 
+     * @return
      */
     public int getYMin(){
         HashSet<Place> places = getPlaces();
@@ -121,10 +121,10 @@ public class Layer {
             ret = Math.min(ret, place.getY());
         return ret;
     }
-    
+
     /**
      * Gets the min y coordinate
-     * @return 
+     * @return
      */
     public int getYMax(){
         HashSet<Place> places = getPlaces();
@@ -134,7 +134,7 @@ public class Layer {
             ret = Math.max(ret, place.getY());
         return ret;
     }
-    
+
     /**
      * Puts the element at a position but doesn't add it to the world
      * @param x x coordinate
@@ -147,12 +147,12 @@ public class Layer {
         max_x = Math.max(max_x, x);
         min_y = Math.min(min_y, y);
         max_y = Math.max(max_y, y);
-        
+
         //element.getLayer().remove(element);
         element.setPosition(x, y, this);
         put(element);
     }
-    
+
     /**
      * Adds an element to the layer (but not to the world), uses the position of the element
      * @param element element to be added
@@ -164,13 +164,13 @@ public class Layer {
             max_x = Math.max(max_x, element.getX());
             min_y = Math.min(min_y, element.getY());
             max_y = Math.max(max_y, element.getY());
-            
+
             elements.insert(element, element.getX(), element.getY());
         } catch (Exception ex) {
             throw new PlaceNotInsertedException(element.getX(), element.getY());
         }
     }
-    
+
     /**
      * Gets the element at a position
      * @param x x coordinate
@@ -180,7 +180,7 @@ public class Layer {
     public LayerElement get(int x, int y){
         return (LayerElement) elements.get(x, y);
     }
-    
+
     /**
      * Gets the surrounding places, without the center place
      * @param _x center coordinate
@@ -188,28 +188,28 @@ public class Layer {
      * @param distance maximum distance in each drection
      * @return
      */
-    public LinkedList<Place> getNeighbors(int _x, int _y, int distance){
-        LinkedList<Place> ret = new LinkedList<Place>();
+    public LinkedList<LayerElement> getNeighbors(int _x, int _y, int distance){
+        LinkedList<LayerElement> ret = new LinkedList<LayerElement>();
         distance = Math.abs(distance);
         for(int x = -distance; x <= distance; ++x){
             for(int y = -distance; y <= distance; ++y){
                 if(!(x == 0 && y == 0)){ // if not center place
                     LayerElement el = get(_x + x, _y + y);
-                    if(el != null) ret.add((Place) el);
+                    if(el != null) ret.add(el);
                 }
             }
         }
         return ret;
     }
-    
+
     /**
      * Gets the id of the layer
      * @return layer id
      */
-    public int getId(){
+    public Integer getId(){
         return id;
     }
-    
+
     /**
      * Gets the world
      * @return world
@@ -217,20 +217,20 @@ public class Layer {
     public World getWorld(){
         return world;
     }
-    
+
     /**
      * Gets the id
      * @return layer id
      */
     @Override
     public String toString(){
-        return String.valueOf(getId());
+        return getId().toString();
     }
-    
+
     /**
      * Removes an element from the layer but not from the world
-     * @param element 
-     * @throws mudmap2.backend.Layer.PlaceNotFoundException 
+     * @param element
+     * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
     public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException{
         if(element.getLayer() != this) throw new RuntimeException("Element not in this layer");
@@ -239,7 +239,7 @@ public class Layer {
         if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
         elements.remove(element.getX(), element.getY());
     }
-    
+
     /**
      * Returns true, if an element at position x,y exists
      * @param x x position
@@ -249,11 +249,11 @@ public class Layer {
     public boolean exist(int x, int y){
         return elements.exist(x, y);
     }
-    
+
     public boolean isEmpty(){
         return elements.isEmpty();
     }
-    
+
     /**
      * Gets a collection of all elements
      * @return set of all elements or empty set
@@ -261,13 +261,13 @@ public class Layer {
     public HashSet<Place> getPlaces(){
         return elements.values();
     }
-    
+
     /**
      * This exception will be thrown, if a place doesn't exist at a certain position
      */
     public static class PlaceNotFoundException extends Exception {
         int x, y;
-        
+
         /**
          * Constructs an exception
          * @param _x x coordinate of the place
@@ -276,16 +276,16 @@ public class Layer {
         public PlaceNotFoundException(int _x, int _y) {
             x = _x; y = _y;
         }
-        
+
         @Override
         public String toString(){
             return "Element at position " + x + ", " + y + " doesn't exist";
         }
     }
-    
+
     public static class PlaceNotInsertedException extends Exception {
         int x, y;
-        
+
         /**
          * Constructs an exception
          * @param _x x coordinate of the place
@@ -294,11 +294,11 @@ public class Layer {
         public PlaceNotInsertedException(int _x, int _y) {
             x = _x; y = _y;
         }
-        
+
         @Override
         public String toString(){
             return "Couldn't insert place at position " + x + ", " + y;
         }
     }
-    
+
 }
