@@ -1940,10 +1940,12 @@ public class WorldTab extends JPanel {
 
                 }  else { // if layer doesn't exist or no place exists at position x,y
                     JMenuItem mi_new = new JMenuItem("New place");
+                    mi_new.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0));
                     mi_new.addActionListener(new PlaceDialog(parent.parent, parent.world, layer, px, py));
                     add(mi_new);
                     JMenuItem mi_placeholder = new JMenuItem("New placeholder");
                     add(mi_placeholder);
+                    mi_placeholder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, 0));
                     mi_placeholder.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent arg0) {
