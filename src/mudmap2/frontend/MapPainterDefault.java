@@ -32,7 +32,7 @@ import static mudmap2.frontend.WorldTab.getShowPathsCurved;
  * @author Neop
  */
 public class MapPainterDefault implements MapPainter {
-    
+
     static final float path_stroke_width = 3;
 
     static final float tile_selection_stroke_width = 3;
@@ -41,18 +41,18 @@ public class MapPainterDefault implements MapPainter {
     static final float tile_risk_level_stroke_width = 2;
     static final int tile_border_width = 10;
     static final int exit_circle_radius = 5;
-    
+
     static final int draw_text_threshold = 40;
 
     HashSet<Place> place_group;
     WorldCoordinate place_group_shift_start, place_group_shift_end;
     int place_selected_x, place_selected_y;
     boolean place_selection_enabled;
-    
+
     double graphics_width, graphics_height;
     int tile_size;
     WorldCoordinate cur_pos;
-    
+
     Font last_tile_font;
 
     public MapPainterDefault() {
@@ -61,7 +61,7 @@ public class MapPainterDefault implements MapPainter {
         place_selection_enabled = false;
         last_tile_font = null;
     }
-    
+
     @Override
     public void setPlaceGroup(HashSet<Place> group, WorldCoordinate shift_start, WorldCoordinate shift_end) {
         place_group = group;
@@ -82,12 +82,12 @@ public class MapPainterDefault implements MapPainter {
 
     /**
      * Returns true if the tile is large enough to draw text
-     * @return 
+     * @return
      */
     private boolean getTileDrawText(){
         return tile_size >= draw_text_threshold;
-    }   
-    
+    }
+
     /**
      * Gets the current tile border area size
      * @return area border width
@@ -99,7 +99,7 @@ public class MapPainterDefault implements MapPainter {
 
     /**
      * Gets the radius of the exit circles / dots
-     * @return 
+     * @return
      */
     private int getExitCircleRadius(){
         return (int) Math.round(exit_circle_radius * Math.min(1.0, Math.max(0.5, (double) (tile_size - 20) / 80)));
@@ -107,7 +107,7 @@ public class MapPainterDefault implements MapPainter {
 
     /**
      * Gets the stroke width of the tile selection box
-     * @return 
+     * @return
      */
     private float getTileSelectionStrokeWidth(){
         return tile_selection_stroke_width * (float) (1.0 + tile_size / 200.0);
@@ -115,7 +115,7 @@ public class MapPainterDefault implements MapPainter {
 
     /**
      * Gets the stroke width of the risk level border
-     * @return 
+     * @return
      */
     private float getRiskLevelStrokeWidth(){
         return tile_risk_level_stroke_width * (float) (1.0 + tile_size / 200.0);
@@ -123,24 +123,24 @@ public class MapPainterDefault implements MapPainter {
 
     /**
      * Gets the path stroke width
-     * @return 
+     * @return
      */
     private float getPathStrokeWidth(){
         return path_stroke_width * (float) (1.0 + tile_size / 200.0);
     }
-    
+
     public Font getTileFont(){
         return last_tile_font;
     }
-    
+
     /**
      * Returns true, if a place is selected by group selection
      * @param place
-     * @return 
+     * @return
      */
     private boolean placeGroupIsSelected(Place place){
         if(place != null){
-            if(place_group_shift_end != null && place_group_shift_start != null 
+            if(place_group_shift_end != null && place_group_shift_start != null
                 && place_group_shift_end.getLayer() == place.getLayer().getId()){
                 int x1 = (int) Math.round(place_group_shift_end.getX());
                 int x2 = (int) Math.round(place_group_shift_start.getX());
@@ -152,14 +152,14 @@ public class MapPainterDefault implements MapPainter {
                 int y_min = Math.min(y1, y2);
                 int y_max = Math.max(y1, y2);
 
-                if(place.getX() >= x_min && place.getX() <= x_max 
+                if(place.getX() >= x_min && place.getX() <= x_max
                     && place.getY() >= y_min && place.getY() <= y_max) return true;
             }
             if(place_group != null && place_group.contains(place)) return true;
         }
         return false;
     }
-    
+
     /**
      * Calculates the offset of the exit visualization (dot/circle) to the
      * upper left corner of a tile
@@ -192,13 +192,13 @@ public class MapPainterDefault implements MapPainter {
             ret.first = ret.second = border_width;
         } else if(dir.equals("sw")){ // south-west
             ret.first = border_width;
-            ret.second = tile_size - border_width; 
+            ret.second = tile_size - border_width;
         } else {
             ret.first = ret.second = tile_size / 2;
         }
         return ret;
     }
-    
+
     /**
     * Gets the normal vector of an exit
     * @param dir exit direction
@@ -239,7 +239,7 @@ public class MapPainterDefault implements MapPainter {
         }
         return ret;
     }
-    
+
     /**
      * fits the string to max_width in px, cuts it at whitespaces, if possible
      * @param str string to be fitted
@@ -258,11 +258,11 @@ public class MapPainterDefault implements MapPainter {
             int strlen = Math.min(str.length(), max_length / fm.charWidth('.'));
 
             // find last ' ' before max_length, if there is no ' ' cut the
-            // string at max_length 
+            // string at max_length
             while(fm.stringWidth(str.substring(0, strlen)) > max_length){
                 int whitespace = str.substring(0, strlen).lastIndexOf(' ');
                 // if there is still a whitespace: cut the string
-                if(whitespace != -1) strlen = whitespace; 
+                if(whitespace != -1) strlen = whitespace;
                 else {
                     // if there is no whitespace fit the string length to the line pixel width
                     int lenpx = fm.stringWidth(str.substring(0, (int) Math.ceil(strlen / 1.5)));
@@ -270,7 +270,7 @@ public class MapPainterDefault implements MapPainter {
                         strlen = (int) Math.ceil(strlen / 1.5);
                         lenpx = fm.stringWidth(str.substring(0, strlen));
                         //if(lenpx < max_length) strlen *= 1.5;
-                    } 
+                    }
                     break;
                 }
             }
@@ -287,7 +287,7 @@ public class MapPainterDefault implements MapPainter {
         }
         return ret;
     }
-    
+
     /**
      * Converts world coordinates to screen coordinates
      * @param place_x a world (place) coordinate (x axis)
@@ -313,7 +313,7 @@ public class MapPainterDefault implements MapPainter {
     /**
      * Checks whether a place is currently drawn on the screen
      * @param place
-     * @return 
+     * @return
      */
     private boolean isOnScreen(Place place){
         int x = getScreenPosX(place.getX());
@@ -325,11 +325,11 @@ public class MapPainterDefault implements MapPainter {
         else return true;*/
         return !(y < 0 || y > graphics_height);
     }
-    
+
     /**
      * Remove integer part, the part after the point remains
      * @param val
-     * @return 
+     * @return
      */
     private double remint(double val){
         return val - Math.round(val);
@@ -341,12 +341,12 @@ public class MapPainterDefault implements MapPainter {
         this.graphics_height = graphics_height;
         this.tile_size = tile_size;
         this.cur_pos = cur_pos;
-        
+
         last_tile_font = g.getFont();
-        
+
         final float selection_stroke_width = getTileSelectionStrokeWidth();
         final int tile_border_width_scaled = getTileBorderWidth();
-        
+
         // max number of text lines tht fit in a tile
         FontMetrics fm = g.getFontMetrics();
         final int max_lines = (int) Math.floor((double)(tile_size - 3 * (tile_border_width_scaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
@@ -370,9 +370,9 @@ public class MapPainterDefault implements MapPainter {
         ((Graphics2D) graphic_path).setStroke(new BasicStroke(getPathStrokeWidth()));
         ((Graphics2D) graphic_path).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
+
         // get the locations of copied places
-        HashSet<Pair<Integer, Integer>> copied_place_locations = mudmap2.Mudmap2.get_copy_place_locations();
+        HashSet<Pair<Integer, Integer>> copied_place_locations = mudmap2.CopyPaste.get_copy_place_locations();
 
         // clear screen
         g.clearRect(0, 0, (int) graphics_width + 1, (int) graphics_height + 1);
@@ -385,7 +385,7 @@ public class MapPainterDefault implements MapPainter {
                 int place_x = tile_x + place_x_offset;
                 int place_y = (int)(graphics_height / tile_size) - tile_y + place_y_offset;
 
-                if(layer != null && layer.exist(place_x, place_y)){                
+                if(layer != null && layer.exist(place_x, place_y)){
                     Place cur_place = (Place) layer.get(place_x, place_y);
 
                     // place position in pixel on the screen
@@ -425,12 +425,12 @@ public class MapPainterDefault implements MapPainter {
 
                         // place name
                         // gets place name if unique, else place name with ID
-                        String place_name = ((cur_place.isNameUnique() && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE) 
+                        String place_name = ((cur_place.isNameUnique() && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE)
                                                 ? cur_place.getName() : cur_place.toString();
                         LinkedList<String> line = fitLineLength(place_name, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines);
                         for(String str: line){
-                            g.drawString(str, 
-                                    place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()), 
+                            g.drawString(str,
+                                    place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()),
                                     place_y_px + tile_border_width_scaled + fm.getHeight() * (1 + line_num));
                             line_num++;
                         }
@@ -439,7 +439,7 @@ public class MapPainterDefault implements MapPainter {
                             // recommended level
                             int reclvlmin = cur_place.getRecLevelMin(), reclvlmax = cur_place.getRecLevelMax();
                             if(reclvlmin > -1 || reclvlmax > -1){
-                                g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"), 
+                                g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"),
                                         place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()),
                                         place_y_px + tile_border_width_scaled + fm.getHeight() * (1 + line_num));
                                 line_num++;
@@ -457,8 +457,8 @@ public class MapPainterDefault implements MapPainter {
                                 }
                                 line = fitLineLength(sa_str, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines - line_num);
                                 for(String str: line){
-                                    g.drawString(str, 
-                                            place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()), 
+                                    g.drawString(str,
+                                            place_x_px + tile_border_width_scaled + (int) selection_stroke_width + (int) Math.ceil(getRiskLevelStrokeWidth()),
                                             place_y_px + tile_border_width_scaled + fm.getHeight() * (1 + line_num));
                                     line_num++;
                                 }
@@ -466,7 +466,7 @@ public class MapPainterDefault implements MapPainter {
 
                             // flags
                             if(line_num < max_lines){
-                                String flags = "";                                    
+                                String flags = "";
                                 // place has comments
                                 if(!cur_place.getComments().isEmpty()) flags += "C";
                                 if(!cur_place.getChildren().isEmpty()) flags += "Sa";
@@ -479,8 +479,8 @@ public class MapPainterDefault implements MapPainter {
                                 }
 
                                 // draw flags
-                                g.drawString(flags, 
-                                        place_x_px + tile_border_width_scaled + (int) Math.ceil(2 * selection_stroke_width), 
+                                g.drawString(flags,
+                                        place_x_px + tile_border_width_scaled + (int) Math.ceil(2 * selection_stroke_width),
                                         place_y_px + tile_size - tile_border_width_scaled - (int) Math.ceil(2 * selection_stroke_width));
                             }
                         }
@@ -571,14 +571,14 @@ public class MapPainterDefault implements MapPainter {
 
                     // draw exits
                     if(tile_size >= 20){
-                        // the up / down flags have to be drawn after the 
+                        // the up / down flags have to be drawn after the
                         // exits to know whether they have to be drawn
                         if((exit_up || exit_down) && getTileDrawText() && line_num <= max_lines){
                             g.setColor(Color.BLACK);
                             // have some arrows: ￪￬ ↑↓
                             String updownstr = "" + (exit_up ? "↑" : "") + (exit_down ? "↓" : "");
-                            g.drawString(updownstr, 
-                                    place_x_px + tile_size - tile_border_width_scaled - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width), 
+                            g.drawString(updownstr,
+                                    place_x_px + tile_size - tile_border_width_scaled - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selection_stroke_width),
                                     place_y_px + tile_size - tile_border_width_scaled - (int) Math.ceil(2 * selection_stroke_width));
                         }
                     }
@@ -599,7 +599,7 @@ public class MapPainterDefault implements MapPainter {
 
                         g.setColor(Color.BLUE);
                         ((Graphics2D)g).setStroke(new BasicStroke(selection_stroke_width));
-                        
+
 
                         g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width + tile_size / 4));
                         g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px + selection_stroke_width), (int) (place_x_px + selection_stroke_width + tile_size / 4), (int) (place_y_px + selection_stroke_width));
@@ -608,7 +608,7 @@ public class MapPainterDefault implements MapPainter {
                         g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + selection_stroke_width));
 
                         g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
-                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));                         
+                        g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));
 
                         g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
                         g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - selection_stroke_width + tile_size));
@@ -630,11 +630,11 @@ public class MapPainterDefault implements MapPainter {
                     g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px + selection_stroke_width), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px + selection_stroke_width));
 
                     g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
-                    g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));                         
+                    g.drawLine((int) (place_x_px + selection_stroke_width), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px + selection_stroke_width + tile_size  / 4), (int) (place_y_px - selection_stroke_width + tile_size));
 
                     g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size * 3 / 4));
                     g.drawLine((int) (place_x_px - selection_stroke_width + tile_size), (int) (place_y_px - selection_stroke_width + tile_size), (int) (place_x_px - selection_stroke_width + tile_size * 3 / 4), (int) (place_y_px - selection_stroke_width + tile_size));
-                }       
+                }
             }
         }
 
@@ -649,5 +649,5 @@ public class MapPainterDefault implements MapPainter {
         g.drawImage(image_path, 0, 0, null);
         graphic_path.dispose();
     }
-    
+
 }

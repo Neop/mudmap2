@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -1345,36 +1344,36 @@ public class WorldTab extends JPanel {
                             break;
                         case KeyEvent.VK_X: // cut selected places
                             if(!parent.placeGroupGetSelection().isEmpty()){ // cut group selection
-                                mudmap2.Mudmap2.cut(parent.place_group, parent.getCursorX(), parent.getCursorY());
+                                mudmap2.CopyPaste.cut(parent.place_group, parent.getCursorX(), parent.getCursorY());
                                 parent.showMessage(parent.place_group.size() + " places cut");
                                 parent.placeGroupReset();
                             } else if(parent.getSelectedPlace() != null){ // cut cursor selection
                                 HashSet<Place> tmp_selection = new HashSet<Place>();
                                 tmp_selection.add(parent.getSelectedPlace());
-                                mudmap2.Mudmap2.cut(tmp_selection, parent.getCursorX(), parent.getCursorY());
+                                mudmap2.CopyPaste.cut(tmp_selection, parent.getCursorX(), parent.getCursorY());
                                 parent.showMessage("1 place cut");
                             } else parent.showMessage("No places cut: selection empty");
                             break;
                         case KeyEvent.VK_C: // copy selected places
                             if(!parent.placeGroupGetSelection().isEmpty()){ // copy group selection
-                                mudmap2.Mudmap2.copy(parent.place_group, parent.getCursorX(), parent.getCursorY());
+                                mudmap2.CopyPaste.copy(parent.place_group, parent.getCursorX(), parent.getCursorY());
                                 parent.showMessage(parent.place_group.size() + " places copied");
                                 parent.placeGroupReset();
                             } else if(parent.getSelectedPlace() != null){ // copy cursor selection
                                 HashSet<Place> tmp_selection = new HashSet<Place>();
                                 tmp_selection.add(parent.getSelectedPlace());
-                                mudmap2.Mudmap2.copy(tmp_selection, parent.getCursorX(), parent.getCursorY());
+                                mudmap2.CopyPaste.copy(tmp_selection, parent.getCursorX(), parent.getCursorY());
                                 parent.showMessage("1 place copied");
                             } else {
-                                mudmap2.Mudmap2.resetCopy();
+                                mudmap2.CopyPaste.resetCopy();
                                 parent.showMessage("No places copied: selection empty");
                             }
                             break;
                         case KeyEvent.VK_V: // paste copied / cut places
-                            if(mudmap2.Mudmap2.hasCopyPlaces()){
-                                if(mudmap2.Mudmap2.canPaste(parent.getCursorX(), parent.getCursorY(), parent.getWorld().getLayer(parent.getCurPosition().getLayer()))){
-                                    int paste_num = mudmap2.Mudmap2.getCopyPlaces().size();
-                                    if(mudmap2.Mudmap2.paste(parent.getCursorX(), parent.getCursorY(), parent.getWorld().getLayer(parent.getCurPosition().getLayer()))){
+                            if(mudmap2.CopyPaste.hasCopyPlaces()){
+                                if(mudmap2.CopyPaste.canPaste(parent.getCursorX(), parent.getCursorY(), parent.getWorld().getLayer(parent.getCurPosition().getLayer()))){
+                                    int paste_num = mudmap2.CopyPaste.getCopyPlaces().size();
+                                    if(mudmap2.CopyPaste.paste(parent.getCursorX(), parent.getCursorY(), parent.getWorld().getLayer(parent.getCurPosition().getLayer()))){
                                         parent.showMessage(paste_num + " places pasted");
                                     } else {
                                         parent.showMessage("No places pasted");
@@ -1383,7 +1382,7 @@ public class WorldTab extends JPanel {
                                     parent.showMessage("Can't paste: not enough free space on map");
                                 }
                             } else {
-                                mudmap2.Mudmap2.resetCopy();
+                                mudmap2.CopyPaste.resetCopy();
                                 parent.showMessage("Can't paste: no places cut or copied");
                             }
                             break;
@@ -1957,8 +1956,8 @@ public class WorldTab extends JPanel {
                 }
 
                 // cut / copy / paste for selected places
-                final boolean can_paste = layer != null && mudmap2.Mudmap2.canPaste(px, py, layer);
-                final boolean has_paste_places = layer != null && mudmap2.Mudmap2.hasCopyPlaces();
+                final boolean can_paste = layer != null && mudmap2.CopyPaste.canPaste(px, py, layer);
+                final boolean has_paste_places = layer != null && mudmap2.CopyPaste.hasCopyPlaces();
                 final boolean has_selection = parent.placeGroupHasSelection();
 
                 if(has_place || has_selection || has_paste_places)
@@ -1977,7 +1976,7 @@ public class WorldTab extends JPanel {
                                 set = new HashSet<Place>();
                                 set.add(place);
                             }
-                            mudmap2.Mudmap2.cut(set, px, py);
+                            mudmap2.CopyPaste.cut(set, px, py);
                             parent.repaint();
                         }
                     });
@@ -1995,7 +1994,7 @@ public class WorldTab extends JPanel {
                                 set = new HashSet<Place>();
                                 set.add(place);
                             }
-                            mudmap2.Mudmap2.copy(set, px, py);
+                            mudmap2.CopyPaste.copy(set, px, py);
                             parent.repaint();
                         }
                     });
@@ -2009,7 +2008,7 @@ public class WorldTab extends JPanel {
 
                         @Override
                         public void actionPerformed(ActionEvent ae) {
-                            mudmap2.Mudmap2.paste(px, py, layer);
+                            mudmap2.CopyPaste.paste(px, py, layer);
                             parent.repaint();
                         }
                     });
