@@ -121,17 +121,6 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Returns true, if the name of the place is unique in its world
-     * @return true if the place name is unique
-     */
-    public boolean isNameUnique(){
-        if(getLayer() != null && getLayer().getWorld() != null){
-            return getLayer().getWorld().getPlaceNameCount(getName()) <= 1;
-        }
-        return true;
-    }
-
-    /**
      * Gets the position of a place as world coordinate
      * @return place coordinate
      */

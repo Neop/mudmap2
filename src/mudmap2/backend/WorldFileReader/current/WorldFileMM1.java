@@ -54,7 +54,7 @@ import mudmap2.backend.WorldFileReader.WorldReadException;
  * @author Neop
  */
 public class WorldFileMM1 implements WorldFile {
-    /* 
+    /*
      * Note: the version number should only vary if the
      * world file structure changed. Before mudmap 1.4.60 the
      * file version was always equal to the program version
@@ -62,34 +62,34 @@ public class WorldFileMM1 implements WorldFile {
     public static final int reader_major = 1;
     public static final int reader_minor = 7;
     private boolean version_mismatch, version_mismatch_confirmed;
-    
+
     RiskLevel risk_level_default;
-    
-    private boolean compatibility_mudmap_1;
-    
+
+    public static boolean compatibility_mudmap_1;
+
     World world;
 
     int file_major, file_minor;
     int cur_area;
-    
+
     // temporary data for layer quadtree optimization
     HashMap<Integer, Pair<Integer, Integer>> layer_center;
-    
+
     int cur_place_id;
     String cur_place_name;
     Place cur_place;
-    
+
     ArrayList<Pair<Place, Integer>> children = new ArrayList<Pair<Place, Integer>>();
     ArrayList<WorldFileMM1.PathTmp> tmp_paths = new ArrayList<WorldFileMM1.PathTmp>();
     ArrayList<WorldFileMM1.PathTmp> tmp_paths_deprecated = new ArrayList<WorldFileMM1.PathTmp>();
-    
+
     // error counter for deprecated path specification format
     // increments if there are more than one path between two places
     // (there is no way to reconstruct which exits were connected)
     int path_connection_error_dep_double;
-            
+
     // -----------------------
-    
+
     public WorldFileMM1(World _world) {
         world = _world;
         compatibility_mudmap_1 = true;
@@ -98,36 +98,36 @@ public class WorldFileMM1 implements WorldFile {
     public boolean getCompatibilityMudmap1(){
         return compatibility_mudmap_1;
     }
-    
+
     public void setCompatibilityMudmap1(boolean c){
         compatibility_mudmap_1 = c;
     }
-    
+
     @Override
     public void readFile(String file) throws WorldReadException {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
-            
+
             file_major = file_minor = 0;
             version_mismatch = version_mismatch_confirmed = false;
-            
+
             cur_area = -1;
 
             layer_center = new HashMap<Integer, Pair<Integer, Integer>>();
-            
+
             // temporary data for creating a place
             cur_place_id = -1;
             cur_place_name = "";
             cur_place = new Place(-1, "", 0, 0, new Layer(-1, world));
-            
+
             risk_level_default = world.getRiskLevel(0);
-            
+
             children = new ArrayList<Pair<Place, Integer>>();
             tmp_paths = new ArrayList<WorldFileMM1.PathTmp>();
             tmp_paths_deprecated = new ArrayList<WorldFileMM1.PathTmp>();
-            
+
             path_connection_error_dep_double = 0;
-            
+
                 String line;
                 try {
                 while((line = reader.readLine()) != null){
@@ -151,7 +151,7 @@ public class WorldFileMM1 implements WorldFile {
                         else if(line.startsWith("lc "))     readLayerCenter(line);
 
                         else if(line.startsWith("p "))      readPlaceName(line);
-                        else if(line.startsWith("ppos "))   readPlacePosition(line);    
+                        else if(line.startsWith("ppos "))   readPlacePosition(line);
                         else if(line.startsWith("par "))    readPlaceArea(line);
                         else if(line.startsWith("pb "))     readPlaceFlag(line);
                         else if(line.startsWith("pw "))     readPlacePathPw(line); // deprecated
@@ -166,17 +166,17 @@ public class WorldFileMM1 implements WorldFile {
                 }
             } catch (IOException ex) {
                 Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-                int ret = JOptionPane.showConfirmDialog(null, 
-                        "Error while parsing worlds file, places might be missing. Continue? \n" + ex.getMessage(), 
+                int ret = JOptionPane.showConfirmDialog(null,
+                        "Error while parsing worlds file, places might be missing. Continue? \n" + ex.getMessage(),
                         "Loading world", JOptionPane.YES_NO_OPTION);
                 if(ret == JOptionPane.NO_OPTION) throw new WorldReadException();
             }
-            
+
             // connect children and parent places
             for(Pair<Place, Integer> p: children){
                 p.first.connectChild(world.getPlace(p.second));
             }
-            
+
             // new path specification format is introduced in file version 1.5.0 (after 1.4.45)
             if(file_major == 1 && file_minor >= 5){ // connect paths
                 for(WorldFileMM1.PathTmp path: tmp_paths){
@@ -199,7 +199,7 @@ public class WorldFileMM1 implements WorldFile {
                     JOptionPane.showMessageDialog(null, error_not_paired_cnt + " paths could not be properly reconstructed.\nThis means that one exit of each faulty path is unknown.", "World reconstruction warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
-            
+
         } catch (FileNotFoundException ex) {
             System.out.println("Could not open world file \"" + file + "\", file not found");
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
@@ -218,7 +218,7 @@ public class WorldFileMM1 implements WorldFile {
             throw ex;
         }
     }
-    
+
     private void readFileVersion(String line) throws WorldReadException{
         // remove tag and split version
         String[] tmp = safeSplit(line.substring(4), ".", 2);
@@ -228,13 +228,13 @@ public class WorldFileMM1 implements WorldFile {
 
         version_mismatch = (file_major > reader_major || (file_major == reader_major && (file_minor > reader_minor)));
         if(file_major > reader_major){
-            int ret = JOptionPane.showConfirmDialog(null, 
-                    "World file version is greater than the reader version. Please update MUD Map. Continuing might cause data loss.", 
+            int ret = JOptionPane.showConfirmDialog(null,
+                    "World file version is greater than the reader version. Please update MUD Map. Continuing might cause data loss.",
                     "Loading world", JOptionPane.OK_CANCEL_OPTION);
             if(ret == JOptionPane.CANCEL_OPTION) throw new WorldReadException();
         }
     }
-    
+
     private void readPathColorCardinal(String line){
         String[] tmp = safeSplit(line.substring(5), " ", 3);
         Color color = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
@@ -252,7 +252,7 @@ public class WorldFileMM1 implements WorldFile {
         Color color = new Color(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]));
         world.setTileCenterColor(color);
     }
-    
+
     private void readPathColorUser(String line){
         int i = 0, r = 0, g = 0, b;
         Color col = null;
@@ -275,12 +275,12 @@ public class WorldFileMM1 implements WorldFile {
             }
         }
     }
-    
+
     private void readHome(String line){
         String[] tmp = safeSplit(line.substring(5), " ", 3);
         world.setHome(new WorldCoordinate(Integer.parseInt(tmp[0]), Double.parseDouble(tmp[1]), Double.parseDouble(tmp[2])));
     }
-    
+
     private void readRiskLevel(String line){
         String[] tmp = safeSplit(line, " ", 5);
         int rlid = Integer.parseInt(tmp[1]);
@@ -294,33 +294,33 @@ public class WorldFileMM1 implements WorldFile {
             world.getRiskLevel(rlid).setColor(new Color(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4])));
         }
     }
-    
+
     private void readShowPlaceID(String line){
         world.setShowPlaceID(World.ShowPlaceID.valueOf(line.split("\\s")[1]));
     }
-    
+
     private void readArea(String line){
         cur_area = Integer.parseInt(line.split("\\s")[1]);
         world.addArea(new Area(cur_area, configGetText(2, line)));
     }
-    
+
     private void readAreaColor(String line){
         String[] tmp = line.split("\\s");
         Color color = new Color(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]));
         world.getArea(cur_area).setColor(color);
     }
-    
+
     // layer center (for quadtree optimization)
     private void readLayerCenter(String line){
         String[] tmp = line.split("\\s");
         layer_center.put(Integer.parseInt(tmp[1]), new Pair<Integer, Integer>(Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3])));
     }
-    
+
     private void readPlaceName(String line){
         cur_place_id = Integer.parseInt(line.split("\\s")[1]);
         cur_place_name = configGetText(2, line);
     }
-    
+
     private void readPlacePosition(String line) throws WorldReadException{
         String[] tmp = safeSplit(line, " ", 4);
         int layer = Integer.parseInt(tmp[1]);
@@ -346,19 +346,19 @@ public class WorldFileMM1 implements WorldFile {
             }
         }
     }
-    
+
     private void readPlaceArea(String line){
         cur_place.setArea(world.getArea(Integer.parseInt(line.substring(3).trim())));
     }
-    
+
     private void readPlaceFlag(String line){
         cur_place.setFlag(line.substring(3).trim(), true);
     }
-    
+
     // deprecated
     private void readPlacePathPw(String line){
         /* This tag describes 3 of 4 pieces of information
-        * needed for a path connection. Both places have 
+        * needed for a path connection. Both places have
         * corresponding tags, but a path might not be reconstructable
         * if there are more than on connections between two places
         */
@@ -380,35 +380,35 @@ public class WorldFileMM1 implements WorldFile {
         // if there is no pair create a new entry
         if(!found_path) tmp_paths_deprecated.add(new WorldFileMM1.PathTmp(cur_place, other_place_id, tmp[2], null));
     }
-    
+
     private void readPlacePath(String line){
         String tmp[] = safeSplit(line.substring(3).trim(), "$", 3);
 
         tmp_paths.add(new WorldFileMM1.PathTmp(cur_place, Integer.parseInt(tmp[0]), tmp[1], tmp[2]));
     }
-    
+
     private void readPlaceChild(String line){
         String[] tmp = safeSplit(line, " ", 2);
         children.add(new Pair<Place, Integer>(cur_place, Integer.parseInt(tmp[1])));
     }
-    
+
     private void readPlaceRiskLevel(String line){
         int rlid = Integer.parseInt(line.substring(3).trim());
         RiskLevel rl = world.getRiskLevel(rlid);
         if(rl != null) cur_place.setRiskLevel(rl);
         else System.out.println("Couldn't load risk level " + rlid + " for " + cur_place_name);
     }
-    
+
     private void readPlaceRecommendedLevel(String line){
         String[] tmp = line.split(" ");
         cur_place.setRecLevelMin(Integer.parseInt(tmp[1]));
         cur_place.setRecLevelMax(Integer.parseInt(tmp[2]));
     }
-    
+
     private void readPlaceComment(String line){
         cur_place.addComment(line.substring(4).trim());
     }
-    
+
     private void readUnrecognized(String line) throws WorldReadException{
         System.out.println("Unrecognized line in world data: " + line);
         if(version_mismatch && !version_mismatch_confirmed){
@@ -417,13 +417,13 @@ public class WorldFileMM1 implements WorldFile {
             if(!version_mismatch_confirmed) throw new WorldReadException("World file version is greater than file reader version. Please update mudmap or consult the developer.");
         }
     }
-    
+
     /**
      * Returns the text data of a configuration file entry
-     * 
+     *
      * Some config file lines consist of space-separated data followed by a text
      * This method returns the text part.
-     * 
+     *
      * @param non_text number of data entries to be removed
      * @param line raw config line
      * @return text part
@@ -440,39 +440,39 @@ public class WorldFileMM1 implements WorldFile {
 
     /**
      * Create a backup copy of the world file
-     * @param file_orig 
+     * @param file_orig
      */
     @Override
     public void backup(String file_orig) {
         try {
             File fileold = new File(file_orig);
             File filenew = new File(file_orig + ".bak");
-            
+
             if(fileold.canRead()){
                 if(filenew.exists()) filenew.delete();
                 Files.copy(fileold.toPath(), filenew.toPath());
             }
-            
+
         } catch (IOException ex) {
             Logger.getLogger(WorldFileMM1.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(null, "Could not create world backup file", "World backup", JOptionPane.INFORMATION_MESSAGE);
         }
-        
+
     }
     /**
      * Splits a string in exactly num substrings separated by separator
      * Additional substrings will be empty if less than num-1 separators
      * are found
-     * 
+     *
      * @param line
      * @param separator
      * @param num
-     * @return 
+     * @return
      */
     private String[] safeSplit(String line, String separator, Integer num) {
         String tmp[] = new String[num];
         int index[] = new int[num];
-        
+
         int i = 0;
         for(; i < num; ++i){
             if(i == 0){ // first
@@ -489,28 +489,28 @@ public class WorldFileMM1 implements WorldFile {
         }
         // fill remaining elements with empty strings
         for(++i;i < num; ++i) tmp[i] = new String();
-        
+
         return tmp;
     }
-    
+
     // Path creation helper class
     private class PathTmp {
         public Place place_a;
         public int place_b;
         public String[] exits;
-        
+
         PathTmp(Place _place_a, int _place_b, String exit_a, String exit_b){
             place_a = _place_a;
             place_b = _place_b;
-            
+
             exits = new String[2];
             exits[0] = exit_a;
             exits[1] = exit_b;
         }
     }
-    
+
     // ----------------------
-    
+
     @Override
     public void writeFile(String file) {
         try {
@@ -519,14 +519,14 @@ public class WorldFileMM1 implements WorldFile {
 
             outstream.println("# MUD Map 2 world file");
             outstream.println("# compatibility for MUD Map 1 " + (compatibility_mudmap_1 ? "enabled" : "disabled"));
-            
+
             outstream.println("ver " + reader_major + "." + reader_minor);
             outstream.println("mver " + mudmap2.Mudmap2.getVersionMajor() + "." + mudmap2.Mudmap2.getVersionMinor() + "." + mudmap2.Mudmap2.getVersionBuild());
             outstream.println("wname " + world.getName());
             outstream.println("wcol " + world.getPathColor().getRed() + " " + world.getPathColor().getGreen() + " " + world.getPathColor().getBlue());
             outstream.println("wcnd " + world.getPathColorNstd().getRed() + " " + world.getPathColorNstd().getGreen() + " " + world.getPathColorNstd().getBlue());
             outstream.println("tccol " + world.getTileCenterColor().getRed() + " " + world.getTileCenterColor().getGreen() + " " + world.getTileCenterColor().getBlue());
-            
+
             HashMap<Color, String> pcol = new HashMap<Color, String>();
             for(Map.Entry<String, Color> entry: world.getPathColors().entrySet()){
                 if(pcol.containsKey(entry.getValue())){ // if value is already in pcol
@@ -541,14 +541,14 @@ public class WorldFileMM1 implements WorldFile {
             for(Map.Entry<Color, String> entry: pcol.entrySet()){
                 outstream.println("pcol " + entry.getKey().getRed() + " " + entry.getKey().getGreen() + " " + entry.getKey().getBlue() + " " + entry.getValue());
             }
-            
+
             outstream.println("home " + world.getHome());
             outstream.println("show_place_id " + world.getShowPlaceId());
-            
+
             // risk levels
             for(RiskLevel rl: world.getRiskLevels())
                 outstream.println("dlc " + rl.getId() + " " + rl.getColor().getRed() + " " + rl.getColor().getGreen() + " " + rl.getColor().getBlue() + " " + rl.getDescription());
-            
+
             // areas
             for(Area a: world.getAreas()){
                 boolean is_in_use = false;
@@ -565,29 +565,29 @@ public class WorldFileMM1 implements WorldFile {
             for(Layer l: world.getLayers()){
                 outstream.println("lc " + l.getId() + " " + l.getCenterX() + " " + l.getCenterY());
             }
-            
+
             // places
             for(Place p: world.getPlaces()){
                 outstream.println("p " + p.getId() + " " + p.getName());
                 outstream.println("ppos " + p.getLayer().getId() + " " + p.getX() + " " + p.getY());
                 if(p.getArea() != null) outstream.println("par " + p.getArea().getId());
-                
+
                 // paths
                 for(Path path: p.getPaths()){
                     Place other_place = path.getOtherPlace(p);
-                    
+
                     if(compatibility_mudmap_1) // deprecated path format
                         outstream.println("pw " + other_place.getId() + " " + path.getExit(p));
-                    
+
                     // new path format
                     if(path.getPlaces()[0] == p) // only one of both places should describe the path
                         outstream.println("pp " + other_place.getId() + "$" + path.getExit(p) + "$" + path.getExit(other_place));
                 }
-                
+
                 // risk level and recommended level
-                outstream.println("pdl " + p.getRiskLevel().getId());
+                if(p.getRiskLevel() != null) outstream.println("pdl " + p.getRiskLevel().getId());
                 if(p.getRecLevelMin() != -1 || p.getRecLevelMax() != -1) outstream.println("prl " + p.getRecLevelMin() + " " + p.getRecLevelMax());
-                
+
                 // children
                 for(Place child: p.getChildren()) outstream.println("pchi " + child.getId());
                 // comments
@@ -597,7 +597,7 @@ public class WorldFileMM1 implements WorldFile {
                     if(flag.getValue()) outstream.println("pb " + flag.getKey());
                 }
             }
-            
+
             outstream.close();
         } catch (IOException ex) {
             System.out.printf("Couldn't write world file " + mudmap2.Paths.getConfigFile());
@@ -605,5 +605,5 @@ public class WorldFileMM1 implements WorldFile {
             Logger.getLogger(World.class.getName()).log(Level.WARNING, null, ex);
         }
     }
-    
+
 }

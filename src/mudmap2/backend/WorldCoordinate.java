@@ -128,6 +128,11 @@ public class WorldCoordinate implements Comparable<WorldCoordinate> {
         return new WorldCoordinate(layer, x, y);
     }
 
+    /**
+     * Only to test for equality
+     * @param t
+     * @return
+     */
     @Override
     public int compareTo(WorldCoordinate t) {
         final double d = 0.001;

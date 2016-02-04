@@ -44,11 +44,6 @@ import mudmap2.backend.sssp.BreadthSearchGraph;
  */
 public class World implements BreadthSearchGraph {
 
-    public static final int file_version_major = 1;
-    public static final int file_version_minor = 6;
-
-    public static boolean compatibility_mudmap_1 = true;
-
     boolean file_backed_up;
 
     // name and file of the world
@@ -219,7 +214,11 @@ public class World implements BreadthSearchGraph {
             try{
                 // if place belongs to a different world
                 if(place.getLayer().getWorld() != this) place.getLayer().getWorld().remove(place);
-                else place.getLayer().remove(place);
+                else {
+                    try{
+                        if(place.getLayer() != l) place.getLayer().remove(place);
+                    } catch(Exception ex){}
+                }
             } catch(Exception ex){
                 Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -275,8 +274,8 @@ public class World implements BreadthSearchGraph {
             // error, wrong layer? (shouldn't occur)
             throw new RuntimeException("Couldn't remove \"" + place + ": layer mismatch");
         } else {
-            place.removeConnections();
             layer.remove(place);
+            place.removeConnections();
             places.remove(place.getId());
             if(place_names.containsKey(place.getName()))
                 place_names.put(place.getName(), Math.max(0, place_names.get(place.getName()) - 1));
@@ -327,7 +326,8 @@ public class World implements BreadthSearchGraph {
      * @param l
      */
     public void setLayer(Layer l){ // TODO: rename addLayer(), throw Exception if layer exists
-        layers.put(l.getId(), l);
+        if(!layers.containsKey(l.getId()))
+            layers.put(l.getId(), l);
     }
 
     /**
@@ -449,7 +449,7 @@ public class World implements BreadthSearchGraph {
     }
 
     /**
-     * Gets all exit direction colors
+     * Gets exit direction colors (without default colors)
      * @return
      */
     public HashMap<String, Color> getPathColors(){
@@ -570,18 +570,34 @@ public class World implements BreadthSearchGraph {
      * @param rl new risk level
      */
     public void addRiskLevel(RiskLevel rl){
-        if(!risk_levels.containsKey(rl.getId())) risk_levels.put(rl.getId(), rl);
+        if(!risk_levels.containsValue(rl)){
+            // ID-collision?
+            while(risk_levels.containsKey(rl.getId())) ++rl.id;
+            risk_levels.put(rl.getId(), rl);
+        }
     }
 
     /**
      * Removes a risk level
      * @param rl
+     * @throws java.lang.Exception
      */
-    public void removeRiskLevel(RiskLevel rl){
+    public void removeRiskLevel(RiskLevel rl) throws Exception {
+        if(!risk_levels.containsValue(rl)) throw new Exception("Tried to remove risk level that does not belong to this world");
+        // remode from risk level list
         risk_levels.remove(rl.getId());
         // remove from places
         for(Place place: places.values())
-            if(place.getRiskLevel().getId() == rl.getId()) place.setRiskLevel(null);
+            if(place.getRiskLevel() == rl) place.setRiskLevel(null);
+    }
+
+    /**
+     * Returns true, if the name of the place is unique in its world
+     * @param name
+     * @return true if the place name is unique
+     */
+    public Boolean isPlaceNameUnique(String name){
+        return place_names.containsKey(name);
     }
 
     /**

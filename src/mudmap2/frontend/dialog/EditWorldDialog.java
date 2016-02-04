@@ -29,6 +29,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
@@ -51,51 +53,51 @@ import mudmap2.frontend.GUIElement.ColorChooserButton;
 public class EditWorldDialog extends ActionDialog {
 
     World world;
-    
+
     JTextField textfield_name;
     ColorChooserButton colorchooser_path;
-    
+
     HashMap<RiskLevel, Pair<JTextField, ColorChooserButton>> risklevel_colors;
     JTextField risklevel_new_name; // entry to create a new risk level
     ColorChooserButton risklevel_new_color, tile_center_color;
-    
+
     ButtonGroup buttongroup_place_id;
     JRadioButton radiobutton_place_id_none, radiobutton_place_id_unique, radiobutton_place_id_all;
-    
+
     public EditWorldDialog(JFrame _parent, World _world) {
         super(_parent, "Edit world - " + _world.getName(), true);
         world = _world;
     }
-    
+
     @Override
     void create() {
         setLayout(new GridBagLayout());
-        
+
         GridBagConstraints constraints = new GridBagConstraints();
         GridBagConstraints constraints_l = new GridBagConstraints();
         GridBagConstraints constraints_r = new GridBagConstraints();
-        
+
         constraints.insets = constraints_l.insets = constraints_r.insets = new Insets(2, 2, 2, 2);
-        
+
         constraints_l.fill = GridBagConstraints.HORIZONTAL;
         constraints_r.fill = GridBagConstraints.BOTH;
         constraints_r.gridx = 1;
         constraints_l.weightx = constraints_r.weightx = 1.0;
         constraints_l.gridy = ++constraints_r.gridy;
-        
+
         add(new JLabel("World name"), constraints_l);
         add(textfield_name = new JTextField(world.getName()), constraints_r);
         textfield_name.setColumns(20);
-        
+
         constraints_l.gridy = ++constraints_r.gridy;
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
         constraints.gridwidth = 2;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         add(new JSeparator(), constraints);
-        
+
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
         add(new JLabel("Risk Levels"), constraints);
-        
+
         risklevel_colors = new HashMap<RiskLevel, Pair<JTextField, ColorChooserButton>>();
         for(RiskLevel rl: world.getRiskLevels()){
             constraints_l.gridy = ++constraints_r.gridy;
@@ -105,20 +107,20 @@ public class EditWorldDialog extends ActionDialog {
             add(colorchooser, constraints_r);
             risklevel_colors.put(rl, new Pair<JTextField, ColorChooserButton>(tf_rl_name, colorchooser));
         }
-        
+
         constraints_l.gridy = ++constraints_r.gridy;
-        
+
         add(risklevel_new_name = new JTextField(), constraints_l);
         add(risklevel_new_color = new ColorChooserButton(getParent()), constraints_r);
-        
+
         constraints_l.gridy = ++constraints_r.gridy;
-        
+
         add(new JLabel("Tile center color"), constraints_l);
         add(tile_center_color = new ColorChooserButton(getParent(), world.getTileCenterColor()), constraints_r);
-        
+
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
         add(new JSeparator(), constraints);
-        
+
         buttongroup_place_id = new ButtonGroup();
         radiobutton_place_id_none = new JRadioButton("Don't show place ID on map");
         radiobutton_place_id_unique = new JRadioButton("Show place ID if name isn't unique");
@@ -144,10 +146,10 @@ public class EditWorldDialog extends ActionDialog {
                 buttongroup_place_id.setSelected(radiobutton_place_id_all.getModel(), true);
                 break;
         }
-        
+
         constraints_l.insets = constraints_r.insets = new Insets(0, 2, 0, 2);
         constraints_l.gridy = ++constraints_r.gridy;
-        
+
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel, constraints_l);
         button_cancel.addActionListener(new ActionListener() {
@@ -156,57 +158,61 @@ public class EditWorldDialog extends ActionDialog {
                 dispose();
             }
         });
-        
+
         JButton button_ok = new JButton("Ok");
         add(button_ok, constraints_r);
         getRootPane().setDefaultButton(button_ok);
         button_ok.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                save();
+                try {
+                    save();
+                } catch (Exception ex) {
+                    Logger.getLogger(EditWorldDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 dispose();
             }
         });
-        
+
         pack();
         setResizable(false);
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
-    
+
     /**
      * Saves the changes
      */
-    private void save(){
+    private void save() throws Exception{
         String name = textfield_name.getText();
-       
+
         // if textfield is not empty and name is unique
         if(!name.isEmpty() && (name.equals(world.getName()) || WorldManager.getWorldFile(name) == null)){
             world.setName(name);
-            
+
             // modify risk levels
-            for(Map.Entry<RiskLevel,Pair<JTextField, ColorChooserButton>> foo: risklevel_colors.entrySet()){
-                String description = foo.getValue().first.getText();
-                if(description.isEmpty()) world.removeRiskLevel(foo.getKey());
+            for(Map.Entry<RiskLevel,Pair<JTextField, ColorChooserButton>> rl_color: risklevel_colors.entrySet()){
+                String description = rl_color.getValue().first.getText();
+                if(description.isEmpty()) world.removeRiskLevel(rl_color.getKey());
                 else {
-                    foo.getKey().setDescription(description);
-                    foo.getKey().setColor(foo.getValue().second.getColor());
+                    rl_color.getKey().setDescription(description);
+                    rl_color.getKey().setColor(rl_color.getValue().second.getColor());
                 }
             }
-            
+
             world.setTileCenterColor(tile_center_color.getColor());
-            
+
             // add new risk level, if name not empty
             String name_new = risklevel_new_name.getText();
             if(!name_new.isEmpty()){
                 world.addRiskLevel(new RiskLevel(name_new, risklevel_new_color.getColor()));
             }
-            
+
             ButtonModel selection = buttongroup_place_id.getSelection();
-            if(selection == radiobutton_place_id_none.getModel()) world.setShowPlaceID(World.ShowPlaceID.NONE);            
+            if(selection == radiobutton_place_id_none.getModel()) world.setShowPlaceID(World.ShowPlaceID.NONE);
             else if(selection == radiobutton_place_id_all.getModel()) world.setShowPlaceID(World.ShowPlaceID.ALL);
             else world.setShowPlaceID(World.ShowPlaceID.UNIQUE);
         }
         getParent().repaint();
     }
-    
+
 }

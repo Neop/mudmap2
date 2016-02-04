@@ -417,7 +417,7 @@ public class MapPainterDefault implements MapPainter {
                         g.drawRect(place_x_px + tile_border_width_scaled, place_y_px + tile_border_width_scaled,
                                 tile_size - 2 * tile_border_width_scaled - (int) (0.5 * getRiskLevelStrokeWidth()),
                                 tile_size - 2 * tile_border_width_scaled - (int) (0.5 * getRiskLevelStrokeWidth()));
-                    } else System.out.println("Error: Can't draw risk level, reference is null");
+                    }
 
                     // draw text, if tiles are large enough
                     if(getTileDrawText()){
@@ -425,7 +425,7 @@ public class MapPainterDefault implements MapPainter {
 
                         // place name
                         // gets place name if unique, else place name with ID
-                        String place_name = ((cur_place.isNameUnique() && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE)
+                        String place_name = ((layer.getWorld().isPlaceNameUnique(cur_place.getName()) && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE)
                                                 ? cur_place.getName() : cur_place.toString();
                         LinkedList<String> line = fitLineLength(place_name, fm, (int) (tile_size - 2 * (tile_border_width_scaled + selection_stroke_width)), max_lines);
                         for(String str: line){

@@ -25,19 +25,19 @@ package mudmap2.backend;
 
 /**
  * Describes a way direction between two places
- * 
+ *
  * @author neop
  */
 public class Path {
-    
+
     public static final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw", "-"};
-    
-    private Place[] places;
-    private String[] exitdirections;
-    
+
+    private final Place[] places;
+    private final String[] exitdirections;
+
     /**
      * Constructs a new path between two places
-     * 
+     *
      * @param pl1 A place to connect
      * @param exitdir1 the exit of place 1 to be used
      * @param pl2 the other place
@@ -47,40 +47,39 @@ public class Path {
         places = new Place[2];
         places[0] = pl1;
         places[1] = pl2;
-        
+
         exitdirections = new String[2];
         exitdirections[0] = exitdir1;
         exitdirections[1] = exitdir2;
     }
-    
+
     /**
      * Gets the connected places
-     * 
+     *
      * @return the two connected places
      */
     public Place[] getPlaces(){
         return places;
     }
-    
+
     /**
      * Checks whether a certain place is connected with this path
      * @param place
      * @return true if place is in this path
      */
     public boolean hasPlace(Place place){
-        if(places[0] == place || places[1] == place) return true;
-        return false;
+        return places[0] == place || places[1] == place;
     }
-    
+
     /**
      * Gets the exit directions
-     * 
+     *
      * @return The two exit directions
      */
     public String[] getExitDirections(){
         return exitdirections;
     }
-    
+
     /**
      * Gets the exit direction of a place p used in this path
      * @param p
@@ -92,12 +91,12 @@ public class Path {
         else if(places[1] == p) return exitdirections[1];
         else throw new RuntimeException("Place not found in path");
     }
-    
+
     /**
      * Gets the place that is not equal to p in a path
      * @param p
      * @return place of path that is not p
-     * @throws RuntimeException 
+     * @throws RuntimeException
      */
     public Place getOtherPlace(Place p) throws RuntimeException{
         if(places[0] == p) return places[1];
@@ -112,7 +111,7 @@ public class Path {
         places[0].paths.remove(this);
         places[1].paths.remove(this);
     }
-    
+
     /**
      * Gets the opposite direction, eg. n - s or ne - sw
      * @param dir
@@ -122,18 +121,21 @@ public class Path {
         String ret = "";
         if(dir.equals("n")) ret = "s";
         else if(dir.equals("s")) ret = "n";
-        
+
         else if(dir.equals("e")) ret = "w";
         else if(dir.equals("w")) ret = "e";
-        
+
         else if(dir.equals("se")) ret = "nw";
         else if(dir.equals("sw")) ret = "ne";
-        
+
         else if(dir.equals("ne")) ret = "sw";
         else if(dir.equals("nw")) ret = "se";
+
+        else if(dir.equals("u")) ret = "d";
+        else if(dir.equals("d")) ret = "u";
         return ret;
     }
-    
+
     /**
      * Gets the direcion of the relative coordinates
      * @param x coordinate relative to a place
@@ -144,16 +146,16 @@ public class Path {
         String ret = "";
         if(y > 0) ret = "n";
         else if(y < 0) ret = "s";
-        
+
         if(x > 0) ret = ret + "e";
         else if(x < 0) ret = ret + "w";
         return ret;
     }
-    
+
     /**
      * Translates the default directions to numbers (like on the numberpad)
      * @param dir
-     * @return 
+     * @return
      */
     public static int getDirNum(String dir){
         int ret = -1;

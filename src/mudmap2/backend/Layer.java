@@ -49,6 +49,8 @@ public class Layer {
         this.world = world;
         max_x = min_x = max_y = min_y = 0;
         elements = new Quadtree();
+
+        if(world != null) world.setLayer(this);
     }
 
     public Layer(World world){
@@ -56,6 +58,8 @@ public class Layer {
         this.world = world;
         max_x = min_x = max_y = min_y = 0;
         elements = new Quadtree();
+
+        if(world != null) world.setLayer(this);
     }
 
     /**
@@ -154,7 +158,10 @@ public class Layer {
     }
 
     /**
-     * Adds an element to the layer (but not to the world), uses the position of the element
+     * Adds an element to the layer (but not to the world!), uses the position
+     * of the element.
+     * NOTICE: use World::put(), if you want to add a place to a layer of a
+     * world! This method won't add the place to the world!
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
@@ -232,11 +239,14 @@ public class Layer {
      * @param element
      * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
-    public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException{
+    public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException {
         if(element.getLayer() != this) throw new RuntimeException("Element not in this layer");
         // element on the layer before placing the new one
         LayerElement el_bef = get(element.getX(), element.getY());
-        if(el_bef != element && el_bef != null) throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
+        if(el_bef != element){
+            if(el_bef != null) throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
+            else throw new PlaceNotFoundException(element.getX(), element.getY());
+        }
         elements.remove(element.getX(), element.getY());
     }
 
