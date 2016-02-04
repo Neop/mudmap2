@@ -19,8 +19,6 @@ package mudmap2.backend;
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mudmap2.backend.sssp.BreadthSearch;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -49,7 +47,6 @@ public class PlaceTest {
 
     @AfterClass
     public static void tearDownClass() {
-        world = null;
     }
 
     @Before
@@ -116,33 +113,6 @@ public class PlaceTest {
         instance.setName(name);
         result = instance.getName();
         assertEquals(name, result);
-    }
-
-    /**
-     * Test of isNameUnique method, of class Place.
-     */
-    @Test
-    public void testIsNameUnique() {
-        System.out.println("isNameUnique");
-
-        Place instance = new Place("MyPlace", 0, 0, layer);
-        try { // TODO: remove this if place puts itself to layer in constructor
-            layer.put(instance);
-        } catch (Layer.PlaceNotInsertedException ex) {
-            fail(ex.getMessage());
-        }
-        boolean result = instance.isNameUnique();
-        assertTrue(result);
-
-        // add a second place
-        instance = new Place("MyPlace", 1, 0, layer);
-        try { // TODO: remove this if place puts itself to layer in constructor
-            layer.put(instance);
-        } catch (Layer.PlaceNotInsertedException ex) {
-            fail(ex.getMessage());
-        }
-        result = instance.isNameUnique();
-        assertFalse(result);
     }
 
     /**

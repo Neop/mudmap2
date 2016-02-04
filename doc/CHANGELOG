@@ -1,3 +1,8 @@
+2.?.?
+- added missing key hints in context menu
+- fixed: could not cut-paste places when they overlap
+- several minor changes and bugfixes
+
 2.2.7
 - fixed: could not change place names
 
