@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -53,7 +54,7 @@ public class World implements BreadthSearchGraph {
 
     // ID and object
     TreeMap<Integer, RiskLevel> risk_levels;
-    TreeMap<Integer, Area> areas;
+    HashSet<Area> areas;
     TreeMap<Integer, Place> places;
     TreeMap<String, Integer> place_names;
     TreeMap<Integer, Layer> layers;
@@ -94,7 +95,7 @@ public class World implements BreadthSearchGraph {
         risk_levels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
         risk_levels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
 
-        areas = new TreeMap<>();
+        areas = new HashSet<>();
         layers = new TreeMap<>();
         places = new TreeMap<>();
         place_names = new TreeMap<>();
@@ -183,12 +184,9 @@ public class World implements BreadthSearchGraph {
                 else {
                     try{
                         if(place.getLayer() != l) place.getLayer().remove(place);
-                    } catch(RuntimeException ex){} catch (PlaceNotFoundException ex) {
-                    }
+                    } catch(RuntimeException | PlaceNotFoundException ex){}
                 }
-            } catch(RuntimeException ex){
-                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (PlaceNotFoundException ex) {
+            } catch(RuntimeException | PlaceNotFoundException ex){
                 Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -215,7 +213,7 @@ public class World implements BreadthSearchGraph {
 
             // find or create placeholder area
             Area area = null;
-            for(Area a: areas.values()) if(a.getName().equals("placeholder")){
+            for(Area a: areas) if(a.getName().equals("placeholder")){
                 area = a;
                 break;
             }
@@ -476,18 +474,9 @@ public class World implements BreadthSearchGraph {
      * @return all areas
      */
     public ArrayList<Area> getAreas(){
-        ArrayList<Area> ret = new ArrayList<>(areas.values());
+        ArrayList<Area> ret = new ArrayList<>(areas);
         Collections.sort(ret);
         return ret;
-    }
-
-    /**
-     * Gets an area by it's id
-     * @param id area id
-     * @return area
-     */
-    public Area getArea(int id){
-        return areas.get(id);
     }
 
     /**
@@ -495,7 +484,7 @@ public class World implements BreadthSearchGraph {
      * @param area new area
      */
     public void addArea(Area area) {
-        if(!areas.containsValue(area)) areas.put(area.getId(), area);
+        areas.add(area);
     }
 
     /**
@@ -507,7 +496,7 @@ public class World implements BreadthSearchGraph {
         for(Place p: places.values()){
             if(p.getArea() == area) p.setArea(null);
         }
-        areas.remove(area.getId());
+        areas.remove(area);
     }
 
     /**

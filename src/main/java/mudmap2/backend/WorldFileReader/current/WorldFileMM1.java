@@ -67,7 +67,6 @@ public class WorldFileMM1 extends WorldFile {
     public static boolean compatibility_mudmap_1;
 
     int file_major, file_minor;
-    int cur_area;
 
     // temporary data for layer quadtree optimization
     HashMap<Integer, Pair<Integer, Integer>> layer_center;
@@ -76,6 +75,8 @@ public class WorldFileMM1 extends WorldFile {
     String cur_place_name;
     Place cur_place;
 
+    Area curArea;
+    HashMap<Integer, Area> areas = new HashMap<>();
     ArrayList<Pair<Place, Integer>> children = new ArrayList<>();
     ArrayList<WorldFileMM1.PathTmp> tmp_paths = new ArrayList<>();
     ArrayList<WorldFileMM1.PathTmp> tmp_paths_deprecated = new ArrayList<>();
@@ -104,8 +105,6 @@ public class WorldFileMM1 extends WorldFile {
         file_major = file_minor = 0;
         version_mismatch = version_mismatch_confirmed = false;
 
-        cur_area = -1;
-
         layer_center = new HashMap<>();
 
         // temporary data for creating a place
@@ -115,6 +114,7 @@ public class WorldFileMM1 extends WorldFile {
 
         risk_level_default = world.getRiskLevel(0);
 
+        areas = new HashMap<>();
         children = new ArrayList<>();
         tmp_paths = new ArrayList<>();
         tmp_paths_deprecated = new ArrayList<>();
@@ -305,14 +305,18 @@ public class WorldFileMM1 extends WorldFile {
     }
 
     private void readArea(String line, World world){
-        cur_area = Integer.parseInt(line.split("\\s")[1]);
-        world.addArea(new Area(cur_area, configGetText(2, line)));
+        Integer curAreaID = Integer.parseInt(line.split("\\s")[1]);
+        curArea = new Area(configGetText(2, line));
+        world.addArea(curArea);
+        areas.put(curAreaID, curArea);
     }
 
     private void readAreaColor(String line, World world){
-        String[] tmp = line.split("\\s");
-        Color color = new Color(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]));
-        world.getArea(cur_area).setColor(color);
+        if(null != curArea){
+            String[] tmp = line.split("\\s");
+            Color color = new Color(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]));
+            curArea.setColor(color);
+        }
     }
 
     // layer center (for quadtree optimization)
@@ -353,7 +357,8 @@ public class WorldFileMM1 extends WorldFile {
     }
 
     private void readPlaceArea(String line, World world){
-        cur_place.setArea(world.getArea(Integer.parseInt(line.substring(3).trim())));
+        Integer areaID = Integer.parseInt(line.substring(3).trim());
+        cur_place.setArea(areas.get(areaID));
     }
 
     private void readPlaceFlag(String line){
@@ -542,6 +547,21 @@ public class WorldFileMM1 extends WorldFile {
 
     @Override
     public void writeFile(World world) {
+        // create IDs for areas
+        HashMap<Area, Integer> areaIDs = new HashMap<>();
+        Integer cnt = 0;
+        for(Area a: world.getAreas()){
+            Boolean inUse = false;
+            // remove unused
+            for(Place place: world.getPlaces()){
+                if(place.getArea() == a){
+                    inUse = true;
+                    break;
+                }
+            }
+            if(inUse) areaIDs.put(a, ++cnt);
+        }
+
         try {
             try (PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(filename)))) {
                 outstream.println("# MUD Map 2 world file");
@@ -577,17 +597,15 @@ public class WorldFileMM1 extends WorldFile {
                     outstream.println("dlc " + rl.getId() + " " + rl.getColor().getRed() + " " + rl.getColor().getGreen() + " " + rl.getColor().getBlue() + " " + rl.getDescription());
 
                 // areas
-                for(Area a: world.getAreas()){
-                    boolean is_in_use = false;
-                    for(Place place: world.getPlaces()) if(place.getArea() == a){
-                        is_in_use = true;
-                        break;
-                    }
-                    if(is_in_use){
-                        outstream.println("a " + a.getId() + " " + a.getName());
-                        outstream.println("acol " + a.getColor().getRed() + " " + a.getColor().getGreen() + " " + a.getColor().getBlue());
+                for(Map.Entry<Area, Integer> area: areaIDs.entrySet()){
+                    if(area.getValue() != null){
+                        outstream.println("a " + area.getValue() + " " + area.getKey().getName());
+                        outstream.println("acol " + area.getKey().getColor().getRed()
+                                + " " + area.getKey().getColor().getGreen()
+                                + " " + area.getKey().getColor().getBlue());
                     }
                 }
+
                 // layers (for quadtree optimization)
                 for(Layer l: world.getLayers()){
                     outstream.println("lc " + l.getId() + " " + l.getCenterX() + " " + l.getCenterY());
@@ -597,7 +615,7 @@ public class WorldFileMM1 extends WorldFile {
                 for(Place p: world.getPlaces()){
                     outstream.println("p " + p.getId() + " " + p.getName());
                     outstream.println("ppos " + p.getLayer().getId() + " " + p.getX() + " " + p.getY());
-                    if(p.getArea() != null) outstream.println("par " + p.getArea().getId());
+                    if(p.getArea() != null) outstream.println("par " + areaIDs.get(p.getArea()));
 
                     // paths
                     for(Path path: p.getPaths()){

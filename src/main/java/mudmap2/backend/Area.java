@@ -27,70 +27,59 @@ import java.awt.Color;
 
 /**
  * An area is a collection of places, marked by a color
- * 
+ *
  * @author neop
  */
 public class Area implements Comparable<Area> {
-    // next id to be assigned
-    static int next_id = 0;
-    
-    int id;
+
     String name;
     Color color;
-    
+
     /**
      * Constructs a new Area
      * @param name Name of the area
      * @param color
      */
     public Area(String name, Color color) {
-        id = next_id++;
         this.name = name;
         this.color = color;
     }
 
     /**
      * Constructs a new Area
-     * @param id area id
      * @param name Name of the area
      */
-    public Area(int id, String name) {
-        this.id = id;
-        if(this.id >= next_id) next_id = this.id + 1;
+    public Area(String name) {
         this.name = name;
         color = new Color(0, 0, 0);
     }
-    
-    public int getId(){
-        return id;
-    }
-    
+
     /**
      * Gets the are name
-     * 
+     *
      * @return area name
      */
     public String getName(){
         return name;
     }
-    
+
     /**
      * Sets a new name
-     * @param _name new area name
+     * @param name new area name
      */
-    public void setName(String _name){
-        name = _name;
+    public void setName(String name){
+        this.name = name;
     }
-    
+
     /**
      * Gets the area color
-     * 
+     *
      * @return area color
      */
     public Color getColor(){
         return color;
     }
-    
+
     /**
      * Sets a new area color
      * @param color new area color
@@ -98,7 +87,7 @@ public class Area implements Comparable<Area> {
     public void setColor(Color color){
         this.color = color;
     }
-    
+
     /**
      * Gets the name of an area
      * @return name
@@ -108,6 +97,11 @@ public class Area implements Comparable<Area> {
         return name;
     }
 
+    /**
+     * Compares areas by their name
+     * @param arg0
+     * @return
+     */
     @Override
     public int compareTo(Area arg0){
         return name.compareTo(arg0.getName());
