@@ -36,28 +36,28 @@ import mudmap2.backend.prquadtree.Quadtree;
 public class Layer {
 
     World world;
-    static int next_id;
+    static int nextID;
     Integer id;
-    Quadtree elements;
+    Quadtree<Place> elements;
 
     // for quadtree optimization
-    int max_x, min_x, max_y, min_y;
+    int maxX, minX, maxY, minY;
 
     public Layer(int id, World world){
         this.id = id;
-        if(id >= next_id) next_id = id + 1;
+        if(id >= nextID) nextID = id + 1;
         this.world = world;
-        max_x = min_x = max_y = min_y = 0;
-        elements = new Quadtree();
+        maxX = minX = maxY = minY = 0;
+        elements = new Quadtree<>();
 
         if(world != null) world.setLayer(this);
     }
 
     public Layer(World world){
-        id = next_id++;
+        id = nextID++;
         this.world = world;
-        max_x = min_x = max_y = min_y = 0;
-        elements = new Quadtree();
+        maxX = minX = maxY = minY = 0;
+        elements = new Quadtree<>();
 
         if(world != null) world.setLayer(this);
     }
@@ -68,7 +68,7 @@ public class Layer {
      * @param center_y
      */
     public void setQuadtree(int center_x, int center_y){
-        elements = new Quadtree<Place>(center_x, center_y);
+        elements = new Quadtree<>(center_x, center_y);
     }
 
     /**
@@ -76,7 +76,7 @@ public class Layer {
      * @return
      */
     public int getCenterX(){
-        return (max_x + min_x) / 2;
+        return (maxX + minX) / 2;
     }
 
     /**
@@ -84,7 +84,7 @@ public class Layer {
      * @return
      */
     public int getCenterY(){
-        return (max_y + min_y) / 2;
+        return (maxY + minY) / 2;
     }
 
     /**
@@ -146,11 +146,11 @@ public class Layer {
      * @param element new element
      * @throws java.lang.Exception
      */
-    public void put(LayerElement element, int x, int y) throws Exception{
-        min_x = Math.min(min_x, x);
-        max_x = Math.max(max_x, x);
-        min_y = Math.min(min_y, y);
-        max_y = Math.max(max_y, y);
+    public void put(Place element, int x, int y) throws Exception{
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
 
         //element.getLayer().remove(element);
         element.setPosition(x, y, this);
@@ -165,12 +165,12 @@ public class Layer {
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
-    public void put(LayerElement element) throws PlaceNotInsertedException {
+    public void put(Place element) throws PlaceNotInsertedException {
         try {
-            min_x = Math.min(min_x, element.getX());
-            max_x = Math.max(max_x, element.getX());
-            min_y = Math.min(min_y, element.getY());
-            max_y = Math.max(max_y, element.getY());
+            minX = Math.min(minX, element.getX());
+            maxX = Math.max(maxX, element.getX());
+            minY = Math.min(minY, element.getY());
+            maxY = Math.max(maxY, element.getY());
 
             elements.insert(element, element.getX(), element.getY());
         } catch (Exception ex) {
@@ -184,8 +184,8 @@ public class Layer {
      * @param y y coordinate
      * @return element at that position or null
      */
-    public LayerElement get(int x, int y){
-        return (LayerElement) elements.get(x, y);
+    public Place get(int x, int y){
+        return elements.get(x, y);
     }
 
     /**
@@ -195,13 +195,13 @@ public class Layer {
      * @param distance maximum distance in each drection
      * @return
      */
-    public LinkedList<LayerElement> getNeighbors(int _x, int _y, int distance){
-        LinkedList<LayerElement> ret = new LinkedList<LayerElement>();
+    public LinkedList<Place> getNeighbors(int _x, int _y, int distance){
+        LinkedList<Place> ret = new LinkedList<>();
         distance = Math.abs(distance);
         for(int x = -distance; x <= distance; ++x){
             for(int y = -distance; y <= distance; ++y){
                 if(!(x == 0 && y == 0)){ // if not center place
-                    LayerElement el = get(_x + x, _y + y);
+                    Place el = get(_x + x, _y + y);
                     if(el != null) ret.add(el);
                 }
             }

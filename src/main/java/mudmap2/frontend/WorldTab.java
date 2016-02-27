@@ -1653,7 +1653,7 @@ public class WorldTab extends JPanel {
                                 // create placeholder or remove one
                                 if(place == null){
                                     parent.world.putPlaceholder(parent.getCurPosition().getLayer(), parent.getCursorX(), parent.getCursorY());
-                                } else if(place.getName().equals(Place.placeholder_name)){
+                                } else if(place.getName().equals(Place.placeholderName)){
                                     try {
                                         place.remove();
                                     } catch (RuntimeException ex) {
@@ -1805,7 +1805,7 @@ public class WorldTab extends JPanel {
                         mi_path_connect_neighbors.setToolTipText("Choose from surrounding places");
                         mi_path_connect_neighbors.addActionListener(new PathConnectNeighborsDialog(parent.parent, place));
 
-                        LinkedList<LayerElement> places = layer.getNeighbors(px, py, 1);
+                        LinkedList<Place> places = layer.getNeighbors(px, py, 1);
                         if(!places.isEmpty()){
                             m_path_connect.add(new JSeparator());
 

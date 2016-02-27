@@ -46,20 +46,20 @@ public class World implements BreadthSearchGraph {
     // worldname and file of the world
     String worldname;
     // color of path lines and self-defined path colors
-    Color path_color_cardinal, path_color_non_cardinal;
-    HashMap<String, Color> path_colors;
-    Color tile_center_color;
+    Color pathColorCardinal, pathColorNonCardinal;
+    HashMap<String, Color> pathColors;
+    Color tileCenterColor;
     // Coordinates of the home position
     WorldCoordinate home;
 
     // ID and object
-    TreeMap<Integer, RiskLevel> risk_levels;
+    TreeMap<Integer, RiskLevel> riskLevels;
     HashSet<Area> areas;
     TreeMap<Integer, Place> places;
-    TreeMap<String, Integer> place_names;
+    TreeMap<String, Integer> placeNames;
     TreeMap<Integer, Layer> layers;
 
-    ShowPlaceID show_place_id;
+    ShowPlaceID showPlaceID;
 
     /**
      * Creates an empty world
@@ -83,24 +83,24 @@ public class World implements BreadthSearchGraph {
     private void initialize(){
         home = new WorldCoordinate(0, 0, 0);
         // path line colors
-        path_color_non_cardinal = path_color_cardinal = new Color(0, 255, 0);
-        path_colors = new HashMap<>();
-        tile_center_color = new Color(207, 190, 134);
+        pathColorNonCardinal = pathColorCardinal = new Color(0, 255, 0);
+        pathColors = new HashMap<>();
+        tileCenterColor = new Color(207, 190, 134);
 
         // risk levels
-        risk_levels = new TreeMap<>();
-        risk_levels.put(0, new RiskLevel(0, "not evaluated", new Color(188, 188, 188)));
-        risk_levels.put(1, new RiskLevel(1, "secure", new Color(0, 255, 0)));
-        risk_levels.put(2, new RiskLevel(2, "mobs don't attack", new Color(255, 255, 0)));
-        risk_levels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
-        risk_levels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
+        riskLevels = new TreeMap<>();
+        riskLevels.put(0, new RiskLevel(0, "not evaluated", new Color(188, 188, 188)));
+        riskLevels.put(1, new RiskLevel(1, "secure", new Color(0, 255, 0)));
+        riskLevels.put(2, new RiskLevel(2, "mobs don't attack", new Color(255, 255, 0)));
+        riskLevels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
+        riskLevels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
 
         areas = new HashSet<>();
         layers = new TreeMap<>();
         places = new TreeMap<>();
-        place_names = new TreeMap<>();
+        placeNames = new TreeMap<>();
 
-        show_place_id = ShowPlaceID.UNIQUE;
+        showPlaceID = ShowPlaceID.UNIQUE;
     }
 
     /**
@@ -197,8 +197,8 @@ public class World implements BreadthSearchGraph {
 
         // add to place list of the world
         places.put(place.getId(), place);
-        if(!place_names.containsKey(place.getName())) place_names.put(place.getName(), 1);
-        else place_names.put(place.getName(), place_names.get(place.getName()) + 1);
+        if(!placeNames.containsKey(place.getName())) placeNames.put(place.getName(), 1);
+        else placeNames.put(place.getName(), placeNames.get(place.getName()) + 1);
     }
 
     /**
@@ -209,7 +209,7 @@ public class World implements BreadthSearchGraph {
      */
     public void putPlaceholder(int layer, int x, int y){
         try {
-            Place place = new Place(Place.placeholder_name, x, y, null);
+            Place place = new Place(Place.placeholderName, x, y, null);
 
             // find or create placeholder area
             Area area = null;
@@ -244,8 +244,8 @@ public class World implements BreadthSearchGraph {
             layer.remove(place);
             place.removeConnections();
             places.remove(place.getId());
-            if(place_names.containsKey(place.getName()))
-                place_names.put(place.getName(), Math.max(0, place_names.get(place.getName()) - 1));
+            if(placeNames.containsKey(place.getName()))
+                placeNames.put(place.getName(), Math.max(0, placeNames.get(place.getName()) - 1));
         }
     }
 
@@ -255,7 +255,7 @@ public class World implements BreadthSearchGraph {
      * @return
      */
     public int getPlaceNameCount(String name){
-        if(place_names.containsKey(name)) return place_names.get(name);
+        if(placeNames.containsKey(name)) return placeNames.get(name);
         else return 0;
     }
 
@@ -330,7 +330,7 @@ public class World implements BreadthSearchGraph {
      * @return risk level
      */
     public RiskLevel getRiskLevel(int id){
-        return risk_levels.get(id);
+        return riskLevels.get(id);
     }
 
     /**
@@ -370,7 +370,7 @@ public class World implements BreadthSearchGraph {
      * @return path color
      */
     public Color getPathColor(){
-        return path_color_cardinal;
+        return pathColorCardinal;
     }
 
     /**
@@ -378,7 +378,7 @@ public class World implements BreadthSearchGraph {
      * @return path color
      */
     public Color getPathColorNstd(){
-        return path_color_non_cardinal;
+        return pathColorNonCardinal;
     }
 
     /**
@@ -387,14 +387,14 @@ public class World implements BreadthSearchGraph {
      * @return
      */
     public Color getPathColor(String dir){
-        if(!path_colors.containsKey(dir)){
+        if(!pathColors.containsKey(dir)){
             if(dir.equals("n") || dir.equals("s") || dir.equals("e") || dir.equals("q") ||
                dir.equals("ne") || dir.equals("nw") || dir.equals("se") || dir.equals("sw") ||
                dir.equals("w") || dir.equals("e"))
-                return path_color_cardinal;
-            else return path_color_non_cardinal;
+                return pathColorCardinal;
+            else return pathColorNonCardinal;
         } else {
-            return path_colors.get(dir);
+            return pathColors.get(dir);
         }
     }
 
@@ -404,7 +404,7 @@ public class World implements BreadthSearchGraph {
      * @param color
      */
     public void setPathColor(String dir, Color color){
-        path_colors.put(dir, color);
+        pathColors.put(dir, color);
     }
 
     /**
@@ -412,7 +412,7 @@ public class World implements BreadthSearchGraph {
      * @return
      */
     public HashMap<String, Color> getPathColors(){
-        return path_colors;
+        return pathColors;
     }
 
     /**
@@ -420,7 +420,7 @@ public class World implements BreadthSearchGraph {
      * @param color new color
      */
     public void setPathColor(Color color){
-        path_color_cardinal = color;
+        pathColorCardinal = color;
     }
 
     /**
@@ -428,7 +428,7 @@ public class World implements BreadthSearchGraph {
      * @param color
      */
     public void setPathColorNstd(Color color){
-        path_color_non_cardinal = color;
+        pathColorNonCardinal = color;
     }
 
     /**
@@ -436,7 +436,7 @@ public class World implements BreadthSearchGraph {
      * @return
      */
     public Color getTileCenterColor(){
-        return tile_center_color;
+        return tileCenterColor;
     }
 
     /**
@@ -444,7 +444,7 @@ public class World implements BreadthSearchGraph {
      * @param color
      */
     public void setTileCenterColor(Color color){
-        tile_center_color = color;
+        tileCenterColor = color;
     }
 
     public enum ShowPlaceID {
@@ -458,7 +458,7 @@ public class World implements BreadthSearchGraph {
      * @param show
      */
     public void setShowPlaceID(ShowPlaceID show){
-        show_place_id = show;
+        showPlaceID = show;
     }
 
     /**
@@ -466,7 +466,7 @@ public class World implements BreadthSearchGraph {
      * @return
      */
     public ShowPlaceID getShowPlaceId(){
-        return show_place_id;
+        return showPlaceID;
     }
 
     /**
@@ -512,7 +512,7 @@ public class World implements BreadthSearchGraph {
      * @return all risk levels
      */
     public Collection<RiskLevel> getRiskLevels(){
-        return risk_levels.values();
+        return riskLevels.values();
     }
 
     /**
@@ -520,10 +520,10 @@ public class World implements BreadthSearchGraph {
      * @param rl new risk level
      */
     public void addRiskLevel(RiskLevel rl){
-        if(!risk_levels.containsValue(rl)){
+        if(!riskLevels.containsValue(rl)){
             // ID-collision?
-            while(risk_levels.containsKey(rl.getId())) ++rl.id;
-            risk_levels.put(rl.getId(), rl);
+            while(riskLevels.containsKey(rl.getId())) ++rl.id;
+            riskLevels.put(rl.getId(), rl);
         }
     }
 
@@ -533,9 +533,9 @@ public class World implements BreadthSearchGraph {
      * @throws java.lang.Exception
      */
     public void removeRiskLevel(RiskLevel rl) throws Exception {
-        if(!risk_levels.containsValue(rl)) throw new Exception("Tried to remove risk level that does not belong to this world");
+        if(!riskLevels.containsValue(rl)) throw new Exception("Tried to remove risk level that does not belong to this world");
         // remode from risk level list
-        risk_levels.remove(rl.getId());
+        riskLevels.remove(rl.getId());
         // remove from places
         for(Place place: places.values())
             if(place.getRiskLevel() == rl) place.setRiskLevel(null);
@@ -547,7 +547,7 @@ public class World implements BreadthSearchGraph {
      * @return true if the place worldname is unique
      */
     public Boolean isPlaceNameUnique(String name){
-        return place_names.containsKey(name);
+        return placeNames.containsKey(name);
     }
 
     /**

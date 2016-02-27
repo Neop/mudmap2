@@ -210,7 +210,7 @@ public class LayerTest {
         try {
             int x = 0;
             int y = 0;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element, x, y);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -220,7 +220,7 @@ public class LayerTest {
         try {
             int x = -5;
             int y = -2;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element, x, y);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -230,7 +230,7 @@ public class LayerTest {
         try {
             int x = 3;
             int y = 9;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element, x, y);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -250,7 +250,7 @@ public class LayerTest {
         try {
             int x = 0;
             int y = 0;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -260,7 +260,7 @@ public class LayerTest {
         try {
             int x = -5;
             int y = -2;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -270,7 +270,7 @@ public class LayerTest {
         try {
             int x = 3;
             int y = 9;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -290,7 +290,7 @@ public class LayerTest {
         try {
             int x = 0;
             int y = 0;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -300,7 +300,7 @@ public class LayerTest {
         try {
             int x = -5;
             int y = -2;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -310,7 +310,7 @@ public class LayerTest {
         try {
             int x = 3;
             int y = 9;
-            LayerElement element = new LayerElement(x, y, instance);
+            Place element = new Place("MyPlace", x, y, instance);
             instance.put(element);
             assertEquals(element, instance.get(x, y));
         } catch (Exception ex) {
@@ -330,15 +330,15 @@ public class LayerTest {
         int distance = 2;
         Layer instance = new Layer(world);
 
-        LinkedList<LayerElement> result = instance.getNeighbors(x, y, distance);
+        LinkedList<Place> result = instance.getNeighbors(x, y, distance);
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        LayerElement el1 = new LayerElement(x, y, instance);
-        LayerElement el2 = new LayerElement(x+1, y+1, instance);
-        LayerElement el3 = new LayerElement(x-1, y-1, instance);
-        LayerElement el4 = new LayerElement(x-2, y-2, instance);
-        LayerElement el5 = new LayerElement(x+2, y-2, instance);
+        Place el1 = new Place("Place1", x, y, instance);
+        Place el2 = new Place("Place1", x+1, y+1, instance);
+        Place el3 = new Place("Place1", x-1, y-1, instance);
+        Place el4 = new Place("Place1", x-2, y-2, instance);
+        Place el5 = new Place("Place1", x+2, y-2, instance);
         try {
             instance.put(el1);
             instance.put(el2);
@@ -416,7 +416,7 @@ public class LayerTest {
         Layer instance = new Layer(world);
 
         try {
-            LayerElement element = new LayerElement(0, 0, instance);
+            Place element = new Place("MyPlace", 0, 0, instance);
             instance.put(element);
             assertEquals(element, instance.get(0, 0));
 
@@ -440,7 +440,8 @@ public class LayerTest {
         int y = 0;
         assertFalse(instance.exist(x, y));
         try {
-            instance.put(new LayerElement(x, y, instance));
+            Place element = new Place("MyPlace", x, y, instance);
+            instance.put(element);
             assertTrue(instance.exist(x, y));
         } catch (Layer.PlaceNotInsertedException ex) {
             Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -450,7 +451,8 @@ public class LayerTest {
         y = 5;
         assertFalse(instance.exist(x, y));
         try {
-            instance.put(new LayerElement(x, y, instance));
+            Place element = new Place("MyPlace", x, y, instance);
+            instance.put(element);
             assertTrue(instance.exist(x, y));
         } catch (Layer.PlaceNotInsertedException ex) {
             Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -460,7 +462,8 @@ public class LayerTest {
         y = 6;
         assertFalse(instance.exist(x, y));
         try {
-            instance.put(new LayerElement(x, y, instance));
+            Place element = new Place("MyPlace", x, y, instance);
+            instance.put(element);
             assertTrue(instance.exist(x, y));
         } catch (Layer.PlaceNotInsertedException ex) {
             Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -470,7 +473,8 @@ public class LayerTest {
         y = -5;
         assertFalse(instance.exist(x, y));
         try {
-            instance.put(new LayerElement(x, y, instance));
+            Place element = new Place("MyPlace", x, y, instance);
+            instance.put(element);
             assertTrue(instance.exist(x, y));
         } catch (Layer.PlaceNotInsertedException ex) {
             Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -480,7 +484,8 @@ public class LayerTest {
         y = -6;
         assertFalse(instance.exist(x, y));
         try {
-            instance.put(new LayerElement(x, y, instance));
+            Place element = new Place("MyPlace", x, y, instance);
+            instance.put(element);
             assertTrue(instance.exist(x, y));
         } catch (Layer.PlaceNotInsertedException ex) {
             Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -498,7 +503,7 @@ public class LayerTest {
         assertTrue(instance.isEmpty());
 
         try {
-            LayerElement element = new LayerElement(0, 0, instance);
+            Place element = new Place("MyPlace", 0, 0, instance);
             instance.put(element);
             assertFalse(instance.isEmpty());
 
@@ -523,8 +528,8 @@ public class LayerTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        LayerElement el1 = new LayerElement(0, 0, instance);
-        LayerElement el2 = new LayerElement(-1, 2, instance);
+        Place el1 = new Place("Place1", 0, 0, instance);
+        Place el2 = new Place("Place2", -1, 2, instance);
         try {
             instance.put(el1);
             instance.put(el2);

@@ -35,29 +35,29 @@ import mudmap2.backend.sssp.BreadthSearch;
  */
 public class Place extends LayerElement implements Comparable<Place>, BreadthSearch {
 
-    public static final String placeholder_name = "?";
+    public static final String placeholderName = "?";
 
     // next id to be assigned
-    static int next_id;
+    static int nextID;
 
     int id;
     String name;
     Area area;
-    int rec_level_min, rec_level_max;
-    RiskLevel risk_level;
+    int recLevelMin, recLevelMax;
+    RiskLevel riskLevel;
 
     HashSet<Place> children, parents;
     HashSet<Path> paths;
     TreeMap<String, Boolean> flags;
     LinkedList<String> comments;
 
-    BreadthSearchData breadth_search_data;
+    BreadthSearchData breadthSearchData;
 
-    public Place(int id, String name, int pos_x, int pos_y, Layer l){
-        super(pos_x, pos_y, l);
+    public Place(int id, String name, int posX, int posY, Layer l){
+        super(posX, posY, l);
         this.name = name;
         this.id = id;
-        if(id >= next_id) next_id = id + 1;
+        if(id >= nextID) nextID = id + 1;
 
         initialize();
     }
@@ -65,14 +65,14 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     /**
      * Constructs new a place a certain position
      * @param name name
-     * @param pos_x x coordinate
-     * @param pos_y y coordinate
+     * @param posX x coordinate
+     * @param posY y coordinate
      * @param l
      */
-    public Place(String name, int pos_x, int pos_y, Layer l){
-        super(pos_x, pos_y, l);
+    public Place(String name, int posX, int posY, Layer l){
+        super(posX, posY, l);
         this.name = name;
-        id = next_id++;
+        id = nextID++;
 
         initialize();
     }
@@ -82,16 +82,16 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     private void initialize(){
         area = null;
-        risk_level = null;
-        rec_level_min = rec_level_max = -1;
+        riskLevel = null;
+        recLevelMin = recLevelMax = -1;
 
-        children = new HashSet<Place>();
-        parents = new HashSet<Place>();
-        paths = new HashSet<Path>();
-        flags = new TreeMap<String, Boolean>();
-        comments = new LinkedList<String>();
+        children = new HashSet<>();
+        parents = new HashSet<>();
+        paths = new HashSet<>();
+        flags = new TreeMap<>();
+        comments = new LinkedList<>();
 
-        breadth_search_data = null;
+        breadthSearchData = null;
 
         // TODO: put place on layer if not null?
     }
@@ -149,15 +149,15 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return minimal recommended level
      */
     public int getRecLevelMin(){
-        return rec_level_min;
+        return recLevelMin;
     }
 
     /**
      * Sets the minimal recommended level
-     * @param rec_level_min
+     * @param recLevelMin
      */
-    public void setRecLevelMin(int rec_level_min){
-        this.rec_level_min = rec_level_min;
+    public void setRecLevelMin(int recLevelMin){
+        this.recLevelMin = recLevelMin;
     }
 
     /**
@@ -165,15 +165,15 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return maximal recommended level
      */
     public int getRecLevelMax(){
-        return rec_level_max;
+        return recLevelMax;
     }
 
     /**
      * Sets the maximal recommended level
-     * @param rec_level_max
+     * @param recLevelMax
      */
-    public void setRecLevelMax(int rec_level_max){
-        this.rec_level_max = rec_level_max;
+    public void setRecLevelMax(int recLevelMax){
+        this.recLevelMax = recLevelMax;
     }
 
     /**
@@ -181,15 +181,15 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return risk level
      */
     public RiskLevel getRiskLevel(){
-        return risk_level;
+        return riskLevel;
     }
 
     /**
      * sets the risk level
-     * @param risk_level
+     * @param riskLevel
      */
-    public void setRiskLevel(RiskLevel risk_level){
-        this.risk_level = risk_level;
+    public void setRiskLevel(RiskLevel riskLevel){
+        this.riskLevel = riskLevel;
     }
 
     /**
@@ -245,7 +245,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return paths to place or empty set
      */
     public HashSet<Path> getPaths(Place place){
-        HashSet<Path> ret = new HashSet<Path>();
+        HashSet<Path> ret = new HashSet<>();
         for(Path path: paths)
             if(path.hasPlace(place)) ret.add(path);
         return ret;
@@ -487,9 +487,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         Place place = new Place(name, getX(), getY(), null);
 
         place.area = area;
-        place.rec_level_max = rec_level_max;
-        place.rec_level_min = rec_level_min;
-        place.risk_level = risk_level;
+        place.recLevelMax = recLevelMax;
+        place.recLevelMin = recLevelMin;
+        place.riskLevel = riskLevel;
         place.flags = (TreeMap<String, Boolean>) flags.clone();
         place.comments = (LinkedList<String>) comments.clone();
 
@@ -510,8 +510,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     @Override
     public BreadthSearchData getBreadthSearchData() {
-        if(breadth_search_data == null) breadth_search_data = new BreadthSearchData();
-        return breadth_search_data;
+        if(breadthSearchData == null) breadthSearchData = new BreadthSearchData();
+        return breadthSearchData;
     }
 
 }

@@ -29,47 +29,24 @@ import static org.junit.Assert.*;
  * @author neop
  */
 public class AreaTest {
-    
+
     public AreaTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
-    }
-
-    /**
-     * Test of getId method, of class Area.
-     */
-    @Test
-    public void testGetId() {
-        System.out.println("getId");
-        
-        int expResult = 5;
-        Area instance = new Area(expResult, "My Area");
-        int result = instance.getId();
-        assertEquals(expResult, result);
-        
-        expResult = 0;
-        instance = new Area(expResult, "My Area");
-        result = instance.getId();
-        assertEquals(expResult, result);
-        
-        expResult = -4;
-        instance = new Area(expResult, "My Area");
-        result = instance.getId();
-        assertEquals(expResult, result);
     }
 
     /**
@@ -78,16 +55,11 @@ public class AreaTest {
     @Test
     public void testGetName() {
         System.out.println("getName");
-        
+
         // test with both contructors
         String expResult = "MyArea";
         Area instance = new Area(expResult, Color.CYAN);
         String result = instance.getName();
-        assertEquals(expResult, result);
-        
-        expResult = "Another area";
-        instance = new Area(2, expResult);
-        result = instance.getName();
         assertEquals(expResult, result);
     }
 
@@ -97,10 +69,10 @@ public class AreaTest {
     @Test
     public void testSetName() {
         System.out.println("setName");
-        
+
         // test with both contructors
         Area instance = new Area("MyArea", Color.CYAN);
-        
+
         String name = "Another area";
         instance.setName(name);
         String result = instance.getName();
@@ -113,7 +85,7 @@ public class AreaTest {
     @Test
     public void testGetColor() {
         System.out.println("getColor");
-        
+
         Color expResult = Color.CYAN;
         Area instance = new Area("MyArea", expResult);
         Color result = instance.getColor();
@@ -126,9 +98,9 @@ public class AreaTest {
     @Test
     public void testSetColor() {
         System.out.println("setColor");
-        
+
         Area instance = new Area("MyArea", Color.GREEN);
-        
+
         Color color = Color.RED;
         instance.setColor(color);
         Color result = instance.getColor();
@@ -146,7 +118,7 @@ public class AreaTest {
     @Test
     public void testToString() {
         System.out.println("toString");
-        
+
         String name = "MyArea";
         Area instance = new Area(name, Color.yellow);
         String result = instance.toString();
@@ -159,21 +131,21 @@ public class AreaTest {
     @Test
     public void testCompareTo() {
         System.out.println("compareTo");
-        
+
         String name1 = "MyArea";
         String name2 = "MyArea";
         String name3 = "Another area";
         Area instance = new Area(name1, Color.yellow);
         Area area1 = new Area(name2, Color.BLACK);
         Area area2 = new Area(name3, Color.BLACK);
-        
+
         int expResult = name1.compareTo(name2);
         int result = instance.compareTo(area1);
         assertEquals(expResult, result);
-        
+
         expResult = name1.compareTo(name3);
         result = instance.compareTo(area2);
         assertEquals(expResult, result);
     }
-    
+
 }

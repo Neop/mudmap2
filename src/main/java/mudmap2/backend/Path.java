@@ -119,20 +119,38 @@ public class Path {
      */
     public static String getOppositeDir(String dir){
         String ret = "";
-        if(dir.equals("n")) ret = "s";
-        else if(dir.equals("s")) ret = "n";
-
-        else if(dir.equals("e")) ret = "w";
-        else if(dir.equals("w")) ret = "e";
-
-        else if(dir.equals("se")) ret = "nw";
-        else if(dir.equals("sw")) ret = "ne";
-
-        else if(dir.equals("ne")) ret = "sw";
-        else if(dir.equals("nw")) ret = "se";
-
-        else if(dir.equals("u")) ret = "d";
-        else if(dir.equals("d")) ret = "u";
+        switch (dir) {
+            case "n":
+                ret = "s";
+                break;
+            case "s":
+                ret = "n";
+                break;
+            case "e":
+                ret = "w";
+                break;
+            case "w":
+                ret = "e";
+                break;
+            case "se":
+                ret = "nw";
+                break;
+            case "sw":
+                ret = "ne";
+                break;
+            case "ne":
+                ret = "sw";
+                break;
+            case "nw":
+                ret = "se";
+                break;
+            case "u":
+                ret = "d";
+                break;
+            case "d":
+                ret = "u";
+                break;
+        }
         return ret;
     }
 
@@ -159,14 +177,32 @@ public class Path {
      */
     public static int getDirNum(String dir){
         int ret = -1;
-        if(dir.equals("n")) ret = 8;
-        else if(dir.equals("ne")) ret = 9;
-        else if(dir.equals("e")) ret = 6;
-        else if(dir.equals("se")) ret = 3;
-        else if(dir.equals("s")) ret = 2;
-        else if(dir.equals("sw")) ret = 1;
-        else if(dir.equals("w")) ret = 4;
-        else if(dir.equals("nw")) ret = 7;
+        switch (dir) {
+            case "n":
+                ret = 8;
+                break;
+            case "ne":
+                ret = 9;
+                break;
+            case "e":
+                ret = 6;
+                break;
+            case "se":
+                ret = 3;
+                break;
+            case "s":
+                ret = 2;
+                break;
+            case "sw":
+                ret = 1;
+                break;
+            case "w":
+                ret = 4;
+                break;
+            case "nw":
+                ret = 7;
+                break;
+        }
         return ret;
     }
 }

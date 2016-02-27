@@ -33,11 +33,11 @@ import java.awt.Color;
 public class RiskLevel {
     // next id to be assigned
     static int next_id = 0;
-    
+
     int id;
     public String description;
     public Color color;
-    
+
     /**
      * Constructs the risk level
      * @param id identification number, unique in a world
@@ -61,7 +61,7 @@ public class RiskLevel {
         description = desc;
         this.color = color;
     }
-    
+
     /**
      * Gets the risk level id
      * @return id
@@ -69,7 +69,7 @@ public class RiskLevel {
     public int getId(){
         return id;
     }
-    
+
     /**
      * Gets the color
      * @return color of the risk level
@@ -77,7 +77,7 @@ public class RiskLevel {
     public Color getColor(){
         return color;
     }
-    
+
     /**
      * Sets the color
      * @param c new color
@@ -85,7 +85,7 @@ public class RiskLevel {
     public void setColor(Color c){
         color = c;
     }
-    
+
     /**
      * Gets the description of the risk level
      * @return description
@@ -93,7 +93,7 @@ public class RiskLevel {
     public String getDescription(){
         return toString();
     }
-    
+
     /**
      * Sets the description
      * @param desc new description
@@ -101,7 +101,7 @@ public class RiskLevel {
     public void setDescription(String desc){
         description = desc;
     }
-    
+
     /**
      * Gets the description of the risk level
      * @return description
