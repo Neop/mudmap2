@@ -229,7 +229,7 @@ public class World implements BreadthSearchGraph {
         l.put(place, x, y);
 
         // add to place list of the world
-        places.put(place.getId(), place);
+        if(!places.containsKey(place.getId())) places.put(place.getId(), place);
         if(!place_names.containsKey(place.getName())) place_names.put(place.getName(), 1);
         else place_names.put(place.getName(), place_names.get(place.getName()) + 1);
     }

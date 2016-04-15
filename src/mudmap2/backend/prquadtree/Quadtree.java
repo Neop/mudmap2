@@ -145,6 +145,15 @@ public class Quadtree<T> {
     }
 
     /**
+     * Checks whether the quadtree contains object
+     * @param object
+     * @return
+     */
+    public boolean contains(T object){
+        return (root != null && root.contains(object));
+    }
+
+    /**
      * QuadtreeElement interface class
      * @param <T> element data type
      */
@@ -178,6 +187,9 @@ public class Quadtree<T> {
 
         /** checks whether the element is empty */
         public boolean isEmpty();
+
+        /** checks whether the element or one of its children contains object*/
+        public boolean contains(T object);
     }
 
     /**
@@ -410,6 +422,20 @@ public class Quadtree<T> {
         public void values(HashSet<T> set) {
             for(int i = 0; i < 4; ++i) if(elements[i] != null) elements[i].values(set);
         }
+
+        /**
+         * Checks whether the element or one of its children contains object
+         * @param object
+         * @return
+         */
+        @Override
+        public boolean contains(T object) {
+            if(elements[NE] != null && elements[NE].contains(object)) return true;
+            else if(elements[NW] != null && elements[NW].contains(object)) return true;
+            else if(elements[SE] != null && elements[SE].contains(object)) return true;
+            else if(elements[SW] != null && elements[SW].contains(object)) return true;
+            return false;
+        }
     }
 
     /**
@@ -525,6 +551,16 @@ public class Quadtree<T> {
         @Override
         public void values(HashSet<T> set) {
             if(data != null) set.add(data);
+        }
+
+        /**
+         * Checks whether the element contains object
+         * @param object
+         * @return
+         */
+        @Override
+        public boolean contains(T object) {
+            return data == object;
         }
     }
 }

@@ -1,5 +1,6 @@
-2.?.?
+2.2.8
 - added missing key hints in context menu
+- fixed: could not save world via file menu at first start
 - fixed: could not cut-paste places when they overlap
 - several minor changes and bugfixes
 

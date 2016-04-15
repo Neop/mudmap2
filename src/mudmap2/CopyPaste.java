@@ -153,7 +153,7 @@ public final class CopyPaste {
                     }
                 });
 
-                places = (Place[]) ordered_places.toArray(new Place[ordered_places.size()]);
+                places = ordered_places.toArray(new Place[ordered_places.size()]);
             }
 
             // copy places

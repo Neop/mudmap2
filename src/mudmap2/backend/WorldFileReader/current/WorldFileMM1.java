@@ -512,10 +512,12 @@ public class WorldFileMM1 implements WorldFile {
     // ----------------------
 
     @Override
-    public void writeFile(String file) {
+    public void writeFile(String filestr) {
         try {
             // open file
-            PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)));
+            File file = new File(filestr);
+            file.getParentFile().mkdirs();
+            PrintWriter outstream = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 
             outstream.println("# MUD Map 2 world file");
             outstream.println("# compatibility for MUD Map 1 " + (compatibility_mudmap_1 ? "enabled" : "disabled"));

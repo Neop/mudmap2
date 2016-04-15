@@ -138,13 +138,13 @@ public final class Mainwindow extends JFrame {
                     // create a new world
                     if(WorldManager.getWorldFile(ret) == null) // no world with that name yet
                         try {
-                        World w = WorldManager.createWorld(ret);
-                        available_worlds_tab.update();
-                        openWorld(w.getFile());
-                    } catch (Exception ex) {
-                        Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
-                        JOptionPane.showMessageDialog((Component) arg0.getSource(), "Couldn't create world \"" + ret + "\":\n" + ex.getMessage());
-                    }
+                            World w = WorldManager.createWorld(ret);
+                            available_worlds_tab.update();
+                            openWorld(w.getFile());
+                        } catch (Exception ex) {
+                            Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
+                            JOptionPane.showMessageDialog((Component) arg0.getSource(), "Couldn't create world \"" + ret + "\":\n" + ex.getMessage());
+                        }
                     else JOptionPane.showMessageDialog((Component) arg0.getSource(), "Can't create world \"" + ret + "\", name already exists");
                 }
             }

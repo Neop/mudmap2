@@ -43,6 +43,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -55,6 +56,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import static javax.swing.JComponent.TOOL_TIP_TEXT_KEY;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -966,7 +968,9 @@ public class WorldTab extends JPanel {
             try {
                 // open file
                 if(!Paths.isDirectory(Paths.getWorldsDir())) Paths.createDirectory(Paths.getWorldsDir());
-                PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(world.getFile() + "_meta")));
+                File file = new File(world.getFile() + "_meta");
+                file.getParentFile().mkdirs();
+                PrintWriter outstream = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 
                 outstream.println("# MUD Map (v2) world meta data file");
                 outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
