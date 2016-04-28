@@ -41,7 +41,7 @@ public class AboutDialog extends ActionDialog {
 
     /**
      * Creates an about dialog
-     * @param parent 
+     * @param parent
      */
     public AboutDialog(JFrame parent){
         super(parent, "About MUD Map", true);
@@ -50,12 +50,12 @@ public class AboutDialog extends ActionDialog {
     @Override
     void create() {
         setLayout(new GridBagLayout());
-        
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(3, 5, 4, 5);
         constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1.0;
-        
+
         ++constraints.gridy;
         add(new JLabel("<html><h1>MUD Map v2</h1></html>"), constraints);
         ++constraints.gridy;
@@ -71,7 +71,9 @@ public class AboutDialog extends ActionDialog {
         ++constraints.gridy;
         add(new JLabel("by Neop (mneop@web.de)"), constraints);
         ++constraints.gridy;
-        
+        add(new JLabel("HTML/JS map code by Gaardian"), constraints);
+        ++constraints.gridy;
+
         JButton button_ok = new JButton("Ok");
         add(button_ok, constraints);
         getRootPane().setDefaultButton(button_ok);
@@ -81,7 +83,7 @@ public class AboutDialog extends ActionDialog {
                 dispose();
             }
         });
-        
+
         pack();
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }

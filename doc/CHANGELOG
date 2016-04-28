@@ -1,3 +1,6 @@
+2.2.9
+- added html export. Thanks to gaardian.com for the html/js map visualization code!
+
 2.2.8
 - added missing key hints in context menu
 - fixed: could not save world via file menu at first start

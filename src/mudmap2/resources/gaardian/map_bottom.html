@@ -1,0 +1,1077 @@
+</script>
+        </div>
+<script type="text/javascript">
+function getOppositeExitType(exittype) {
+    switch (exittype) {
+		case 0:
+			return 2;
+		case 1:
+			return 3;
+		case 2:
+			return 0;
+		case 3:
+			return 1;
+		case 4:
+			return 5;
+		case 5:
+		    return 4;
+	}
+	return exittype;
+}
+
+var room_height = 60, room_width = 100;
+var roomgap_x = 50, roomgap_y = 40;
+var door_width = room_height / 2;
+var arrowheadlength = roomgap_x / 6;
+var brokenexit_x = roomgap_x / 3;
+var brokenexit_y = roomgap_y / 2;
+var highlightedRooms = '';
+var highlightedKeyRoom = '';
+var renderedAreaExits = new Array();
+
+
+function init() {
+    var entranceroom = null;
+    var padContainerLeft = false;
+    var padContainerRight = false;
+    var padContainerDown = false;
+    // Calculate all twoway indices and find the entrance room.
+    for (var i = 1, roomsLength = rooms.length; i < roomsLength; i++) {
+        exits = rooms[i].exitsArray;
+        if (exits != null) {
+            for (var j = 0, exitsLength = exits.length; j < exitsLength; j++) {
+                var roomexit = exits[j];
+                var exittype = roomexit.exittype;
+                if (roomexit.areaexit != null) {
+                    // area exits have special renderers
+                    roomexit.linktype = LINK_TO_ANOTHER_AREA;
+                    if (roomexit.room1.xpos == 1 && (roomexit.exittype == EXIT_WEST || roomexit.exittype == EXIT_DOWN)) {
+                        padContainerLeft = true;
+                    } else if (roomexit.room1.xpos == gridmaxx && (roomexit.exittype == EXIT_EAST || roomexit.exittype == EXIT_UP)) {
+                        padContainerRight = true;
+                    }
+                    if (roomexit.room1.ypos == gridmaxy && (roomexit.exittype == EXIT_SOUTH || roomexit.exittype == EXIT_DOWN)) {
+                        padContainerDown = true;
+                    }
+                } else if (exittype > 5) {
+                    // portals or special exits are disconnected
+                    roomexit.linktype = LINK_DISCONNECTED;
+                } else {
+                    var oppositeExittype = getOppositeExitType(exittype);
+                    targetexits = roomexit.room2.exitsArray;
+                    for (var k = 0, targetexitsLength = targetexits.length; k < targetexitsLength; k++) {
+                        if (targetexits[k].areaexit == null && targetexits[k].room2.roomid == roomexit.room1.roomid && targetexits[k].exittype == oppositeExittype) {
+                            roomexit.linktype = LINK_TWOWAY;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (rooms[i].isEntrance) {
+            entranceroom = rooms[i];
+        }
+    }
+    
+    // Pad left for area exits if necessary
+    if (padContainerLeft) {
+        CONTAINER_PAD_LEFT = room_width;
+        var container = document.getElementById("map-container");
+        container.style.left = CONTAINER_PAD_LEFT + "px";
+    }
+    if (padContainerRight) {
+        CONTAINER_PAD_RIGHT = room_width;
+    }
+    if (padContainerDown) {
+        CONTAINER_PAD_DOWN = room_height;
+    }
+    
+	// Ready for drawing now!
+}
+init();
+
+var jg = new jsGraphics("map-container");
+var jg3 = new jsGraphics("map-container");
+// order is important
+var jg4 = new jsGraphics("map-container");
+var jg2 = new jsGraphics("map-container");
+
+function drawLabel(label, jg) {
+    var x = calcLeftPos(label);
+    var y = calcTopPos(label);
+    // we don't need height
+    var width = label.width * room_width + (label.width - 1) * roomgap_x;
+    var alignment = "center";
+    var fontsize = "10pt";
+    var fontfamily = NORMALROOMFONT;
+    var fontweight = Font.PLAIN;
+    var lineheight = null;
+    switch (label.labeltype) {
+        case LABEL_TYPE_SECTION_CENTER: case LABEL_TYPE_SECTION_BOTTOM: case LABEL_TYPE_SECTION_TOP:
+            alignment = "center";
+            fontsize = "14pt";
+            fontweight = Font.BOLD;
+            break;
+        case LABEL_TYPE_SECTION_JUMBO_CENTER:
+            alignment = "center";
+            fontsize = "24pt";
+            fontweight = Font.ITALIC_BOLD;
+            break;
+        case LABEL_TYPE_INFORMATIONAL:
+            alignment = "left";
+            fontsize = "10pt";
+            fontweight = Font.PLAIN;
+            break;
+    }
+    switch (label.labeltype) {
+        case LABEL_TYPE_SECTION_CENTER: case LABEL_TYPE_SECTION_JUMBO_CENTER:
+            lineheight = room_height;
+            break;
+    }
+    jg.setFont(fontfamily, fontsize, fontweight); 
+    jg.setColor(label.labelcolor);
+    jg.drawStringRect(label.labeltext, x, y, width, alignment, lineheight);
+}
+
+function drawRoom(room, jg, borderColor, backgroundColor) {
+    x = calcLeftPos(room);
+    y = calcTopPos(room);
+    if (backgroundColor == null && room.roomcolor != "") {
+        backgroundColor = room.roomcolor;
+    }
+    if (backgroundColor != null) {
+        jg.setStroke(1);
+        jg.setColor(backgroundColor);
+        jg.fillRect(x, y, room_width, room_height);
+    }
+    if (borderColor != null) {
+        jg.setColor(borderColor);
+        jg.setStroke(5);
+    } else {
+        if (room.isEntrance) {
+            jg.setColor("green");
+            jg.setStroke(5);
+        } else if (room.aggroType > 0) {
+            if (room.aggroType == 1) {
+                // moving aggressive (this section of the area contains aggressives)
+                jg.setStroke(2);
+            } else {
+                // stationary aggressive
+                jg.setStroke(4);
+            }
+            jg.setColor("red");
+        } else {
+            jg.setColor("black");
+            jg.setStroke(2);
+        }
+    }
+    jg.drawRect(x, y, room_width, room_height);
+    if (room.pk) {
+        jg.setColor("red");
+        jg.setFont(NORMALROOMFONT,"10px",Font.BOLD);
+        jg.drawStringRect("PK", x + 5, calcBottomPos(room) - 15, 15, "left");
+    }
+    jg.setColor("black");
+    var fontsize = "12px";
+    // todo: make it check the height of the new div and size appropriately
+    if (getFormattedRoomname(room).length >= 39) {
+        fontsize = "10px";
+    }
+    jg.setFont(NORMALROOMFONT,fontsize,Font.PLAIN);
+    jg.drawStringRect(getFormattedRoomname(room), x + 4, y + 5, room_width - 5, "center");
+    
+    // finally, re-render the first disconnected exit if it has been obscured
+    if (backgroundColor != null) {
+        rerenderFirstDisconnectedExit(room, jg);
+    }
+}
+
+function getFormattedRoomname(room) {
+    var roomname = room.roomname;
+    if (room.graffiti) {
+        roomname += " (G)";
+    }
+    return roomname;
+}
+
+function isExitDirectlyConnected(exittype, room1, room2) {
+    if (exittype == EXIT_EAST) {
+        if (room1.xpos > room2.xpos) {
+            return false;
+        }
+        for (var i = room1.xpos + 1; i < room2.xpos && i <= gridmaxx; i++) {
+            if (fill_grid[i][room1.ypos]) {
+                return false;
+            }
+        }
+        return true;
+    } else if (exittype == EXIT_WEST) {
+        if (room2.xpos > room1.xpos) {
+            return false;
+        }
+        for (var i = room2.xpos + 1; i < room1.xpos && i <= gridmaxx; i++) {
+            if (fill_grid[i][room2.ypos]) {
+                return false;
+            }
+        }
+        return true;
+    } else if (exittype == EXIT_SOUTH) {
+        if (room1.ypos > room2.ypos) {
+            return false;
+        }
+        for (var i = room1.ypos + 1; i < room2.ypos && i <= gridmaxy; i++) {
+            if (fill_grid[room1.xpos][i]) {
+                return false;
+            }
+        }
+        return true;
+    } else if (exittype == EXIT_NORTH) {
+        if (room2.ypos > room1.ypos) {
+            return false;
+        }
+        for (var i = room2.ypos + 1; i < room1.ypos && i <= gridmaxy; i++) {
+            if (fill_grid[room2.xpos][i]) {
+                return false;
+            }
+        }
+        return true;
+    } else if (exittype == EXIT_UP) {
+        // room1 can have two up exits - top left up or top right up
+        if (room2.ypos >= room1.ypos) {
+            return false;
+        }
+        // can't be directly on top of each other!
+        if (room1.xpos == room2.xpos) {
+            return false;
+        }
+        var rise = room1.ypos - room2.ypos;
+        var run = room1.xpos - room2.xpos;
+        var m = rise / run;
+        if (Math.abs(m) == 1) { 
+            // for each of these exits, see if a room lies in the path
+            if (room1.xpos < room2.xpos) {
+                // top right up
+                var x = room1.xpos + 1;
+                for (var i = room1.ypos - 1; i > room2.ypos && i >= 1; i--) {
+                    if (fill_grid[x][i]) {
+                        return false;
+                    }
+                    x++;
+                }
+            } else if (room1.xpos > room2.xpos) {
+                // top left up
+                var x = room1.xpos - 1;
+                for (var i = room1.ypos - 1; i > room2.ypos && i >= 1; i--) {
+                    if (fill_grid[x][i]) {
+                        return false;
+                    }
+                    x--;
+                }
+            }
+        } else {
+            // not a straight slope; determine if there are rooms occupied within
+            // 1 gridroom of this line
+            // calculate b in y = mx + b
+            var b = room1.ypos - (m * room1.xpos);
+            // make sure the slope isn't too steep for rooms next to each other
+            if (Math.abs(run) == 1 && Math.abs(m) >= MAX_SLOPE) {
+                return false;
+            }
+            if (room1.xpos < room2.xpos) {
+                // top right up
+                var x = room1.xpos + 1;
+                for (var y = m * x + b; y > room2.ypos && y >= 1; y = m * x + b) {
+                    if (fill_grid[x][Math.ceil(y)]) {
+                        return false;
+                    }
+                    x++;
+                }
+            } else if (room1.xpos > room2.xpos) {
+                // top left up
+                var x = room1.xpos - 1;
+                for (var y = m * x + b; y > room2.ypos && y >= 1; y = m * x + b) {
+                    if (fill_grid[x][Math.ceil(y)]) {
+                        return false;
+                    }
+                    x--;
+                }
+            }
+        }
+        return true;
+    } else if (exittype == EXIT_DOWN) {
+        // room1 can have two up exits - bottom left down or bottom right down
+        if (room1.ypos >= room2.ypos) {
+            return false;
+        }
+        // can't be directly on top of each other!
+        if (room1.xpos == room2.xpos) {
+            return false;
+        }
+        var rise = room1.ypos - room2.ypos;
+        var run = room1.xpos - room2.xpos;
+        var m = rise / run;
+        if (Math.abs(m) == 1) {
+            // for each of these exits, see if a room lies in the path
+            if (room1.xpos < room2.xpos) {
+                // bottom right down
+                var x = room1.xpos + 1;
+                for (var i = room1.ypos + 1; i < room2.ypos && i <= gridmaxy; i++) {
+                    if (fill_grid[x][i]) {
+                        return false;
+                    }
+                    x++;
+                }
+            } else if (room1.xpos > room2.xpos) {
+                // bottom left down
+                var x = room1.xpos - 1;
+                for (var i = room1.ypos + 1; i < room2.ypos && i <= gridmaxy; i++) {
+                    if (fill_grid[x][i]) {
+                        return false;
+                    }
+                    x--;
+                }
+            }
+        } else {
+            // not a straight slope; determine if there are rooms occupied within
+            // 1 gridroom of this line
+            // calculate b in y = mx + b
+            var b = room1.ypos - (m * room1.xpos);
+            // make sure the slope isn't too steep for rooms next to each other
+            if (Math.abs(run) == 1 && Math.abs(m) >= MAX_SLOPE) {
+                return false;
+            }
+            if (room1.xpos < room2.xpos) {
+                // bottom right down
+                var x = room1.xpos + 1;
+                for (var y = m * x + b; y < room2.ypos && y <= gridmaxy; y = m * x + b) {
+                    if (fill_grid[x][Math.ceil(y)]) {
+                        return false;
+                    }
+                    x++;
+                }
+            } else if (room1.xpos > room2.xpos) {
+                // bottom left down
+                var x = room1.xpos - 1;
+                for (var y = m * x + b; y < room2.ypos && y <= gridmaxy; y = m * x + b) {
+                    if (fill_grid[x][Math.ceil(y)]) {
+                        return false;
+                    }
+                    x--;
+                }
+            }
+        }
+        return true;
+    }
+    
+}
+
+function contains(a, obj){
+  for(var i = 0; i < a.length; i++) {
+    if(a[i] === obj){
+      return true;
+    }
+  }
+  return false;
+}
+
+function exitAlreadyRendered(roomexit, xpos, ypos) {
+    var key = xpos + "," + ypos;
+    var areaname = roomexit.areaexit.areaname;
+    var renderedLocations = renderedAreaExits[areaname];
+    if (renderedLocations != null) {
+        if (contains(renderedLocations, key)) {
+            return true;
+        } else {
+            renderedLocations.push(key);
+            renderedAreaExits[areaname] = renderedLocations;
+            return false;
+        }
+    } else {
+        var renderedLocations = new Array();
+        renderedLocations.push(key);
+        renderedAreaExits[areaname] = renderedLocations;
+        return false;
+    }
+}
+
+// Top-left corner of grid is (0,0) -- actually, that should be (1,1) - (0,0) is used to denote an unmapped room
+function drawExit(roomexit, jg) {
+    jg.setStroke(2);
+    var room1 = roomexit.room1;
+    var room2 = roomexit.room2;
+    var exittype = roomexit.exittype;
+    if (roomexit.random) {
+        jg.setColor("red");
+    }
+    // todo: refactor even further - call separate methods to draw exits for north/south, east/west, up/down, disconnected links
+    if (roomexit.linktype == LINK_DISCONNECTED) {
+        // draw the special exit command
+        jg.setColor("blue");
+        jg.setFont(CUSTOMEXITFONT,"10px",Font.PLAIN);
+        var exitaction = roomexit.exitaction;
+        if (roomexit.exittype == 6) {
+            exitaction = "enter " + exitaction;
+        }
+        // calculate the position of this custom exit for this room
+        var index = -1;
+        var exitsArray = room1.exitsArray;
+        for (var i = 0; i < exitsArray.length; i++) {
+            if (exitsArray[i].linktype == LINK_DISCONNECTED) {
+                index++;
+            }
+            if (exitsArray[i] == roomexit) {
+                break;
+            }
+        }
+        var delta = index * 16;
+        if (room1.pk) {
+            jg.drawStringRect(exitaction, calcLeftPos(room1) + 4, calcBottomPos(room1) - 14 + delta, room_width - 5, "right");
+        } else {
+            jg.drawStringRect(exitaction, calcLeftPos(room1) + 4, calcBottomPos(room1) - 14 + delta, room_width + 5, "left");
+        }
+        // draw the link connecting the rooms besides the exit string
+        jg.drawImage('http://maps.gaardian.com/link.png',calcLeftPos(room1) - 16, calcBottomPos(room1) - 14 + delta, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+    } else if (roomexit.linktype == LINK_TO_ANOTHER_AREA) {
+        jg.setFont(NORMALROOMFONT,"12px",Font.ITALIC);
+        if (exittype == EXIT_EAST) {
+            var x1 = calcRightPos(room1);
+            var y1 = calcMiddleYPos(room1);
+            jg.drawLine(x1, y1, x1 + roomgap_x - 5, y1);
+            if (!exitAlreadyRendered(roomexit, room1.xpos + 1, room1.ypos)) {
+                jg.drawStringRect("To " + roomexit.areaexit.areaname, x1 + roomgap_x, calcTopPos(room1) + room_height / 4, room_width, "center");
+            }
+        } else if (exittype == EXIT_WEST) {
+            var x1 = calcLeftPos(room1);
+            var y1 = calcMiddleYPos(room1);
+            jg.drawLine(x1, y1, x1 - roomgap_x + 5, y1);
+            if (!exitAlreadyRendered(roomexit, room1.xpos - 1, room1.ypos)) {
+                jg.drawStringRect("To " + roomexit.areaexit.areaname, x1 - roomgap_x - room_width, calcTopPos(room1) + room_height / 4, room_width, "center");
+            }
+        } else if (exittype == EXIT_SOUTH) {
+            var x1 = calcMiddleXPos(room1);
+            var y1 = calcBottomPos(room1);
+            jg.drawLine(x1, y1, x1, y1 + roomgap_y - 5);
+            if (!exitAlreadyRendered(roomexit, room1.xpos, room1.ypos + 1)) {
+                jg.drawStringRect("To " + roomexit.areaexit.areaname, calcLeftPos(room1), y1 + roomgap_y, room_width, "center");
+            }
+        } else if (exittype == EXIT_NORTH) {
+            var x1 = calcMiddleXPos(room1);
+            var y1 = calcTopPos(room1);
+            jg.drawLine(x1, y1, x1, y1 - roomgap_y + 5);
+            if (!exitAlreadyRendered(roomexit, room1.xpos, room1.ypos - 1)) {
+                jg.drawStringRect("To " + roomexit.areaexit.areaname, calcLeftPos(room1), y1 - roomgap_y - (room_height * 3 / 4), room_width, "center");
+            }
+        } else if (exittype == EXIT_UP) {
+            // todo: special treatment for up exits where top-right is already filled (check fill_grid)
+            var x1 = calcRightPos(room1);
+            var y1 = calcTopPos(room1);
+            jg.drawLine(x1, y1, x1 + roomgap_x, y1 - roomgap_y + 5);
+            if (!exitAlreadyRendered(roomexit, room1.xpos + 1, room1.ypos - 1)) {
+                jg.drawStringRect("To " + roomexit.areaexit.areaname, x1 + roomgap_x, y1 - roomgap_y - (room_height / 2), room_width, "center");
+            }
+        } else if (exittype == EXIT_DOWN) {
+            // todo: special treatment for down exits where bottom-left is already filled (check fill_grid)
+            var x1 = calcLeftPos(room1);
+            var y1 = calcBottomPos(room1);
+            jg.drawLine(x1, y1, x1 - roomgap_x, y1 + roomgap_y - 5);
+            if (!exitAlreadyRendered(roomexit, room1.xpos - 1, room1.ypos + 1)) {
+                jg.drawStringRect("To " + roomexit.areaexit.areaname, x1 - roomgap_x - room_width, y1 + roomgap_y, room_width, "center");
+            }
+        }
+    } else {
+        var room1x = room1.xpos;
+        var room2x = room2.xpos;
+        var room1y = room1.ypos;
+        var room2y = room2.ypos;
+        if (exittype == EXIT_EAST || exittype == EXIT_WEST) {
+            if (room1 == room2) {
+                // This exit loops back to itself
+                if (exittype == EXIT_WEST) {
+                    var x1 = calcLeftPos(room1);
+                    var y1 = calcMiddleYPos(room1);
+                    var midx = x1 - room_width / 4;
+                    var midy = y1 - room_height / 4;
+                    var xPoints = new Array(x1, midx, midx, x1);
+                    var yPoints = new Array(y1, y1, midy, midy);
+                    jg.drawPolyline(xPoints, yPoints);
+                    // draw a one-way arrow
+                    jg.drawLine(x1 - 1, midy, x1 - arrowheadlength, midy - arrowheadlength / 2);
+                    jg.drawLine(x1 - 1, midy, x1 - arrowheadlength, midy + arrowheadlength / 2);
+                } else if (exittype == EXIT_EAST) {
+                    // todo: test this
+                    var x1 = calcRightPos(room1);
+                    var y1 = calcMiddleYPos(room1);
+                    var midx = x1 + room_width / 4;
+                    var midy = y1 + room_height / 4;
+                    var xPoints = new Array(x1, midx, midx, x1);
+                    var yPoints = new Array(y1, y1, midy, midy);
+                    jg.drawPolyline(xPoints, yPoints);
+                    // draw a one-way arrow
+                    jg.drawLine(x1 + 1, midy, x1 + arrowheadlength, midy - arrowheadlength / 2);
+                    jg.drawLine(x1 + 1, midy, x1 + arrowheadlength, midy + arrowheadlength / 2);
+                }
+            } else if (room1y == room2y && isExitDirectlyConnected(exittype, room1, room2)) {
+                // East-west exit - assume no wraparound exits (e.g. if east exit of east room connects to west exit of west room)
+                // This will be captured by isExitDirectlyConnected
+                
+                // assume east exit for now
+                var x1 = calcRightPos(room1);
+                var y1 = calcMiddleYPos(room1);
+                var x2 = calcLeftPos(room2);
+                var y2 = calcMiddleYPos(room2); // y1 should equal y2
+                // change coordinates if this is a west exit
+                if (room1x > room2x) {
+                    x1 = calcLeftPos(room1);
+                    y1 = calcMiddleYPos(room1);
+                    x2 = calcRightPos(room2);
+                    y2 = calcMiddleYPos(room2);
+                }
+                
+                jg.drawLine(x1, y1, x2, y2);
+                if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                    var midx = x1 + (x2 - x1) / 2;
+                    var topy = y1 - door_width / 2;
+                    jg.drawLine(midx, topy, midx, y1 + door_width / 2);
+                    // todo: clicking on locked doors should highlight room with key and show popup
+                    if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                        jg.drawImage('http://maps.gaardian.com/lock.png', midx + 4, topy - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, topy - 4));
+                    }
+                }
+                // then draw uni-directional arrows, if applicable
+                if (roomexit.linktype == LINK_ONEWAY) {
+                    if (exittype == EXIT_EAST) {
+                        // left to right
+                        jg.drawLine(x2 - 1, y2, x2 - arrowheadlength, y2 - arrowheadlength / 2);
+                        jg.drawLine(x2 - 1, y2, x2 - arrowheadlength, y2 + arrowheadlength / 2);
+                    } else {
+                        // right to left
+                        jg.drawLine(x2 + 1, y2, x2 + arrowheadlength, y2 - arrowheadlength / 2);
+                        jg.drawLine(x2 + 1, y2, x2 + arrowheadlength, y2 + arrowheadlength / 2);
+                    }
+                }
+            } else {
+                if (exittype == EXIT_EAST) {
+                    var x1 = calcRightPos(room1);
+                    var y1 = calcMiddleYPos(room1) - room_height / 4;
+                    var x2 = x1 + brokenexit_x;
+                    var y2 = y1;
+                    jg.drawLine(x1, y1, x2, y2);
+                    if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                        var midx = x1 + (x2 - x1) / 2 - 2;
+                        jg.drawLine(midx, y1 - door_width / 4, midx, y2 + door_width / 4);
+                        if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                            jg.drawImage('http://maps.gaardian.com/lock.png', midx + 4, y1 - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, y1 - 4));
+                        }
+                    }
+                    if (roomexit.linktype == LINK_ONEWAY) {
+                        jg.drawLine(x2 - 1, y2, x2 - arrowheadlength / 2, y2 - arrowheadlength / 2);
+                        jg.drawLine(x2 - 1, y2, x2 - arrowheadlength / 2, y2 + arrowheadlength / 2);
+                    }
+                    jg.drawImage('http://maps.gaardian.com/link.png', x2 + 4, y2 - 8, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                } else {
+                    var x1 = calcLeftPos(room1);
+                    var y1 = calcMiddleYPos(room1) + room_height / 4;
+                    var x2 = x1 - brokenexit_x;
+                    var y2 = y1;
+                    jg.drawLine(x1, y1, x2, y2);
+                    if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                        var midx = x2 + (x1 - x2) / 2; // must be positive
+                        jg.drawLine(midx, y1 - door_width / 4, midx, y2 + door_width / 4);
+                        if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                            jg.drawImage('http://maps.gaardian.com/lock.png', midx + 4, y1 - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, y1 - 4));
+                        }
+                    }
+                    if (roomexit.linktype == LINK_ONEWAY) {
+                        jg.drawLine(x2 + 1, y2, x2 + arrowheadlength / 2, y2 - arrowheadlength / 2);
+                        jg.drawLine(x2 + 1, y2, x2 + arrowheadlength / 2, y2 + arrowheadlength / 2);
+                    }
+                    jg.drawImage('http://maps.gaardian.com/link.png', x2 - 16, y2 - 8, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                }
+            }
+        } else if (exittype == EXIT_NORTH || exittype == EXIT_SOUTH) {
+            if (room1 == room2) {
+                if (exittype == EXIT_NORTH) {
+                    var x1 = calcMiddleXPos(room1);
+                    var y1 = calcTopPos(room1);
+                    var midx = x1 + room_width / 4;
+                    var midy = y1 - room_height / 4;
+                    var xPoints = new Array(x1, x1, midx, midx);
+                    var yPoints = new Array(y1, midy, midy, y1);
+                    jg.drawPolyline(xPoints, yPoints);
+                    // draw a one-way arrow
+                    jg.drawLine(midx, y1 - 1, midx - arrowheadlength / 2, y1 - arrowheadlength);
+                    jg.drawLine(midx, y1 - 1, midx + arrowheadlength / 2, y1 - arrowheadlength);
+                } else if (exittype == EXIT_SOUTH) {
+                    // todo: test this
+                    var x1 = calcMiddleXPos(room1);
+                    var y1 = calcBottomPos(room1);
+                    var midx = x1 - room_width / 4;
+                    var midy = y1 + room_height / 4;
+                    var xPoints = new Array(x1, x1, midx, midx);
+                    var yPoints = new Array(y1, midy, midy, y1);
+                    jg.drawPolyline(xPoints, yPoints);
+                    // draw a one-way arrow
+                    jg.drawLine(midx, y1 + 1, midx - arrowheadlength / 2, y1 + arrowheadlength);
+                    jg.drawLine(midx, y1 + 1, midx + arrowheadlength / 2, y1 + arrowheadlength);
+                }
+            } else if (room1x == room2x && isExitDirectlyConnected(exittype, room1, room2)) {
+                // North-south exit - assume no wraparound exits (e.g. if south exit of south room connects to north exit of north room)
+                // This will be captured by isExitDirectlyConnected
+                
+                // assume south exit for now
+                var x1 = calcMiddleXPos(room1);
+                var y1 = calcBottomPos(room1);
+                var x2 = calcMiddleXPos(room2);
+                var y2 = calcTopPos(room2);
+                // change coordinates if this is a north exit
+                if (room1y > room2y) {
+                    x1 = calcMiddleXPos(room1);
+                    y1 = calcTopPos(room1);
+                    x2 = calcMiddleXPos(room2);
+                    y2 = calcBottomPos(room2);
+                }
+                // south exit from room1 should go to room2
+                
+                jg.drawLine(x1, y1, x2, y2);
+                if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                    var midy = y1 + (y2 - y1) / 2;
+                    var rightx = x1 + door_width / 2;
+                    jg.drawLine(x1 - door_width / 2, midy, rightx, midy);
+                    if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                        jg.drawImage('http://maps.gaardian.com/lock.png', rightx + 6, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, rightx + 6, midy - 8));
+                    }
+                }
+                if (roomexit.linktype == LINK_ONEWAY) {
+                    if (exittype == EXIT_NORTH) {
+                        // bottom to top
+                        jg.drawLine(x2, y2 + 1, x2 - arrowheadlength / 2, y2 + arrowheadlength);
+                        jg.drawLine(x2, y2 + 1, x2 + arrowheadlength / 2, y2 + arrowheadlength);
+                    } else {
+                        // top to bottom
+                        jg.drawLine(x2, y2 - 1, x2 - arrowheadlength / 2, y2 - arrowheadlength);
+                        jg.drawLine(x2, y2 - 1, x2 + arrowheadlength / 2, y2 - arrowheadlength);
+                    }
+                }
+            } else {
+                if (exittype == EXIT_NORTH) {
+                    var x1 = calcMiddleXPos(room1) - room_width / 4;
+                    var y1 = calcTopPos(room1);
+                    var x2 = x1;
+                    var y2 = y1 - brokenexit_y;
+                    jg.drawLine(x1, y1, x2, y2);
+                    if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                        var midy = y1 - (y1 - y2) / 2; // must be positive
+                        jg.drawLine(x1 - door_width / 4, midy, x1 + door_width / 4, midy);
+                        if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                            jg.drawImage('http://maps.gaardian.com/lock.png', x2 + 10, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 10, midy - 8));
+                        }
+                    }
+                    if (roomexit.linktype == LINK_ONEWAY) {
+                        jg.drawLine(x2, y2 + 1, x2 - arrowheadlength / 2, y2 + arrowheadlength / 2);
+                        jg.drawLine(x2, y2 + 1, x2 + arrowheadlength / 2, y2 + arrowheadlength / 2);
+                    }
+                    jg.drawImage('http://maps.gaardian.com/link.png', x1 - 8, y2 - 16, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                } else {
+                    var x1 = calcMiddleXPos(room1) + room_width / 4;
+                    var y1 = calcBottomPos(room1);
+                    var x2 = x1;
+                    var y2 = y1 + brokenexit_y;
+                    jg.drawLine(x1, y1, x2, y2);
+                    if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                        var midy = y1 + (y2 - y1) / 2; // must be positive
+                        jg.drawLine(x1 - door_width / 4, midy, x1 + door_width / 4, midy);
+                        if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                            jg.drawImage('http://maps.gaardian.com/lock.png', x2 + 10, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 10, midy - 8));
+                        }
+                    }
+                    if (roomexit.linktype == LINK_ONEWAY) {
+                        jg.drawLine(x2, y2 - 1, x2 - arrowheadlength / 2, y2 - arrowheadlength / 2);
+                        jg.drawLine(x2, y2 - 1, x2 + arrowheadlength / 2, y2 - arrowheadlength / 2);
+                    }
+                    jg.drawImage('http://maps.gaardian.com/link.png', x1 - 8, y2, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                }
+            }
+        } else if (exittype == EXIT_UP || exittype == EXIT_DOWN) {
+            var rise = room1y - room2y;
+            if (room1 == room2) {
+                // The exit loops back on itself.
+                if (exittype == EXIT_DOWN) {
+                    var x1 = calcLeftPos(room1);
+                    var y1 = calcBottomPos(room1);
+                    var midy1 = y1 + roomgap_y / 2;
+                    
+                    var midx = x1 - room_width / 5;
+                    var midy2 = y1 - room_height / 4;
+                    var xPoints = new Array(x1, midx, midx, x1);
+                    var yPoints = new Array(y1, midy1, midy2, midy2);
+                    jg.drawPolyline(xPoints, yPoints);
+                    // draw a one-way arrow
+                    jg.drawLine(x1 - 1, midy2, x1 - arrowheadlength, midy2 - arrowheadlength / 2);
+                    jg.drawLine(x1 - 1, midy2, x1 - arrowheadlength, midy2 + arrowheadlength / 2);
+                } else if (exittype == EXIT_UP) {
+                    var x1 = calcRightPos(room1);
+                    var y1 = calcTopPos(room1);
+                    var midy1 = y1 - roomgap_y / 2;
+                    
+                    var midx = x1 + room_width / 5;
+                    var midy2 = y1 + room_height / 4;
+                    var xPoints = new Array(x1, midx, midx, x1);
+                    var yPoints = new Array(y1, midy1, midy2, midy2);
+                    jg.drawPolyline(xPoints, yPoints);
+                    // draw a one-way arrow
+                    jg.drawLine(x1 + 1, midy2, x1 + arrowheadlength, midy2 - arrowheadlength / 2);
+                    jg.drawLine(x1 + 1, midy2, x1 + arrowheadlength, midy2 + arrowheadlength / 2);
+                }
+            } else {
+                if (roomexit.forceBrokenExit || rise == 0 || !isExitDirectlyConnected(exittype, room1, room2)) {
+                    if (exittype == EXIT_UP) {
+                        var x1 = calcRightPos(room1);
+                        var y1 = calcTopPos(room1);
+                        var x2 = x1 + roomgap_x / 3;
+                        var y2 = y1 - roomgap_y / 3;
+                        jg.drawLine(x1, y1, x2, y2);
+                        if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                            // todo: use proper door_width lengths
+                            jg.drawLine(x1, y2, x2, y1);
+                            if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                                jg.drawImage('http://maps.gaardian.com/lock.png', x2 + 2, y2 + 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 2, y2 + 8));
+                            }
+                        }
+                        if (roomexit.linktype == LINK_ONEWAY) {
+                            jg.drawLine(x2 - arrowheadlength, y2, x2, y2);
+                            jg.drawLine(x2, y2 + arrowheadlength, x2, y2);
+                        }
+                        jg.drawImage('http://maps.gaardian.com/link.png', x2, y2 - 12, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                    } else {
+                        var x1 = calcLeftPos(room1);
+                        var y1 = calcBottomPos(room1);
+                        var x2 = x1 - roomgap_x / 3;
+                        var y2 = y1 + roomgap_y / 3;
+                        jg.drawLine(x1, y1, x2, y2);
+                        if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                            // todo: use proper door_width lengths
+                            jg.drawLine(x1, y2, x2, y1);
+                            if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                                jg.drawImage('http://maps.gaardian.com/lock.png', x1, y2, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x1, y2));
+                            }
+                        }
+                        if (roomexit.linktype == LINK_ONEWAY) {
+                            jg.drawLine(x2 + arrowheadlength, y2, x2, y2);
+                            jg.drawLine(x2, y2 - arrowheadlength, x2, y2);
+                        }
+                        jg.drawImage('http://maps.gaardian.com/link.png', x2 - 12, y2, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                    }
+                } else {
+                    // Up-down exit (sort by x-axis)
+                    if (room1x > room2x) {
+                        // todo: this is really messed up, but it works
+                        // should really clean it up
+                        var swap = room1;
+                        room1 = room2;
+                        room2 = swap;
+                        // if (exittype == EXIT_UP) {
+                        //     exittype = EXIT_DOWN;
+                        // } else {
+                        //     exittype = EXIT_UP;
+                        // }
+                    }
+                    room1x = room1.xpos;
+                    room2x = room2.xpos;
+                    room1y = room1.ypos;
+                    room2y = room2.ypos;
+                    if (room1y > room2y) {
+                        // going up from room1
+                        var x1 = calcRightPos(room1);
+                        var y1 = calcTopPos(room1);
+                        var x2 = calcLeftPos(room2);
+                        var y2 = calcBottomPos(room2);
+                    
+                        jg.drawLine(x1, y1, x2, y2);
+                        // todo/fixme: this isn't working yet
+                        if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                            var midy = y1 + (y2 - y1) / 2;
+                            var midx = x1 + (x2 - x1) / 2;
+                            jg.drawLine(midx - door_width / 4, midy - door_width / 4, midx + door_width / 4, midy + door_width / 4);
+                            if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                                jg.drawImage('http://maps.gaardian.com/lock.png', midx + door_width / 4 + 2, midy + door_width / 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + door_width / 4 + 2, midy + door_width / 4));
+                            }
+                        }
+                        if (roomexit.linktype == LINK_ONEWAY) {
+                            if (exittype == EXIT_UP) {
+                                jg.drawLine(x2 - arrowheadlength, y2, x2, y2);
+                                jg.drawLine(x2, y2 + arrowheadlength, x2, y2);
+                            } else {
+                                // note: not impossible to be a down exit?!
+                                jg.drawLine(x1, y1, x1 + arrowheadlength, y1);
+                                jg.drawLine(x1, y1, x1, y1 - arrowheadlength);
+                            }
+                        
+                        }
+                    } else {
+                        // going down from room1
+                        var x1 = calcRightPos(room1);
+                        var y1 = calcBottomPos(room1);
+                        var x2 = calcLeftPos(room2);
+                        var y2 = calcTopPos(room2);
+                    
+                        jg.drawLine(x1, y1, x2, y2);
+                    
+                        if (roomexit.doorinfo.doortype >= DOOR_CLOSED) {
+                            var midy = y1 + (y2 - y1) / 2;
+                            var midx = x1 + (x2 - x1) / 2;
+                            jg.drawLine(midx - door_width / 4, midy + door_width / 4, midx + door_width / 4, midy - door_width / 4);
+                            if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
+                                jg.drawImage('http://maps.gaardian.com/lock.png', midx + door_width / 2, midy - door_width / 2, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + door_width / 2, midy - door_width / 2));
+                            }
+                        }
+                        if (roomexit.linktype == LINK_ONEWAY) {
+                            if (exittype == EXIT_DOWN) {
+                                jg.drawLine(x2 - arrowheadlength, y2, x2, y2);
+                                jg.drawLine(x2, y2 - arrowheadlength, x2, y2);
+                            } else {
+                                // note: impossible to be an up exit?!
+                                jg.drawLine(x1, y1, x1 + arrowheadlength, y1);
+                                jg.drawLine(x1, y1, x1, y1 + arrowheadlength);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    jg.setColor("black");
+}
+
+function generateOnClickHandlerForKey(doorinfo, imgx, imgy) {
+    // doorname, doortype, keyname, keydesc, keyroom
+    var handler = "Tip(&quot;";
+    var roomProvided = doorinfo.keyroom != null;
+    if (doorinfo.doorname != "" && doorinfo.keyname != "") {
+        handler += "<i>" + doorinfo.doorname + "</i> can be opened with <b>" + doorinfo.keyname + "</b>";
+        if (roomProvided) {
+            handler += "<br>found in \\&quot;" + doorinfo.keyroom.roomname + "\\&quot;";
+        }
+        handler += doorinfo.keydesc;
+        if (roomProvided) {
+            handler += "<p>Click to highlight key location.</p>";
+        }
+        handler += "&quot;, ABOVE, true, OFFSETX, -17, PADDING, 8, WIDTH, -400);";
+    } else {
+        handler += "No information is available for this locked door.<br>Try picking the lock or quaffing a passdoor potion. :)&quot;, ABOVE, true, OFFSETX, -17, PADDING, 8);";
+    }
+    var result = 'onmouseover=\"' + handler + '\" onmouseout=\"UnTip();\"';
+    if (roomProvided) {
+        result += ' onclick=\"highlightKeyRoom(rooms[' + doorinfo.keyroom.roomid + '], ' + imgx + ', ' + imgy + ');\"';
+    }
+    return result;
+}
+
+function calcLeftPos(room) {
+    return room.xpos * room_width + (room.xpos - 1) * roomgap_x
+}
+function calcTopPos(room) {
+    return room.ypos * room_height + (room.ypos - 1) * roomgap_y
+}
+function calcRightPos(room) {
+    return calcLeftPos(room) + room_width
+}
+function calcBottomPos(room) {
+    return calcTopPos(room) + room_height
+}
+function calcMiddleXPos(room) {
+    return calcLeftPos(room) + (room_width/2)
+}
+function calcMiddleYPos(room) {
+    return calcTopPos(room) + (room_height/2)
+}
+function updateMap() {
+    jg.paint();
+}
+
+function submitSearchRoomsRequest() {
+    searchRooms(document.getElementById('roomnamebox').value);
+}
+
+function searchRooms(roomname) {
+    jg3.clear();
+    setSearchResultsMessage("");
+    if (roomname != null && roomname != '') {
+        var results = 0;
+        var re = new RegExp(roomname, "i");
+        for (var i = 1; i < rooms.length; i++) {
+            if (rooms[i].roomname.match(re)) {
+                drawRoom(rooms[i], jg3, "cyan", "lightcyan");
+                results++;
+            }
+        }
+        if (results == 0) {
+            setSearchResultsMessage("No matching rooms found.");
+        } else {
+            var message = results + " room" + (results == 1 ? "" : "s") + " highlighted.";
+            setSearchResultsMessage(message);
+        }
+        jg3.paint();
+    }
+}
+
+function setSearchResultsMessage(message) {
+    document.getElementById("searchboxresults").innerHTML = message;
+}
+
+function highlightRooms(room, room2) {
+    jg2.clear();
+    link = room.roomid + '-' + room2.roomid;
+    reversedLink = room2.roomid + '-' + room.roomid;
+    if (highlightedRooms != link && highlightedRooms != reversedLink) {
+        highlightRoom(room);
+        highlightRoom(room2);
+        highlightedRooms = link;
+        // Now show the link between the two rooms
+        jg2.setColor("orange");
+        var mid1x = calcRightPos(room);
+        var mid1y = calcBottomPos(room);
+        var mid2x = calcRightPos(room2);
+        var mid2y = calcBottomPos(room2);
+        jg2.fillOval(mid1x - 16, mid1y - 16, 16, 16);
+        jg2.fillOval(mid2x - 16, mid2y - 16, 16, 16);
+        jg2.setStroke(2);
+        jg2.drawLine(mid1x - 8, mid1y - 8, mid2x - 8, mid2y - 8);
+        jg2.paint();
+    } else {
+        highlightedRooms = '';
+    }
+}
+
+function highlightRoom(room) {
+    drawRoom(room, jg2, "yellow", "lightyellow");
+}
+
+function highlightKeyRoom(room, imgx, imgy) {
+    jg4.clear();
+    if (highlightedKeyRoom != room.roomid) {
+        drawRoom(room, jg4, "purple", "#ffd6fe");
+        highlightedKeyRoom = room.roomid;
+        // draw line between lock and contained location
+        jg4.setColor("#4B0082");
+        var mid1x = calcRightPos(room);
+        var mid1y = calcBottomPos(room);
+        var mid2x = imgx + 16 + 11; // hack x pos to make line vertical for a room on the same x axis
+        var mid2y = imgy + 16 + 8;
+        jg4.fillOval(mid1x - 16, mid1y - 16, 16, 16);
+        jg4.fillOval(mid2x - 12, mid2y - 12, 12, 12);
+        jg4.setStroke(2);
+        jg4.drawLine(mid1x - 8, mid1y - 8, mid2x - 6, mid2y - 6);
+        jg4.paint();
+    } else {
+        highlightedKeyRoom = '';
+    }
+}
+
+// first disconnected exit could be obscured -- re-render whenever the room is rendered
+function rerenderFirstDisconnectedExit(room, jg) {
+    // re-render only the first exit
+    var roomExits = room.exitsArray;
+    for (var i = 0; i < roomExits.length; i++) {
+        if (roomExits[i].linktype == LINK_DISCONNECTED) {
+            drawExit(roomExits[i], jg);
+            break;
+        }
+    }
+}
+
+// Assumes init() has already been called.
+function drawMap() {
+    // Initialize the fill grid with false -> sets fill_grid[x][y] = false
+    for (var i = 1; i <= gridmaxx; i++) {
+        fill_grid[i] = new Array();
+        for (var j = 1; j <= gridmaxy; j++) {
+            fill_grid[i][j] = false;
+        }
+    }
+    
+    // For each of the rooms, mark its corresponding cell as occupied or not.
+    for (var i = 1; i < rooms.length; i++) {
+        var room = rooms[i];
+        // Only mark room as occupied if it is placed on the map!
+        if (room.xpos > 0 && room.ypos > 0) {
+            fill_grid[room.xpos][room.ypos] = true;
+        }
+    }
+    
+    // Draw all of the exits before rooms.
+    for (var i = 1; i < rooms.length; i++) {
+        exits = rooms[i].exitsArray;
+        for (var j = 0; j < exits.length; j++) {
+            drawExit(exits[j], jg);
+        }
+    }
+    
+    // Finally render the rooms (and any obscured exits).
+    for (var i = 1; i < rooms.length; i++) {
+        var room = rooms[i];
+        drawRoom(room, jg);
+    }
+    
+    // Draw all the labels
+    for (var i = 1; i < labels.length; i++) {
+        var label = labels[i];
+        drawLabel(label, jg);
+    }
+    
+    // Pad some space on the bottom and the right.
+    var xdelta = 0;
+    var ydelta = 0;
+    var maxx = (gridmaxx + xdelta + 1) * room_width + (gridmaxx + xdelta) * roomgap_x + CONTAINER_PAD_RIGHT;
+    var maxy = (gridmaxy + ydelta + 1) * room_height + (gridmaxy + ydelta) * roomgap_y + CONTAINER_PAD_DOWN;
+    jg.setColor("white");
+    jg.drawRect(maxx, maxy, 1, 1);
+    
+    updateMap();
+    document.getElementById("top-strip").style.width = (maxx + CONTAINER_PAD_LEFT + CONTAINER_PAD_RIGHT) + "px";
+}
+drawMap();
+
+</script>
+        <script type="text/javascript" src="wz_tooltip/wz_tooltip.js"></script> 
+        <script type="text/javascript" src="wz_tooltip/tip_centerwindow.js"></script>
+        <script type="text/javascript" src="wz_tooltip/tip_balloon.js"></script>
+        <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+        <script>
+        $(document).ready(function(){
+            $("#moreinfo").click(function () {
+                var topHeight = $("#top-strip").height();
+                var infoOffset = $("#areainfo").offset().top;
+                var mapTop = $("#map-container").offset().top;
+                if ($("#areainfo").is(":hidden")) {
+                    $("#areainfo").width(($("#top-strip").width() - 120) + "px");
+                } else {
+                }
+                $("#areainfo").slideToggle("slow");
+            });
+            // Set the top strip to be min 900px.
+            if ($("#top-strip").width() < 900) {
+                $("#top-strip").width("900px");
+            }
+			// update the room count
+			$("#room_count_span").html(rooms.length - 1);
+        });
+          </script>
+
+	<script type="text/javascript">
+
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-27355433-1']);
+	  _gaq.push(['_setDomainName', '.gaardian.com']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+	<script type="text/javascript">var a=new Date,b=a.getUTCHours();if(0==a.getUTCMonth()&&2012==a.getUTCFullYear()&&((18==a.getUTCDate()&&13<=b)||(19==a.getUTCDate()&&0>=b)))window.location="http://sopastrike.com/strike";</script>
+	
+    </body>
+</html>

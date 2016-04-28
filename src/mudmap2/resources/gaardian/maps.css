@@ -1,0 +1,129 @@
+/* @override http://maps.gaardian.com/maps.css */
+
+.top-strip {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	background-color: #d6ffdb;
+	color: black;
+	/*height: 180px;*/
+        height: 100px;
+}
+
+.top-strip a {
+	text-decoration: none;
+}
+
+.top-strip a.main-site {
+	color: black;
+}
+
+.header, .areainfo {
+	font-size: 18pt;
+	position: absolute;
+	top: 40px;
+	left: 100px;
+	font-family: Tahoma;
+	text-align: right;
+}
+
+.areaname {
+	font-size: 10pt;
+}
+
+.areainfo {
+	font-size: 10pt;
+	top: 95px;
+	height: 70px;
+	text-align: left;
+	background-color: #d6ffdb;
+	z-index: 1;
+	border-left: 5px ridge #709975;
+	padding-left: 10px;
+}
+
+body {
+	font-family: Verdana, Tahoma;
+	font-size: 10pt;
+}
+
+.map-container {
+	position: absolute;
+	top: 255px;
+	left: 0px;
+	padding-left: 15px;
+	width: 95%;
+}
+
+.area-listing {
+	position: absolute;
+	top: 210px;
+	left: 100px;
+	width: 71%;
+}
+
+.warning {
+	position: absolute;
+	top: 210px;
+	left: 100px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	color: red;
+	text-align: center;
+}
+
+.searchbox {
+	font-size: 12pt;
+	position: absolute;
+	top: 50px;
+	left: 500px;
+	font-family: Tahoma;
+	text-align: left;
+}
+
+.searchbox button, .searchbox input {
+	font-size: 10pt;
+}
+
+.searchbox-results {
+	font-size: 10pt;
+}
+
+.hits {
+	font-size: 7pt;
+	color: gray;
+	font-style: italic;
+}
+
+.message {
+	position: absolute;
+	top: 200px;
+	left: 100px;
+	border: dotted 1px;
+	padding: 5px;
+	text-align: center;
+}
+
+li {
+	padding-bottom: 5px;
+}
+
+ul {
+	padding-top: 5px;
+}
+
+a {
+	color: #54785b;
+}
+
+a:hover, .top-strip a.main-site:hover {
+	color: #c890c3;
+}
+
+.letter {
+  vertical-align: top;
+  font-size: 14pt;
+  padding-top: 20px;
+  font-family: Verdana;
+}
