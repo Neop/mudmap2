@@ -152,6 +152,8 @@ public class Layer {
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);
 
+        // remove element from layer, if it's already on the layer
+        if(elements.contains(element)) elements.remove(element.getX(), element.getY());
         //element.getLayer().remove(element);
         element.setPosition(x, y, this);
         put(element);

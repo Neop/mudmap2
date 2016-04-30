@@ -205,4 +205,9 @@ public class Path {
         }
         return ret;
     }
+
+    public static Boolean isCardinalDir(String str){
+        for(String dir: directions) if(dir.equals(str)) return true;
+        return false;
+    }
 }

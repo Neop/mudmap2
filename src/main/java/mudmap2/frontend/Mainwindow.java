@@ -44,6 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -59,6 +60,7 @@ import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldFileReader.current.WorldFileMM1;
 import mudmap2.backend.WorldManager;
+import mudmap2.backend.html.GaardianMap;
 import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
@@ -74,8 +76,8 @@ import mudmap2.frontend.dialog.PlaceListDialog;
  */
 public final class Mainwindow extends JFrame implements ActionListener,ChangeListener {
 
-    static int config_file_version_major = 2;
-    static int config_file_version_minor = 0;
+    static Integer config_file_version_major = 2;
+    static Integer config_file_version_minor = 0;
     private static final long serialVersionUID = 1L;
 
     // Contains all opened maps <name, worldtab>
@@ -87,8 +89,13 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
     JTabbedPane tabbed_pane;
     AvailableWorldsTab available_worlds_tab;
 
+    // for experimental html export message
+    Boolean firstHtmlExport;
+
     public Mainwindow(){
         super("MUD Map " + Mainwindow.class.getPackage().getImplementationVersion());
+
+        firstHtmlExport = true;
 
         setMinimumSize(new Dimension(400, 300));
 
@@ -151,6 +158,11 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         menu_file_save_as_image.setActionCommand("export_image");
         menu_file_save_as_image.addActionListener(this);
         menu_file.add(menu_file_save_as_image);
+
+        JMenuItem menu_file_save_as_html = new JMenuItem("Export as html");
+        menu_file_save_as_html.setActionCommand("export_html");
+        menu_file_save_as_html.addActionListener(this);
+        menu_file.add(menu_file_save_as_html);
 
         menu_file.addSeparator();
         JMenuItem menu_file_quit = new JMenuItem("Quit");
@@ -370,6 +382,24 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
                 if(wt != null){
                     ExportImageDialog dlg = new ExportImageDialog(wt.parent, wt);
                     dlg.setVisible(true);
+                }
+                break;
+            case "export_html":
+                if(wt != null){
+                    if(firstHtmlExport){
+                        JOptionPane.showMessageDialog(Mainwindow.this, "The html export is experimental, some paths might not show up on the exported map. Thanks to gaardian.com for the html/js code!");
+                        firstHtmlExport = false;
+                    }
+
+                    JFileChooser fc = new JFileChooser();
+                    int retVal = fc.showSaveDialog(Mainwindow.this);
+                    if(retVal == JFileChooser.APPROVE_OPTION){
+                        String filename = fc.getSelectedFile().getAbsolutePath();
+                        if(!filename.endsWith(".html")) filename = filename + ".html";
+                        System.out.println(">>>> " + filename);
+                        GaardianMap.writeFile(filename,
+                                wt.getWorld().getLayer(wt.getCurPosition().getLayer()));
+                    }
                 }
                 break;
             case "quit":

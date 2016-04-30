@@ -143,7 +143,7 @@ public class World implements BreadthSearchGraph {
     public Place get(int layer, int x, int y){
         Layer l = getLayer(layer);
         if(l == null) return null;
-        else return (Place) l.get(x, y);
+        else return l.get(x, y);
     }
 
     /**
@@ -196,7 +196,7 @@ public class World implements BreadthSearchGraph {
         l.put(place, x, y);
 
         // add to place list of the world
-        places.put(place.getId(), place);
+        if(!places.containsKey(place.getId())) places.put(place.getId(), place);
         if(!placeNames.containsKey(place.getName())) placeNames.put(place.getName(), 1);
         else placeNames.put(place.getName(), placeNames.get(place.getName()) + 1);
     }

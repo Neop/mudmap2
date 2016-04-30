@@ -563,84 +563,84 @@ public class WorldFileMM1 extends WorldFile {
         }
 
         try {
-            try (PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(filename)))) {
-                outstream.println("# MUD Map 2 world file");
-                outstream.println("# compatibility for MUD Map 1 " + (compatibility_mudmap_1 ? "enabled" : "disabled"));
+            // open file
+            File file = new File(filename);
+            file.getParentFile().mkdirs();
+            PrintWriter outstream = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 
-                outstream.println("ver " + reader_major + "." + reader_minor);
-                outstream.println("mver " + WorldFileMM1.class.getPackage().getImplementationVersion());
-                outstream.println("wname " + world.getName());
-                outstream.println("wcol " + world.getPathColor().getRed() + " " + world.getPathColor().getGreen() + " " + world.getPathColor().getBlue());
-                outstream.println("wcnd " + world.getPathColorNstd().getRed() + " " + world.getPathColorNstd().getGreen() + " " + world.getPathColorNstd().getBlue());
-                outstream.println("tccol " + world.getTileCenterColor().getRed() + " " + world.getTileCenterColor().getGreen() + " " + world.getTileCenterColor().getBlue());
+            outstream.println("# MUD Map 2 world file");
+            outstream.println("# compatibility for MUD Map 1 " + (compatibility_mudmap_1 ? "enabled" : "disabled"));
 
-                HashMap<Color, String> pcol = new HashMap<>();
-                for(Map.Entry<String, Color> entry: world.getPathColors().entrySet()){
-                    if(pcol.containsKey(entry.getValue())){ // if value is already in pcol
-                        if(pcol.isEmpty())
-                            pcol.put(entry.getValue(), entry.getKey().replaceAll(" ", "\\_"));
-                        else
-                            pcol.put(entry.getValue(), pcol.get(entry.getValue()) + ";" + entry.getKey().replaceAll(" ", "\\_"));
-                    } else {
-                        pcol.put(entry.getValue(), entry.getKey().replaceAll(" ", "\\_"));
-                    }
+            outstream.println("ver " + reader_major + "." + reader_minor);
+            outstream.println("mver " + WorldFileMM1.class.getPackage().getImplementationVersion());
+            outstream.println("wname " + world.getName());
+            outstream.println("wcol " + world.getPathColor().getRed() + " " + world.getPathColor().getGreen() + " " + world.getPathColor().getBlue());
+            outstream.println("wcnd " + world.getPathColorNstd().getRed() + " " + world.getPathColorNstd().getGreen() + " " + world.getPathColorNstd().getBlue());
+            outstream.println("tccol " + world.getTileCenterColor().getRed() + " " + world.getTileCenterColor().getGreen() + " " + world.getTileCenterColor().getBlue());
+
+            HashMap<Color, String> pcol = new HashMap<>();
+            for(Map.Entry<String, Color> entry: world.getPathColors().entrySet()){
+                if(pcol.containsKey(entry.getValue())){ // if value is already in pcol
+                    pcol.put(entry.getValue(), pcol.get(entry.getValue()) + ";" + entry.getKey().replaceAll(" ", "\\_"));
+                } else {
+                    pcol.put(entry.getValue(), entry.getKey().replaceAll(" ", "\\_"));
                 }
-                for(Map.Entry<Color, String> entry: pcol.entrySet()){
-                    outstream.println("pcol " + entry.getKey().getRed() + " " + entry.getKey().getGreen() + " " + entry.getKey().getBlue() + " " + entry.getValue());
+            }
+            for(Map.Entry<Color, String> entry: pcol.entrySet()){
+                outstream.println("pcol " + entry.getKey().getRed() + " " + entry.getKey().getGreen() + " " + entry.getKey().getBlue() + " " + entry.getValue());
+            }
+
+            outstream.println("home " + world.getHome());
+            outstream.println("show_place_id " + world.getShowPlaceId());
+
+            // risk levels
+            for(RiskLevel rl: world.getRiskLevels())
+                outstream.println("dlc " + rl.getId() + " " + rl.getColor().getRed() + " " + rl.getColor().getGreen() + " " + rl.getColor().getBlue() + " " + rl.getDescription());
+
+            // areas
+            for(Map.Entry<Area, Integer> area: areaIDs.entrySet()){
+                if(area.getValue() != null){
+                    outstream.println("a " + area.getValue() + " " + area.getKey().getName());
+                    outstream.println("acol " + area.getKey().getColor().getRed()
+                            + " " + area.getKey().getColor().getGreen()
+                            + " " + area.getKey().getColor().getBlue());
+                }
+            }
+
+            // layers (for quadtree optimization)
+            for(Layer l: world.getLayers()){
+                outstream.println("lc " + l.getId() + " " + l.getCenterX() + " " + l.getCenterY());
+            }
+
+            // places
+            for(Place p: world.getPlaces()){
+                outstream.println("p " + p.getId() + " " + p.getName());
+                outstream.println("ppos " + p.getLayer().getId() + " " + p.getX() + " " + p.getY());
+                if(p.getArea() != null) outstream.println("par " + areaIDs.get(p.getArea()));
+
+                // paths
+                for(Path path: p.getPaths()){
+                    Place other_place = path.getOtherPlace(p);
+
+                    if(compatibility_mudmap_1) // deprecated path format
+                        outstream.println("pw " + other_place.getId() + " " + path.getExit(p));
+
+                    // new path format
+                    if(path.getPlaces()[0] == p) // only one of both places should describe the path
+                        outstream.println("pp " + other_place.getId() + "$" + path.getExit(p) + "$" + path.getExit(other_place));
                 }
 
-                outstream.println("home " + world.getHome());
-                outstream.println("show_place_id " + world.getShowPlaceId());
+                // risk level and recommended level
+                if(p.getRiskLevel() != null) outstream.println("pdl " + p.getRiskLevel().getId());
+                if(p.getRecLevelMin() != -1 || p.getRecLevelMax() != -1) outstream.println("prl " + p.getRecLevelMin() + " " + p.getRecLevelMax());
 
-                // risk levels
-                for(RiskLevel rl: world.getRiskLevels())
-                    outstream.println("dlc " + rl.getId() + " " + rl.getColor().getRed() + " " + rl.getColor().getGreen() + " " + rl.getColor().getBlue() + " " + rl.getDescription());
-
-                // areas
-                for(Map.Entry<Area, Integer> area: areaIDs.entrySet()){
-                    if(area.getValue() != null){
-                        outstream.println("a " + area.getValue() + " " + area.getKey().getName());
-                        outstream.println("acol " + area.getKey().getColor().getRed()
-                                + " " + area.getKey().getColor().getGreen()
-                                + " " + area.getKey().getColor().getBlue());
-                    }
-                }
-
-                // layers (for quadtree optimization)
-                for(Layer l: world.getLayers()){
-                    outstream.println("lc " + l.getId() + " " + l.getCenterX() + " " + l.getCenterY());
-                }
-
-                // places
-                for(Place p: world.getPlaces()){
-                    outstream.println("p " + p.getId() + " " + p.getName());
-                    outstream.println("ppos " + p.getLayer().getId() + " " + p.getX() + " " + p.getY());
-                    if(p.getArea() != null) outstream.println("par " + areaIDs.get(p.getArea()));
-
-                    // paths
-                    for(Path path: p.getPaths()){
-                        Place other_place = path.getOtherPlace(p);
-
-                        if(compatibility_mudmap_1) // deprecated path format
-                            outstream.println("pw " + other_place.getId() + " " + path.getExit(p));
-
-                        // new path format
-                        if(path.getPlaces()[0] == p) // only one of both places should describe the path
-                            outstream.println("pp " + other_place.getId() + "$" + path.getExit(p) + "$" + path.getExit(other_place));
-                    }
-
-                    // risk level and recommended level
-                    if(p.getRiskLevel() != null) outstream.println("pdl " + p.getRiskLevel().getId());
-                    if(p.getRecLevelMin() != -1 || p.getRecLevelMax() != -1) outstream.println("prl " + p.getRecLevelMin() + " " + p.getRecLevelMax());
-
-                    // children
-                    for(Place child: p.getChildren()) outstream.println("pchi " + child.getId());
-                    // comments
-                    for(String comment: p.getComments()) outstream.println("pcom " + comment);
-                    // flags
-                    for(Map.Entry<String, Boolean> flag: p.getFlags().entrySet()){
-                        if(flag.getValue()) outstream.println("pb " + flag.getKey());
-                    }
+                // children
+                for(Place child: p.getChildren()) outstream.println("pchi " + child.getId());
+                // comments
+                for(String comment: p.getComments()) outstream.println("pcom " + comment);
+                // flags
+                for(Map.Entry<String, Boolean> flag: p.getFlags().entrySet()){
+                    if(flag.getValue()) outstream.println("pb " + flag.getKey());
                 }
             }
         } catch (IOException ex) {

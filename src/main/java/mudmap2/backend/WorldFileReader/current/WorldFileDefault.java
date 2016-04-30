@@ -105,7 +105,7 @@ public class WorldFileDefault extends WorldFile {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(WorldFileDefault.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(WorldFileDefault.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return fileVersion;

@@ -58,6 +58,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import static javax.swing.JComponent.TOOL_TIP_TEXT_KEY;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -100,6 +101,7 @@ import mudmap2.frontend.dialog.PlaceSelectionDialog;
  * @author neop
  */
 public class WorldTab extends JPanel {
+    private static final long serialVersionUID = 1L;
 
     World world;
     String filename;
@@ -1011,7 +1013,9 @@ public class WorldTab extends JPanel {
             try {
                 // open file
                 if(!Paths.isDirectory(Paths.getWorldsDir())) Paths.createDirectory(Paths.getWorldsDir());
-                PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(getFilename()+ "_meta")));
+                File file = new File(getFilename() + "_meta");
+                file.getParentFile().mkdirs();
+                PrintWriter outstream = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 
                 outstream.println("# MUD Map (v2) world meta data file");
                 outstream.println("ver " + meta_file_ver_major + "." + meta_file_ver_minor);
@@ -1040,6 +1044,7 @@ public class WorldTab extends JPanel {
     }
 
     private static class WorldPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
 
         double screen_width, screen_height;
 

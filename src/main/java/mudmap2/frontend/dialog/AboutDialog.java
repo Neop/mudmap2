@@ -64,6 +64,7 @@ public class AboutDialog extends ActionDialog {
 
         ++constraints.gridy;
         add(new JLabel(iconimage));
+
         ++constraints.gridy;
         add(new JLabel("<html><h1>MUD Map v2</h1></html>"), constraints);
         ++constraints.gridy;
@@ -83,6 +84,9 @@ public class AboutDialog extends ActionDialog {
         add(new LinkLabel("Sourceforge", Paths.sourceforge_url), constraints);
         ++constraints.gridy;
         add(new JLabel("by Neop (mneop@web.de)"), constraints);
+        ++constraints.gridy;
+
+        add(new JLabel("HTML/JS map code by Gaardian"), constraints);
         ++constraints.gridy;
 
         JButton button_ok = new JButton("Ok");
