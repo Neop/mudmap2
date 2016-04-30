@@ -47,6 +47,7 @@ public final class Mudmap2 {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
             mwin = new Mainwindow();
+            mwin.setVisible(true);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, ex);
         }

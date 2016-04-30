@@ -1,5 +1,5 @@
 /*  MUD Map (v2) - A tool to create and organize maps for text-based games
- *  Copyright (C) 2014  Neop (email: mneop@web.de)
+ *  Copyright (C) 2016  Neop (email: mneop@web.de)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,12 +69,14 @@ import mudmap2.frontend.dialog.PlaceListDialog;
 
 /**
  * Main class for the mudmap window
+ * call setVisible(true) to show window
  * @author neop
  */
-public final class Mainwindow extends JFrame {
+public final class Mainwindow extends JFrame implements ActionListener,ChangeListener {
 
     static int config_file_version_major = 2;
     static int config_file_version_minor = 0;
+    private static final long serialVersionUID = 1L;
 
     // Contains all opened maps <name, worldtab>
     HashMap<World, WorldTab> world_tabs;
@@ -107,6 +109,17 @@ public final class Mainwindow extends JFrame {
             }
         });
 
+        initGui();
+        readConfig();
+
+        // ---
+        tabbed_pane = new JTabbedPane();
+        add(tabbed_pane);
+        tabbed_pane.addTab("Available worlds", available_worlds_tab = new AvailableWorldsTab(this));
+        tabbed_pane.addChangeListener(this);
+    }
+
+    private void initGui() {
         // Add GUI components
         JMenuBar menu_bar = new JMenuBar();
         add(menu_bar, BorderLayout.NORTH);
@@ -120,124 +133,64 @@ public final class Mainwindow extends JFrame {
 
         JMenuItem menu_file_new = new JMenuItem("New");
         menu_file.add(menu_file_new);
-        menu_file_new.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                createNewWorld();
-            }
-        });
+        menu_file_new.setActionCommand("new_world");
+        menu_file_new.addActionListener(this);
 
         JMenuItem menu_file_open = new JMenuItem("Open");
-        menu_file.add(menu_file_open);
         menu_file_open.addActionListener(new OpenWorldDialog(this));
+        menu_file.add(menu_file_open);
 
         menu_file.addSeparator();
         JMenuItem menu_file_save = new JMenuItem("Save");
         menu_file_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        menu_file_save.setActionCommand("save_world");
+        menu_file_save.addActionListener(this);
         menu_file.add(menu_file_save);
-        menu_file_save.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = getSelectedTab();
-                if(wt != null) wt.save();
-            }
-        });
 
         JMenuItem menu_file_save_as_image = new JMenuItem("Export as image");
+        menu_file_save_as_image.setActionCommand("export_image");
+        menu_file_save_as_image.addActionListener(this);
         menu_file.add(menu_file_save_as_image);
-        menu_file_save_as_image.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                WorldTab wt = getSelectedTab();
-                if(wt != null){
-                    ExportImageDialog dlg = new ExportImageDialog(wt.parent, wt);
-                    dlg.setVisible(true);
-                }
-            }
-        });
 
         menu_file.addSeparator();
         JMenuItem menu_file_quit = new JMenuItem("Quit");
+        menu_file_quit.setActionCommand("quit");
+        menu_file_quit.addActionListener(this);
         menu_file.add(menu_file_quit);
-        menu_file_quit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                quit();
-            }
-        });
 
         JMenuItem menu_edit_edit_world = new JMenuItem("Edit world");
+        menu_edit_edit_world.setActionCommand("edit_world");
+        menu_edit_edit_world.addActionListener(this);
         menu_edit.add(menu_edit_edit_world);
-        menu_edit_edit_world.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                WorldTab tab = getSelectedTab();
-                if(tab != null){
-                    (new EditWorldDialog(tab.parent, tab.getWorld())).setVisible(true);
-                    available_worlds_tab.update();
-                }
-            }
-        });
 
         JMenuItem menu_edit_path_colors = new JMenuItem("Path colors");
+        menu_edit_path_colors.setActionCommand("path_colors");
+        menu_edit_path_colors.addActionListener(this);
         menu_edit.add(menu_edit_path_colors);
-        menu_edit_path_colors.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                WorldTab tab = getSelectedTab();
-                if(tab != null){
-                    (new PathColorDialog(tab.parent, tab.getWorld())).setVisible(true);
-                    tab.repaint();
-                }
-            }
-        });
 
         JMenuItem menu_edit_add_area = new JMenuItem("Add area");
+        menu_edit_add_area.setActionCommand("add_area");
+        menu_edit_add_area.addActionListener(this);
         menu_edit.add(menu_edit_add_area);
-        menu_edit_add_area.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = getSelectedTab();
-                if(wt != null) (new AreaDialog(wt.parent, wt.getWorld())).setVisible(true);
-            }
-        });
 
         menu_edit.add(new JSeparator());
 
         JMenuItem menu_edit_set_home_position = new JMenuItem("Set home position");
+        menu_edit_set_home_position.setActionCommand("set_home");
+        menu_edit_set_home_position.addActionListener(this);
         menu_edit.add(menu_edit_set_home_position);
-        menu_edit_set_home_position.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = getSelectedTab();
-                if(wt != null) wt.setHome();
-            }
-        });
+
         JMenuItem menu_edit_goto_home_position = new JMenuItem("Go to home position");
+        menu_edit_goto_home_position.setActionCommand("goto_home");
+        menu_edit_goto_home_position.addActionListener(this);
         menu_edit.add(menu_edit_goto_home_position);
-        menu_edit_goto_home_position.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = getSelectedTab();
-                if(wt != null) wt.gotoHome();
-            }
-        });
 
         menu_edit.add(new JSeparator());
 
         JMenuItem menu_edit_list_places = new JMenuItem("List places");
+        menu_edit_list_places.setActionCommand("list_places");
+        menu_edit_list_places.addActionListener(this);
         menu_edit.add(menu_edit_list_places);
-        menu_edit_list_places.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                WorldTab wt = getSelectedTab();
-                // show place list
-                if(wt != null) (new PlaceListDialog(wt, false)).setVisible(true);
-            }
-
-        });
 
         menu_edit.add(new JSeparator());
 
@@ -245,60 +198,21 @@ public final class Mainwindow extends JFrame {
         menu_edit.add(menu_edit_curved_paths);
         // will be set after the config file is read
         //menu_edit_curved_paths.setSelected(WorldTab.getShowPathsCurved());
-        menu_edit_curved_paths.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                WorldTab.setShowPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
-                WorldTab cur_tab = getSelectedTab();
-                if(cur_tab != null) cur_tab.repaint();
-            }
-        });
+        menu_edit_curved_paths.addChangeListener(this);
 
         menu_edit_show_cursor = new JCheckBoxMenuItem("Show place cursor");
         menu_edit.add(menu_edit_show_cursor);
         menu_edit_show_cursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
-        menu_edit_show_cursor.addChangeListener(new ChangeListener() {
-
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                WorldTab cur_tab = getSelectedTab();
-                if(cur_tab != null){
-                    cur_tab.setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
-                    cur_tab.repaint();
-                }
-            }
-        });
+        menu_edit_show_cursor.addChangeListener(this);
 
         JMenuItem menu_help_help = new JMenuItem("Help (online)");
+        menu_help_help.setActionCommand("help");
+        menu_help_help.addActionListener(this);
         menu_help.add(menu_help_help);
-        menu_help_help.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                Paths.openWebsite(Paths.manual_url);
-            }
-        });
 
         JMenuItem menu_help_about = new JMenuItem("About");
         menu_help.add(menu_help_about);
         menu_help_about.addActionListener((ActionListener) new AboutDialog(this));
-
-        // ---
-        readConfig();
-
-        // ---
-        tabbed_pane = new JTabbedPane();
-        add(tabbed_pane);
-        tabbed_pane.addTab("Available worlds", available_worlds_tab = new AvailableWorldsTab(this));
-        tabbed_pane.addChangeListener(new ChangeListener() {
-
-            @Override
-            public void stateChanged(ChangeEvent ce) {
-                WorldTab cur_tab = getSelectedTab();
-                if(cur_tab != null) cur_tab.updateCursorEnabled();
-            }
-        });
-
-        setVisible(true);
     }
 
     public void createNewWorld(){
@@ -439,6 +353,77 @@ public final class Mainwindow extends JFrame {
         } catch (IOException ex) {
             System.out.printf("Couldn't write config file " + Paths.getConfigFile());
             Logger.getLogger(Mainwindow.class.getName()).log(Level.WARNING, null, ex);
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        WorldTab wt = getSelectedTab();
+        switch(e.getActionCommand()){
+            case "new_world":
+                createNewWorld();
+                break;
+            case "save_world":
+                if(wt != null) wt.save();
+                break;
+            case "export_image":
+                if(wt != null){
+                    ExportImageDialog dlg = new ExportImageDialog(wt.parent, wt);
+                    dlg.setVisible(true);
+                }
+                break;
+            case "quit":
+                quit();
+                break;
+            case "edit_world":
+                if(wt != null){
+                    (new EditWorldDialog(wt.parent, wt.getWorld())).setVisible(true);
+                            available_worlds_tab.update();
+                }
+                break;
+            case "path_colors":
+                if(wt != null){
+                    (new PathColorDialog(wt.parent, wt.getWorld())).setVisible(true);
+                    wt.repaint();
+                }
+                break;
+            case "add_area":
+                if(wt != null) (new AreaDialog(wt.parent, wt.getWorld())).setVisible(true);
+                break;
+            case "set_home": // set home position
+                if(wt != null) wt.setHome();
+                break;
+            case "goto_home": // go to home position
+                if(wt != null) wt.gotoHome();
+                break;
+            case "list_places": // show place list
+                if(wt != null) (new PlaceListDialog(wt, false)).setVisible(true);
+                break;
+            default:
+                String message = getClass().getName() + ": ActionCommand not recognized";
+                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, message);
+                JOptionPane.showMessageDialog(this, message, "MUD Map error", JOptionPane.ERROR_MESSAGE);
+                break;
+        }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        WorldTab wt = getSelectedTab();
+        if(e.getSource() == menu_edit_curved_paths){
+            WorldTab.setShowPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
+            if(wt != null) wt.repaint();
+        } else if(e.getSource() == menu_edit_show_cursor){
+            if(wt != null){
+                wt.setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                wt.repaint();
+            }
+        } else if(e.getSource() == tabbed_pane){
+            if(wt != null) wt.updateCursorEnabled();
+        } else {
+            String message = getClass().getName() + ": ChangeEvent not recognized";
+            Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, message);
+            JOptionPane.showMessageDialog(this, message, "MUD Map error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
