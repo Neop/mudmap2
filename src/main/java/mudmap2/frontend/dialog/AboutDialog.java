@@ -27,6 +27,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -56,10 +58,21 @@ public class AboutDialog extends ActionDialog {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1.0;
 
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL iconurl = classLoader.getResource("resources/mudmap-128.png");
+        ImageIcon iconimage = new ImageIcon(iconurl);
+
+        ++constraints.gridy;
+        add(new JLabel(iconimage));
         ++constraints.gridy;
         add(new JLabel("<html><h1>MUD Map v2</h1></html>"), constraints);
         ++constraints.gridy;
-        add(new JLabel("Version " + AboutDialog.class.getPackage().getImplementationVersion()), constraints);
+        String version = AboutDialog.class.getPackage().getImplementationVersion();
+        if(version == null){
+            add(new JLabel("Developmental version"), constraints);
+        } else {
+            add(new JLabel("Version " + version), constraints);
+        }
         ++constraints.gridy;
         add(new JLabel("License: GPLv3"), constraints);
         ++constraints.gridy;

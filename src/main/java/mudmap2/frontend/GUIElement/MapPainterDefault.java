@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
-import mudmap2.Pair;
+import mudmap2.utils.Pair;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;

@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import mudmap2.Pair;
+import mudmap2.utils.Pair;
 import mudmap2.backend.Area;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;

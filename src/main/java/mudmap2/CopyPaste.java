@@ -16,6 +16,7 @@
  */
 package mudmap2;
 
+import mudmap2.utils.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

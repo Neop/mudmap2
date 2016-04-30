@@ -16,6 +16,7 @@
  */
 package mudmap2;
 
+import mudmap2.utils.Pair;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

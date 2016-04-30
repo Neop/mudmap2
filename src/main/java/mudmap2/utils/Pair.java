@@ -20,7 +20,7 @@
  *  A pair of data, should work similar to the c++ equivalent
  */
 
-package mudmap2;
+package mudmap2.utils;
 
 /**
  * A pair of variables

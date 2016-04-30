@@ -26,8 +26,6 @@ package mudmap2.frontend;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -44,6 +42,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -89,16 +88,12 @@ public final class Mainwindow extends JFrame {
     public Mainwindow(){
         super("MUD Map " + Mainwindow.class.getPackage().getImplementationVersion());
 
-        // set program icon
-        try {
-            /*URL url_icon = ClassLoader.getSystemResource("resources/mudmap.svg");
-            Image icon = Toolkit.getDefaultToolkit().createImage(url_icon);
-            setIconImage(icon);*/
-        } catch(Exception e){
-            System.out.println(e);
-        }
-
         setMinimumSize(new Dimension(400, 300));
+
+        ClassLoader classLoader = Mainwindow.class.getClassLoader();
+        URL iconurl = classLoader.getResource("resources/mudmap-128.png");
+        ImageIcon iconimage = new ImageIcon(iconurl);
+        setIconImage(iconimage.getImage());
 
         // create GUI
         world_tabs = new HashMap<>();

@@ -22,7 +22,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mudmap2.Pair;
+import mudmap2.utils.Pair;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileReader.WorldFile;
 

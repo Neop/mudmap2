@@ -39,7 +39,7 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import mudmap2.Pair;
+import mudmap2.utils.Pair;
 import mudmap2.backend.RiskLevel;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldManager;
