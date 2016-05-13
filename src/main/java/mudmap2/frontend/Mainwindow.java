@@ -68,6 +68,7 @@ import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathColorDialog;
 import mudmap2.frontend.dialog.PlaceListDialog;
+import mudmap2.frontend.dialog.SaveWorldDialog;
 
 /**
  * Main class for the mudmap window
@@ -153,6 +154,11 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         menu_file_save.setActionCommand("save_world");
         menu_file_save.addActionListener(this);
         menu_file.add(menu_file_save);
+
+        JMenuItem menu_file_save_as = new JMenuItem("Save as");
+        menu_file_save_as.setActionCommand("save_world_as");
+        menu_file_save_as.addActionListener(this);
+        menu_file.add(menu_file_save_as);
 
         JMenuItem menu_file_save_as_image = new JMenuItem("Export as image");
         menu_file_save_as_image.setActionCommand("export_image");
@@ -268,10 +274,6 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         }
     }
 
-    public void updateCurTab(){
-
-    }
-
     /**
      * Closes all tabs
      */
@@ -377,6 +379,12 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
                 break;
             case "save_world":
                 if(wt != null) wt.save();
+                break;
+            case "save_world_as":
+                if(wt != null){
+                    SaveWorldDialog dlg = new SaveWorldDialog(wt.parent, wt);
+                    dlg.setVisible(true);
+                }
                 break;
             case "export_image":
                 if(wt != null){

@@ -94,7 +94,7 @@ public class WorldFileList {
                     // check if file is world file
                     WorldFileDefault worldFile = new WorldFileDefault(file.getPath());
                     try {
-                        if(worldFile.isWorldFile()){ // is world file
+                        if(worldFile.canRead()){ // is world file
                             String name = worldFile.readWorldName();
                             availableWorlds.put(file.getPath(), name);
                         }
@@ -122,7 +122,7 @@ public class WorldFileList {
                     String file = line.substring(2).trim();
 
                     WorldFileDefault worldFile = new WorldFileDefault(file);
-                    if(worldFile.isWorldFile()){ // is world file
+                    if(worldFile.canRead()){ // is world file
                         String name;
                         try {
                             // get world name

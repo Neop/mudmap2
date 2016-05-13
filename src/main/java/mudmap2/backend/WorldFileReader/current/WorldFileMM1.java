@@ -45,13 +45,16 @@ import mudmap2.backend.Place;
 import mudmap2.backend.RiskLevel;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
+import mudmap2.backend.WorldFileReader.Exception.WorldFileException;
 import mudmap2.backend.WorldManager;
 import mudmap2.backend.WorldFileReader.WorldFile;
+import mudmap2.backend.WorldFileReader.WorldFileType;
 
 /**
  * Reads and writes world files (mudmap 1+ file type)
  * @author Neop
  */
+@Deprecated
 public class WorldFileMM1 extends WorldFile {
     /*
      * Note: the version number should only vary if the
@@ -125,14 +128,15 @@ public class WorldFileMM1 extends WorldFile {
     @Override
     public World readFile() throws Exception {
         World world = new World();
+        world.setWorldFile(this);
 
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
 
-                reset(world);
+            reset(world);
 
-                String line;
-                try {
+            String line;
+            try {
                 while((line = reader.readLine()) != null){
                     line = line.trim();
 
@@ -236,7 +240,7 @@ public class WorldFileMM1 extends WorldFile {
             int ret = JOptionPane.showConfirmDialog(null,
                     "World file version is greater than the reader version. Please update MUD Map. Continuing might cause data loss.",
                     "Loading world", JOptionPane.OK_CANCEL_OPTION);
-            if(ret == JOptionPane.CANCEL_OPTION) throw new Exception("Could not read world file");
+            if(ret == JOptionPane.CANCEL_OPTION) throw new WorldFileException(filename, "Could not read world file", null);
         }
     }
 
@@ -466,8 +470,8 @@ public class WorldFileMM1 extends WorldFile {
             Logger.getLogger(WorldFileMM1.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(null, "Could not create world backup file", "World backup", JOptionPane.INFORMATION_MESSAGE);
         }
-
     }
+
     /**
      * Splits a string in exactly num substrings separated by separator
      * Additional substrings will be empty if less than num-1 separators
@@ -525,6 +529,36 @@ public class WorldFileMM1 extends WorldFile {
         }
 
         return worldname;
+    }
+
+    @Override
+    public Boolean canRead() {
+        Boolean ret = false;
+
+        try(BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+
+            Boolean worldNameFound = false;
+            Boolean fileVersionFound = false;
+
+            while((line = reader.readLine()) != null){
+                line = line.trim();
+                if(line.startsWith("wname ")) worldNameFound = true;
+                else if(line.startsWith("ver ")) fileVersionFound = true;
+                if(worldNameFound && fileVersionFound) break;
+            }
+
+            ret = worldNameFound && fileVersionFound;
+        } catch (IOException | UnsupportedOperationException ex) {
+            return false;
+        }
+
+        return ret;
+    }
+
+    @Override
+    public WorldFileType getWorldFileType() {
+        return WorldFileType.MUDMAP1;
     }
 
     // Path creation helper class
@@ -612,6 +646,8 @@ public class WorldFileMM1 extends WorldFile {
                 outstream.println("lc " + l.getId() + " " + l.getCenterX() + " " + l.getCenterY());
             }
 
+            outstream.flush();
+
             // places
             for(Place p: world.getPlaces()){
                 outstream.println("p " + p.getId() + " " + p.getName());
@@ -642,6 +678,8 @@ public class WorldFileMM1 extends WorldFile {
                 for(Map.Entry<String, Boolean> flag: p.getFlags().entrySet()){
                     if(flag.getValue()) outstream.println("pb " + flag.getKey());
                 }
+
+                outstream.flush();
             }
         } catch (IOException ex) {
             System.out.printf("Couldn't write world file " + mudmap2.Paths.getConfigFile());

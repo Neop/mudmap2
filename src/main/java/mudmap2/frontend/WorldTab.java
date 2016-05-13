@@ -58,7 +58,6 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
-import static javax.swing.JComponent.TOOL_TIP_TEXT_KEY;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -410,25 +409,27 @@ public class WorldTab extends JPanel {
         if(!passive){
             writeMeta();
 
-            WorldFile worldFile;
+            WorldFile worldFile = world.getWorldFile();
 
-            // get world file type
-            WorldFile worldFileReader = null;
-            try {
-                worldFileReader = (new WorldFileDefault(filename)).getWorldFileReader();
-            } catch (FileNotFoundException ex) {}
-
-            if(worldFileReader != null){ // found worldFileReader for file type
-                worldFileReader.writeFile(world);
-            } else if(null != filename
-                    && !filename.isEmpty()
-                    && !(new File(filename)).exists()){ // file doesn't exist
-                worldFileReader = new WorldFileDefault(filename);
-            } else { // filename empty or unrecognized file type
-                // TODO: ask user for file type and filename
+            if(worldFile == null){
+                if(filename == null || filename.isEmpty() || (new File(filename)).exists()){
+                    // TODO: create new filename
+                    throw new UnsupportedOperationException("no filename or file exists");
+                } else {
+                    worldFile = new WorldFileDefault(filename);
+                    world.setWorldFile(worldFile);
+                }
             }
 
-            if(worldFileReader != null) worldFileReader.writeFile(world);
+            try {
+                worldFile.writeFile(world);
+            } catch (IOException ex) {
+                Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(parent,
+                        "Could not save world file " + worldFile.getFilename(),
+                        "Saving world file",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
         showMessage("World saved");
     }
@@ -955,8 +956,9 @@ public class WorldTab extends JPanel {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
 
                 String line;
-                int layer_id = -1;
-                double pos_x = 0, pos_y = 0;
+                int layer_id = world.getHome().getLayer();
+                double pos_x = world.getHome().getX();
+                double pos_y = world.getHome().getY();
 
                 try {
                     while((line = reader.readLine()) != null){
@@ -1000,7 +1002,7 @@ public class WorldTab extends JPanel {
                 System.out.println("Couldn't open world meta file \"" + file + "\", file not found");
                 //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
 
-                pushPosition(new WorldCoordinate(0, 0, 0));
+                pushPosition(world.getHome());
             }
         }
     }

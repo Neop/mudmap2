@@ -25,7 +25,6 @@
 package mudmap2.backend;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,12 +101,10 @@ public class WorldManager {
         Boolean error = false;
 
         WorldFileDefault worldFile = new WorldFileDefault(filename);
-        try {
-            if(worldFile.isWorldFile()){
-                File file = new File(filename);
-                if(!file.delete()) error = true;
-            }
-        } catch (FileNotFoundException ex) {} // file is already deleted
+        if(worldFile.canRead()){
+            File file = new File(filename);
+            if(!file.delete()) error = true;
+        }
         return error;
     }
 

@@ -16,15 +16,14 @@
  */
 package mudmap2.backend.WorldFileReader.current;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import mudmap2.utils.Pair;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileReader.WorldFile;
+import mudmap2.backend.WorldFileReader.WorldFileType;
+import static mudmap2.backend.WorldFileReader.WorldFileType.INVALID;
+import static mudmap2.backend.WorldFileReader.WorldFileType.UNKNOWN;
 
 /**
  * This class uses the default file type for saving world files and selects the
@@ -34,11 +33,45 @@ import mudmap2.backend.WorldFileReader.WorldFile;
 public class WorldFileDefault extends WorldFile {
 
     WorldFile worldFile;
+    WorldFileType worldFileType;
 
+    @SuppressWarnings("deprecation")
     public WorldFileDefault(String filename) {
         super(filename);
-        // set default world file type here:
-        worldFile = new WorldFileMM1(filename);
+
+        File file = new File(filename);
+        if(file.exists()){
+            WorldFileJSON wfj = new WorldFileJSON(filename);
+            if(wfj.canRead()) worldFileType = WorldFileType.JSON;
+            else {
+                WorldFileMM1 wfmm1 = new WorldFileMM1(filename);
+                if(wfmm1.canRead()) worldFileType = WorldFileType.MUDMAP1;
+                else worldFileType = WorldFileType.INVALID;
+            }
+        } else {
+            worldFileType = WorldFileType.UNKNOWN;
+        }
+
+        switch(worldFileType){
+            default:
+            case INVALID:
+            case UNKNOWN: // set default world file type here:
+            case JSON:
+                worldFile = new WorldFileJSON(filename);
+                break;
+            case MUDMAP1:
+                worldFile = new WorldFileMM1(filename);
+                break;
+        }
+    }
+
+    public void setWorldFile(WorldFile worldFile) {
+        this.worldFile = worldFile;
+    }
+
+    @Override
+    public WorldFileType getWorldFileType() {
+        return worldFileType;
     }
 
     /**
@@ -51,85 +84,16 @@ public class WorldFileDefault extends WorldFile {
     public World readFile() throws FileNotFoundException, Exception {
         World world = null;
 
-        WorldFile worldFileReader = getWorldFileReader();
-        if(worldFileReader == null){
-            throw new Exception("Could not read world from file '" + filename + "': invalid file type or version");
-        }
-        return worldFileReader.readFile();
-    }
-
-    /**
-     * Checks whether the file is a world file
-     * @return
-     * @throws FileNotFoundException
-     */
-    public Boolean isWorldFile() throws FileNotFoundException{
-        if(null != filename && !filename.isEmpty()){
-            String line;
-            BufferedReader reader = new BufferedReader(new FileReader(filename));
-
-            try {
-                while((line = reader.readLine()) != null){
-                    line = line.trim();
-                    if(line.startsWith("// MUD Map world file")
-                            || line.startsWith("# MUD Map 2 world file")){
-                        return true;
-                    }
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(WorldFileDefault.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Reads the file version number from world file.
-     *
-     * @return
-     * @throws FileNotFoundException
-     */
-    public Pair<Integer,Integer> readFileVersion() throws FileNotFoundException {
-        String line;
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
-
-        Pair<Integer, Integer> fileVersion = new Pair<>(0, 0);
-
-        try {
-            while((line = reader.readLine()) != null){
-                line = line.trim();
-                if(line.startsWith("ver") && line.contains(" ")){
-                    String[] parts = line.substring(line.indexOf(' ') + 1).split("\\.", 3);
-                    if(parts.length >= 1) fileVersion.first = Integer.parseInt(parts[0]);
-                    if(parts.length >= 2) fileVersion.second = Integer.parseInt(parts[1]);
-                }
-            }
-        } catch (IOException ex) {
-            //Logger.getLogger(WorldFileDefault.class.getName()).log(Level.SEVERE, null, ex);
+        if(worldFile != null){
+            world = worldFile.readFile();
+            world.setWorldFile(this);
         }
 
-        return fileVersion;
-    }
-
-    /**
-     * Get the right file reader for the file type
-     * @return
-     * @throws java.io.FileNotFoundException
-     */
-    public WorldFile getWorldFileReader() throws FileNotFoundException {
-        WorldFile ret = null;
-
-        if(isWorldFile()){
-            switch(readFileVersion().first){
-                case 1:
-                    ret = new WorldFileMM1(filename);
-                    break;
-                case 2:
-                    ret = new WorldFileYAML(filename);
-                    break;
-            }
+        if(world == null){
+            throw new Exception("Could not read world from file '" + filename);
         }
-        return ret;
+
+        return world;
     }
 
     /**
@@ -139,34 +103,26 @@ public class WorldFileDefault extends WorldFile {
      */
     @Override
     public String readWorldName() throws Exception {
-
-        String worldname = "";
-
-        // find the right file type
-        switch(readFileVersion().first){
-            case 0: // not found
-            case 1: // MUD Map v1/v2 file
-                worldFile = new WorldFileMM1(filename);
-                worldname = worldFile.readWorldName();
-                break;
-            case 2: // MUD Map YAML file
-                worldFile = new WorldFileYAML(filename);
-                worldname = worldFile.readWorldName();
-                break;
-            default: // invalid value
-                throw new Exception("Could not read world name from file '" + filename + "': invalid file version");
+        if(worldFile != null){
+            return worldFile.readWorldName();
         }
-
-        return worldname;
+        return "";
     }
 
     /**
      * write world
      * @param world
+     * @throws java.io.IOException
      */
     @Override
-    public void writeFile(World world) {
+    public void writeFile(World world) throws IOException {
+        if(worldFile.getWorldFileType() == WorldFileType.MUDMAP1){
+            worldFile = new WorldFileJSON(filename);
+            world.setWorldFile(this);
+        }
+
         worldFile.writeFile(world);
+        worldFileType = worldFile.getWorldFileType();
     }
 
     /**
@@ -176,6 +132,11 @@ public class WorldFileDefault extends WorldFile {
     @Override
     public void backup() throws FileNotFoundException {
         worldFile.backup();
+    }
+
+    @Override
+    public Boolean canRead() {
+        return !worldFileType.equals(INVALID) && !worldFileType.equals(UNKNOWN);
     }
 
 }

@@ -22,6 +22,7 @@
 package mudmap2.backend.WorldFileReader;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import mudmap2.backend.World;
 
 /**
@@ -43,10 +44,14 @@ public abstract class WorldFile {
     // Reads a world from file
     public abstract World readFile() throws Exception;
     // Writes the world to file
-    public abstract void writeFile(World world);
+    public abstract void writeFile(World world) throws IOException;
     // saves a backup copy of the world
     public abstract void backup() throws FileNotFoundException;
 
     // reads the world name
     public abstract String readWorldName() throws Exception;
+
+    // can file be read and interpreted by this reader?
+    public abstract Boolean canRead();
+    public abstract WorldFileType getWorldFileType();
 }

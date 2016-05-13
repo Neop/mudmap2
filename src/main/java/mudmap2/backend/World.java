@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Layer.PlaceNotInsertedException;
+import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.sssp.BreadthSearchGraph;
 
 /**
@@ -45,6 +46,7 @@ public class World implements BreadthSearchGraph {
 
     // worldname and file of the world
     String worldname;
+    WorldFile worldFile;
     // color of path lines and self-defined path colors
     Color pathColorCardinal, pathColorNonCardinal;
     HashMap<String, Color> pathColors;
@@ -65,6 +67,7 @@ public class World implements BreadthSearchGraph {
      * Creates an empty world
      */
     public World(){
+        worldFile = null;
         initialize();
     }
 
@@ -73,8 +76,25 @@ public class World implements BreadthSearchGraph {
      * @param name worldname of the world
      */
     public World(String name){
-        this.worldname = name;
+        worldname = name;
+        worldFile = null;
         initialize();
+    }
+
+    /**
+     * Get world file reader
+     * @return WorldFileReader or null
+     */
+    public WorldFile getWorldFile() {
+        return worldFile;
+    }
+
+    /**
+     * Set world file reader
+     * @param worldFile
+     */
+    public void setWorldFile(WorldFile worldFile) {
+        this.worldFile = worldFile;
     }
 
     /**
@@ -548,6 +568,39 @@ public class World implements BreadthSearchGraph {
      */
     public Boolean isPlaceNameUnique(String name){
         return placeNames.containsKey(name);
+    }
+
+    /**
+     * Add new label
+     * @param label
+     */
+    public void addLabel(Label label){
+
+    }
+
+    /**
+     * Remove label
+     * @param label
+     */
+    public void removeLabel(Label label){
+
+    }
+
+    /**
+     * Get all labels
+     * @return
+     */
+    public Label[] getLabels(){
+        return null;
+    }
+
+    /**
+     * get all labels of layer
+     * @param layer
+     * @return
+     */
+    public Label[] getLabels(Integer layer){
+        return null;
     }
 
     /**
