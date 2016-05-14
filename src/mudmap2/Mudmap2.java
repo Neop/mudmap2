@@ -38,7 +38,7 @@ public final class Mudmap2 {
 
     static final int version_major = 2;
     static final int version_minor = 2;
-    static final int version_build = 9;
+    static final int version_build = 10;
     static final String version_state = "";
 
     static boolean portable_mode = false;

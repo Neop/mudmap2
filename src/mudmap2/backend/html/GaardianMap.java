@@ -78,6 +78,9 @@ public class GaardianMap {
             // write top lines
             for(String str: linesTop){
                 // replace css link with actual css code
+                if(str.contains("<head>")){
+                    str = str.concat("<title>" + layer.getWorld().getName() + " map</title>");
+                }
                 if(str.contains("stylesheet") && str.contains("maps.css")){
                     outstream.println("<style>");
                     for(String str2: linescss) outstream.println(str2);
