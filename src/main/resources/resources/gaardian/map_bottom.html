@@ -430,7 +430,7 @@ function drawExit(roomexit, jg) {
             jg.drawStringRect(exitaction, calcLeftPos(room1) + 4, calcBottomPos(room1) - 14 + delta, room_width + 5, "left");
         }
         // draw the link connecting the rooms besides the exit string
-        jg.drawImage('http://maps.gaardian.com/link.png',calcLeftPos(room1) - 16, calcBottomPos(room1) - 14 + delta, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+        jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D',calcLeftPos(room1) - 16, calcBottomPos(room1) - 14 + delta, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
     } else if (roomexit.linktype == LINK_TO_ANOTHER_AREA) {
         jg.setFont(NORMALROOMFONT,"12px",Font.ITALIC);
         if (exittype == EXIT_EAST) {
@@ -534,7 +534,7 @@ function drawExit(roomexit, jg) {
                     jg.drawLine(midx, topy, midx, y1 + door_width / 2);
                     // todo: clicking on locked doors should highlight room with key and show popup
                     if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                        jg.drawImage('http://maps.gaardian.com/lock.png', midx + 4, topy - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, topy - 4));
+                        jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', midx + 4, topy - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, topy - 4));
                     }
                 }
                 // then draw uni-directional arrows, if applicable
@@ -560,14 +560,14 @@ function drawExit(roomexit, jg) {
                         var midx = x1 + (x2 - x1) / 2 - 2;
                         jg.drawLine(midx, y1 - door_width / 4, midx, y2 + door_width / 4);
                         if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                            jg.drawImage('http://maps.gaardian.com/lock.png', midx + 4, y1 - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, y1 - 4));
+                            jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', midx + 4, y1 - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, y1 - 4));
                         }
                     }
                     if (roomexit.linktype == LINK_ONEWAY) {
                         jg.drawLine(x2 - 1, y2, x2 - arrowheadlength / 2, y2 - arrowheadlength / 2);
                         jg.drawLine(x2 - 1, y2, x2 - arrowheadlength / 2, y2 + arrowheadlength / 2);
                     }
-                    jg.drawImage('http://maps.gaardian.com/link.png', x2 + 4, y2 - 8, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                    jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D', x2 + 4, y2 - 8, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
                 } else {
                     var x1 = calcLeftPos(room1);
                     var y1 = calcMiddleYPos(room1) + room_height / 4;
@@ -578,14 +578,14 @@ function drawExit(roomexit, jg) {
                         var midx = x2 + (x1 - x2) / 2; // must be positive
                         jg.drawLine(midx, y1 - door_width / 4, midx, y2 + door_width / 4);
                         if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                            jg.drawImage('http://maps.gaardian.com/lock.png', midx + 4, y1 - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, y1 - 4));
+                            jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', midx + 4, y1 - 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + 4, y1 - 4));
                         }
                     }
                     if (roomexit.linktype == LINK_ONEWAY) {
                         jg.drawLine(x2 + 1, y2, x2 + arrowheadlength / 2, y2 - arrowheadlength / 2);
                         jg.drawLine(x2 + 1, y2, x2 + arrowheadlength / 2, y2 + arrowheadlength / 2);
                     }
-                    jg.drawImage('http://maps.gaardian.com/link.png', x2 - 16, y2 - 8, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                    jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D', x2 - 16, y2 - 8, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
                 }
             }
         } else if (exittype == EXIT_NORTH || exittype == EXIT_SOUTH) {
@@ -638,7 +638,7 @@ function drawExit(roomexit, jg) {
                     var rightx = x1 + door_width / 2;
                     jg.drawLine(x1 - door_width / 2, midy, rightx, midy);
                     if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                        jg.drawImage('http://maps.gaardian.com/lock.png', rightx + 6, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, rightx + 6, midy - 8));
+                        jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', rightx + 6, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, rightx + 6, midy - 8));
                     }
                 }
                 if (roomexit.linktype == LINK_ONEWAY) {
@@ -663,14 +663,14 @@ function drawExit(roomexit, jg) {
                         var midy = y1 - (y1 - y2) / 2; // must be positive
                         jg.drawLine(x1 - door_width / 4, midy, x1 + door_width / 4, midy);
                         if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                            jg.drawImage('http://maps.gaardian.com/lock.png', x2 + 10, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 10, midy - 8));
+                            jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', x2 + 10, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 10, midy - 8));
                         }
                     }
                     if (roomexit.linktype == LINK_ONEWAY) {
                         jg.drawLine(x2, y2 + 1, x2 - arrowheadlength / 2, y2 + arrowheadlength / 2);
                         jg.drawLine(x2, y2 + 1, x2 + arrowheadlength / 2, y2 + arrowheadlength / 2);
                     }
-                    jg.drawImage('http://maps.gaardian.com/link.png', x1 - 8, y2 - 16, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                    jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D', x1 - 8, y2 - 16, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
                 } else {
                     var x1 = calcMiddleXPos(room1) + room_width / 4;
                     var y1 = calcBottomPos(room1);
@@ -681,14 +681,14 @@ function drawExit(roomexit, jg) {
                         var midy = y1 + (y2 - y1) / 2; // must be positive
                         jg.drawLine(x1 - door_width / 4, midy, x1 + door_width / 4, midy);
                         if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                            jg.drawImage('http://maps.gaardian.com/lock.png', x2 + 10, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 10, midy - 8));
+                            jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', x2 + 10, midy - 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 10, midy - 8));
                         }
                     }
                     if (roomexit.linktype == LINK_ONEWAY) {
                         jg.drawLine(x2, y2 - 1, x2 - arrowheadlength / 2, y2 - arrowheadlength / 2);
                         jg.drawLine(x2, y2 - 1, x2 + arrowheadlength / 2, y2 - arrowheadlength / 2);
                     }
-                    jg.drawImage('http://maps.gaardian.com/link.png', x1 - 8, y2, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                    jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D', x1 - 8, y2, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
                 }
             }
         } else if (exittype == EXIT_UP || exittype == EXIT_DOWN) {
@@ -734,14 +734,14 @@ function drawExit(roomexit, jg) {
                             // todo: use proper door_width lengths
                             jg.drawLine(x1, y2, x2, y1);
                             if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                                jg.drawImage('http://maps.gaardian.com/lock.png', x2 + 2, y2 + 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 2, y2 + 8));
+                                jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', x2 + 2, y2 + 8, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x2 + 2, y2 + 8));
                             }
                         }
                         if (roomexit.linktype == LINK_ONEWAY) {
                             jg.drawLine(x2 - arrowheadlength, y2, x2, y2);
                             jg.drawLine(x2, y2 + arrowheadlength, x2, y2);
                         }
-                        jg.drawImage('http://maps.gaardian.com/link.png', x2, y2 - 12, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                        jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D', x2, y2 - 12, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
                     } else {
                         var x1 = calcLeftPos(room1);
                         var y1 = calcBottomPos(room1);
@@ -752,14 +752,14 @@ function drawExit(roomexit, jg) {
                             // todo: use proper door_width lengths
                             jg.drawLine(x1, y2, x2, y1);
                             if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                                jg.drawImage('http://maps.gaardian.com/lock.png', x1, y2, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x1, y2));
+                                jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', x1, y2, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, x1, y2));
                             }
                         }
                         if (roomexit.linktype == LINK_ONEWAY) {
                             jg.drawLine(x2 + arrowheadlength, y2, x2, y2);
                             jg.drawLine(x2, y2 - arrowheadlength, x2, y2);
                         }
-                        jg.drawImage('http://maps.gaardian.com/link.png', x2 - 12, y2, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
+                        jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADpSURBVCjPY/jPgB8y0EmBHXdWaeu7ef9rHuaY50jU3J33v/VdVqkdN1SBEZtP18T/L/7f/X/wf+O96kM3f9z9f+T/xP8+XUZsYAWGfsUfrr6L2Ob9J/X/pP+V/1P/e/+J2LbiYfEHQz+ICV1N3yen+3PZf977/9z/Q//X/rf/7M81Ob3pu1EXWIFuZvr7aSVBOx1/uf0PBEK3/46/gnZOK0l/r5sJVqCp6Xu99/2qt+v+T/9f+L8CSK77v+pt73vf65qaYAVqzPYGXvdTvmR/z/4ZHhfunP0p+3vKF6/79gZqzPQLSYoUAABKPQ+kpVV/igAAAABJRU5ErkJggg%3D%3D', x2 - 12, y2, 16, 16, 'onclick="highlightRooms(rooms[' + room1.roomid + '], rooms[' + room2.roomid + ']);"');
                     }
                 } else {
                     // Up-down exit (sort by x-axis)
@@ -793,7 +793,7 @@ function drawExit(roomexit, jg) {
                             var midx = x1 + (x2 - x1) / 2;
                             jg.drawLine(midx - door_width / 4, midy - door_width / 4, midx + door_width / 4, midy + door_width / 4);
                             if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                                jg.drawImage('http://maps.gaardian.com/lock.png', midx + door_width / 4 + 2, midy + door_width / 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + door_width / 4 + 2, midy + door_width / 4));
+                                jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', midx + door_width / 4 + 2, midy + door_width / 4, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + door_width / 4 + 2, midy + door_width / 4));
                             }
                         }
                         if (roomexit.linktype == LINK_ONEWAY) {
@@ -821,7 +821,7 @@ function drawExit(roomexit, jg) {
                             var midx = x1 + (x2 - x1) / 2;
                             jg.drawLine(midx - door_width / 4, midy + door_width / 4, midx + door_width / 4, midy - door_width / 4);
                             if (roomexit.doorinfo.doortype == DOOR_LOCKED) {
-                                jg.drawImage('http://maps.gaardian.com/lock.png', midx + door_width / 2, midy - door_width / 2, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + door_width / 2, midy - door_width / 2));
+                                jg.drawImage('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJ/SURBVDjLbVJBaxNBGH2bpEkTmxi1NTRKTZtoQUHEWz0Igj2I4kG9eVNQhEBO7bEHc+yv8JAiHnr2B4gFqVrQRhObljQolBSTJqZJdnZmfbNr2rU68DEz33zfm/fejGHbNrxjaWlpRCk1J6WcYZxkgPGTsWJZ1mIul/vlrTe8AIVC4Qqbl5PJ5GQsFoPP5wP36PV6qNfr2OIg0L35+fm1fwDYPMLDj+l0OmOaJmq1Gjqdjr4dgUAAiUTCqSsWixvMXV5YWOjqvW+AxOSz8fHxjBAC5XJ5s91up7gO6tDrUqn0QwOTXYZSsoO+wGDB5EwkEkGlUgGb7mSz2apHajWfz9+sVqvFVCrl1P4PYExr5m16vYUjQ+c0O11DtmN/ebD95pG9UpnGzl7Y0Xz30ir8toAtLdiWG0JIvFi76piaGG7g9plVTD/5YLgMCPLg/g0YtMTwhznfApRBfsP6kAYJSKuN57Md5oXTsvHy7aEEfZMutHZfIRAahWGMsHAICMeZVsD+HmTrG8zudyhrH+HJLGyz7wEgRSh9k4nm+nvqPIb4xWuovV5k/2lMXJ9F8+s6ARqIpk6QsIQtTC+AcGTYpBqfvgBfcJTuKMi+xKfdMCZgIp6eRK8TYu2+w2oA4PwDm+5qVK218XmNLN7xxILqKfS7pGqTWekLmuVtV65STs8hA73RqJQQP5+CP3KKACamHj7FlGBDawfH00kEW0MuA8o9AmA6qMrSHqwTIAoM08hAkHkN0ES3UYfotBGdiNFu5cr2AmgJobOPET7nhxEMuU/o40soSjO7iHbbVNgnUen6pY0/AOCTbC7PuV44H0f8Cetg5g9zP5aU7loDcfwGcrKyzYdvwUUAAAAASUVORK5CYII%3D', midx + door_width / 2, midy - door_width / 2, 16, 16, generateOnClickHandlerForKey(roomexit.doorinfo, midx + door_width / 2, midy - door_width / 2));
                             }
                         }
                         if (roomexit.linktype == LINK_ONEWAY) {
