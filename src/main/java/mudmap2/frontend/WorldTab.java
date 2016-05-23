@@ -1909,24 +1909,24 @@ public class WorldTab extends JPanel {
                         }
                     }
 
-                    // ------------- sub-areas ------------------
-                    JMenu m_subareas = new JMenu("Sub-areas");
-                    m_subareas.setToolTipText("Not to be confused with areas, sub-areas usually connect a place to another layer of the map, eg. a building <-> rooms inside it");
+                    // ------------- layers / maps ------------------
+                    JMenu m_children = new JMenu("Children");
+                    m_children.setToolTipText("Child relationships, eg. for maps within maps");
                     if(!parent.passive || !place.getChildren().isEmpty())
-                        add(m_subareas);
+                        add(m_children);
 
                     if(!parent.passive){
-                        JMenuItem mi_sa_connect = new JMenuItem("Connect with place");
-                        m_subareas.add(mi_sa_connect);
-                        mi_sa_connect.setToolTipText("Connects another place to this place as sub-area");
-                        mi_sa_connect.addActionListener(new ActionListener() {
+                        JMenuItem mi_child_connect = new JMenuItem("Connect with place");
+                        m_children.add(mi_child_connect);
+                        mi_child_connect.setToolTipText("Connect another place as child place");
+                        mi_child_connect.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
                                 PlaceSelectionDialog dlg = new PlaceSelectionDialog(parent.parent, parent.world, parent.getCurPosition(), true);
                                 dlg.setVisible(true);
                                 Place child = dlg.getSelection();
                                 if(child != null && child != place){
-                                    int ret = JOptionPane.showConfirmDialog(parent, "Connect \"" + child.getName() + "\" to \"" + place.getName() + "\"?", "Connect sub-area", JOptionPane.YES_NO_OPTION);
+                                    int ret = JOptionPane.showConfirmDialog(parent, "Connect \"" + child.getName() + "\" to \"" + place.getName() + "\"?", "Connect child place", JOptionPane.YES_NO_OPTION);
                                     if(ret == JOptionPane.YES_OPTION){
                                         place.connectChild(child);
                                         parent.repaint();
@@ -1935,10 +1935,10 @@ public class WorldTab extends JPanel {
                             }
                         });
 
-                        JMenuItem mi_sa_new_layer = new JMenuItem("Add on new layer");
-                        mi_sa_new_layer.setToolTipText("Creates a new place on a new layer and connects it with \"" + place.getName() + "\" as a sub-area");
-                        m_subareas.add(mi_sa_new_layer);
-                        mi_sa_new_layer.addActionListener(new ActionListener() {
+                        JMenuItem mi_child_new_layer = new JMenuItem("Add child on new map layer");
+                        mi_child_new_layer.setToolTipText("Creates a new place on a new map layer and connects it with \"" + place.getName() + "\" as it'S parent place");
+                        m_children.add(mi_child_new_layer);
+                        mi_child_new_layer.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent arg0) {
                                 // create new place
@@ -1960,7 +1960,7 @@ public class WorldTab extends JPanel {
                     if(!children.isEmpty()){
                         if(!parent.passive){
                             JMenu m_sa_remove = new JMenu("Remove");
-                            m_subareas.add(m_sa_remove);
+                            m_children.add(m_sa_remove);
 
                             for(Place child: children){
                                 JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.getName());
@@ -1969,22 +1969,22 @@ public class WorldTab extends JPanel {
                             }
                         }
 
-                        m_subareas.add(new JSeparator());
+                        m_children.add(new JSeparator());
 
                         for(Place child: children){
                             JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.getName());
-                            m_subareas.add(mi_sa_goto);
+                            m_children.add(mi_sa_goto);
                             mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                         }
                     }
 
                     HashSet<Place> parents = place.getParents();
                     if(!parents.isEmpty()){
-                        m_subareas.add(new JSeparator());
+                        m_children.add(new JSeparator());
 
                         for(Place child: parents){
                             JMenuItem mi_sa_goto = new JMenuItem("Go to parent " + child.getName());
-                            m_subareas.add(mi_sa_goto);
+                            m_children.add(mi_sa_goto);
                             mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                         }
                     }
