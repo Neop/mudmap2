@@ -39,17 +39,21 @@ public class WorldFileDefault extends WorldFile {
     public WorldFileDefault(String filename) {
         super(filename);
 
-        File file = new File(filename);
-        if(file.exists()){
-            WorldFileJSON wfj = new WorldFileJSON(filename);
-            if(wfj.canRead()) worldFileType = WorldFileType.JSON;
-            else {
-                WorldFileMM1 wfmm1 = new WorldFileMM1(filename);
-                if(wfmm1.canRead()) worldFileType = WorldFileType.MUDMAP1;
-                else worldFileType = WorldFileType.INVALID;
+        if(filename != null){
+            File file = new File(filename);
+            if(file.exists()){
+                WorldFileJSON wfj = new WorldFileJSON(filename);
+                if(wfj.canRead()) worldFileType = WorldFileType.JSON;
+                else {
+                    WorldFileMM1 wfmm1 = new WorldFileMM1(filename);
+                    if(wfmm1.canRead()) worldFileType = WorldFileType.MUDMAP1;
+                    else worldFileType = WorldFileType.INVALID;
+                }
+            } else {
+                worldFileType = WorldFileType.UNKNOWN;
             }
         } else {
-            worldFileType = WorldFileType.UNKNOWN;
+            worldFileType = WorldFileType.INVALID;
         }
 
         switch(worldFileType){

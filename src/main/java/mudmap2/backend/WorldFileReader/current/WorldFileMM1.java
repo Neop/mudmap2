@@ -104,27 +104,6 @@ public class WorldFileMM1 extends WorldFile {
         compatibility_mudmap_1 = c;
     }
 
-    private void reset(World world){
-        file_major = file_minor = 0;
-        version_mismatch = version_mismatch_confirmed = false;
-
-        layer_center = new HashMap<>();
-
-        // temporary data for creating a place
-        cur_place_id = -1;
-        cur_place_name = "";
-        cur_place = new Place(-1, "", 0, 0, new Layer(-1, world));
-
-        risk_level_default = world.getRiskLevel(0);
-
-        areas = new HashMap<>();
-        children = new ArrayList<>();
-        tmp_paths = new ArrayList<>();
-        tmp_paths_deprecated = new ArrayList<>();
-
-        path_connection_error_dep_double = 0;
-    }
-
     @Override
     public World readFile() throws Exception {
         World world = new World();
@@ -133,7 +112,7 @@ public class WorldFileMM1 extends WorldFile {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
 
-            reset(world);
+            layer_center = new HashMap<>();
 
             String line;
             try {

@@ -20,8 +20,6 @@ import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mudmap2.backend.Area;
@@ -44,12 +42,12 @@ import org.junit.rules.TemporaryFolder;
  *
  * @author neop
  */
-public class WorldFileJSONTest {
+public class WorldFileMM1Test {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    public WorldFileJSONTest() {
+    public WorldFileMM1Test() {
     }
 
     @BeforeClass
@@ -69,7 +67,24 @@ public class WorldFileJSONTest {
     }
 
     /**
-     * Test of readFile and writeFile methods, of class WorldFileJSON.
+     * Test of getCompatibilityMudmap1 and setCompatibilityMudmap1 methods, of class WorldFileMM1.
+     */
+    @Test
+    public void testGetCompatibilityMudmap1() {
+        System.out.println("getCompatibilityMudmap1");
+
+        String wfmm1File = folder.getRoot() + "/wfmm1";
+        WorldFileMM1 instance = new WorldFileMM1(wfmm1File);
+
+        instance.setCompatibilityMudmap1(true);
+        assertTrue(instance.getCompatibilityMudmap1());
+
+        instance.setCompatibilityMudmap1(false);
+        assertFalse(instance.getCompatibilityMudmap1());
+    }
+
+    /**
+     * Test of readFile and writeFile methods, of class WorldFileMM1.
      */
     @Test
     public void testReadWriteFile() throws Exception {
@@ -121,11 +136,11 @@ public class WorldFileJSONTest {
         pl0.addComment(comment1);
         pl0.addComment(comment2);
 
-        String wfjFile = folder.getRoot() + "/wfj";
-        WorldFileJSON instanceWriter = new WorldFileJSON(wfjFile);
+        String wfmm1File = folder.getRoot() + "/wfmm1";
+        WorldFileMM1 instanceWriter = new WorldFileMM1(wfmm1File);
         instanceWriter.writeFile(world);
 
-        WorldFileJSON instanceReader = new WorldFileJSON(wfjFile);
+        WorldFileMM1 instanceReader = new WorldFileMM1(wfmm1File);
         World result = instanceReader.readFile();
 
         assertEquals(worldName, result.getName());
@@ -191,12 +206,10 @@ public class WorldFileJSONTest {
         assertTrue(pl0r.getComments().contains(comment0));
         assertTrue(pl0r.getComments().contains(comment1));
         assertTrue(pl0r.getComments().contains(comment2));
-
-        // TODO: test labels
     }
 
     /**
-     * Test of backup method, of class WorldFileJSON.
+     * Test of backup method, of class WorldFileMM1.
      * @throws java.io.IOException
      */
     @Test
@@ -204,15 +217,15 @@ public class WorldFileJSONTest {
         System.out.println("backup");
 
         try {
-            String wfjFile = folder.getRoot() + "/wfj";
-            WorldFileJSON instance = new WorldFileJSON(wfjFile);
+            String wfmm1File = folder.getRoot() + "/wfmm1";
+            WorldFileMM1 instance = new WorldFileMM1(wfmm1File);
             // don't write world
             //instance.writeFile(new World("Foo Bar"));
 
             instance.backup();
 
-            File f1 = new File(wfjFile);
-            File f2 = new File(wfjFile + ".bak");
+            File f1 = new File(wfmm1File);
+            File f2 = new File(wfmm1File + ".bak");
 
             assertTrue(FileUtils.contentEquals(f1, f2));
         } catch (FileNotFoundException ex) {
@@ -221,15 +234,15 @@ public class WorldFileJSONTest {
         }
 
         try {
-            String wfjFile = folder.getRoot() + "/wfj";
-            WorldFileJSON instance = new WorldFileJSON(wfjFile);
+            String wfmm1File = folder.getRoot() + "/wfmm1";
+            WorldFileMM1 instance = new WorldFileMM1(wfmm1File);
             // write world
             instance.writeFile(new World("Foo Bar"));
 
             instance.backup();
 
-            File f1 = new File(wfjFile);
-            File f2 = new File(wfjFile + ".bak");
+            File f1 = new File(wfmm1File);
+            File f2 = new File(wfmm1File + ".bak");
 
             assertTrue(FileUtils.contentEquals(f1, f2));
         } catch (FileNotFoundException ex) {
@@ -239,25 +252,22 @@ public class WorldFileJSONTest {
     }
 
     /**
-     * Test of readWorldName method, of class WorldFileJSON.
+     * Test of readWorldName method, of class WorldFileMM1.
      */
     @Test
-    public void testReadWorldName() {
+    public void testReadWorldName() throws Exception {
+        System.out.println("readWorldName");
+
         System.out.println("readWorldName");
 
         String worldName = "foobar";
         World world = new World(worldName);
-        String wfjFile = folder.getRoot() + "/wfj";
+        String wfmm1File = folder.getRoot() + "/wfmm1";
 
-        try {
-            WorldFileJSON wfj = new WorldFileJSON(wfjFile);
-            wfj.writeFile(world);
-        } catch (IOException ex) {
-            Logger.getLogger(WorldFileJSONTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail("Could not create files for test");
-        }
+        WorldFileMM1 wfmm1 = new WorldFileMM1(wfmm1File);
+        wfmm1.writeFile(world);
 
-        WorldFileJSON instance = new WorldFileJSON(wfjFile);
+        WorldFileMM1 instance = new WorldFileMM1(wfmm1File);
         try {
             String result = instance.readWorldName();
             assertEquals(worldName, result);
@@ -268,7 +278,7 @@ public class WorldFileJSONTest {
     }
 
     /**
-     * Test of canRead method, of class WorldFileJSON.
+     * Test of canRead method, of class WorldFileMM1.
      */
     @Test
     public void testCanRead() {
@@ -290,50 +300,25 @@ public class WorldFileJSONTest {
         WorldFileMM1 wfm = new WorldFileMM1(wfmFile);
         wfm.writeFile(world);
 
-        WorldFileJSON instancewfj = new WorldFileJSON(wfjFile);
+        WorldFileMM1 instancewfj = new WorldFileMM1(wfjFile);
         Boolean result = instancewfj.canRead();
-        assertTrue(result);
-
-        WorldFileJSON instancewfm = new WorldFileJSON(wfmFile);
-        result = instancewfm.canRead();
         assertFalse(result);
+
+        WorldFileMM1 instancewfm = new WorldFileMM1(wfmFile);
+        result = instancewfm.canRead();
+        assertTrue(result);
     }
 
     /**
-     * Test of getWorldFileType method, of class WorldFileJSON.
+     * Test of getWorldFileType method, of class WorldFileMM1.
      */
     @Test
     public void testGetWorldFileType() {
         System.out.println("getWorldFileType");
 
-        WorldFileJSON instance = new WorldFileJSON(null);
+        WorldFileMM1 instance = new WorldFileMM1(null);
         WorldFileType result = instance.getWorldFileType();
-        assertEquals(WorldFileType.JSON, result);
-    }
-
-    /**
-     * Test of colToHex and hexToCol methods
-     */
-    @Test
-    public void testColorConversion() {
-        WorldFileJSON instance = new WorldFileJSON(null);
-        try {
-            Method colToHex = WorldFileJSON.class.getDeclaredMethod("colToHex", Color.class);
-            Method hexToCol = WorldFileJSON.class.getDeclaredMethod("hexToCol", String.class);
-            colToHex.setAccessible(true);
-            hexToCol.setAccessible(true);
-
-            Color colOrig = new Color(255, 128, 64);
-            String hex = (String) colToHex.invoke(instance, colOrig);
-            Color col = (Color) hexToCol.invoke(instance, hex);
-
-            assertEquals("#ff8040", hex);
-            assertEquals(colOrig.getRGB(), col.getRGB());
-
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(WorldFileJSONTest.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        }
+        assertEquals(WorldFileType.MUDMAP1, result);
     }
 
 }

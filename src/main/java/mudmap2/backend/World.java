@@ -504,7 +504,9 @@ public class World implements BreadthSearchGraph {
      * @param area new area
      */
     public void addArea(Area area) {
-        areas.add(area);
+        if(!areas.contains(area)){
+            areas.add(area);
+        }
     }
 
     /**

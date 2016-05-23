@@ -517,7 +517,7 @@ public class WorldFileJSON extends WorldFile {
             placeObj.put("y", place.getY());
 
             if(place.getArea() != null) placeObj.put("a", areaIDs.get(place.getArea()));
-            placeObj.put("r", place.getRiskLevel().getId());
+            if(place.getRiskLevel() != null) placeObj.put("r", place.getRiskLevel().getId());
             if(place.getRecLevelMin() > -1) placeObj.put("lvlMin", place.getRecLevelMin());
             if(place.getRecLevelMax() > -1) placeObj.put("lvlMax", place.getRecLevelMax());
 

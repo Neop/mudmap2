@@ -142,6 +142,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setArea(Area area) {
         this.area = area;
+        if(getLayer() != null && getLayer().getWorld() != null){
+            getLayer().getWorld().addArea(area);
+        }
     }
 
     /**
