@@ -23,20 +23,20 @@ public interface MapPainter {
      * @param shift_start 
      * @param shift_end 
      */
-    public void setPlaceGroup(HashSet<Place> group, WorldCoordinate shift_start, WorldCoordinate shift_end);
+    public void setSelectedPlaces(HashSet<Place> group, WorldCoordinate shift_start, WorldCoordinate shift_end);
     
     /**
      * Sets the coordinate of the seleted place
      * @param x
      * @param y 
      */
-    public void setPlaceSelection(int x, int y);
+    public void selectPlaceAt(int x, int y);
     
     /**
      * Sets whether the place selection is enabled
      * @param b 
      */
-    public void setPlaceSelectionEnabled(boolean b);
+    public void setSelectionVisible(boolean b);
 
     /**
      * Paints layer to the graphic g

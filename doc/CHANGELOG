@@ -1,3 +1,13 @@
+2.3.x
+- new JSON-based file format, the old format is now considered deprecated and new features won't be implemented
+- automatic file type detection
+- maven build management
+- more unit tests
+- major refactoring
+- bugfixes
+- changed terminology 'sub-area' to '(sub-) map'
+- mudmap icon now shown as window icon and in about dialog
+
 2.2.10
 - html export: changed image references to inline images
 - html export: minor bugfix (page title)

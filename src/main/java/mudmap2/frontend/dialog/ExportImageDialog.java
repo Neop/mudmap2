@@ -106,7 +106,7 @@ public class ExportImageDialog extends ActionDialog {
         add(new JLabel("Tile size:"), constraints);
         ++constraints.gridx;
         
-        spinner_tile_size = new JSpinner(new SpinnerNumberModel((int) worldtab.getTileSize(), WorldTab.tile_size_min, WorldTab.tile_size_max, 1));
+        spinner_tile_size = new JSpinner(new SpinnerNumberModel((int) worldtab.getTileSize(), WorldTab.TILE_SIZE_MIN, WorldTab.TILE_SIZE_MAX, 1));
         add(spinner_tile_size, constraints);
         spinner_tile_size.addChangeListener(new ChangeListener() {
 
