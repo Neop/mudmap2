@@ -131,7 +131,7 @@ public class PathTest {
     }
 
     /**
-     * Test of remove method, of class Path.
+     * Test of removePlace method, of class Path.
      */
     @Test
     public void testRemove() {

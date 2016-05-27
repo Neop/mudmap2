@@ -133,7 +133,7 @@ public final class CopyPaste {
             if(copyMode){
                 places = copyPlaces.toArray(new Place[copyPlaces.size()]);
             } else {
-                // get movement direction
+                // getPlace movement direction
                 final int fact_x = (x <= copydx ? 1 : -1);
                 final int fact_y = (y <= copydy ? 1 : -1);
 
@@ -166,9 +166,9 @@ public final class CopyPaste {
                     if(copyMode){ // copy places -> duplicate on new layer
                         Place new_place = place.duplicate();
                         place_to_new_place.put(place, new_place);
-                        layer.getWorld().put(new_place, layer.getId(), place.getX() - copydx + x, place.getY() - copydy + y);
+                        layer.getWorld().putPlace(new_place, layer.getId(), place.getX() - copydx + x, place.getY() - copydy + y);
                     } else {
-                        layer.getWorld().put(place, layer.getId(), place.getX() - copydx + x, place.getY() - copydy + y);
+                        layer.getWorld().putPlace(place, layer.getId(), place.getX() - copydx + x, place.getY() - copydy + y);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, ex);

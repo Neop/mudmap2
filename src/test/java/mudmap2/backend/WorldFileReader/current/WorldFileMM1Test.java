@@ -102,9 +102,9 @@ public class WorldFileMM1Test {
         Place pl0 = new Place(placeNames[0], placeX[0], placeY[0], layer1);
         Place pl1 = new Place(placeNames[1], placeX[1], placeY[1], layer1);
         Place pl2 = new Place(placeNames[2], placeX[2], placeY[2], layer2);
-        world.put(pl0);
-        world.put(pl1);
-        world.put(pl2);
+        world.putPlace(pl0);
+        world.putPlace(pl1);
+        world.putPlace(pl2);
 
         Path path0 = new Path(pl0, "n", pl1, "s");
         Path path1 = new Path(pl1, "e", pl0, "w");

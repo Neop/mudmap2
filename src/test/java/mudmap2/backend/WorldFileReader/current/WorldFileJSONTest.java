@@ -70,6 +70,7 @@ public class WorldFileJSONTest {
 
     /**
      * Test of readFile and writeFile methods, of class WorldFileJSON.
+     * @throws java.lang.Exception
      */
     @Test
     public void testReadWriteFile() throws Exception {
@@ -80,6 +81,7 @@ public class WorldFileJSONTest {
 
         Layer layer1 = world.getNewLayer();
         Layer layer2 = world.getNewLayer();
+        layer1.setName("MyLayer");
 
         String placeNames[] = {"Foo", "Foo Bar", "Baz"};
         Integer placeX[] = {0, 1, 6};
@@ -87,9 +89,9 @@ public class WorldFileJSONTest {
         Place pl0 = new Place(placeNames[0], placeX[0], placeY[0], layer1);
         Place pl1 = new Place(placeNames[1], placeX[1], placeY[1], layer1);
         Place pl2 = new Place(placeNames[2], placeX[2], placeY[2], layer2);
-        world.put(pl0);
-        world.put(pl1);
-        world.put(pl2);
+        world.putPlace(pl0);
+        world.putPlace(pl1);
+        world.putPlace(pl2);
 
         Path path0 = new Path(pl0, "n", pl1, "s");
         Path path1 = new Path(pl1, "e", pl0, "w");
@@ -149,6 +151,11 @@ public class WorldFileJSONTest {
         assertEquals(pl2.getY(), pl2r.getY());
         assertEquals(pl0r.getLayer(), pl1r.getLayer());
         assertNotSame(pl0r.getLayer().getId(), pl2r.getLayer().getId());
+
+        assertEquals(pl0.getLayer().getName(), pl0r.getLayer().getName());
+        assertTrue(pl0r.getLayer().hasName());
+        assertEquals(pl1.getLayer().getName(), pl1r.getLayer().getName());
+        assertFalse(pl2r.getLayer().hasName());
 
         assertEquals(2, pl0r.getPaths().size());
         assertEquals(2, pl1r.getPaths().size());

@@ -113,7 +113,7 @@ public class LayerElementTest {
     }
 
     /**
-     * Test of setLayer method, of class LayerElement.
+     * Test of addLayer method, of class LayerElement.
      */
     @Test
     public void testSetLayer() {

@@ -38,6 +38,7 @@ public class Layer {
     World world;
     static int nextID;
     Integer id;
+    String name;
     Quadtree<Place> elements;
 
     // for quadtree optimization
@@ -50,7 +51,7 @@ public class Layer {
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
 
-        if(world != null) world.setLayer(this);
+        if(world != null) world.addLayer(this);
     }
 
     public Layer(World world){
@@ -59,7 +60,20 @@ public class Layer {
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
 
-        if(world != null) world.setLayer(this);
+        if(world != null) world.addLayer(this);
+    }
+
+    public String getName() {
+        if(name == null) return "Layer " + getId();
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean hasName(){
+        return name != null;
     }
 
     /**
@@ -152,18 +166,18 @@ public class Layer {
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);
 
-        // remove element from layer, if it's already on the layer
+        // removePlace element from layer, if it's already on the layer
         if(elements.contains(element)) elements.remove(element.getX(), element.getY());
-        //element.getLayer().remove(element);
+        //element.getLayer().removePlace(element);
         element.setPosition(x, y, this);
         put(element);
     }
 
     /**
      * Adds an element to the layer (but not to the world!), uses the position
-     * of the element.
-     * NOTICE: use World::put(), if you want to add a place to a layer of a
-     * world! This method won't add the place to the world!
+ of the element.
+ NOTICE: use World::putPlace(), if you want to add a place to a layer of a
+ world! This method won't add the place to the world!
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
@@ -228,15 +242,6 @@ public class Layer {
     }
 
     /**
-     * Gets the id
-     * @return layer id
-     */
-    @Override
-    public String toString(){
-        return getId().toString();
-    }
-
-    /**
      * Removes an element from the layer but not from the world
      * @param element
      * @throws mudmap2.backend.Layer.PlaceNotFoundException
@@ -275,9 +280,20 @@ public class Layer {
     }
 
     /**
+     * Gets the id
+     * @return layer id
+     */
+    @Override
+    public String toString(){
+        return getName();
+    }
+
+    /**
      * This exception will be thrown, if a place doesn't exist at a certain position
      */
     public static class PlaceNotFoundException extends Exception {
+
+        private static final long serialVersionUID = 1L;
         int x, y;
 
         /**
@@ -296,6 +312,8 @@ public class Layer {
     }
 
     public static class PlaceNotInsertedException extends Exception {
+
+        private static final long serialVersionUID = 1L;
         int x, y;
 
         /**

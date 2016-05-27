@@ -67,7 +67,7 @@ public class GaardianMap {
         File file = new File(filestr);
         file.getParentFile().mkdirs();
         try {
-            // get map code from resources
+            // getPlace map code from resources
             List<String> linesTop = readRessource("resources/gaardian/map_top.html");
             List<String> linesBody = readRessource("resources/gaardian/map_body.html");
             List<String> linesBottom = readRessource("resources/gaardian/map_bottom.html");

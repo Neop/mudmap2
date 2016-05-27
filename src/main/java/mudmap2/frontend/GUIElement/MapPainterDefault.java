@@ -37,7 +37,6 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
-import static mudmap2.frontend.WorldTab.getShowPathsCurved;
 
 /**
  *
@@ -67,11 +66,17 @@ public class MapPainterDefault implements MapPainter {
 
     Font lastTileFont;
 
+    Boolean showPaths;
+    Boolean showPathsCurved;
+
     public MapPainterDefault() {
         selectePlaces = null;
         placeSelectedX = placeSelectedY = 0;
         placeSelectionEnabled = false;
         lastTileFont = null;
+
+        showPaths = true;
+        showPathsCurved = true;
     }
 
     @Override
@@ -170,6 +175,30 @@ public class MapPainterDefault implements MapPainter {
 
     public Font getTileFont(){
         return lastTileFont;
+    }
+
+    public Boolean getShowPaths() {
+        return showPaths;
+    }
+
+    public void setShowPaths(Boolean showPaths) {
+        this.showPaths = showPaths;
+    }
+
+    /**
+     * Returns true if curved path lines are enabled
+     * @return
+     */
+    public boolean getPathsCurved(){
+        return showPathsCurved;
+    }
+
+    /**
+     * Enables or disables curved path lines
+     * @param showPathsCurved
+     */
+    public void setPathsCurved(boolean showPathsCurved){
+        this.showPathsCurved = showPathsCurved;
     }
 
     /**
@@ -443,7 +472,7 @@ public class MapPainterDefault implements MapPainter {
         ((Graphics2D) graphicPath).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // get the locations of copied places
+        // getPlace the locations of copied places
         HashSet<Pair<Integer, Integer>> copiedPlaceLocations = mudmap2.CopyPaste.getCopyPlaceLocations();
 
         // clear screen
@@ -566,82 +595,84 @@ public class MapPainterDefault implements MapPainter {
 
                     // draw path lines here
                     boolean exitUp = false, exitDown = false;
-                    for(Path path: curPlace.getPaths()){
-                        Place otherPlace = path.getOtherPlace(curPlace);
+                    if(getShowPaths()){
+                        for(Path path: curPlace.getPaths()){
+                            Place otherPlace = path.getOtherPlace(curPlace);
 
-                        Color colorPlace1 = layer.getWorld().getPathColor(path.getExitDirections()[0]);
-                        Color colorPlace2 = layer.getWorld().getPathColor(path.getExitDirections()[1]);
-                        if(path.getPlaces()[0] != curPlace) {
-                            Color tmp = colorPlace1;
-                            colorPlace1 = colorPlace2;
-                            colorPlace2 = tmp;
-                        }
-
-                        // if both places of a path are on the same layer and at least one of the two places is on the screen
-                        // usually the main place (path.getPlaces()[0]) draws the path. If it isn't on screen, the other place draws it
-                        if(Objects.equals(otherPlace.getLayer().getId(), layer.getId()) && (path.getPlaces()[0] == curPlace || !isOnScreen(otherPlace))){
-                            Pair<Integer, Integer> exitOffset = getExitOffset(path.getExit(curPlace));
-                            Pair<Integer, Integer> exitOffsetOther = getExitOffset(path.getExit(otherPlace));
-
-                            boolean drawCurves = getShowPathsCurved();
-
-                            // exit positions on the map
-                            final double exit1x = placeXpx + exitOffset.first;
-                            final double exit1y = placeYpx + exitOffset.second;
-                            final double exit2x = placeXpx + (otherPlace.getX() - curPlace.getX()) * tileSize + exitOffsetOther.first;
-                            final double exit2y = placeYpx - (otherPlace.getY() - curPlace.getY()) * tileSize + exitOffsetOther.second;
-
-                            if(colorPlace1.equals(colorPlace2)){ // same color
-                                ((Graphics2D) graphicPath).setPaint(colorPlace1);
-                            } else { // draw gradient
-                                GradientPaint gp = new GradientPaint((float) exit1x, (float) exit1y, colorPlace1,
-                                                                     (float) exit2x, (float) exit2y, colorPlace2);
-                                ((Graphics2D) graphicPath).setPaint(gp);
+                            Color colorPlace1 = layer.getWorld().getPathColor(path.getExitDirections()[0]);
+                            Color colorPlace2 = layer.getWorld().getPathColor(path.getExitDirections()[1]);
+                            if(path.getPlaces()[0] != curPlace) {
+                                Color tmp = colorPlace1;
+                                colorPlace1 = colorPlace2;
+                                colorPlace2 = tmp;
                             }
 
-                            if(drawCurves){
-                                Pair<Double, Double> normal1 = getExitNormal(path.getExit(curPlace));
-                                Pair<Double, Double> normal2 = getExitNormal(path.getExit(otherPlace));
+                            // if both places of a path are on the same layer and at least one of the two places is on the screen
+                            // usually the main place (path.getPlaces()[0]) draws the path. If it isn't on screen, the other place draws it
+                            if(Objects.equals(otherPlace.getLayer().getId(), layer.getId()) && (path.getPlaces()[0] == curPlace || !isOnScreen(otherPlace))){
+                                Pair<Integer, Integer> exitOffset = getExitOffset(path.getExit(curPlace));
+                                Pair<Integer, Integer> exitOffsetOther = getExitOffset(path.getExit(otherPlace));
 
-                                double dx = exit2x - exit1x;
-                                double dy = exit2y - exit1y;
+                                boolean drawCurves = getPathsCurved();
 
-                                if(drawCurves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tileSize){
-                                    CubicCurve2D c = new CubicCurve2D.Double();
-                                    c.setCurve(// point 1
-                                            exit1x, exit1y,
-                                            // point 2
-                                            exit1x + normal1.first * tileSize, exit1y - normal1.second * tileSize,
-                                            // point 3
-                                            exit2x + normal2.first * tileSize, exit2y - normal2.second * tileSize,
-                                            // point 4
-                                            exit2x, exit2y);
-                                    ((Graphics2D) graphicPath).draw(c);
+                                // exit positions on the map
+                                final double exit1x = placeXpx + exitOffset.first;
+                                final double exit1y = placeYpx + exitOffset.second;
+                                final double exit2x = placeXpx + (otherPlace.getX() - curPlace.getX()) * tileSize + exitOffsetOther.first;
+                                final double exit2y = placeYpx - (otherPlace.getY() - curPlace.getY()) * tileSize + exitOffsetOther.second;
+
+                                if(colorPlace1.equals(colorPlace2)){ // same color
+                                    ((Graphics2D) graphicPath).setPaint(colorPlace1);
+                                } else { // draw gradient
+                                    GradientPaint gp = new GradientPaint((float) exit1x, (float) exit1y, colorPlace1,
+                                                                         (float) exit2x, (float) exit2y, colorPlace2);
+                                    ((Graphics2D) graphicPath).setPaint(gp);
+                                }
+
+                                if(drawCurves){
+                                    Pair<Double, Double> normal1 = getExitNormal(path.getExit(curPlace));
+                                    Pair<Double, Double> normal2 = getExitNormal(path.getExit(otherPlace));
+
+                                    double dx = exit2x - exit1x;
+                                    double dy = exit2y - exit1y;
+
+                                    if(drawCurves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tileSize){
+                                        CubicCurve2D c = new CubicCurve2D.Double();
+                                        c.setCurve(// point 1
+                                                exit1x, exit1y,
+                                                // point 2
+                                                exit1x + normal1.first * tileSize, exit1y - normal1.second * tileSize,
+                                                // point 3
+                                                exit2x + normal2.first * tileSize, exit2y - normal2.second * tileSize,
+                                                // point 4
+                                                exit2x, exit2y);
+                                        ((Graphics2D) graphicPath).draw(c);
+                                    }
+                                }
+
+                                if(!drawCurves) {
+                                    graphicPath.drawLine((int) exit1x, (int) exit1y, (int) exit2x, (int) exit2y);
                                 }
                             }
 
-                            if(!drawCurves) {
-                                graphicPath.drawLine((int) exit1x, (int) exit1y, (int) exit2x, (int) exit2y);
-                            }
-                        }
-
-                        // draw exit dots, if tiles are larger than 20
-                        if(tileSize >= 20){
-                            g.setColor(colorPlace1);
-                            String exit = path.getExit(curPlace);
-                            switch (exit) {
-                                case "u":
-                                    exitUp = true;
-                                    break;
-                                case "d":
-                                    exitDown = true;
-                                    break;
-                                default:
-                                    Pair<Integer, Integer> exitOffset = getExitOffset(exit);
-                                    if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
-                                        int exitCircleRadius2 = getExitCircleRadius();
-                                        g.fillOval(placeXpx + exitOffset.first - exitCircleRadius2, placeYpx + exitOffset.second - exitCircleRadius2, 2 * exitCircleRadius2, 2 * exitCircleRadius2);
-                                    }   break;
+                            // draw exit dots, if tiles are larger than 20
+                            if(tileSize >= 20){
+                                g.setColor(colorPlace1);
+                                String exit = path.getExit(curPlace);
+                                switch (exit) {
+                                    case "u":
+                                        exitUp = true;
+                                        break;
+                                    case "d":
+                                        exitDown = true;
+                                        break;
+                                    default:
+                                        Pair<Integer, Integer> exitOffset = getExitOffset(exit);
+                                        if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
+                                            int exitCircleRadius2 = getExitCircleRadius();
+                                            g.fillOval(placeXpx + exitOffset.first - exitCircleRadius2, placeYpx + exitOffset.second - exitCircleRadius2, 2 * exitCircleRadius2, 2 * exitCircleRadius2);
+                                        }   break;
+                                }
                             }
                         }
                     }
@@ -696,7 +727,7 @@ public class MapPainterDefault implements MapPainter {
             graphicPath.clearRect(p.first + tileBorderWidthScaled, p.second + tileBorderWidthScaled, clearTileSize, clearTileSize);
 
         // draw graphicPath to g
-        g.drawImage(imagePath, 0, 0, null);
+        if(getShowPaths()) g.drawImage(imagePath, 0, 0, null);
         graphicPath.dispose();
     }
 

@@ -54,19 +54,6 @@ public class WorldTest {
     }
 
     /**
-     * Test of writeWorld method, of class World.
-     */
-    @Test
-    @Ignore
-    public void testWriteWorld() {
-        System.out.println("writeWorld");
-        World instance = null;
-        //instance.writeWorld();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of breadthSearch method, of class World.
      */
     @Test
@@ -79,12 +66,12 @@ public class WorldTest {
         Place expResult = null;
         Place result = instance.breadthSearch(start, end);
         //assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO review the generated test code and removePlace the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of get method, of class World.
+     * Test of getPlace method, of class World.
      */
     @Test
     public void testGet() {
@@ -93,8 +80,8 @@ public class WorldTest {
         World world = new World("My World");
         Layer l1 = new Layer(world);
         Layer l2 = new Layer(world);
-        world.setLayer(l1);
-        world.setLayer(l2);
+        world.addLayer(l1);
+        world.addLayer(l2);
 
         int x = 1;
         int y = 4;
@@ -111,14 +98,14 @@ public class WorldTest {
             fail(ex.getMessage());
         }
 
-        Place result = world.get(l1.getId(), x, y);
+        Place result = world.getPlace(l1.getId(), x, y);
         assertEquals(pl1, result);
-        result = world.get(l2.getId(), x, y);
+        result = world.getPlace(l2.getId(), x, y);
         assertEquals(pl3, result);
     }
 
     /**
-     * Test of put method, of class World.
+     * Test of putPlace method, of class World.
      */
     @Test
     public void testPut_Place() {
@@ -129,7 +116,7 @@ public class WorldTest {
         Layer layer = instance.getNewLayer();
         Place place = new Place("MyPlace", x, y, layer);
         try {
-            instance.put(place);
+            instance.putPlace(place);
 
             Place result = instance.getPlace(place.getId());
             assertEquals(place, result);
@@ -139,13 +126,13 @@ public class WorldTest {
 
         Place place2 = new Place("MyPlace", x, y, layer);
         try {
-            instance.put(place2);
+            instance.putPlace(place2);
             fail();
         } catch (Exception ex) {}
     }
 
     /**
-     * Test of put method, of class World.
+     * Test of putPlace method, of class World.
      */
     @Test
     public void testPut_4args() {
@@ -154,8 +141,8 @@ public class WorldTest {
         World world = new World("My World");
         Layer l1 = new Layer(world);
         Layer l2 = new Layer(world);
-        world.setLayer(l1);
-        world.setLayer(l2);
+        world.addLayer(l1);
+        world.addLayer(l2);
 
         int x = 1;
         int y = 4;
@@ -165,20 +152,20 @@ public class WorldTest {
         Place pl3 = new Place("Third Place", x, y, l2);
 
         try {
-            world.put(pl1);
-            world.put(pl2);
-            world.put(pl3);
+            world.putPlace(pl1);
+            world.putPlace(pl2);
+            world.putPlace(pl3);
         } catch (Layer.PlaceNotInsertedException ex) {
             fail(ex.getMessage());
         } catch (Exception ex) {
             fail(ex.getMessage());
         }
 
-        Place result = world.get(l1.getId(), x, y);
+        Place result = world.getPlace(l1.getId(), x, y);
         assertEquals(pl1, result);
-        result = world.get(l1.getId(), x + 1, y - 6);
+        result = world.getPlace(l1.getId(), x + 1, y - 6);
         assertEquals(pl2, result);
-        result = world.get(l2.getId(), x, y);
+        result = world.getPlace(l2.getId(), x, y);
         assertEquals(pl3, result);
     }
 
@@ -191,7 +178,7 @@ public class WorldTest {
 
         World world = new World("My World");
         Layer l1 = new Layer(world);
-        world.setLayer(l1);
+        world.addLayer(l1);
 
         int x = 1;
         int y = 4;
@@ -202,7 +189,7 @@ public class WorldTest {
     }
 
     /**
-     * Test of remove method, of class World.
+     * Test of removePlace method, of class World.
      */
     @Test
     public void testRemove() {
@@ -210,56 +197,20 @@ public class WorldTest {
 
         World world = new World("My World");
         Layer l1 = new Layer(world);
-        world.setLayer(l1);
+        world.addLayer(l1);
 
         int x = 1;
         int y = 4;
 
         Place place = new Place("MyPlace", x, y, l1);
         try {
-            world.put(place);
+            world.putPlace(place);
             assertTrue(l1.exist(x, y));
-            world.remove(place);
+            world.removePlace(place);
             assertFalse(l1.exist(x, y));
         } catch (Exception ex) {
             fail(ex.getMessage());
         }
-    }
-
-    /**
-     * Test of getPlaceNameCount method, of class World.
-     */
-    @Test
-    public void testGetPlaceNameCount() {
-        System.out.println("getPlaceNameCount");
-
-        String name = "MyPlace";
-        World instance = new World("My World");
-        int expResult = 0;
-        int result = instance.getPlaceNameCount(name);
-        assertEquals(expResult, result);
-
-        Place pl1 = new Place(name, 1, 2, instance.getNewLayer());
-        try {
-            instance.put(pl1);
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
-
-        expResult = 1;
-        result = instance.getPlaceNameCount(name);
-        assertEquals(expResult, result);
-
-        Place pl2 = new Place(name, 1, 2, instance.getNewLayer());
-        try {
-            instance.put(pl2);
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
-
-        expResult = 2;
-        result = instance.getPlaceNameCount(name);
-        assertEquals(expResult, result);
     }
 
     /**
@@ -278,8 +229,8 @@ public class WorldTest {
         Layer l2 = new Layer(instance);
 
         /*
-        instance.setLayer(l1);
-        instance.setLayer(l2);
+        instance.addLayer(l1);
+        instance.addLayer(l2);
         */
 
         result = instance.getLayer(l1.getId());
@@ -289,7 +240,7 @@ public class WorldTest {
     }
 
     /**
-     * Test of setLayer method, of class World.
+     * Test of addLayer method, of class World.
      */
     @Test
     public void testSetLayer() {
@@ -298,8 +249,8 @@ public class WorldTest {
         World instance = new World("MyWorld");
         Layer l1 = new Layer(instance);
         Layer l2 = new Layer(instance);
-        instance.setLayer(l1);
-        instance.setLayer(l2);
+        instance.addLayer(l1);
+        instance.addLayer(l2);
 
         Layer result = instance.getLayer(l1.getId());
         assertEquals(l1, result);
@@ -332,7 +283,7 @@ public class WorldTest {
         Layer layer = instance.getNewLayer();
         Place place = new Place("MyPlace", 3, -4, layer);
         try {
-            instance.put(place);
+            instance.putPlace(place);
             Place result = instance.getPlace(place.getId());
             assertEquals(place, result);
         } catch (Exception ex) {
@@ -358,10 +309,10 @@ public class WorldTest {
         Place place2 = new Place("MyPlace", 0, 0, layer);
         Place place3 = new Place("MyPlace", 2, 65, layer);
         try {
-            instance.put(place1);
-            instance.put(place2);
+            instance.putPlace(place1);
+            instance.putPlace(place2);
             // places should also be returned when added to the layer directly
-            instance.put(place3);
+            instance.putPlace(place3);
 
             places = instance.getPlaces();
             assertEquals(3, places.size());

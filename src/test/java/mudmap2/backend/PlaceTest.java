@@ -682,13 +682,13 @@ public class PlaceTest {
         assertEquals(1, p1.getParents().size());
         assertEquals(2, p2.getParents().size());
 
-        // remove child p1 from instance
+        // removePlace child p1 from instance
         instance.removeChild(p1);
         assertEquals(1, instance.getChildren().size());
         assertEquals(0, p1.getParents().size());
         assertEquals(2, p2.getParents().size());
 
-        // remove child p2 from instance
+        // removePlace child p2 from instance
         instance.removeChild(p2);
         assertEquals(0, instance.getChildren().size());
         assertEquals(0, p1.getParents().size());
@@ -811,7 +811,7 @@ public class PlaceTest {
     }
 
     /**
-     * Test of remove method, of class Place.
+     * Test of removePlace method, of class Place.
      */
     @Test
     public void testRemove() {
@@ -820,7 +820,7 @@ public class PlaceTest {
         int x = 1, y = 2;
         Place instance = new Place("MyPlace", x, y, layer);
 
-        try { // TODO: remove this if place puts itself to layer in constructor
+        try { // TODO: removePlace this if place puts itself to layer in constructor
             layer.put(instance);
         } catch (Layer.PlaceNotInsertedException ex) {
             fail(ex.getMessage());
@@ -912,7 +912,7 @@ public class PlaceTest {
         System.out.println("breadthSearchReset");
         Place instance = null;
         instance.breadthSearchReset();
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO review the generated test code and removePlace the default call to fail.
         fail("The test case is a prototype.");
     }
 
@@ -927,7 +927,7 @@ public class PlaceTest {
         BreadthSearch.BreadthSearchData expResult = null;
         BreadthSearch.BreadthSearchData result = instance.getBreadthSearchData();
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO review the generated test code and removePlace the default call to fail.
         fail("The test case is a prototype.");
     }
 

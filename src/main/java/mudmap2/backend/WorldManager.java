@@ -77,7 +77,7 @@ public class WorldManager {
     }
 
     /**
-     * get all filenames associated to a world
+     * getPlace all filenames associated to a world
      * @param world
      * @return list of filenames or empty list
      */
@@ -117,7 +117,7 @@ public class WorldManager {
         World world = new World(name);
 
         // find unique file name
-        String shortname = name.replaceAll("\\s", ""); // remove whitespaces
+        String shortname = name.replaceAll("\\s", ""); // removePlace whitespaces
         String filename = shortname;
         Integer cnt = 1;
         while((new File(Paths.getWorldsDir() + filename).exists())){

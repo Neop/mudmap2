@@ -35,7 +35,7 @@ import mudmap2.backend.sssp.BreadthSearch;
  */
 public class Place extends LayerElement implements Comparable<Place>, BreadthSearch {
 
-    public static final String placeholderName = "?";
+    public static final String PLACEHOLDER_NAME = "?";
 
     // next id to be assigned
     static int nextID;
@@ -92,8 +92,6 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         comments = new LinkedList<>();
 
         breadthSearchData = null;
-
-        // TODO: put place on layer if not null?
     }
 
     /**
@@ -118,6 +116,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setName(String name){
         this.name = name;
+        callWorldChangeListeners();
     }
 
     /**
@@ -145,6 +144,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         if(getLayer() != null && getLayer().getWorld() != null){
             getLayer().getWorld().addArea(area);
         }
+        callWorldChangeListeners();
     }
 
     /**
@@ -161,6 +161,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setRecLevelMin(int recLevelMin){
         this.recLevelMin = recLevelMin;
+        callWorldChangeListeners();
     }
 
     /**
@@ -177,6 +178,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setRecLevelMax(int recLevelMax){
         this.recLevelMax = recLevelMax;
+        callWorldChangeListeners();
     }
 
     /**
@@ -193,6 +195,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setRiskLevel(RiskLevel riskLevel){
         this.riskLevel = riskLevel;
+        callWorldChangeListeners();
     }
 
     /**
@@ -208,6 +211,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void deleteComments(){
         comments.clear();
+        callWorldChangeListeners();
     }
 
     /**
@@ -271,6 +275,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
             }
         }
         if(!ok) throw new RuntimeException("Couldn't remove path connection (" + this + " [" + dir1 + "] - " + other + " [" + dir2 + "]), path not found");
+        callWorldChangeListeners();
     }
 
     /**
@@ -280,6 +285,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     public void removePath(Path path){
         paths.remove(path);
         path.getOtherPlace(this).paths.remove(path);
+        callWorldChangeListeners();
     }
 
     /**
@@ -320,6 +326,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
                 other.paths.add(path);
             }
         }
+        callWorldChangeListeners();
         return !exit_occupied;
     }
 
@@ -360,6 +367,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setFlag(String key, boolean state){
         flags.put(key, state);
+        callWorldChangeListeners();
     }
 
     /**
@@ -377,6 +385,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     public void connectChild(Place p){
         children.add(p);
         p.parents.add(this);
+        callWorldChangeListeners();
     }
 
     /**
@@ -386,6 +395,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     public void removeChild(Place child){
         children.remove(child);
         child.parents.remove(this);
+        callWorldChangeListeners();
     }
 
     /**
@@ -428,14 +438,16 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Removes all connections to other places (paths, child-connections)
      */
     void removeConnections() {
-        // remove paths (buffer, becaus connected_places will be modified
+        // removePlace paths (buffer, becaus connected_places will be modified
         HashSet<Path> cp_buffer = (HashSet<Path>) paths.clone();
         for(Path p: cp_buffer) p.remove();
-        // remove connection to sub-areas (children / parents)
+        // removePlace connection to sub-areas (children / parents)
         for(Place pl: children) pl.parents.remove(this);
         children.clear();
         for(Place pl: parents) pl.children.remove(this);
         parents.clear();
+
+        callWorldChangeListeners();
     }
 
     /**
@@ -444,7 +456,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
     public void remove() throws RuntimeException, PlaceNotFoundException {
-        getLayer().getWorld().remove(this);
+        getLayer().getWorld().removePlace(this);
     }
 
     /**
@@ -515,6 +527,14 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     public BreadthSearchData getBreadthSearchData() {
         if(breadthSearchData == null) breadthSearchData = new BreadthSearchData();
         return breadthSearchData;
+    }
+
+    /**
+     * Call world change listeners on place changes
+     */
+    private void callWorldChangeListeners(){
+        if(getLayer() != null && getLayer().getWorld() != null)
+            getLayer().getWorld().callListeners(this);
     }
 
 }

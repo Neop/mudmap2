@@ -199,7 +199,7 @@ public class LayerTest {
     }
 
     /**
-     * Test of put method, of class Layer.
+     * Test of putPlace method, of class Layer.
      */
     @Test
     public void testPut_3args(){
@@ -239,7 +239,7 @@ public class LayerTest {
     }
 
     /**
-     * Test of put method, of class Layer.
+     * Test of putPlace method, of class Layer.
      */
     @Test
     public void testPut_LayerElement() throws Exception {
@@ -279,7 +279,7 @@ public class LayerTest {
     }
 
     /**
-     * Test of get method, of class Layer.
+     * Test of getPlace method, of class Layer.
      */
     @Test
     public void testGet() {
@@ -407,7 +407,7 @@ public class LayerTest {
     }
 
     /**
-     * Test of remove method, of class Layer.
+     * Test of removePlace method, of class Layer.
      */
     @Test
     public void testRemove() {

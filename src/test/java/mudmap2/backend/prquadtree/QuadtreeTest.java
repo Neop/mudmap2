@@ -469,19 +469,4 @@ public class QuadtreeTest {
         assertTrue(result.contains(object2));
     }
 
-    /**
-     * Test of toString method, of class Quadtree.
-     */
-    @Test
-    @Ignore
-    public void testToString() {
-        System.out.println("toString");
-        Quadtree instance = new Quadtree();
-        String expResult = "";
-        String result = instance.toString();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
 }

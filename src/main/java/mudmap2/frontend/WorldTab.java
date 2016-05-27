@@ -93,23 +93,25 @@ import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceListDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 import mudmap2.frontend.dialog.PlaceSelectionDialog;
+import mudmap2.frontend.sidePanel.LayerPanelListener;
+import mudmap2.frontend.sidePanel.PlacePanelListener;
+import mudmap2.frontend.sidePanel.SidePanel;
 
 /**
  * A tab in the main window that displays a world
  *
  * @author neop
  */
-public class WorldTab extends JPanel {
+public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelListener {
     private static final long serialVersionUID = 1L;
 
     World world;
     String filename;
 
-    static boolean showPathsCurved = true;
-
     // GUI elements
     JFrame parent;
     WorldPanel worldpanel;
+    SidePanel sidePanel;
     JSlider sliderZoom;
     JPanel panelSouth;
     ScrollLabel labelInfobar;
@@ -246,6 +248,11 @@ public class WorldTab extends JPanel {
 
         worldpanel = new WorldPanel(this, passive);
         add(worldpanel, BorderLayout.CENTER);
+
+        sidePanel = new SidePanel(world);
+        add(sidePanel, BorderLayout.EAST);
+        sidePanel.addLayerPanelListener(this);
+        sidePanel.addPlacePanelListener(this);
 
         add(panelSouth = new JPanel(), BorderLayout.SOUTH);
         panelSouth.setLayout(new GridBagLayout());
@@ -390,16 +397,16 @@ public class WorldTab extends JPanel {
      * Returns true if curved path lines are enabled
      * @return
      */
-    public static boolean getShowPathsCurved(){
-        return showPathsCurved;
+    public boolean getPathsCurved(){
+        return ((MapPainterDefault) this.worldpanel.mappainter).getPathsCurved();
     }
 
     /**
      * Enables or disables curved path lines
      * @param b
      */
-    public static void setShowPathsCurved(boolean b){
-        showPathsCurved = b;
+    public void setPathsCurved(boolean b){
+        ((MapPainterDefault) this.worldpanel.mappainter).setPathsCurved(b);
     }
 
     /**
@@ -509,14 +516,6 @@ public class WorldTab extends JPanel {
     }
 
     public void updateCursorEnabled(){
-        /*if(update_check_button){
-            JCheckBoxMenuItem mi_show_place_selection = ((Mainwindow) parent).getMiShowPlaceSelection();
-            if(mi_show_place_selection != null){
-                mi_show_place_selection.setState(getCursorEnabled());
-                mi_show_place_selection.setEnabled(!forceSelection);
-            }
-        }*/
-
         updateInfobar();
         repaint();
     }
@@ -573,7 +572,7 @@ public class WorldTab extends JPanel {
      */
     public void pushPosition(WorldCoordinate _pos){
         WorldCoordinate pos = _pos.clone();
-        // remove all entries after the current one
+        // removePlace all entries after the current one
         while(positionsCurIndex > 0){
             positions.pop();
             positionsCurIndex--;
@@ -805,12 +804,57 @@ public class WorldTab extends JPanel {
             if(place != null)
                 for(CursorListener listener: cursorListeners)
                     listener.placeSelected(place);
-            else{
+            else {
                 Layer layer = getWorld().getLayer(getCurPosition().getLayer());
                 for(CursorListener listener: cursorListeners)
                     listener.placeDeselected(layer, getCursorX(), getCursorY());
             }
         }
+    }
+
+    @Override
+    public void layerSelected(Layer layer, MouseEvent event) {
+        switch(event.getButton()){
+            case MouseEvent.BUTTON1: // left click -> go to layer
+                pushPosition(new WorldCoordinate(layer.getId(), layer.getCenterX(), layer.getCenterY()));
+                break;
+            case MouseEvent.BUTTON3: // right click -> set name
+                if(!passive){
+                    String name;
+                    if(layer.hasName()){
+                        name = JOptionPane.showInputDialog(this, "Map name", layer.getName());
+                        if(name != null){
+                            if(name.isEmpty()){
+                                layer.setName(null);
+                                System.out.println("set null");
+                            } else {
+                                layer.setName(name);
+                            }
+                            sidePanel.update();
+                        } else System.out.println("null");
+                    } else {
+                        name = JOptionPane.showInputDialog(this, "Map name");
+                        if(name != null && !name.isEmpty()){
+                            layer.setName(name);
+                            sidePanel.update();
+                        }
+                    }
+                }
+                break;
+        }
+        repaint();
+    }
+
+    @Override
+    public void createLayer() {
+        pushPosition(new WorldCoordinate(world.getNewLayer().getId(), 0, 0));
+        repaint();
+    }
+
+    @Override
+    public void placeSelected(Place place) {
+        pushPosition(place.getCoordinate());
+        repaint();
     }
 
     public interface CursorListener{
@@ -915,33 +959,6 @@ public class WorldTab extends JPanel {
     public HashSet<Place> placeGroupGetSelection(){
         if(placeGroupBoxStart != null) placeGroupBoxSelectionToList();
         return placeGroup;
-    }
-
-    /**
-     * Returns true, if a place is selected by group selection
-     * @param place
-     * @return
-     */
-    private boolean placeGroupIsSelected(Place place){
-        if(place != null){
-            if(placeGroupBoxEnd != null && placeGroupBoxStart != null
-                && placeGroupBoxEnd.getLayer() == place.getLayer().getId()){
-                int x1 = (int) Math.round(placeGroupBoxEnd.getX());
-                int x2 = (int) Math.round(placeGroupBoxStart.getX());
-                int y1 = (int) Math.round(placeGroupBoxEnd.getY());
-                int y2 = (int) Math.round(placeGroupBoxStart.getY());
-
-                int x_min = Math.min(x1, x2);
-                int x_max = Math.max(x1, x2);
-                int y_min = Math.min(y1, y2);
-                int y_max = Math.max(y1, y2);
-
-                if(place.getX() >= x_min && place.getX() <= x_max
-                    && place.getY() >= y_min && place.getY() <= y_max) return true;
-            }
-            if(placeGroup.contains(place)) return true;
-        }
-        return false;
     }
 
     /**
@@ -1059,9 +1076,9 @@ public class WorldTab extends JPanel {
          * Constructs a world panel
          * @param _parent parent world tab
          */
-        public WorldPanel(WorldTab _parent, boolean _passive) {
-            parent = _parent;
-            passive = _passive;
+        public WorldPanel(WorldTab _parent, boolean passive) {
+            this.parent = _parent;
+            this.passive = passive;
             mappainter = new MapPainterDefault();
 
             setFocusable(true);
@@ -1562,7 +1579,7 @@ public class WorldTab extends JPanel {
                             if(parent.getCursorEnabled()) parent.moveCursor(+1, +1);
                             break;
 
-                        case KeyEvent.VK_SPACE: // add or remove single place to place group selection
+                        case KeyEvent.VK_SPACE: // add or removePlace single place to place group selection
                             Place place = parent.getSelectedPlace();
                             if(place != null) parent.placeGroupAdd(place);
                             break;
@@ -1584,41 +1601,41 @@ public class WorldTab extends JPanel {
                         switch(arg0.getKeyCode()){
                             case KeyEvent.VK_NUMPAD8:
                             case KeyEvent.VK_UP:
-                            case KeyEvent.VK_W: // remove path to direction 'n'
+                            case KeyEvent.VK_W: // removePlace path to direction 'n'
                                     path = place.getPathTo("n");
                                     if(path != null) place.removePath(path);
                                 break;
-                            case KeyEvent.VK_NUMPAD9: // remove path to direction 'ne'
+                            case KeyEvent.VK_NUMPAD9: // removePlace path to direction 'ne'
                                     path = place.getPathTo("ne");
                                     if(path != null) place.removePath(path);
                                 break;
                             case KeyEvent.VK_NUMPAD6:
                             case KeyEvent.VK_RIGHT:
-                            case KeyEvent.VK_D: // remove path to direction 'e'
+                            case KeyEvent.VK_D: // removePlace path to direction 'e'
                                     path = place.getPathTo("e");
                                     if(path != null) place.removePath(path);
                                 break;
-                            case KeyEvent.VK_NUMPAD3: // remove path to direction 'se'
+                            case KeyEvent.VK_NUMPAD3: // removePlace path to direction 'se'
                                     path = place.getPathTo("se");
                                     if(path != null) place.removePath(path);
                                 break;
                             case KeyEvent.VK_NUMPAD2:
                             case KeyEvent.VK_DOWN:
-                            case KeyEvent.VK_S: // remove path to direction 's'
+                            case KeyEvent.VK_S: // removePlace path to direction 's'
                                     path = place.getPathTo("s");
                                     if(path != null) place.removePath(path);
                                 break;
-                            case KeyEvent.VK_NUMPAD1: // remove path to direction 'sw'
+                            case KeyEvent.VK_NUMPAD1: // removePlace path to direction 'sw'
                                     path = place.getPathTo("sw");
                                     if(path != null) place.removePath(path);
                                 break;
                             case KeyEvent.VK_NUMPAD4:
                             case KeyEvent.VK_LEFT:
-                            case KeyEvent.VK_A: // remove path to direction 'w'
+                            case KeyEvent.VK_A: // removePlace path to direction 'w'
                                     path = place.getPathTo("w");
                                     if(path != null) place.removePath(path);
                                 break;
-                            case KeyEvent.VK_NUMPAD7: // remove path to direction 'nw'
+                            case KeyEvent.VK_NUMPAD7: // removePlace path to direction 'nw'
                                     path = place.getPathTo("nw");
                                     if(path != null) place.removePath(path);
                                 break;
@@ -1656,10 +1673,10 @@ public class WorldTab extends JPanel {
                         case KeyEvent.VK_F:
                             if(parent.getCursorEnabled()){
                                 Place place = parent.getSelectedPlace();
-                                // create placeholder or remove one
+                                // create placeholder or removePlace one
                                 if(place == null){
                                     parent.world.putPlaceholder(parent.getCurPosition().getLayer(), parent.getCursorX(), parent.getCursorY());
-                                } else if(place.getName().equals(Place.placeholderName)){
+                                } else if(place.getName().equals(Place.PLACEHOLDER_NAME)){
                                     try {
                                         place.remove();
                                     } catch (RuntimeException ex) {
@@ -1673,7 +1690,7 @@ public class WorldTab extends JPanel {
                             }
                             parent.repaint();
                             break;
-                        // remove place
+                        // removePlace place
                         case KeyEvent.VK_DELETE:
                         case KeyEvent.VK_R:
                             if(!parent.placeGroupHasSelection()){ // no places selected
@@ -1715,7 +1732,7 @@ public class WorldTab extends JPanel {
                             }
                             break;
 
-                        case KeyEvent.VK_SPACE: // add or remove single place to place group selection
+                        case KeyEvent.VK_SPACE: // add or removePlace single place to place group selection
                             place = parent.getSelectedPlace();
                             if(place != null) parent.placeGroupAdd(place);
                             break;
@@ -1741,8 +1758,8 @@ public class WorldTab extends JPanel {
 
             /**
              * Constructs a context menu at position (x,y)
-             * @param x screen / panel coordinate x
-             * @param y screen / panel coordinate y
+             * @param px screen / panel coordinate x
+             * @param py screen / panel coordinate y
              */
             public TabContextMenu(WorldTab parent, Integer px, Integer py) {
                 addPopupMenuListener(new TabContextPopMenuListener());
@@ -1851,7 +1868,7 @@ public class WorldTab extends JPanel {
                         }
                     }
 
-                    // get all connected places
+                    // getPlace all connected places
                     HashSet<Path> paths = place.getPaths();
 
                     if(!paths.isEmpty()){

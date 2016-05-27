@@ -56,7 +56,7 @@ public class PlaceListDialog extends ActionDialog{
     public PlaceListDialog(WorldTab parent, boolean modal){
         super(parent.get_parent(), "Place list - " + parent.getWorld().getName(), modal);
         this.parent = parent;
-        // get places later, in case something changes
+        // getPlace places later, in case something changes
         //places = new ArrayList<Place>(parent.getWorld().getPlaces());
     }
   

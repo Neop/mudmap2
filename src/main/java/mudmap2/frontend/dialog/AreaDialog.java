@@ -17,7 +17,7 @@
 
 /*  File description
  *
- *  The area dialog is used to create, modify and remove areas
+ *  The area dialog is used to create, modify and removePlace areas
  */
 package mudmap2.frontend.dialog;
 
@@ -37,7 +37,7 @@ import mudmap2.backend.World;
 import mudmap2.frontend.GUIElement.ColorChooserButton;
 
 /**
- * The area dialog is used to create, modify and remove areas
+ * The area dialog is used to create, modify and removePlace areas
  * @author neop
  */
 public class AreaDialog extends ActionDialog {

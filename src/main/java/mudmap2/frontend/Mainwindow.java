@@ -31,13 +31,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -55,10 +48,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import mudmap2.Paths;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
-import mudmap2.backend.WorldFileReader.current.WorldFileMM1;
 import mudmap2.backend.WorldManager;
 import mudmap2.backend.html.GaardianMap;
 import mudmap2.frontend.dialog.AboutDialog;
@@ -118,7 +109,6 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         });
 
         initGui();
-        readConfig();
 
         // ---
         tabbed_pane = new JTabbedPane();
@@ -309,65 +299,9 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
      * Saves all config
      */
     public void quit(){
-        writeConfig();
         closeTabs();
         WorldFileList.writeWorldList();
         System.exit(0);
-    }
-
-    /**
-     * Reads MUD Map config file
-     */
-    public void readConfig(){
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(mudmap2.Paths.getConfigFile()));
-
-            String line;
-            int file_major = 0, file_minor = 0;
-
-            try {
-                while((line = reader.readLine()) != null){
-                    line = line.trim();
-
-                    if(line.startsWith("ver")){
-                        String[] tmp = line.substring(4).split("\\.");
-                        file_major = Integer.parseInt(tmp[0]);
-                        file_minor = Integer.parseInt(tmp[1]);
-                    } else if(line.startsWith("show_paths_curved")){ // show curved path lines - if path lines are enabled
-                        String[] tmp = line.split(" ");
-                        WorldTab.setShowPathsCurved(Boolean.parseBoolean(tmp[1]));
-                    } else if(line.startsWith("compat_mudmap_1")){ // save world files compatible to mudmap 1
-                        String[] tmp = line.split(" ");
-                        WorldFileMM1.compatibility_mudmap_1 = Boolean.parseBoolean(tmp[1]);
-                    }
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (FileNotFoundException ex) {
-            System.out.println("Couldn't open config file \"" + mudmap2.Paths.getConfigFile() + "\", file not found");
-            //Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
-        }
-
-        if(menu_edit_curved_paths != null) menu_edit_curved_paths.setSelected(WorldTab.getShowPathsCurved());
-    }
-
-    /**
-     * Writes MUD Map config file
-     */
-    public void writeConfig(){
-        // open file
-        if(!Paths.isDirectory(Paths.getUserDataDir())) Paths.createDirectory(Paths.getUserDataDir());
-
-        try (PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(Paths.getConfigFile())))) {
-            outstream.println("# MUD Map 2 config file");
-            outstream.println("ver " + config_file_version_major + "." + config_file_version_minor);
-            outstream.println("show_paths_curved " + WorldTab.getShowPathsCurved());
-            outstream.println("compat_mudmap_1 " + WorldFileMM1.compatibility_mudmap_1);
-        } catch (IOException ex) {
-            System.out.printf("Couldn't write config file " + Paths.getConfigFile());
-            Logger.getLogger(Mainwindow.class.getName()).log(Level.WARNING, null, ex);
-        }
     }
 
     @Override
@@ -449,8 +383,10 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
     public void stateChanged(ChangeEvent e) {
         WorldTab wt = getSelectedTab();
         if(e.getSource() == menu_edit_curved_paths){
-            WorldTab.setShowPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
-            if(wt != null) wt.repaint();
+            if(wt != null){
+                wt.setPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                wt.repaint();
+            }
         } else if(e.getSource() == menu_edit_show_cursor){
             if(wt != null){
                 wt.setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());

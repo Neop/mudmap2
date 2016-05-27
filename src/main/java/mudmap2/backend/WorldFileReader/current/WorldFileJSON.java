@@ -115,7 +115,7 @@ public class WorldFileJSON extends WorldFile {
                         "could not read world file version", null);
             }
 
-            // get world name
+            // getPlace world name
             String worldName = "";
             if(root.has("worldName")) worldName = root.getString("worldName");
             if(worldName.isEmpty()) {
@@ -220,17 +220,22 @@ public class WorldFileJSON extends WorldFile {
                 Integer length = layers.length();
                 for(Integer i = 0; i < length; ++i){
                     JSONObject layer = layers.getJSONObject(i);
-                    if(layer.has("id")
-                            && layer.has("centerX")
-                            && layer.has("centerY")){
+                    if(layer.has("id")){
                         Integer id = layer.getInt("id");
-                        Integer centerX = layer.getInt("centerX");
-                        Integer centerY = layer.getInt("centerY");
                         // create layer
                         Layer l = new Layer(id, world);
-                        // set quadtree center
-                        l.setQuadtree(centerX, centerY);
-                        world.setLayer(l);
+
+                        if(layer.has("centerX") && layer.has("centerY")){
+                            // set quadtree center
+                            Integer centerX = layer.getInt("centerX");
+                            Integer centerY = layer.getInt("centerY");
+                            l.setQuadtree(centerX, centerY);
+                        }
+                        if(layer.has("name")){
+                            // set layer name
+                            l.setName(layer.getString("name"));
+                        }
+                        world.addLayer(l);
                     }
                 }
             }
@@ -294,7 +299,7 @@ public class WorldFileJSON extends WorldFile {
                         if(place.has("p")){
                             JSONArray parents = place.getJSONArray("p");
                             HashSet<Integer> set = new HashSet<>();
-                            parentMapping.put(p, set);
+                            parentMapping.putPlace(p, set);
 
                             Integer lp = parents.length();
                             for(Integer pa = 0; pa < lp; ++pa){
@@ -321,7 +326,7 @@ public class WorldFileJSON extends WorldFile {
                             }
                         }
 
-                        world.put(p);
+                        world.putPlace(p);
                     }
                 }
             }
@@ -463,7 +468,7 @@ public class WorldFileJSON extends WorldFile {
         Integer cnt = 0; // incremental id
         for(Area a: world.getAreas()){
             Boolean inUse = false;
-            // remove unused
+            // removePlace unused
             for(Place place: world.getPlaces()){
                 if(place.getArea() == a){
                     inUse = true;
@@ -492,16 +497,20 @@ public class WorldFileJSON extends WorldFile {
         JSONArray layers = new JSONArray();
         root.put("layers", layers);
         for(Layer layer: world.getLayers()){
-            JSONObject layerObj = new JSONObject();
+            if(!layer.getPlaces().isEmpty()){
+                JSONObject layerObj = new JSONObject();
 
-            // add layer to id map
-            Integer layerID = nextLayerID++;
-            layerIDs.put(layer.getId(), layerID);
+                // add layer to id map
+                Integer layerID = nextLayerID++;
+                layerIDs.put(layer.getId(), layerID);
 
-            layerObj.put("id", layerID);
-            layerObj.put("centerX", layer.getCenterX());
-            layerObj.put("centerY", layer.getCenterY());
-            layers.put(layerObj);
+                layerObj.put("id", layerID);
+                layerObj.put("centerX", layer.getCenterX());
+                layerObj.put("centerY", layer.getCenterY());
+                if(layer.hasName()) layerObj.put("name", layer.getName());
+
+                layers.put(layerObj);
+            }
         }
 
         // places

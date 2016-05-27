@@ -17,7 +17,7 @@
 
 /*  File description
  *
- *  The place remove dialog removes a place from the map after asking the user
+ *  The place removePlace dialog removes a place from the map after asking the user
  */
 package mudmap2.frontend.dialog;
 
@@ -33,7 +33,7 @@ import mudmap2.backend.Place;
 import mudmap2.backend.World;
 
 /**
- * The place remove dialog removes a place from the map after asking the user
+ * The place removePlace dialog removes a place from the map after asking the user
  * @author neop
  */
 public class PlaceRemoveDialog implements ActionListener {
@@ -66,11 +66,11 @@ public class PlaceRemoveDialog implements ActionListener {
         if(ret == 0){
             places_removed = true;
             try {
-                if(place != null) // remove single place
-                    world.remove(place);
-                else if(places != null) // remove multiple places
+                if(place != null) // removePlace single place
+                    world.removePlace(place);
+                else if(places != null) // removePlace multiple places
                     for(Place pl: places)
-                        world.remove(pl);
+                        world.removePlace(pl);
                 parent.repaint();
             } catch (RuntimeException ex) {
                 Logger.getLogger(PlaceRemoveDialog.class.getName()).log(Level.SEVERE, null, ex);

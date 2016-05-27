@@ -208,7 +208,7 @@ public class WorldFileMM1 extends WorldFile {
     }
 
     private void readFileVersion(String line) throws Exception{
-        // remove tag and split version
+        // removePlace tag and split version
         String[] tmp = safeSplit(line.substring(4), ".", 2);
 
         file_major = Integer.parseInt(tmp[0]);
@@ -319,7 +319,7 @@ public class WorldFileMM1 extends WorldFile {
 
         // create the layer, if it doesn't exist
         Layer l = world.getLayer(layer);
-        if(l == null) world.setLayer(l = new Layer(layer, world));
+        if(l == null) world.addLayer(l = new Layer(layer, world));
         if(l.isEmpty() && layer_center.containsKey(layer)){
             Pair<Integer, Integer> p = layer_center.get(layer);
             l.setQuadtree(p.first, p.second);
@@ -330,7 +330,7 @@ public class WorldFileMM1 extends WorldFile {
             cur_place = new Place(cur_place_id, cur_place_name, Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), world.getLayer(Integer.parseInt(tmp[1])));
             cur_place.setRiskLevel(risk_level_default);
             try {
-                world.put(cur_place);
+                world.putPlace(cur_place);
             } catch (Exception ex) {
                 Logger.getLogger(WorldFileMM1.class.getName()).log(Level.SEVERE, null, ex);
                 int ret = JOptionPane.showConfirmDialog(null, "Could not add place " + cur_place.getName() + " to world. Continue?", "Loading world", JOptionPane.YES_NO_OPTION);
@@ -565,7 +565,7 @@ public class WorldFileMM1 extends WorldFile {
         Integer cnt = 0;
         for(Area a: world.getAreas()){
             Boolean inUse = false;
-            // remove unused
+            // removePlace unused
             for(Place place: world.getPlaces()){
                 if(place.getArea() == a){
                     inUse = true;
