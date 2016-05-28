@@ -53,7 +53,7 @@ public class SidePanel extends JPanel {
     }
 
     public void update(){
-        layerPanel.updateLayerPanels();
+        layerPanel.update();
         placePanel.update();
     }
 

@@ -51,7 +51,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -66,7 +65,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -90,7 +88,6 @@ import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
-import mudmap2.frontend.dialog.PlaceListDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 import mudmap2.frontend.dialog.PlaceSelectionDialog;
 import mudmap2.frontend.sidePanel.LayerPanelListener;
@@ -282,31 +279,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             }
         });
 
-        JButton button_list = new JButton("List");
-        constraints.gridx++;
-        panelSouth.add(button_list, constraints);
-        button_list.addActionListener(new PlaceListDialog(this, passive)); // passive WorldTab creates modal PlaceListDialogs
-
-        JTextField textfield_search = new JTextField("Search");
-        constraints.gridx++;
-        panelSouth.add(textfield_search, constraints);
-        textfield_search.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                String[] keywords = ((JTextField) arg0.getSource()).getText().toLowerCase().split(" ");
-                ArrayList<Place> found_places = new ArrayList<>();
-
-                // search
-                for(Place pl: getWorld().getPlaces())
-                    if(pl.matchKeywords(keywords)) found_places.add(pl);
-
-                // display
-                if(found_places.isEmpty()) JOptionPane.showMessageDialog(parent, "No places found!", "Search - " + getWorld().getName(), JOptionPane.PLAIN_MESSAGE);
-                else (new PlaceListDialog(WorldTab.this, found_places, passive)).setVisible(true);
-            }
-        });
-
-
         constraints.gridx++;
         constraints.weightx = 1.0;
         constraints.fill = GridBagConstraints.BOTH;
@@ -328,7 +300,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                 setTileSize((int) ((double) TILE_SIZE_MAX * ((JSlider) arg0.getSource()).getValue() / 100.0));
             }
         });
-        // ---
 
         cursorListeners = new LinkedList<>();
     }
@@ -391,6 +362,14 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
      */
     public int getPanelHeight(){
         return (int) worldpanel.getScreenHeight();
+    }
+
+    /**
+     * Set visibility of the side panel
+     * @param b
+     */
+    public void setSidePanelVisible(Boolean b){
+        sidePanel.setVisible(b);
     }
 
     /**
@@ -1356,11 +1335,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                         case KeyEvent.VK_H:
                         case KeyEvent.VK_HOME:
                             parent.gotoHome();
-                            break;
-
-                        // show place list
-                        case KeyEvent.VK_L:
-                            (new PlaceListDialog(parent, passive)).setVisible(true);
                             break;
 
                         // reset place group selection

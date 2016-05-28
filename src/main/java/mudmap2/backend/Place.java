@@ -472,9 +472,6 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         // search in comments
         for(String comment: comments)
             if(comment.toLowerCase().contains(keyword)) return true;
-        // search in flags
-        for(Entry<String, Boolean> flag: flags.entrySet())
-            if(flag.getValue() && flag.getKey().toLowerCase().contains(keyword)) return true;
         return false;
     }
 

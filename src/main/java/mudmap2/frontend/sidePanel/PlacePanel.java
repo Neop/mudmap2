@@ -17,12 +17,19 @@
 package mudmap2.frontend.sidePanel;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -45,12 +52,15 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
     World world;
 
     JTree tree;
+    DefaultMutableTreeNode root;
 
     HashMap<Layer, LayerTreeNode> layerNodes;
     HashMap<Place, PlaceTreeNode> placeNodes;
 
     HashSet<LayerPanelListener> layerListeners;
     HashSet<PlacePanelListener> placeListeners;
+
+    Boolean useKeywords;
 
     public PlacePanel(World world){
         this.world = world;
@@ -62,42 +72,81 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
         layerListeners = new HashSet<>();
         placeListeners = new HashSet<>();
 
-        update();
-    }
+        useKeywords = false;
 
-    public final void update(){
-        removeAll();
+        JTextField textFieldSearch = new JTextField("Search");
+        textFieldSearch.setToolTipText("Search for places");
+        textFieldSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                update(((JTextField) e.getSource()).getText());
+            }
+        });
+        add(textFieldSearch, BorderLayout.SOUTH);
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(world.getName());
+        root = new DefaultMutableTreeNode(world.getName());
         tree = new JTree(root);
         tree.getSelectionModel().addTreeSelectionListener(this);
 
         JScrollPane scrollPane = new JScrollPane(tree,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        add(scrollPane);
+        add(scrollPane, BorderLayout.CENTER);
+
+        update();
+    }
+
+    public final void update(){
+        update("");
+    }
+
+    /**
+     * Creates the
+     * @param keyword
+     */
+    public final void update(String keyword){
+        root.removeAllChildren();
+        layerNodes.clear();
+        placeNodes.clear();
 
         ArrayList<Layer> layerList = new ArrayList<>(world.getLayers());
         Collections.sort(layerList, new AlphanumComparator<>());
+
+        String[] keywords;
+        if(keyword.isEmpty()){
+            keywords = new String[0];
+            useKeywords = false;
+        } else {
+            keywords = keyword.split(" ");
+            useKeywords = true;
+        }
 
         for(Layer layer: layerList){
             LayerTreeNode layerNode = new LayerTreeNode(layer);
             root.add(layerNode);
             layerNodes.put(layer, layerNode);
 
-
             HashSet<Place> places = layer.getPlaces();
             ArrayList<Place> placeList = new ArrayList<>(places);
             Collections.sort(placeList, new AlphanumComparator<>());
 
             for(Place place: placeList){
-                PlaceTreeNode placeNode = new PlaceTreeNode(place);
-                layerNode.add(placeNode);
-                placeNodes.put(place, placeNode);
+                if(!useKeywords || place.matchKeywords(keywords)){
+                    PlaceTreeNode placeNode = new PlaceTreeNode(place);
+                    layerNode.add(placeNode);
+                    placeNodes.put(place, placeNode);
+                }
             }
         }
 
-        tree.expandRow(0);
+        // remove empty layer nodes
+        if(useKeywords){
+            for(LayerTreeNode layerNode: layerNodes.values()){
+                if(layerNode.getChildCount() == 0) layerNode.removeFromParent();
+            }
+        }
+
+        ((DefaultTreeModel) tree.getModel()).reload();
         tree.setShowsRootHandles(true);
         tree.setRootVisible(false);
     }
@@ -147,28 +196,30 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
 
     @Override
     public void WorldChanged(Object source) {
-        if(source instanceof Layer){
-            if(layerNodes.containsKey((Layer) source)){
-                layerNodes.get((Layer) source).update();
-            } else { // new layer
-                update();
-            }
-        } else if(source instanceof Place){
-            Place place = (Place) source;
-            if(placeNodes.containsKey(place)){
-                placeNodes.get(place).update();
-            } else if(layerNodes.containsKey(place.getLayer())) { // new place
-                HashSet<Place> places = place.getLayer().getPlaces();
-                ArrayList<Place> placeList = new ArrayList<>(places);
-                Collections.sort(placeList, new AlphanumComparator<>());
+        if(!useKeywords){ // don't update when keywords/search is in use
+            if(source instanceof Layer){
+                if(layerNodes.containsKey((Layer) source)){
+                    layerNodes.get((Layer) source).update();
+                } else { // new layer
+                    update();
+                }
+            } else if(source instanceof Place){
+                Place place = (Place) source;
+                if(placeNodes.containsKey(place)){
+                    placeNodes.get(place).update();
+                } else if(layerNodes.containsKey(place.getLayer())) { // new place
+                    HashSet<Place> places = place.getLayer().getPlaces();
+                    ArrayList<Place> placeList = new ArrayList<>(places);
+                    Collections.sort(placeList, new AlphanumComparator<>());
 
-                Integer pos = placeList.indexOf(place);
+                    Integer pos = placeList.indexOf(place);
 
-                PlaceTreeNode placeNode = new PlaceTreeNode(place);
-                placeNodes.put(place, placeNode);
-                layerNodes.get(place.getLayer()).insert(placeNode, pos);
+                    PlaceTreeNode placeNode = new PlaceTreeNode(place);
+                    placeNodes.put(place, placeNode);
+                    layerNodes.get(place.getLayer()).insert(placeNode, pos);
 
-                ((DefaultTreeModel) tree.getModel()).reload();
+                    ((DefaultTreeModel) tree.getModel()).reload();
+                }
             }
         }
     }

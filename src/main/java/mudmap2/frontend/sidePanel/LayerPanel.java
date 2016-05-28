@@ -18,6 +18,7 @@ package mudmap2.frontend.sidePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -26,12 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import mudmap2.backend.Layer;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldChangeListener;
@@ -61,15 +62,23 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
         panels = new HashMap<>();
 
         setLayout(new BorderLayout());
-        updateLayerPanels();
-    }
 
-    public final void updateLayerPanels(){
-        removeAll();
+        JPanel south = new JPanel(new GridLayout(2, 1));
+
+        // search box
+        JTextField textFieldSearch = new JTextField("Search");
+        south.add(textFieldSearch);
+        textFieldSearch.setToolTipText("Search for layers");
+        textFieldSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                update(((JTextField) e.getSource()).getText());
+            }
+        });
 
         // add button
         JButton buttonAdd = new JButton("Add new map");
-        add(buttonAdd, BorderLayout.SOUTH);
+        south.add(buttonAdd);
         buttonAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -78,6 +87,23 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
                 }
             }
         });
+
+        add(south, BorderLayout.SOUTH);
+
+
+        update();
+    }
+
+    public final void update(){
+        update("");
+    }
+
+    public final void update(String keyword){
+        panels.clear();
+        if(scrollPane != null){
+            BorderLayout layout = (BorderLayout) getLayout();
+            remove(layout.getLayoutComponent(BorderLayout.CENTER));
+        }
 
         // create content panel
         JPanel contentPanel = new JPanel();
@@ -93,14 +119,31 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
         ArrayList<Layer> layerList = new ArrayList<>(world.getLayers());
         Collections.sort(layerList, new AlphanumComparator<>());
 
+        Boolean hasKeywords = keyword != null && !keyword.isEmpty();
+        String[] keywords = keyword.toLowerCase().split(" ");
+        System.out.println("hkw " + hasKeywords + " " + keywords.length);
         // add layers to content panel
         for(Layer layer: layerList){
+            if(hasKeywords){
+                Boolean found = false;
+                for(String key: keywords){
+                    if(layer.getName().toLowerCase().contains(key)){
+                        found = true;
+                        break;
+                    };
+                }
+                if(!found) continue;
+            }
+
             JPanel preview = createLayerPanel(layer);
             contentPanel.add(preview);
 
             panels.put(preview, layer);
             preview.addMouseListener(this);
         }
+
+        revalidate();
+        repaint();
     }
 
     /**
@@ -179,7 +222,7 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
     public void WorldChanged(Object source) {
         // only recreate panel on layer change
         if(source instanceof Layer){
-            updateLayerPanels();
+            update();
         } else {
             revalidate();
             repaint();

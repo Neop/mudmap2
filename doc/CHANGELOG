@@ -2,6 +2,7 @@
 - new JSON-based file format, the old format is now considered deprecated and new features won't be implemented
 - automatic file type detection
 - place / layer sidebar
+- removed old place list
 - maven build management
 - more unit tests
 - major refactoring

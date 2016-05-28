@@ -53,8 +53,6 @@ public class MapPainterDefault implements MapPainter {
     static final int TILE_BORDER_WIDTH = 10;
     static final int EXIT_RADIUS = 5;
 
-    static final int DRAW_TEXT_THRESHOLD = 40;
-
     HashSet<Place> selectePlaces;
     WorldCoordinate placeSelectionBoxStart, placeSelectionBoxEnd;
     int placeSelectedX, placeSelectedY;
@@ -122,14 +120,6 @@ public class MapPainterDefault implements MapPainter {
             if(selectePlaces != null && selectePlaces.contains(place)) return true;
         }
         return false;
-    }
-
-    /**
-     * Returns true if the tile is large enough to draw text
-     * @return
-     */
-    private boolean getTileDrawText(){
-        return tileSize >= DRAW_TEXT_THRESHOLD;
     }
 
     /**
@@ -316,6 +306,9 @@ public class MapPainterDefault implements MapPainter {
      */
     private LinkedList<String> fitLineLength(String str, FontMetrics fm, int maxLength, int maxLines){
         LinkedList<String> ret;
+
+        if(maxLines == 0) return new LinkedList<>();
+
         if(fm.stringWidth(str) <= maxLength){ // string isn't too long, return it
             ret = new LinkedList<>();
             ret.add(str);
@@ -334,8 +327,8 @@ public class MapPainterDefault implements MapPainter {
                     int lenpx = fm.stringWidth(str.substring(0, (int) Math.ceil(strlen / 1.5)));
                     while(lenpx > maxLength){
                         strlen = (int) Math.ceil(strlen / 1.5);
-                        lenpx = fm.stringWidth(str.substring(0, strlen));
-                        //if(lenpx < maxLength) strlen *= 1.5;
+                        int lenpx2 = fm.stringWidth(str.substring(0, strlen));
+                        lenpx = lenpx2 - ((lenpx <= lenpx2) ? 1 : 0); // prevent infinite loops
                     }
                     break;
                 }
@@ -451,6 +444,7 @@ public class MapPainterDefault implements MapPainter {
         FontMetrics fm = g.getFontMetrics();
         final int maxLines = (int) Math.floor((double)(tileSize - 3 * (tileBorderWidthScaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
         final int maxLineLength = tileSize - 2 * (tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()));
+        final Boolean drawText = fm.stringWidth("WW") < (tileSize - 2 * (getRiskLevelStrokeWidth() + getTileBorderWidth()));
 
         // screen center in world coordinates
         final double screenCenterX = (graphicsWidth / tileSize) / 2.0; // note: wdtwd2
@@ -505,7 +499,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // draw tile center color
-                    if(getTileDrawText()){
+                    if(drawText){
                         g.setColor(layer.getWorld().getTileCenterColor());
                         g.fillRect(placeXpx + tileBorderWidthScaled, placeYpx + tileBorderWidthScaled,
                                 tileSize - 2 * tileBorderWidthScaled, tileSize - 2 * tileBorderWidthScaled);
@@ -521,7 +515,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // draw text, if tiles are large enough
-                    if(getTileDrawText()){
+                    if(drawText){
                         g.setColor(Color.BLACK);
 
                         // place name
@@ -681,7 +675,7 @@ public class MapPainterDefault implements MapPainter {
                     if(tileSize >= 20){
                         // the up / down flags have to be drawn after the
                         // exits to know whether they have to be drawn
-                        if((exitUp || exitDown) && getTileDrawText() && lineNum <= maxLines){
+                        if((exitUp || exitDown) && drawText && lineNum <= maxLines){
                             g.setColor(Color.BLACK);
                             // have some arrows: ￪￬ ↑↓
                             String updownstr = "" + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");

@@ -58,7 +58,6 @@ import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathColorDialog;
-import mudmap2.frontend.dialog.PlaceListDialog;
 import mudmap2.frontend.dialog.SaveWorldDialog;
 
 /**
@@ -367,9 +366,6 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
                 break;
             case "goto_home": // go to home position
                 if(wt != null) wt.gotoHome();
-                break;
-            case "list_places": // show place list
-                if(wt != null) (new PlaceListDialog(wt, false)).setVisible(true);
                 break;
             default:
                 String message = getClass().getName() + ": ActionCommand not recognized";
