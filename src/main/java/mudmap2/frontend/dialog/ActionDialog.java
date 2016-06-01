@@ -33,18 +33,20 @@ import javax.swing.KeyStroke;
 /**
  * Abstract dialog class, the dialog will be created and shown on an
  * ActionEvent or if setVisible(true) gets called
- * 
+ *
  * put the dialog creation / initialisation code in create(){} if possible
- * 
+ *
  * @author neop
  */
 public abstract class ActionDialog extends JDialog implements ActionListener {
-    
+
+    private static final long serialVersionUID = 1L;
+
     boolean created = false;
-    
+
     public ActionDialog(JFrame parent, String title, boolean modal){
         super(parent, title, modal);
-        
+
         // listener for escape key
         getRootPane().registerKeyboardAction(new ActionListener() {
             @Override
@@ -53,9 +55,9 @@ public abstract class ActionDialog extends JDialog implements ActionListener {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
-    
+
     abstract void create();
-    
+
     @Override
     public void setVisible(boolean b){
         if(!created){
@@ -69,5 +71,5 @@ public abstract class ActionDialog extends JDialog implements ActionListener {
     public void actionPerformed(ActionEvent arg0) {
         setVisible(true);
     }
-    
+
 }

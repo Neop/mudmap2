@@ -739,18 +739,4 @@ public class WorldTest {
         }
     }
 
-    /**
-     * Test of clone method, of class World.
-     */
-    @Test
-    public void testClone() {
-        System.out.println("clone");
-
-        World instance = new World("MyWorld");
-        try {
-            instance.clone();
-            fail();
-        } catch (CloneNotSupportedException ex) {}
-    }
-
 }

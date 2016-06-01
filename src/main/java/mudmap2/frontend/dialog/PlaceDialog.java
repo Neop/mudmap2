@@ -45,95 +45,97 @@ import mudmap2.backend.World;
 /**
  * The file dialog is used to create and modify places
  * Derived from MouseListener, so it can be directly attached to buttons
- * 
+ *
  * @author neop
  */
 public class PlaceDialog extends ActionDialog {
+
+    private static final long serialVersionUID = 1L;
 
     World world;
     Place place;
     Layer layer;
     int px, py;
-    
+
     // if this area is choosen, it will be replaced with null
     Area area_null;
-    
+
     JTextField textfield_name;
     JComboBox<Area> combobox_area;
     JComboBox<RiskLevel> combobox_risk;
     JSpinner spinner_rec_lvl_min, spinner_rec_lvl_max;
-    
+
     /**
      * Creates a dialog to modify a place
-     * @param _parent
-     * @param _world
-     * @param _place existing place
+     * @param parent
+     * @param world
+     * @param place existing place
      */
-    public PlaceDialog(JFrame _parent, World _world, Place _place){
-        super(_parent, "Edit place - " + _place, true);
-        
-        world = _world;
-        place = _place;
+    public PlaceDialog(JFrame parent, World world, Place place){
+        super(parent, "Edit place - " + place, true);
+
+        this.world = world;
+        this.place = place;
         layer = place.getLayer();
         px = place.getX();
         py = place.getY();
     }
-    
+
     /**
      * Creates a dialog to create a new place
-     * @param _parent
-     * @param _layer layer or null to create a new one
-     * @param _world
-     * @param _px place coordinate x
-     * @param _py place coordinate y
+     * @param parent
+     * @param layer layer or null to create a new one
+     * @param world
+     * @param px place coordinate x
+     * @param py place coordinate y
      */
-    public PlaceDialog(JFrame _parent, World _world, Layer _layer, int _px, int _py){
-        super(_parent, "Add place", true);
-        
-        world = _world;
-        place = null;
-        layer = _layer;
-        px = _px;
-        py = _py;
+    public PlaceDialog(JFrame parent, World world, Layer layer, int px, int py){
+        super(parent, "Add place", true);
+
+        this.world = world;
+        this.place = null;
+        this.layer = layer;
+        this.px = px;
+        this.py = py;
     }
-    
+
     /**
      * Creates the dialog
      */
     @Override
     void create(){
         setLayout(new GridLayout(0, 2, 4, 4));
-        
+
         add(new JLabel("Name"));
         if(place != null) textfield_name = new JTextField(place.getName());
         else textfield_name = new JTextField();
         add(textfield_name);
-        
+
         area_null = new Area("none", null);
-        
+
         add(new JLabel("Area"));
-        combobox_area = new JComboBox<Area>();
+        combobox_area = new JComboBox<>();
         combobox_area.addItem(area_null);
         for(Area a : world.getAreas()) combobox_area.addItem(a);
         if(place != null && place.getArea() != null) combobox_area.setSelectedItem(place.getArea());
         add(combobox_area);
-        
+
         add(new JLabel("Risk level"));
-        combobox_risk = new JComboBox<RiskLevel>();
+        combobox_risk = new JComboBox<>();
         for(RiskLevel rl : world.getRiskLevels()) combobox_risk.addItem(rl);
         if(place != null && place.getRiskLevel() != null) combobox_risk.setSelectedItem(place.getRiskLevel());
         add(combobox_risk);
-        
+
         add(new JLabel("Recommended level min"));
         spinner_rec_lvl_min = new JSpinner();
         spinner_rec_lvl_min.setModel(new SpinnerNumberModel((place != null ? place.getRecLevelMin() : -1), -1, 1000, 1));
         add(spinner_rec_lvl_min);
-        
+
         add(new JLabel("Recommended level max"));
         spinner_rec_lvl_max = new JSpinner();
         spinner_rec_lvl_max.setModel(new SpinnerNumberModel((place != null ? place.getRecLevelMax() : -1), -1, 1000, 1));
         add(spinner_rec_lvl_max);
-        
+
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel);
         button_cancel.addActionListener(new ActionListener() {
@@ -142,7 +144,7 @@ public class PlaceDialog extends ActionDialog {
                 dispose();
             }
         });
-        
+
         JButton button_ok = new JButton("Ok");
         add(button_ok);
         getRootPane().setDefaultButton(button_ok);
@@ -153,7 +155,7 @@ public class PlaceDialog extends ActionDialog {
                 dispose();
             }
         });
-        
+
         // listener for escape key
         getRootPane().registerKeyboardAction(new ActionListener() {
             @Override
@@ -161,11 +163,11 @@ public class PlaceDialog extends ActionDialog {
                 dispose();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        
+
         pack();
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
-    
+
     /**
      * Saves the place data
      */
@@ -173,7 +175,7 @@ public class PlaceDialog extends ActionDialog {
         //if(!textfield_name.getText().isEmpty()){ // name not empty
             try {
                 if(layer == null) layer = world.getNewLayer();
-                
+
                 // create place if it doesn't exist else just set the name
                 if(place == null) world.putPlace(place = new Place(textfield_name.getText(), px, py, layer));
                 else place.setName(textfield_name.getText());
@@ -190,7 +192,7 @@ public class PlaceDialog extends ActionDialog {
         //}
         getParent().repaint();
     }
-    
+
     /**
      * Gets the place (eg. after creation
      * @return place
@@ -198,5 +200,5 @@ public class PlaceDialog extends ActionDialog {
     public Place getPlace(){
         return place;
     }
-    
+
 }

@@ -45,8 +45,8 @@ public class OpenWorldDialog implements ActionListener{
 
     JFileChooser filechooser;
 
-    public OpenWorldDialog(Mainwindow _parent){
-        parent = _parent;
+    public OpenWorldDialog(Mainwindow parent){
+        this.parent = parent;
     }
 
     private void create(){

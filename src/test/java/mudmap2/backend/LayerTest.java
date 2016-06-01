@@ -401,7 +401,7 @@ public class LayerTest {
         System.out.println("toString");
 
         Layer instance = new Layer(world);
-        String expResult = instance.getId().toString();
+        String expResult = instance.getName();
         String result = instance.toString();
         assertEquals(expResult, result);
     }

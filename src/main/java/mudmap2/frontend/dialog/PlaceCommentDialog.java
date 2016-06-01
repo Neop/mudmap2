@@ -21,7 +21,6 @@
  */
 package mudmap2.frontend.dialog;
 
-import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JFrame;
@@ -35,31 +34,33 @@ import mudmap2.backend.Place;
  */
 public class PlaceCommentDialog extends ActionDialog {
 
+    private static final long serialVersionUID = 1L;
+
     Place place;
-    
+
     JTextArea commentarea;
     JOptionPane optionPane;
-    
-    public PlaceCommentDialog(JFrame _parent, Place _place) {
-        super(_parent, "Comments - " + _place, true);
-        place = _place;
+
+    public PlaceCommentDialog(JFrame parent, Place place) {
+        super(parent, "Comments - " + place, true);
+        this.place = place;
     }
 
     @Override
     void create() {
         optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.YES_NO_OPTION);
-        
+
         setContentPane(optionPane);
         optionPane.setMessage(commentarea = new JTextArea(place.getCommentsString(true)));
-        
+
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        
+
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent arg0) {
                 if(isVisible() && arg0.getSource() == optionPane && arg0.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)){
-                    int value = ((Integer) optionPane.getValue()).intValue();
+                    int value = ((Integer) optionPane.getValue());
                     if(value == JOptionPane.YES_OPTION){
                         place.deleteComments();
                         String comments = commentarea.getText();
@@ -72,7 +73,7 @@ public class PlaceCommentDialog extends ActionDialog {
                 }
             }
         });
-        
+
         pack();
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }

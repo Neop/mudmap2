@@ -41,6 +41,8 @@ import mudmap2.frontend.GUIElement.LinkLabel;
  */
 public class AboutDialog extends ActionDialog {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Creates an about dialog
      * @param parent

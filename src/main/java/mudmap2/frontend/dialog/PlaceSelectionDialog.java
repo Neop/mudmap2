@@ -35,48 +35,53 @@ import mudmap2.frontend.WorldTab;
  * @author neop
  */
 public class PlaceSelectionDialog extends ActionDialog {
-    
+
+    private static final long serialVersionUID = 1L;
+
     World world;
     boolean layer_change_allowed;
-    
+
     // true, if ok the button was clicked
-    boolean ok; 
-    
+    boolean ok;
+
     WorldCoordinate default_coordinate;
-    
+
     JFrame parent;
     JOptionPane optionPane;
-    
+
     WorldTab worldtab;
-    
-    public PlaceSelectionDialog(JFrame _parent, World _world, WorldCoordinate _default_coordinate, boolean _layer_change_allowed) {
-        super(_parent, "Select a place - " + _world.getName(), true);
-        parent = _parent;
-        world = _world;
-        
-        default_coordinate = _default_coordinate;
-        layer_change_allowed = _layer_change_allowed;
+
+    public PlaceSelectionDialog(JFrame parent, World world, WorldCoordinate defaultCoordinate, boolean layerChangeAllowed) {
+        super(parent, "Select a place - " + world.getName(), true);
+        this.parent = parent;
+        this.world = world;
+
+        default_coordinate = defaultCoordinate;
+        layer_change_allowed = layerChangeAllowed;
     }
-    
+
     /**
      * Gets the selected place
-     * @return 
+     * @return
      */
     public Place getSelection(){
-        return worldtab.getPlace(worldtab.getCursorX(), worldtab.getCursorY());
+        return worldtab.getWorldPanel().getPlace(worldtab.getWorldPanel().getCursorX(),
+                worldtab.getWorldPanel().getCursorY());
     }
-    
+
     /**
      * Gets the world coordinate of the selected place
-     * @return 
+     * @return
      */
     public WorldCoordinate getCoordinate(){
-        return new WorldCoordinate(worldtab.getCurPosition().getLayer(), worldtab.getCursorX(), worldtab.getCursorY());
+        return new WorldCoordinate(worldtab.getWorldPanel().getPosition().getLayer(),
+                worldtab.getWorldPanel().getCursorX(),
+                worldtab.getWorldPanel().getCursorY());
     }
-    
+
     /**
      * Is true, if the ok button was clicked
-     * @return 
+     * @return
      */
     public boolean getSelected(){
         return ok;
@@ -86,26 +91,26 @@ public class PlaceSelectionDialog extends ActionDialog {
     void create() {
         optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
-        
+
         setContentPane(optionPane);
-        optionPane.setMessage(worldtab = new WorldTab(parent, world, true));
-        worldtab.setCursorForced(true);
-        worldtab.resetHistory(default_coordinate.clone());
-        
+        optionPane.setMessage(worldtab = new WorldTab(world, true));
+        worldtab.getWorldPanel().setCursorForced(true);
+        worldtab.getWorldPanel().resetHistory(default_coordinate.clone());
+
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        
+
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent arg0) {
                 if(isVisible() && arg0.getSource() == optionPane && arg0.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)){
-                    int value = ((Integer) optionPane.getValue()).intValue();
+                    int value = ((Integer) optionPane.getValue());
                     ok = value == JOptionPane.OK_OPTION;
                     dispose();
                     parent.repaint();
                 }
             }
         });
-        
+
         setSize(500, 500);
         setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
     }

@@ -16,6 +16,8 @@
  */
 package mudmap2.frontend.GUIElement;
 
+import mudmap2.frontend.GUIElement.WorldPanel.MapPainter;
+import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import javax.swing.JPanel;

@@ -42,78 +42,80 @@ import mudmap2.frontend.GUIElement.ColorChooserButton;
  */
 public class AreaDialog extends ActionDialog {
 
+    private static final long serialVersionUID = 1L;
+
     boolean new_area;
-    
+
     JTextField textfield_name;
     ColorChooserButton colorchooserbutton;
-    
+
     World world;
     Area area;
     Place place;
     HashSet<Place> place_group;
-    
+
     /**
      * Constructs a modify / delete dialog for existing areas
-     * @param _parent parent window
-     * @param _world world
-     * @param _area area to be modified
+     * @param parent parent window
+     * @param world world
+     * @param area area to be modified
      */
-    public AreaDialog(JFrame _parent, World _world, Area _area){
-        super(_parent, "Edit area - " + _area, true);
-        
+    public AreaDialog(JFrame parent, World world, Area area){
+        super(parent, "Edit area - " + area, true);
+
         new_area = false;
-        world = _world;
-        area = _area;
+        this.world = world;
+        this.area = area;
         place = null;
     }
-    
+
     /**
      * Constructs a dialog to create a new area
-     * @param _parent parent window
-     * @param _world world
+     * @param parent parent window
+     * @param world world
      */
-    public AreaDialog(JFrame _parent, World _world){
-        super(_parent, "New area", true);
-        
+    public AreaDialog(JFrame parent, World world){
+        super(parent, "New area", true);
+
         new_area = true;
-        world = _world;
+        this.world = world;
         area = null;
         place = null;
     }
-    
+
     /**
      * Edits the area of a place or creates a new one and assigns it
-     * @param _parent
-     * @param _world
-     * @param _place 
+     * @param parent
+     * @param world
+     * @param place
      */
-    public AreaDialog(JFrame _parent, World _world, Place _place){
-        super(_parent, (_place.getArea() == null) ? "New area" : ("Edit area - " + _place.getArea()), true);
-        
-        place = _place;
+    public AreaDialog(JFrame parent, World world, Place place){
+        super(parent, (place.getArea() == null) ? "New area" : ("Edit area - " + place.getArea()), true);
+
+        this.place = place;
         new_area = place.getArea() == null;
-        world = _world;
+        this.world = world;
         area = place.getArea();
     }
-    
+
     /**
      * Edits the area of a group of places or creates a new one and assigns it
      * the default area will be taken from _place, if available
-     * @param _parent
-     * @param _world
-     * @param _place_group
-     * @param _place 
+     * @param parent
+     * @param world
+     * @param placeGroup
+     * @param place
      */
-    public AreaDialog(JFrame _parent, World _world, HashSet<Place> _place_group, Place _place){
-        super(_parent, (_place.getArea() == null) ? "New area" : ("Edit area - " + _place.getArea()), true);
-        
-        place = _place;
-        place_group = _place_group;
+    public AreaDialog(JFrame parent, World world, HashSet<Place> placeGroup, Place place){
+        super(parent, (place.getArea() == null) ? "New area" : ("Edit area - " + place.getArea()), true);
+
+        this.place = place;
+        this.place_group = placeGroup;
         new_area = place.getArea() == null;
-        world = _world;
+        this.world = world;
         area = place.getArea();
     }
-    
+
     /**
      * Creates the GUI
      */
@@ -121,12 +123,12 @@ public class AreaDialog extends ActionDialog {
     void create(){
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
-        
+
         constraints.insets = new Insets(2, 2, 2, 2);
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
-        
+
         add(new JLabel("Name"), constraints);
         constraints.gridx = 1;
         constraints.gridwidth = 2;
@@ -134,28 +136,28 @@ public class AreaDialog extends ActionDialog {
         else textfield_name = new JTextField();
         add(textfield_name, constraints);
         textfield_name.setColumns(20);
-        
+
         constraints.gridwidth = 1;
         constraints.gridx = 0;
         constraints.gridy++;
-        
+
         add(new JLabel("Color"), constraints);
-        
+
         constraints.weighty = 4.0;
         constraints.gridx = 1;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridwidth = 2;
-        
-        if(area != null) colorchooserbutton = new ColorChooserButton(getParent(), area.getColor()); 
+
+        if(area != null) colorchooserbutton = new ColorChooserButton(getParent(), area.getColor());
         else colorchooserbutton = new ColorChooserButton(getParent());
         add(colorchooserbutton, constraints);
-        
+
         constraints.weighty = 1.0;
         constraints.gridwidth = 1;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridx = 0;
         constraints.gridy++;
-        
+
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel, constraints);
         button_cancel.addActionListener(new ActionListener() {
@@ -164,7 +166,7 @@ public class AreaDialog extends ActionDialog {
                 dispose();
             }
         });
-        
+
         constraints.gridx++;
         JButton button_new = new JButton("New");
         button_new.setToolTipText("Creates a new area");
@@ -178,7 +180,7 @@ public class AreaDialog extends ActionDialog {
                 dispose();
             }
         });
-        
+
         if(!new_area){ // don't show edit button when creating a new place
             constraints.gridx++;
             JButton button_edit = new JButton("Edit");
@@ -193,12 +195,12 @@ public class AreaDialog extends ActionDialog {
                 }
             });
         }
-       
+
         pack();
         setResizable(false);
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
-    
+
     private void save(){
         // add new area to world and place
         if(new_area){
@@ -216,5 +218,5 @@ public class AreaDialog extends ActionDialog {
                 pl.setArea(area);
         getParent().repaint();
     }
-    
+
 }

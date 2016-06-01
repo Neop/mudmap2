@@ -57,12 +57,25 @@ public class WorldFileJSON extends WorldFile {
 
     JSONObject fileRoot = null;
 
+    HashMap<Integer, Integer> layerIDs;
+
+    JSONObject metaData;
+    WorldMetaJSON metaWriter;
+
     /**
      * Constructor
      * @param filename world filename with path
      */
     public WorldFileJSON(String filename) {
         super(filename);
+    }
+
+    public void setMetaGetter(WorldMetaJSON meta) {
+        this.metaWriter = meta;
+    }
+
+    public JSONObject getMetaData() {
+        return metaData;
     }
 
     /**
@@ -77,6 +90,11 @@ public class WorldFileJSON extends WorldFile {
             fileRoot = new JSONObject(lines);
         }
         return fileRoot;
+    }
+
+    public Integer translateLayerID(Integer layer){
+        if(layerIDs == null) return null;
+        return layerIDs.get(layer);
     }
 
     /**
@@ -190,7 +208,6 @@ public class WorldFileJSON extends WorldFile {
                     }
                 }
             }
-
 
             // areaArray
             HashMap<Integer, Area> areas = new HashMap<>();
@@ -385,6 +402,9 @@ public class WorldFileJSON extends WorldFile {
                 }
             }
 
+            // remember meta data for WorldTab
+            if(root.has("meta")) metaData = root.getJSONObject("meta");
+
         } catch(JSONException ex) {
             System.out.println(ex.getLocalizedMessage());
             throw new WorldFileReadError(filename, ex.getLocalizedMessage(), ex);
@@ -420,7 +440,7 @@ public class WorldFileJSON extends WorldFile {
     public void writeFile(World world) throws IOException {
         JSONObject root = new JSONObject();
 
-        // meta data
+        // metaWriter data
         // mudmap version
         String mudmapVer = getClass().getPackage().getImplementationVersion();
         if(mudmapVer != null)
@@ -491,7 +511,7 @@ public class WorldFileJSON extends WorldFile {
 
         // helper to assign new layer ids
         Integer nextLayerID = 0;
-        HashMap<Integer, Integer> layerIDs = new HashMap<>();
+        layerIDs = new HashMap<>();
 
         // layers (for quadtree optimization
         JSONArray layers = new JSONArray();
@@ -521,7 +541,7 @@ public class WorldFileJSON extends WorldFile {
 
             placeObj.put("id", place.getId());
             placeObj.put("n", place.getName());
-            placeObj.put("l", layerIDs.get(place.getLayer().getId()));
+            placeObj.put("l", translateLayerID(place.getLayer().getId()));
             placeObj.put("x", place.getX());
             placeObj.put("y", place.getY());
 
@@ -598,7 +618,7 @@ public class WorldFileJSON extends WorldFile {
         // home position
         WorldCoordinate home = world.getHome();
         JSONObject obj = new JSONObject();
-        obj.put("l", layerIDs.get(home.getLayer()));
+        obj.put("l", translateLayerID(home.getLayer()));
         obj.put("x", home.getX());
         obj.put("y", home.getY());
         root.put("home", obj);
@@ -617,6 +637,9 @@ public class WorldFileJSON extends WorldFile {
                 labelObj.put("t", label.getText());
             }
         }
+
+        // add metaWriter data from WorldTab
+        if(metaWriter != null) root.put("meta", metaWriter.getMeta(layerIDs));
 
         try ( FileWriter writer = new FileWriter(filename)) {
             root.write(writer, 4, 0);

@@ -121,7 +121,7 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
 
         Boolean hasKeywords = keyword != null && !keyword.isEmpty();
         String[] keywords = keyword.toLowerCase().split(" ");
-        System.out.println("hkw " + hasKeywords + " " + keywords.length);
+        
         // add layers to content panel
         for(Layer layer: layerList){
             if(hasKeywords){

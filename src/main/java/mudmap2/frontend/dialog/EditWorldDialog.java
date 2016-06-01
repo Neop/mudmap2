@@ -42,7 +42,6 @@ import javax.swing.JTextField;
 import mudmap2.utils.Pair;
 import mudmap2.backend.RiskLevel;
 import mudmap2.backend.World;
-import mudmap2.backend.WorldManager;
 import mudmap2.frontend.GUIElement.ColorChooserButton;
 
 /**
@@ -51,6 +50,8 @@ import mudmap2.frontend.GUIElement.ColorChooserButton;
  * @author neop
  */
 public class EditWorldDialog extends ActionDialog {
+
+    private static final long serialVersionUID = 1L;
 
     World world;
 
@@ -64,9 +65,9 @@ public class EditWorldDialog extends ActionDialog {
     ButtonGroup buttongroup_place_id;
     JRadioButton radiobutton_place_id_none, radiobutton_place_id_unique, radiobutton_place_id_all;
 
-    public EditWorldDialog(JFrame _parent, World _world) {
-        super(_parent, "Edit world - " + _world.getName(), true);
-        world = _world;
+    public EditWorldDialog(JFrame parent, World world) {
+        super(parent, "Edit world - " + world.getName(), true);
+        this.world = world;
     }
 
     @Override

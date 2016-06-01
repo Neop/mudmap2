@@ -42,27 +42,29 @@ import mudmap2.backend.Place;
  * @author neop
  */
 public class PathConnectNeighborsDialog extends ActionDialog{
-    
+
+    private static final long serialVersionUID = 1L;
+
     Place place;
-    
+
     HashMap<Place, JCheckBox> neighbor_checkboxes;
-    
-    public PathConnectNeighborsDialog(JFrame _parent, Place _place) {
-        super(_parent, "Connect neighbor paths to " + _place, true);
-        
-        place = _place;
+
+    public PathConnectNeighborsDialog(JFrame parent, Place place) {
+        super(parent, "Connect neighbor paths to " + place, true);
+
+        this.place = place;
     }
-    
+
     @Override
     void create(){
-        neighbor_checkboxes = new HashMap<Place, JCheckBox>();
-        
+        neighbor_checkboxes = new HashMap<>();
+
         setLayout(new GridBagLayout());
-        
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.weightx = 1.0;
-        
+
         Layer layer = place.getLayer();
         for(int x = -1; x <= 1; ++x){
             for(int y = -1; y <= 1; ++y){
@@ -72,7 +74,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
 
                     // if exit of _place available
                     if(place.getExit(dir) == null){
-                        Place neighbor = (Place) layer.get(place.getX() + x, place.getY() + y);
+                        Place neighbor = layer.get(place.getX() + x, place.getY() + y);
 
                         // if exit of neighbor available
                         if(neighbor != null && neighbor.getExit(Path.getOppositeDir(dir)) == null){
@@ -85,7 +87,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
                 }
             }
         }
-        
+
         constraints.gridy++;
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel, constraints);
@@ -95,7 +97,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
                 dispose();
             }
         });
-        
+
         constraints.gridx = 1;
         JButton button_ok = new JButton("Ok");
         add(button_ok, constraints);
@@ -107,12 +109,12 @@ public class PathConnectNeighborsDialog extends ActionDialog{
                 dispose();
             }
         });
-        
+
         setMinimumSize(new Dimension(250, 20));
         pack();
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
-    
+
     private void save(){
         for(Entry<Place, JCheckBox> entry: neighbor_checkboxes.entrySet()){
             if(entry.getValue().isSelected()){
@@ -125,5 +127,5 @@ public class PathConnectNeighborsDialog extends ActionDialog{
             }
         }
         getParent().repaint();
-    }    
+    }
 }

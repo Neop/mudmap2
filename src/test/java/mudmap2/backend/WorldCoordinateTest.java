@@ -172,22 +172,6 @@ public class WorldCoordinateTest {
     }
 
     /**
-     * Test of getMetaString method, of class WorldCoordinate.
-     */
-    @Test
-    public void testGetMetaString() {
-        System.out.println("getMetaString");
-
-        int layerId = 5;
-        double x = 4.3;
-        double y = 5.2;
-        WorldCoordinate instance = new WorldCoordinate(layerId, x, y);
-        String expResult = layerId + " " + (-x) + " " + y;
-        String result = instance.getMetaString();
-        assertEquals(expResult, result);
-    }
-
-    /**
      * Test of clone method, of class WorldCoordinate.
      */
     @Test

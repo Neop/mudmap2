@@ -37,32 +37,32 @@ import mudmap2.backend.World;
  * @author neop
  */
 public class PlaceRemoveDialog implements ActionListener {
-    
+
     JFrame parent;
     World world;
     Place place;
     HashSet<Place> places;
     boolean places_removed = false;
-    
-    public PlaceRemoveDialog(JFrame _parent, World _world, Place _place){        
-        parent = _parent;
-        world = _world;
-        place = _place;
+
+    public PlaceRemoveDialog(JFrame parent, World world, Place place){
+        this.parent = parent;
+        this.world = world;
+        this.place = place;
     }
-    
-    public PlaceRemoveDialog(JFrame _parent, World _world, HashSet<Place> _places){
-        parent = _parent;
-        world = _world;
-        places = _places;
+
+    public PlaceRemoveDialog(JFrame parent, World world, HashSet<Place> places){
+        this.parent = parent;
+        this.world = world;
+        this.places = places;
     }
-    
+
     public void show(){
         int ret = 1;
         if(place != null)
             ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove \"" + place + "\" from the map? This can not be undone!", "Remove place", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
         else if(places != null)
             ret = JOptionPane.showConfirmDialog(parent, "Do yo want to remove " + places.size() + " places from the map? This can not be undone!", "Remove places", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-            
+
         if(ret == 0){
             places_removed = true;
             try {
@@ -79,10 +79,10 @@ public class PlaceRemoveDialog implements ActionListener {
             }
         }
     }
-    
+
     /**
      * Returns true, if ok was clicked
-     * @return 
+     * @return
      */
     public boolean getPlacesRemoved(){
         return places_removed;
@@ -92,5 +92,5 @@ public class PlaceRemoveDialog implements ActionListener {
     public void actionPerformed(ActionEvent arg0) {
         show();
     }
-    
+
 }

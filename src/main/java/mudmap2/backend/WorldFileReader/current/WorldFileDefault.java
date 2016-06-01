@@ -73,6 +73,10 @@ public class WorldFileDefault extends WorldFile {
         this.worldFile = worldFile;
     }
 
+    public WorldFile getWorldFile() {
+        return worldFile;
+    }
+
     @Override
     public WorldFileType getWorldFileType() {
         return worldFileType;

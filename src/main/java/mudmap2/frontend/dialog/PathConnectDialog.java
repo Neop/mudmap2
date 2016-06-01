@@ -36,6 +36,8 @@ import javax.swing.JOptionPane;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
+import mudmap2.backend.WorldCoordinate;
+import mudmap2.frontend.GUIElement.WorldPanel.MapCursorListener;
 import mudmap2.frontend.WorldTab;
 
 /**
@@ -45,30 +47,31 @@ import mudmap2.frontend.WorldTab;
  */
 public class PathConnectDialog extends ActionDialog{
 
+    private static final long serialVersionUID = 1L;
+
     Place place, other;
-    
-    WorldTab worldtab, wt_parent;
-    JLabel label_other_place;
-    JComboBox<String> direction_combo_box1, direction_combo_box2;
-    
-    public PathConnectDialog(WorldTab _parent, Place _place) {
-        super(_parent.get_parent(), "Connect path to " + _place, true);
-        wt_parent = _parent;
-        place = _place;
-        other = null;
+
+    WorldTab worldtab;
+    JLabel labelOtherPlace;
+    JComboBox<String> directionComboBox1, directionComboBox2;
+
+    public PathConnectDialog(Place place) {
+        super(null, "Connect path to " + place, true);
+        this.place = place;
+        this.other = null;
     }
-    
+
     @Override
     void create(){
         setMinimumSize(new Dimension(600, 600));
         setLayout(new GridBagLayout());
-        
-        // world tab
-        worldtab = (WorldTab) wt_parent.clone();
-        worldtab.setCursorForced(true);
-        worldtab.resetHistory(place.getCoordinate());
-        worldtab.setForcedFocusDisabled(true);
-        
+
+        worldtab = new WorldTab(place.getLayer().getWorld(), true);
+        worldtab.getWorldPanel().resetHistory(new WorldCoordinate(place.getLayer().getId(), place.getX(), place.getY()));
+        worldtab.getWorldPanel().setCursorForced(true);
+        worldtab.getWorldPanel().resetHistory(place.getCoordinate());
+        worldtab.getWorldPanel().setFocusForced(false);
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = constraints.gridy = 0;
         constraints.fill = GridBagConstraints.BOTH;
@@ -76,7 +79,7 @@ public class PathConnectDialog extends ActionDialog{
         constraints.weighty = 1;
         constraints.gridwidth = 4;
         add(worldtab, constraints);
-        
+
         // Place config
         constraints = new GridBagConstraints();
         constraints.gridx = 0;
@@ -85,29 +88,29 @@ public class PathConnectDialog extends ActionDialog{
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.weightx = 1.0;
         add(new JLabel(place.toString()), constraints);
-        
-        LinkedList<String> directions1 = new LinkedList<String>();
+
+        LinkedList<String> directions1 = new LinkedList<>();
         for(String s: Path.directions)
             if(place.getExit(s) == null) directions1.add(s);
-        
+
         constraints.gridx = 1;
         constraints.weightx = 0.0;
-        direction_combo_box1 = new JComboBox(directions1.toArray());
-        direction_combo_box1.setEditable(true);
-        add(direction_combo_box1, constraints);
-        
+        directionComboBox1 = new JComboBox<>(directions1.toArray(new String[directions1.size()]));
+        directionComboBox1.setEditable(true);
+        add(directionComboBox1, constraints);
+
         constraints.gridx = 0;
         constraints.gridy = 2;
         constraints.weightx = 1.0;
-        add(label_other_place = new JLabel(), constraints);
-        
+        add(labelOtherPlace = new JLabel(), constraints);
+
         constraints.gridx = 1;
         constraints.weightx = 0.0;
-        direction_combo_box2 = new JComboBox();
+        directionComboBox2 = new JComboBox<>();
         updateDirectionComboBox2();
-        direction_combo_box2.setEditable(true);
-        add(direction_combo_box2, constraints);
-        
+        directionComboBox2.setEditable(true);
+        add(directionComboBox2, constraints);
+
         // Buttons
         constraints.insets = new Insets(2, 2, 2, 2);
         constraints.gridx = 0;
@@ -121,7 +124,7 @@ public class PathConnectDialog extends ActionDialog{
                 dispose();
             }
         });
-        
+
         constraints.gridx = 1;
         constraints.gridy = 3;
         JButton button_ok = new JButton("Ok");
@@ -134,13 +137,13 @@ public class PathConnectDialog extends ActionDialog{
                 dispose();
             }
         });
-        
-        worldtab.addCursorListener(new WorldTab.CursorListener() {
+
+        worldtab.getWorldPanel().addCursorListener(new MapCursorListener() {
             @Override
             public void placeSelected(Place p) {
-                if(p != place){ 
+                if(p != place){
                     other = p;
-                    label_other_place.setText(other.toString());
+                    labelOtherPlace.setText(other.toString());
                     updateDirectionComboBox2();
                 }
             }
@@ -148,47 +151,45 @@ public class PathConnectDialog extends ActionDialog{
             @Override
             public void placeDeselected(Layer layer, int x, int y) {}
         });
-        
+
         pack();
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
-    
-    private final static String one_way_str = "one way";
-    
+
+    private final static String ONE_WAY_PATH_STR =  "one way";
+
     /**
      * Fills the combo box only with directions thar aren't occupied yet
      */
     private void updateDirectionComboBox2() {
-        direction_combo_box2.removeAllItems();
+        directionComboBox2.removeAllItems();
         if(other != null)
             for(String s: Path.directions){
                 Path pa = other.getExit(s);
-                if(s.equals("-")) s = one_way_str;
-                if(pa == null) direction_combo_box2.addItem(s);
+                if(s.equals("-")) s = ONE_WAY_PATH_STR;
+                if(pa == null) directionComboBox2.addItem(s);
             }
-    }    
-    
+    }
+
     /**
      * Saves the new connection
      */
     private void save(){
         if(other != null){ // if a place is selected
-            String dir1 = (String) direction_combo_box1.getSelectedItem();
-            String dir2 = (String) direction_combo_box2.getSelectedItem();
-            
-            if(dir1.equals(one_way_str)) dir1 = "-";
-            if(dir2.equals(one_way_str)) dir2 = "-";
-            
+            String dir1 = (String) directionComboBox1.getSelectedItem();
+            String dir2 = (String) directionComboBox2.getSelectedItem();
+
+            if(dir1.equals(ONE_WAY_PATH_STR)) dir1 = "-";
+            if(dir2.equals(ONE_WAY_PATH_STR)) dir2 = "-";
+
             boolean exit_available_1 = place.getExit(dir1) == null;
             boolean exit_available_2 = other.getExit(dir2) == null;
-            
+
             // if both exits are available
             if(exit_available_1 && exit_available_2)
                 place.connectPath(new Path(place, dir1, other, dir2));
             // else show message
             else JOptionPane.showMessageDialog(this, "Couldn't connect path, an exit of a place is occupied");
-            
-            wt_parent.repaint();
         }
     }
 }

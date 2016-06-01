@@ -636,16 +636,4 @@ public class World implements BreadthSearchGraph {
             listener.WorldChanged(source);
         }
     }
-
-    /**
-     * Don't create multiple instances of the same world
-     * @return
-     * @throws CloneNotSupportedException
-     */
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        super.clone();
-        throw new CloneNotSupportedException();
-    }
-
 }

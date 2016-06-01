@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-package mudmap2.frontend.GUIElement;
+package mudmap2.frontend.GUIElement.WorldPanel;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -408,24 +408,28 @@ public class MapPainterDefault implements MapPainter {
 
         // precalculation
         final float sswts = ssw + tileSize;
-        final int pxpssw = Math.round(pxpx + ssw);
-        final int pxmsswts = Math.round(pxpx - ssw + tileSize);//Math.round(pxpx - sswts);
-        final int pypssw = Math.round(pypx + ssw);
-        final int pymsswts = Math.round(pypx - ssw + tileSize); //Math.round(pypx - sswts);
-        final int sswtsd4 = Math.round(ssw + tileSize / 4.0f);
-        final int sswtsd4m3 = Math.round(-ssw + tileSize / 4.0f * 3.0f);
+        final float pxpssw = pxpx + ssw;
+        final float pxmsswts = pxpx - ssw + tileSize;//Math.round(pxpx - sswts);
+        final float pypssw = pypx + ssw;
+        final float pymsswts = pypx - ssw + tileSize; //Math.round(pypx - sswts);
+        final float sswtsd4 = ssw + tileSize / 4.0f;
+        final float sswtsd4m3 = -ssw + tileSize / 4.0f * 3.0f;
 
-        g.drawLine(pxpssw, pypssw, pxpssw, pypx + sswtsd4);
-        g.drawLine(pxpssw, pypssw, pxpx + Math.round(sswtsd4), pypssw);
+        drawLine(g, pxpssw, pypssw, pxpssw, pypx + sswtsd4);
+        drawLine(g, pxpssw, pypssw, pxpx + Math.round(sswtsd4), pypssw);
 
-        g.drawLine(pxmsswts, pypssw, pxmsswts, pypx + sswtsd4);
-        g.drawLine(pxmsswts, pypssw, pxpx + sswtsd4m3, pypssw);
+        drawLine(g, pxmsswts, pypssw, pxmsswts, pypx + sswtsd4);
+        drawLine(g, pxmsswts, pypssw, pxpx + sswtsd4m3, pypssw);
 
-        g.drawLine(pxpssw, pymsswts, pxpssw, pypx + sswtsd4m3);
-        g.drawLine(pxpssw, pymsswts, pxpx + sswtsd4, pymsswts);
+        drawLine(g, pxpssw, pymsswts, pxpssw, pypx + sswtsd4m3);
+        drawLine(g, pxpssw, pymsswts, pxpx + sswtsd4, pymsswts);
 
-        g.drawLine(pxmsswts, pymsswts, pxmsswts, pypx + sswtsd4m3);
-        g.drawLine(pxmsswts, pymsswts, pxpx + sswtsd4m3, pymsswts);
+        drawLine(g, pxmsswts, pymsswts, pxmsswts, pypx + sswtsd4m3);
+        drawLine(g, pxmsswts, pymsswts, pxpx + sswtsd4m3, pymsswts);
+    }
+
+    private void drawLine(Graphics g, float a, float b, float c, float d){
+        g.drawLine(Math.round(a), Math.round(b), Math.round(c), Math.round(d));
     }
 
     @Override

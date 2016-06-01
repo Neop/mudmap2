@@ -111,15 +111,6 @@ public class WorldCoordinate implements Comparable<WorldCoordinate> {
     }
 
     /**
-     * Gets the position data in String format for meta files
-     * @return
-     */
-    public String getMetaString(){
-        // -x since the x coordinate is flipped in mudmap v1
-        return layer + " " + -x + " " + y;
-    }
-
-    /**
      * creates a new instance of this world coordinate
      * @return world coordinate
      */

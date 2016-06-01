@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mudmap2.frontend.GUIElement;
+package mudmap2.frontend.GUIElement.WorldPanel;
 
 import java.awt.Graphics;
 import java.util.HashSet;

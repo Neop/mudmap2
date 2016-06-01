@@ -26,6 +26,8 @@ package mudmap2.frontend;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -52,6 +54,7 @@ import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldManager;
 import mudmap2.backend.html.GaardianMap;
+import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
@@ -65,20 +68,20 @@ import mudmap2.frontend.dialog.SaveWorldDialog;
  * call setVisible(true) to show window
  * @author neop
  */
-public final class Mainwindow extends JFrame implements ActionListener,ChangeListener {
+public final class Mainwindow extends JFrame implements KeyEventDispatcher,ActionListener,ChangeListener {
 
     static Integer config_file_version_major = 2;
     static Integer config_file_version_minor = 0;
     private static final long serialVersionUID = 1L;
 
     // Contains all opened maps <name, worldtab>
-    HashMap<World, WorldTab> world_tabs;
+    HashMap<World, WorldTab> worldTabs;
 
     // GUI elements
-    JCheckBoxMenuItem menu_edit_curved_paths, menu_edit_show_cursor;
+    JCheckBoxMenuItem menuEditCurvedPaths, menuEditShowCursor;
 
-    JTabbedPane tabbed_pane;
-    AvailableWorldsTab available_worlds_tab;
+    JTabbedPane tabbedPane;
+    AvailableWorldsTab availableWorldsTab;
 
     // for experimental html export message
     Boolean firstHtmlExport;
@@ -89,6 +92,7 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         firstHtmlExport = true;
 
         setMinimumSize(new Dimension(400, 300));
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 
         ClassLoader classLoader = Mainwindow.class.getClassLoader();
         URL iconurl = classLoader.getResource("resources/mudmap-128.png");
@@ -96,7 +100,7 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         setIconImage(iconimage.getImage());
 
         // create GUI
-        world_tabs = new HashMap<>();
+        worldTabs = new HashMap<>();
 
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -110,10 +114,10 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
         initGui();
 
         // ---
-        tabbed_pane = new JTabbedPane();
-        add(tabbed_pane);
-        tabbed_pane.addTab("Available worlds", available_worlds_tab = new AvailableWorldsTab(this));
-        tabbed_pane.addChangeListener(this);
+        tabbedPane = new JTabbedPane();
+        add(tabbedPane);
+        tabbedPane.addTab("Available worlds", availableWorldsTab = new AvailableWorldsTab(this));
+        tabbedPane.addChangeListener(this);
     }
 
     private void initGui() {
@@ -201,16 +205,14 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
 
         menu_edit.add(new JSeparator());
 
-        menu_edit_curved_paths = new JCheckBoxMenuItem("Curved paths");
-        menu_edit.add(menu_edit_curved_paths);
-        // will be set after the config file is read
-        //menu_edit_curved_paths.setSelected(WorldTab.getShowPathsCurved());
-        menu_edit_curved_paths.addChangeListener(this);
+        menuEditCurvedPaths = new JCheckBoxMenuItem("Curved paths");
+        menu_edit.add(menuEditCurvedPaths);
+        menuEditCurvedPaths.addChangeListener(this);
 
-        menu_edit_show_cursor = new JCheckBoxMenuItem("Show place cursor");
-        menu_edit.add(menu_edit_show_cursor);
-        menu_edit_show_cursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
-        menu_edit_show_cursor.addChangeListener(this);
+        menuEditShowCursor = new JCheckBoxMenuItem("Show place cursor");
+        menu_edit.add(menuEditShowCursor);
+        menuEditShowCursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
+        menuEditShowCursor.addChangeListener(this);
 
         JMenuItem menu_help_help = new JMenuItem("Help (online)");
         menu_help_help.setActionCommand("help");
@@ -228,7 +230,7 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
             // create a new world
             try {
                 World world = WorldManager.createWorld(name);
-                available_worlds_tab.update();
+                availableWorldsTab.update();
                 createTab(world, null);
             } catch (Exception ex) {
                 Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -245,21 +247,21 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
     public void createTab(World world, String file){
         setMinimumSize(new Dimension(500, 400));
 
-        if(!world_tabs.containsKey(world)){
+        if(!worldTabs.containsKey(world)){
             // open new tab
-            WorldTab tab = new WorldTab(this, world, file, false);
-            world_tabs.put(world, tab);
-            tabbed_pane.addTab(tab.getWorld().getName(), tab);
+            WorldTab tab = new WorldTab(world, file, false);
+            worldTabs.put(world, tab);
+            tabbedPane.addTab(tab.getWorld().getName(), tab);
         }
         // change current tab
-        tabbed_pane.setSelectedComponent(world_tabs.get(world));
+        tabbedPane.setSelectedComponent(worldTabs.get(world));
 
         WorldTab curTab = getSelectedTab();
         if(curTab != null){
-            available_worlds_tab.update();
+            availableWorldsTab.update();
 
             // update menu entry
-            menu_edit_show_cursor.setState(curTab.getCursorEnabled());
+            menuEditShowCursor.setState(curTab.getWorldPanel().isCursorEnabled());
         }
     }
 
@@ -267,7 +269,7 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
      * Closes all tabs
      */
     public void closeTabs(){
-        for(WorldTab tab: world_tabs.values()) tab.close();
+        for(WorldTab tab: worldTabs.values()) tab.close();
     }
 
     /**
@@ -275,7 +277,7 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
      * @param tab
      */
     public void removeTab(WorldTab tab){
-        tabbed_pane.remove(tab);
+        tabbedPane.remove(tab);
     }
 
     /**
@@ -283,15 +285,15 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
      * @return WorldTab or null
      */
     private WorldTab getSelectedTab(){
-        if(tabbed_pane != null){
-            Component ret = tabbed_pane.getSelectedComponent();
+        if(tabbedPane != null){
+            Component ret = tabbedPane.getSelectedComponent();
             if(ret instanceof WorldTab) return (WorldTab) ret;
         }
         return null;
     }
 
     public JCheckBoxMenuItem getMiShowPlaceSelection(){
-        return menu_edit_show_cursor;
+        return menuEditShowCursor;
     }
 
     /**
@@ -315,13 +317,13 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
                 break;
             case "save_world_as":
                 if(wt != null){
-                    SaveWorldDialog dlg = new SaveWorldDialog(wt.parent, wt);
+                    SaveWorldDialog dlg = new SaveWorldDialog(Mainwindow.this, wt);
                     dlg.setVisible(true);
                 }
                 break;
             case "export_image":
                 if(wt != null){
-                    ExportImageDialog dlg = new ExportImageDialog(wt.parent, wt);
+                    ExportImageDialog dlg = new ExportImageDialog(Mainwindow.this, wt);
                     dlg.setVisible(true);
                 }
                 break;
@@ -339,7 +341,7 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
                         if(!filename.endsWith(".html")) filename = filename + ".html";
                         System.out.println(">>>> " + filename);
                         GaardianMap.writeFile(filename,
-                                wt.getWorld().getLayer(wt.getCurPosition().getLayer()));
+                                wt.getWorld().getLayer(wt.getWorldPanel().getPosition().getLayer()));
                     }
                 }
                 break;
@@ -348,24 +350,24 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
                 break;
             case "edit_world":
                 if(wt != null){
-                    (new EditWorldDialog(wt.parent, wt.getWorld())).setVisible(true);
-                            available_worlds_tab.update();
+                    (new EditWorldDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
+                            availableWorldsTab.update();
                 }
                 break;
             case "path_colors":
                 if(wt != null){
-                    (new PathColorDialog(wt.parent, wt.getWorld())).setVisible(true);
+                    (new PathColorDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
                     wt.repaint();
                 }
                 break;
             case "add_area":
-                if(wt != null) (new AreaDialog(wt.parent, wt.getWorld())).setVisible(true);
+                if(wt != null) (new AreaDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
                 break;
             case "set_home": // set home position
-                if(wt != null) wt.setHome();
+                if(wt != null) wt.getWorldPanel().setHome();
                 break;
             case "goto_home": // go to home position
-                if(wt != null) wt.gotoHome();
+                if(wt != null) wt.getWorldPanel().gotoHome();
                 break;
             default:
                 String message = getClass().getName() + ": ActionCommand not recognized";
@@ -378,23 +380,46 @@ public final class Mainwindow extends JFrame implements ActionListener,ChangeLis
     @Override
     public void stateChanged(ChangeEvent e) {
         WorldTab wt = getSelectedTab();
-        if(e.getSource() == menu_edit_curved_paths){
+        if(e.getSource() == menuEditCurvedPaths){
             if(wt != null){
-                wt.setPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                MapPainterDefault mapPainter = (MapPainterDefault) wt.getWorldPanel().getMappainter();
+                mapPainter.setPathsCurved(((JCheckBoxMenuItem) e.getSource()).isSelected());
                 wt.repaint();
             }
-        } else if(e.getSource() == menu_edit_show_cursor){
+        } else if(e.getSource() == menuEditShowCursor){
             if(wt != null){
-                wt.setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                wt.getWorldPanel().setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
                 wt.repaint();
             }
-        } else if(e.getSource() == tabbed_pane){
-            if(wt != null) wt.updateCursorEnabled();
+        } else if(e.getSource() == tabbedPane){ // tab changed
+            if(wt != null){
+                wt.getWorldPanel().callStatusUpdateListeners();
+                menuEditCurvedPaths.setState(((MapPainterDefault) wt.getWorldPanel().getMappainter()).getPathsCurved());
+            }
         } else {
             String message = getClass().getName() + ": ChangeEvent not recognized";
             Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, message);
             JOptionPane.showMessageDialog(this, message, "MUD Map error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        if(KeyEvent.KEY_PRESSED == e.getID() && e.isControlDown()){
+            switch(e.getKeyCode()){
+                case KeyEvent.VK_S:
+                    WorldTab wt = getSelectedTab();
+                    if(wt != null){
+                        wt.save();
+                    }
+                    return true;
+                case KeyEvent.VK_O:
+                    OpenWorldDialog dlg = new OpenWorldDialog(this);
+                    dlg.setVisible();
+                    return true;
+            }
+        }
+        return false;
     }
 
 }
