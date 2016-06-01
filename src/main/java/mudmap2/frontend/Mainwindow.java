@@ -45,6 +45,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -52,6 +53,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
+import mudmap2.backend.WorldFileReader.WorldFile;
+import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
+import mudmap2.backend.WorldFileReader.current.WorldFileMM1;
 import mudmap2.backend.WorldManager;
 import mudmap2.backend.html.GaardianMap;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
@@ -318,7 +322,11 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             case "save_world_as":
                 if(wt != null){
                     SaveWorldDialog dlg = new SaveWorldDialog(Mainwindow.this, wt);
-                    dlg.setVisible(true);
+                    int ret = dlg.showSaveDialog(wt);
+                    if(ret == JFileChooser.APPROVE_OPTION){
+                        wt.getWorld().setWorldFile(dlg.getWorldFile());
+                        wt.save();
+                    }
                 }
                 break;
             case "export_image":
@@ -420,6 +428,10 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             }
         }
         return false;
+    }
+
+    private WorldFile WorldFileJSON() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
