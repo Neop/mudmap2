@@ -642,7 +642,9 @@ public class WorldFileJSON extends WorldFile {
         if(metaWriter != null) root.put("meta", metaWriter.getMeta(layerIDs));
 
         try ( FileWriter writer = new FileWriter(filename)) {
-            root.write(writer, 4, 0);
+            // indentation for better readability (for debugging), increases file size
+            //root.write(writer, 4, 0);
+            root.write(writer);
             fileRoot = root;
         } catch (Exception ex){
             System.out.println(ex.getLocalizedMessage());

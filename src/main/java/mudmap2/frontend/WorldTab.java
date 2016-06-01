@@ -37,11 +37,13 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import mudmap2.Paths;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -258,12 +260,16 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
             if(worldFile == null){
                 if(filename == null || filename.isEmpty() || (new File(filename)).exists()){
-                    // TODO: create new filename
-                    throw new UnsupportedOperationException("no filename or file exists");
-                } else {
-                    worldFile = new WorldFileDefault(filename);
-                    getWorld().setWorldFile(worldFile);
+                    // get new filename
+                    JFileChooser fileChooser = new JFileChooser(Paths.getWorldsDir());
+                    int ret = fileChooser.showSaveDialog(this);
+                    if(ret == JFileChooser.APPROVE_OPTION){
+                        filename = fileChooser.getSelectedFile().getAbsolutePath();
+                    }
                 }
+
+                worldFile = new WorldFileDefault(filename);
+                getWorld().setWorldFile(worldFile);
             }
 
             // set meta data writer

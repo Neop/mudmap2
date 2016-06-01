@@ -2,9 +2,10 @@
 - new JSON-based file format, the old format is now considered deprecated and new features won't be implemented
 - automatic file type detection
 - place / layer sidebar
-- removed old place list
+- removed old place list and search box
 - maven build management
 - more unit tests
+- removed old world meta data writer (mudmap1 (up to 2.2.x) type world files won't be opened at previous position anymore)
 - major refactoring
 - bugfixes
 - changed terminology 'sub-area' to '(sub-) map'
