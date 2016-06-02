@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldManager;
@@ -79,7 +80,12 @@ final class AvailableWorldsTab extends JPanel {
             r.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
-                    WorldManager.deleteWorldFile(entry.getKey());
+                    int ret = JOptionPane.showConfirmDialog(mwin,
+                            "Do you want to delete world " + entry.getKey() + "?",
+                            "Delete world", JOptionPane.YES_NO_OPTION);
+                    if(ret == JOptionPane.YES_OPTION){
+                        WorldManager.deleteWorldFile(entry.getKey());
+                    }
                 }
             });
             constraints.gridx = 1;

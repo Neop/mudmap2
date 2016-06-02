@@ -84,7 +84,7 @@ public class WorldFileJSON extends WorldFile {
      * @throws IOException
      */
     private JSONObject getJSONRoot() throws IOException{
-        if(fileRoot == null){
+        if(fileRoot == null && (new File(filename)).isFile()){
             byte[] bytes = Files.readAllBytes(Paths.get(filename));
             String lines = new String(bytes);
             fileRoot = new JSONObject(lines);
@@ -682,7 +682,8 @@ public class WorldFileJSON extends WorldFile {
     public String readWorldName() throws Exception {
         try{
             JSONObject object = getJSONRoot();
-            return object.getString("worldName");
+            if(object != null) return object.getString("worldName");
+            else return null;
         } catch(JSONException ex) {
             return "";
         }

@@ -251,11 +251,19 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             if(worldFile == null){
                 if(filename == null || filename.isEmpty() || (new File(filename)).exists()){
                     // get new filename
-                    JFileChooser fileChooser = new JFileChooser(Paths.getWorldsDir());
-                    int ret = fileChooser.showSaveDialog(this);
-                    if(ret == JFileChooser.APPROVE_OPTION){
-                        filename = fileChooser.getSelectedFile().getAbsolutePath();
-                    }
+                    int ret;
+                    do {
+                        JFileChooser fileChooser = new JFileChooser(Paths.getWorldsDir());
+                        ret = fileChooser.showSaveDialog(this);
+                        if(ret == JFileChooser.APPROVE_OPTION){
+                            filename = fileChooser.getSelectedFile().getAbsolutePath();
+                        } else {
+                            ret = JOptionPane.showConfirmDialog(this,
+                                    "No file chosen: " + getWorld().getName()
+                                    + " will not be saved!", "Saving world",
+                                    JOptionPane.OK_CANCEL_OPTION);
+                        }
+                    } while(ret != JFileChooser.APPROVE_OPTION || ret != JOptionPane.OK_OPTION);
                 }
 
                 worldFile = new WorldFileDefault(filename);
@@ -276,6 +284,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             // write world file
             try {
                 worldFile.writeFile(getWorld());
+                WorldManager.putWorld(worldFile.getFilename(), getWorld());
             } catch (IOException ex) {
                 Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(getParent(),

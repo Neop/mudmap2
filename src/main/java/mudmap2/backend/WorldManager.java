@@ -124,7 +124,7 @@ public class WorldManager {
             filename = shortname + cnt++;
         }
 
-        putWorld(filename, world);
+        putWorld(Paths.getWorldsDir() + filename, world);
 
         return world;
     }

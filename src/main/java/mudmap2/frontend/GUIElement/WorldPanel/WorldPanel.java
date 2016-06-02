@@ -51,6 +51,7 @@ import mudmap2.backend.LayerElement;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
+import mudmap2.backend.WorldChangeListener;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.frontend.dialog.AreaDialog;
 import mudmap2.frontend.dialog.PathConnectDialog;
@@ -64,7 +65,7 @@ import mudmap2.frontend.dialog.PlaceSelectionDialog;
  *
  * @author neop
  */
-public class WorldPanel extends JPanel {
+public class WorldPanel extends JPanel implements WorldChangeListener {
     private static final long serialVersionUID = 1L;
 
     // tile size in pixel
@@ -164,6 +165,8 @@ public class WorldPanel extends JPanel {
             }
         });
         addMouseMotionListener((MouseMotionListener) new TabMouseMotionListener());
+
+        if(!passive) world.addChangeListener(this);
     }
 
     public MapPainter getMappainter() {
@@ -668,6 +671,11 @@ public class WorldPanel extends JPanel {
         for(StatusListener listener: statusListeners){
             listener.messageReceived(message);
         }
+    }
+
+    @Override
+    public void WorldChanged(Object source) {
+        repaint();
     }
 
     /**

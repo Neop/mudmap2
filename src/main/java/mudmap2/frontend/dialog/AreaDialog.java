@@ -168,8 +168,8 @@ public class AreaDialog extends ActionDialog {
         });
 
         constraints.gridx++;
-        JButton button_new = new JButton("New");
-        button_new.setToolTipText("Creates a new area");
+        JButton button_new = new JButton("Add");
+        button_new.setToolTipText("Create a new area");
         add(button_new, constraints);
         getRootPane().setDefaultButton(button_new);
         button_new.addActionListener(new ActionListener() {
@@ -184,7 +184,7 @@ public class AreaDialog extends ActionDialog {
         if(!new_area){ // don't show edit button when creating a new place
             constraints.gridx++;
             JButton button_edit = new JButton("Edit");
-            button_edit.setToolTipText("Edits the current area");
+            button_edit.setToolTipText("Edit the current area");
             add(button_edit, constraints);
             getRootPane().setDefaultButton(button_edit);
             button_edit.addActionListener(new ActionListener() {
