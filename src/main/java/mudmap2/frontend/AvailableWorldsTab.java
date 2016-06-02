@@ -34,6 +34,8 @@ import mudmap2.backend.WorldManager;
  */
 final class AvailableWorldsTab extends JPanel {
 
+    private static final long serialVersionUID = 1L;
+
     // Reference to the main window
     final Mainwindow mwin;
 

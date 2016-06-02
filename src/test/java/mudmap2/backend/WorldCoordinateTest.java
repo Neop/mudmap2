@@ -172,24 +172,6 @@ public class WorldCoordinateTest {
     }
 
     /**
-     * Test of clone method, of class WorldCoordinate.
-     */
-    @Test
-    public void testClone() {
-        System.out.println("clone");
-
-        int layerId = 5;
-        double x = 4.3;
-        double y = 5.2;
-        WorldCoordinate instance = new WorldCoordinate(layerId, x, y);
-        WorldCoordinate result = instance.clone();
-
-        assertEquals(layerId, result.getLayer());
-        assertEquals(x, result.getX(), 0.01);
-        assertEquals(y, result.getY(), 0.01);
-    }
-
-    /**
      * Test of compareTo method, of class WorldCoordinate.
      */
     @Test

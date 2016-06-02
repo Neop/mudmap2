@@ -24,7 +24,6 @@ package mudmap2.backend;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.sssp.BreadthSearch;

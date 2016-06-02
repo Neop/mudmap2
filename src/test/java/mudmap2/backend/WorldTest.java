@@ -56,7 +56,7 @@ public class WorldTest {
     /**
      * Test of breadthSearch method, of class World.
      */
-    @Test
+/*    @Test
     @Ignore // TODO: implement this test
     public void testBreadthSearch() {
         System.out.println("breadthSearch");
@@ -69,7 +69,7 @@ public class WorldTest {
         // TODO review the generated test code and removePlace the default call to fail.
         fail("The test case is a prototype.");
     }
-
+*/
     /**
      * Test of getPlace method, of class World.
      */
@@ -619,7 +619,6 @@ public class WorldTest {
      * Test of addArea method, of class World.
      */
     @Test
-    @Ignore
     public void testAddArea() {
         System.out.println("addArea");
 
@@ -629,19 +628,15 @@ public class WorldTest {
         Area a2 = new Area("Second Area", Color.yellow);
         instance.addArea(a1);
         instance.addArea(a2);
-        /*
-        Area result = instance.getArea(a1.getId());
-        assertEquals(a1, result);
-        result = instance.getArea(a2.getId());
-        assertEquals(a2, result);
-        */
+
+        assertTrue(instance.getAreas().contains(a1));
+        assertTrue(instance.getAreas().contains(a2));
     }
 
     /**
      * Test of removeArea method, of class World.
      */
     @Test
-    @Ignore
     public void testRemoveArea() {
         System.out.println("removeArea");
 
@@ -653,12 +648,9 @@ public class WorldTest {
         instance.addArea(a2);
 
         instance.removeArea(a1);
-        /*
-        Area result = instance.getArea(a1.getId());
-        assertNull(result);
-        result = instance.getArea(a2.getId());
-        assertEquals(a2, result);
-        */
+
+        assertFalse(instance.getAreas().contains(a1));
+        assertTrue(instance.getAreas().contains(a2));
     }
 
     /**

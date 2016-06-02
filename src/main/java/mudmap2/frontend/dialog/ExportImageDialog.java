@@ -277,10 +277,10 @@ public class ExportImageDialog extends ActionDialog {
     }
 
     void updateImageWidth(){
-        if(center_position == null) center_position = worldtab.getWorldPanel().getPosition().clone();
+        if(center_position == null) center_position = new WorldCoordinate(worldtab.getWorldPanel().getPosition());
 
         if(rb_cur_view.isSelected()){
-            center_position = worldtab.getWorldPanel().getPosition().clone();
+            center_position = new WorldCoordinate(worldtab.getWorldPanel().getPosition());
             image_width = worldtab.getWorldPanel().getWidth();
             image_height = worldtab.getWorldPanel().getHeight();
         } else if(rb_layer.isSelected() || rb_each_layer.isSelected()){

@@ -65,7 +65,9 @@ public class PlaceSelectionDialog extends ActionDialog {
      * @return
      */
     public Place getSelection(){
-        return worldtab.getWorldPanel().getPlace(worldtab.getWorldPanel().getCursorX(),
+        return worldtab.getWorldPanel().getWorld().getPlace(
+                worldtab.getWorldPanel().getPosition().getLayer(),
+                worldtab.getWorldPanel().getCursorX(),
                 worldtab.getWorldPanel().getCursorY());
     }
 
@@ -74,7 +76,8 @@ public class PlaceSelectionDialog extends ActionDialog {
      * @return
      */
     public WorldCoordinate getCoordinate(){
-        return new WorldCoordinate(worldtab.getWorldPanel().getPosition().getLayer(),
+        return new WorldCoordinate(
+                worldtab.getWorldPanel().getPosition().getLayer(),
                 worldtab.getWorldPanel().getCursorX(),
                 worldtab.getWorldPanel().getCursorY());
     }
@@ -95,7 +98,7 @@ public class PlaceSelectionDialog extends ActionDialog {
         setContentPane(optionPane);
         optionPane.setMessage(worldtab = new WorldTab(world, true));
         worldtab.getWorldPanel().setCursorForced(true);
-        worldtab.getWorldPanel().resetHistory(default_coordinate.clone());
+        worldtab.getWorldPanel().resetHistory(new WorldCoordinate(default_coordinate));
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 

@@ -41,8 +41,8 @@ public class WorldFileList {
     // availableWorlds: <file, name>
     private static final HashMap<String, String> availableWorlds = new HashMap<>();
 
-    static final int metaFileVerMajor = 1;
-    static final int metaFileVerMinor = 1;
+    static final int META_FILE_VER_MAJOR = 1;
+    static final int META_FILE_VER_MINOR = 1;
 
     public static String getWorldName(String file){
         return availableWorlds.get(file);
@@ -153,7 +153,7 @@ public class WorldFileList {
             if(!Paths.isDirectory(Paths.getWorldsDir())) Paths.createDirectory(Paths.getWorldsDir());
             try (PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)))) {
                 outstream.println("# MUD Map (v2) worlds file");
-                outstream.println("ver " + metaFileVerMajor + "." + metaFileVerMinor);
+                outstream.println("ver " + META_FILE_VER_MAJOR + "." + META_FILE_VER_MINOR);
 
                 for(Map.Entry<String, String> w: availableWorlds.entrySet()){
                     // check whether the file name in file equals the name in the list

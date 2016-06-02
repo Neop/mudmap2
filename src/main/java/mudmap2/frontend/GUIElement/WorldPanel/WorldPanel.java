@@ -215,20 +215,7 @@ public class WorldPanel extends JPanel {
      * Set a new home position
      */
     public void setHome(){
-        getWorld().setHome(getPosition().clone());
-    }
-
-    /**
-     * Get a place on the current layer
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return place or null
-     */
-    public Place getPlace(int x, int y){
-        Place ret = null;
-        Layer layer = getWorld().getLayer(getPosition().getLayer());
-        if(layer != null) ret = layer.get(x, y);
-        return ret;
+        getWorld().setHome(new WorldCoordinate(getPosition()));
     }
 
     /**
@@ -236,7 +223,7 @@ public class WorldPanel extends JPanel {
      * @return place or null
      */
     public Place getSelectedPlace(){
-        return getPlace(getCursorX(), getCursorY());
+        return getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY());
     }
 
     // ========================= context menu ==================================
@@ -300,7 +287,7 @@ public class WorldPanel extends JPanel {
     // ========================= position history ==============================
 
     public void pushPosition(WorldCoordinate coord){
-        WorldCoordinate pos = coord.clone();
+        WorldCoordinate pos = new WorldCoordinate(coord);
         // remove all entries after the current one
         while(positionIdx > 0){
             positionHistory.pop();
@@ -312,7 +299,6 @@ public class WorldPanel extends JPanel {
         // move place selection
         setCursor((int) pos.getX(), (int) pos.getY());
         //while(positionHistory.size() > history_max_length) positionHistory.removeLast();
-        repaint();
     }
 
     /**
@@ -330,7 +316,7 @@ public class WorldPanel extends JPanel {
 
     public WorldCoordinate getPosition(){
         if(positionIdx >= positionHistory.size()){
-            return getWorld().getHome().clone();
+            return new WorldCoordinate(new WorldCoordinate(getWorld().getHome()));
         }
         return positionHistory.get(positionIdx);
     }
@@ -618,7 +604,7 @@ public class WorldPanel extends JPanel {
      * calls all place selection listeners
      */
     private void callCursorListeners(){
-        Place place = getPlace(getCursorX(), getCursorY());
+        Place place = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY());
 
         if(place != null)
             for(MapCursorListener listener: mapCursorListeners)
@@ -713,7 +699,7 @@ public class WorldPanel extends JPanel {
             JFrame rootFrame = (JFrame) SwingUtilities.getRoot(e.getComponent());
 
             if(e.getButton() == MouseEvent.BUTTON1){ // left click
-                Place place = getPlace(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
+                Place place = getWorld().getPlace(getPosition().getLayer(), getPlacePosX(e.getX()), getPlacePosY(e.getY()));
                 if(e.isControlDown()){ // left click + ctrl
                     if(place != null) placeGroupAdd(place);
                 } else if(!e.isShiftDown()) { // left click and not shift
@@ -944,7 +930,7 @@ public class WorldPanel extends JPanel {
                     case KeyEvent.VK_UP:
                     //case KeyEvent.VK_W: // add path to direction 'n'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX(), getCursorY() + 1);
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY() + 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("n") == null && other.getExit("s") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "n", other, "s"));
@@ -953,7 +939,7 @@ public class WorldPanel extends JPanel {
                         break;
                     case KeyEvent.VK_NUMPAD9: // add path to direction 'ne'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX() + 1, getCursorY() + 1);
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() + 1, getCursorY() + 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("ne") == null && other.getExit("sw") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "ne", other, "sw"));
@@ -964,7 +950,7 @@ public class WorldPanel extends JPanel {
                     case KeyEvent.VK_RIGHT:
                     //case KeyEvent.VK_D: // add path to direction 'e'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX() + 1, getCursorY());
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() + 1, getCursorY());
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("e") == null && other.getExit("w") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "e", other, "w"));
@@ -973,7 +959,7 @@ public class WorldPanel extends JPanel {
                         break;
                     case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX() + 1, getCursorY() - 1);
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() + 1, getCursorY() - 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("se") == null && other.getExit("nw") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "se", other, "nw"));
@@ -984,7 +970,7 @@ public class WorldPanel extends JPanel {
                     case KeyEvent.VK_DOWN:
                     //case KeyEvent.VK_S: // add path to direction 's'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX(), getCursorY() - 1);
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY() - 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("s") == null && other.getExit("n") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "s", other, "n"));
@@ -993,7 +979,7 @@ public class WorldPanel extends JPanel {
                         break;
                     case KeyEvent.VK_NUMPAD1: // add path to direction 'sw'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX() - 1, getCursorY() - 1);
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() - 1, getCursorY() - 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("sw") == null && other.getExit("ne") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "sw", other, "ne"));
@@ -1004,7 +990,7 @@ public class WorldPanel extends JPanel {
                     case KeyEvent.VK_LEFT:
                     //case KeyEvent.VK_A: // add path to direction 'w'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX() - 1, getCursorY());
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() - 1, getCursorY());
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("w") == null && other.getExit("e") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "w", other, "e"));
@@ -1013,7 +999,7 @@ public class WorldPanel extends JPanel {
                         break;
                     case KeyEvent.VK_NUMPAD7: // add path to direction 'nw'
                         place = getSelectedPlace();
-                        other = getPlace(getCursorX() - 1, getCursorY() + 1);
+                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() - 1, getCursorY() + 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("nw") == null && other.getExit("se") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "nw", other, "se"));

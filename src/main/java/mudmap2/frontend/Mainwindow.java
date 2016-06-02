@@ -45,7 +45,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -54,8 +53,6 @@ import javax.swing.event.ChangeListener;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldFileReader.WorldFile;
-import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
-import mudmap2.backend.WorldFileReader.current.WorldFileMM1;
 import mudmap2.backend.WorldManager;
 import mudmap2.backend.html.GaardianMap;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
@@ -74,9 +71,10 @@ import mudmap2.frontend.dialog.SaveWorldDialog;
  */
 public final class Mainwindow extends JFrame implements KeyEventDispatcher,ActionListener,ChangeListener {
 
-    static Integer config_file_version_major = 2;
-    static Integer config_file_version_minor = 0;
     private static final long serialVersionUID = 1L;
+
+    static final Integer CONFIG_FILE_VER_MAJOR = 2;
+    static final Integer CONFI_FILE_VER_MINOR = 0;
 
     // Contains all opened maps <name, worldtab>
     HashMap<World, WorldTab> worldTabs;
@@ -273,7 +271,12 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
      * Closes all tabs
      */
     public void closeTabs(){
-        for(WorldTab tab: worldTabs.values()) tab.close();
+        for(WorldTab tab: worldTabs.values()){
+            int ret = JOptionPane.showConfirmDialog(this, "Save world \"" + tab.getWorld().getName() + "\"?", "Save world", JOptionPane.YES_NO_OPTION);
+            if(ret == JOptionPane.YES_OPTION) tab.save();
+            WorldManager.closeFile(tab.getFilename());
+            removeTab(tab);
+        }
     }
 
     /**
@@ -325,6 +328,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                     int ret = dlg.showSaveDialog(wt);
                     if(ret == JFileChooser.APPROVE_OPTION){
                         wt.getWorld().setWorldFile(dlg.getWorldFile());
+                        wt.setFilename(dlg.getSelectedFile().getAbsolutePath());
                         wt.save();
                     }
                 }

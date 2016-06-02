@@ -114,10 +114,10 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
      * @param wt
      */
     public WorldTab(WorldTab wt){
+        createGui(wt.getWorld(), true);
+
         worldPanel.setTileSize(wt.getWorldPanel().getTileSize());
         worldPanel.setCursorEnabled(wt.getWorldPanel().isCursorEnabled());
-
-        createGui(wt.getWorld(), true);
     }
 
     /**
@@ -207,16 +207,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
     public WorldPanel getWorldPanel() {
         return worldPanel;
-    }
-
-    /**
-     * Closes the tab
-     */
-    public void close(){
-        int ret = JOptionPane.showConfirmDialog(this, "Save world \"" + getWorld().getName() + "\"?", "Save world", JOptionPane.YES_NO_OPTION);
-        if(ret == JOptionPane.YES_OPTION) save();
-        WorldManager.closeFile(filename);
-        //((Mainwindow) parent).removeTab(this);
     }
 
     /**
@@ -429,7 +419,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         WorldFile worldFile = getWorld().getWorldFile();
 
         // set meta data writer
-        if(worldFile.getWorldFileType() == WorldFileType.JSON){
+        if(worldFile != null && worldFile.getWorldFileType() == WorldFileType.JSON){
             WorldFileJSON wfj = null;
             if(worldFile instanceof WorldFileJSON){
                 wfj = (WorldFileJSON) worldFile;

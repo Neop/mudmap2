@@ -43,6 +43,12 @@ public class WorldCoordinate implements Comparable<WorldCoordinate> {
         this.y = y;
     }
 
+    public WorldCoordinate(WorldCoordinate coord) {
+        layer = coord.getLayer();
+        x = coord.getX();
+        y = coord.getY();
+    }
+
     /**
      * Gets the layer
      * @return layer
@@ -108,15 +114,6 @@ public class WorldCoordinate implements Comparable<WorldCoordinate> {
     @Override
     public String toString(){
         return layer + " " + x + " " + y;
-    }
-
-    /**
-     * creates a new instance of this world coordinate
-     * @return world coordinate
-     */
-    @Override
-    public WorldCoordinate clone(){
-        return new WorldCoordinate(layer, x, y);
     }
 
     /**

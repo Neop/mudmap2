@@ -32,7 +32,7 @@ import java.awt.Color;
  */
 public class RiskLevel {
     // next id to be assigned
-    static int next_id = 0;
+    static int nextID = 0;
 
     int id;
     public String description;
@@ -46,7 +46,7 @@ public class RiskLevel {
      */
     public RiskLevel(int id, String desc, Color color){
         this.id = id;
-        if(id >= next_id) next_id = id + 1;
+        if(id >= nextID) nextID = id + 1;
         description = desc;
         this.color = color;
     }
@@ -57,7 +57,7 @@ public class RiskLevel {
      * @param color color that represents the risk level
      */
     public RiskLevel(String desc, Color color){
-        id = next_id++;
+        id = nextID++;
         description = desc;
         this.color = color;
     }

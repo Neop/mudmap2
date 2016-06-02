@@ -59,19 +59,19 @@ public class LayerTest {
     /**
      * Test of setQuadtree method, of class Layer.
      */
-    @Test
+/*    @Test
     @Ignore
     public void testSetQuadtree() {
         System.out.println("setQuadtree");
 
-        int center_x = -4;
-        int center_y = 5;
+        int centerX = -4;
+        int centerY = 5;
         Layer instance = new Layer(world);
-        instance.setQuadtree(center_x, center_y);
+        instance.setQuadtree(centerX, centerY);
 
         // how to check this?
     }
-
+*/
     /**
      * Test of getCenterX method, of class Layer.
      */

@@ -906,7 +906,7 @@ public class PlaceTest {
     /**
      * Test of breadthSearchReset method, of class Place.
      */
-    @Test
+/*    @Test
     @Ignore
     public void testBreadthSearchReset() {
         System.out.println("breadthSearchReset");
@@ -915,11 +915,11 @@ public class PlaceTest {
         // TODO review the generated test code and removePlace the default call to fail.
         fail("The test case is a prototype.");
     }
-
+*/
     /**
      * Test of getBreadthSearchData method, of class Place.
      */
-    @Test
+/*    @Test
     @Ignore
     public void testGetBreadthSearchData() {
         System.out.println("getBreadthSearchData");
@@ -930,5 +930,5 @@ public class PlaceTest {
         // TODO review the generated test code and removePlace the default call to fail.
         fail("The test case is a prototype.");
     }
-
+*/
 }
