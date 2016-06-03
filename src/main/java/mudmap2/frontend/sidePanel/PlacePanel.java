@@ -260,7 +260,6 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
         }
 
         public void update(){
-            System.out.println("update place " + place.toString());
             setUserObject(place.toString());
         }
 

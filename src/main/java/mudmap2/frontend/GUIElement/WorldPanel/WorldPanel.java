@@ -318,7 +318,9 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     }
 
     public WorldCoordinate getPosition(){
-        if(positionIdx >= positionHistory.size()){
+        if(positionHistory.isEmpty()){
+            positionHistory.add(new WorldCoordinate(getWorld().getHome()));
+        } else if(positionIdx >= positionHistory.size()){
             return new WorldCoordinate(new WorldCoordinate(getWorld().getHome()));
         }
         return positionHistory.get(positionIdx);
@@ -1512,7 +1514,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         PlaceSelectionDialog psdlg = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
                         psdlg.setVisible(true);
                         Place child = psdlg.getSelection();
-                        if(child != null && child != place){
+                        if(psdlg.getSelected() && child != null && child != place){
                             int ret = JOptionPane.showConfirmDialog(rootFrame, "Connect \"" + child.getName() + "\" to \"" + place.getName() + "\"?", "Connect child place", JOptionPane.YES_NO_OPTION);
                             if(ret == JOptionPane.YES_OPTION){
                                 place.connectChild(child);
@@ -1561,6 +1563,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                                     place_it = place_it.getBreadthSearchData().predecessor;
                                     ++path_length;
                                 }
+                                repaint();
                                 callMessageListeners("Path found, length: " + (path_length - 1));
                             }
 

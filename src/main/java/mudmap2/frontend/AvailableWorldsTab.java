@@ -85,6 +85,8 @@ final class AvailableWorldsTab extends JPanel {
                             "Delete world", JOptionPane.YES_NO_OPTION);
                     if(ret == JOptionPane.YES_OPTION){
                         WorldManager.deleteWorldFile(entry.getKey());
+                        update();
+                        repaint();
                     }
                 }
             });

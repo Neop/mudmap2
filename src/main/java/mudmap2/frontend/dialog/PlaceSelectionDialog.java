@@ -55,6 +55,7 @@ public class PlaceSelectionDialog extends ActionDialog {
         super(parent, "Select a place - " + world.getName(), true);
         this.parent = parent;
         this.world = world;
+        ok = false;
 
         default_coordinate = defaultCoordinate;
         layer_change_allowed = layerChangeAllowed;
@@ -109,12 +110,11 @@ public class PlaceSelectionDialog extends ActionDialog {
                     int value = ((Integer) optionPane.getValue());
                     ok = value == JOptionPane.OK_OPTION;
                     dispose();
-                    parent.repaint();
+                    if(parent != null) parent.repaint();
                 }
             }
         });
 
         setSize(500, 500);
-        setLocation(parent.getX() + (parent.getWidth() - getWidth()) / 2, parent.getY() + (parent.getHeight() - getHeight()) / 2);
     }
 }

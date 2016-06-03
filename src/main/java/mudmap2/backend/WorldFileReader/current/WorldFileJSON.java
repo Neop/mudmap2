@@ -194,6 +194,9 @@ public class WorldFileJSON extends WorldFile {
 
             // riskLevels
             if(root.has("riskLevels")){
+                // remove existing risk levels
+                world.getRiskLevels().clear();
+
                 JSONArray riskLevels = root.getJSONArray("riskLevels");
                 Integer length = riskLevels.length();
                 for(Integer i = 0; i < length; ++i){
@@ -204,7 +207,7 @@ public class WorldFileJSON extends WorldFile {
                         Integer id = riskLevel.getInt("id");
                         String desc = riskLevel.getString("desc");
                         Color col = hexToCol(riskLevel.getString("col"));
-                        world.addRiskLevel(new RiskLevel(id, desc, col));
+                        world.setRiskLevel(new RiskLevel(id, desc, col));
                     }
                 }
             }

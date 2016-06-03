@@ -527,6 +527,10 @@ public class World implements BreadthSearchGraph {
         callListeners(rl);
     }
 
+    public void setRiskLevel(RiskLevel rl){
+        riskLevels.put(rl.getId(), rl);
+    }
+
     /**
      * Removes a risk level
      * @param rl

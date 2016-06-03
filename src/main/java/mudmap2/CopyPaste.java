@@ -252,4 +252,16 @@ public final class CopyPaste {
         copyPlaces = null;
         copyPlaceLocations = null;
     }
+
+    /**
+     * Has plac(es) for cut operation
+     * @return
+     */
+    public static Boolean isCut(){
+        return hasCopyPlaces() && !copyMode;
+    }
+
+    public static Boolean isMarked(Place place){
+        return copyPlaces.contains(place);
+    }
 }

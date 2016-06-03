@@ -586,7 +586,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // mark place group selection
-                    if(isSelected(curPlace)){
+                    if(isSelected(curPlace) || (mudmap2.CopyPaste.isCut() && mudmap2.CopyPaste.isMarked(curPlace))){
                         g.setColor(new Color(255, 255, 255, 128));
                         g.fillRect(placeXpx, placeYpx, tileSize, tileSize);
                     }
@@ -690,9 +690,11 @@ public class MapPainterDefault implements MapPainter {
                     }
                 }
 
+                //TODO: extract from parent loop
                 if(copiedPlaceLocations != null){
                     boolean locationFound = false;
                     for(Pair<Integer, Integer> location: copiedPlaceLocations){
+
                         if(location.first == placeX - placeSelectedX && location.second == placeY - placeSelectedY){
                             locationFound = true;
                             break;

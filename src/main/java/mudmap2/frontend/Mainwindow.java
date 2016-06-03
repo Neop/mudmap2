@@ -200,13 +200,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
         menu_edit.add(new JSeparator());
 
-        JMenuItem menu_edit_list_places = new JMenuItem("List places");
-        menu_edit_list_places.setActionCommand("list_places");
-        menu_edit_list_places.addActionListener(this);
-        menu_edit.add(menu_edit_list_places);
-
-        menu_edit.add(new JSeparator());
-
         menuEditCurvedPaths = new JCheckBoxMenuItem("Curved paths");
         menu_edit.add(menuEditCurvedPaths);
         menuEditCurvedPaths.addChangeListener(this);
@@ -215,11 +208,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menu_edit.add(menuEditShowCursor);
         menuEditShowCursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
         menuEditShowCursor.addChangeListener(this);
-
-        JMenuItem menu_help_help = new JMenuItem("Help (online)");
-        menu_help_help.setActionCommand("help");
-        menu_help_help.addActionListener(this);
-        menu_help.add(menu_help_help);
 
         JMenuItem menu_help_about = new JMenuItem("About");
         menu_help.add(menu_help_about);

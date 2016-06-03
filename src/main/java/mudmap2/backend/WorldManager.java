@@ -104,6 +104,7 @@ public class WorldManager {
         if(worldFile.canRead()){
             File file = new File(filename);
             if(!file.delete()) error = true;
+            WorldFileList.removeWorldFileEntry(filename);
         }
         return error;
     }
