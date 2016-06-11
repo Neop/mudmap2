@@ -1,6 +1,7 @@
 2.3.1
 - added '+' on place tiles to show non-standard exits
 - increased up/down arrow size, decreased character spacing
+- added first parent name to place tiles (similar to the child name which is already shown there)
 
 2.3.0
 - new JSON-based file format, the old format is now considered deprecated and new features won't be implemented

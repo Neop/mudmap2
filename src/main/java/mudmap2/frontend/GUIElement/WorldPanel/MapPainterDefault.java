@@ -448,7 +448,7 @@ public class MapPainterDefault implements MapPainter {
 
         // max number of text lines tht fit in a tile
         FontMetrics fm = g.getFontMetrics();
-        final int maxLines = (int) Math.floor((double)(tileSize - 3 * (tileBorderWidthScaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
+        final int maxLines = (int) Math.round((double)(tileSize - 3 * (tileBorderWidthScaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
         final int maxLineLength = tileSize - 2 * (tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()));
         final Boolean drawText = fm.stringWidth("WW") < (tileSize - 2 * (getRiskLevelStrokeWidth() + getTileBorderWidth()));
 
@@ -544,6 +544,25 @@ public class MapPainterDefault implements MapPainter {
                                         placeXpx + tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()),
                                         placeYpx + tileBorderWidthScaled + fm.getHeight() * (1 + lineNum));
                                 lineNum++;
+                            }
+
+                            // sub areas / parents
+                            if(lineNum < maxLines && !curPlace.getParents().isEmpty()){
+                                int parentsNum = curPlace.getParents().size();
+                                String chStr = "Pa" + (parentsNum > 1 ? " (" + curPlace.getParents().size() + "): " : ": ");
+
+                                boolean firstParent = true;
+                                for(Place parent: curPlace.getParents()){
+                                    chStr += (firstParent ? "" : ", ") + parent.getName();
+                                    firstParent = false;
+                                }
+                                line = fitLineLength(chStr, fm, maxLineLength, maxLines - lineNum);
+                                for(String str: line){
+                                    g.drawString(str,
+                                            placeXpx + tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()),
+                                            placeYpx + tileBorderWidthScaled + fm.getHeight() * (1 + lineNum));
+                                    lineNum++;
+                                }
                             }
 
                             // sub areas / children
