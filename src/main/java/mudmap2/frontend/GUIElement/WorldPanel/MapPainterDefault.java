@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import mudmap2.utils.Pair;
@@ -345,6 +346,65 @@ public class MapPainterDefault implements MapPainter {
     }
 
     /**
+     * Draw place tile text
+     *
+     * @param g graphics to draw on
+     * @param x x coordinate of text area (within tile borders)
+     * @param y y coordinate of text area (within tile borders)
+     * @param width text area width
+     * @param height text area height
+     * @param top text for the top part
+     * @param flags flags line
+     * @param exits exits line
+     */
+    private void drawText(Graphics g, int x, int y, int width, int height, List<String> top, String flags, String exits){
+        FontMetrics fm = g.getFontMetrics();
+
+        final int lineHeight = fm.getMaxAscent();
+        // maximum number of lines
+        final int maxLines = (int) Math.floor((height - fm.getDescent()) / lineHeight);
+        // max number of lines for the top part
+        final int topLines = maxLines - ((!flags.isEmpty() || !exits.isEmpty()) && maxLines > 1 ? 1 : 0);
+
+        // reformat lines
+        LinkedList<String> linesTop = new LinkedList<>();
+        for(String topText: top){
+            LinkedList<String> fitLineLength = fitLineLength(topText, fm, width, topLines);
+            linesTop.addAll(fitLineLength);
+            if(linesTop.size() >= topLines) break;
+        }
+
+        // draw top lines
+        for(int i = 0; i < topLines && i < linesTop.size(); ++i){
+            g.drawString(linesTop.get(i), x, y + (i + 1) * lineHeight);
+        }
+
+        if(maxLines > 1){
+            if(fm.stringWidth(flags + exits) < width){
+                // draw flags
+                g.drawString(flags, x, y + height - fm.getDescent());
+            }
+
+            // change font for exits
+            Font orig = g.getFont();
+            // derive font: increase font size and decrease character spacing
+            Map<TextAttribute, Object> attributes = new HashMap<>();
+            attributes.put(TextAttribute.SIZE, 17);
+            attributes.put(TextAttribute.TRACKING, 0.0);
+            g.setFont(orig.deriveFont(attributes));
+
+            FontMetrics fm2 = g.getFontMetrics();
+
+            int exitsWidth = fm2.stringWidth(exits);
+
+            // draw exit string
+            g.drawString(exits, x + width - exitsWidth, y + height - fm2.getDescent());
+
+            g.setFont(orig);
+        }
+    }
+
+    /**
      * Converts world coordinates to screen coordinates
      * @param placeX a world (place) coordinate (x axis)
      * @return a screen coordinate x
@@ -515,6 +575,9 @@ public class MapPainterDefault implements MapPainter {
                                 tileSize - 2 * tileBorderWidthScaled - (int) (0.5 * getRiskLevelStrokeWidth()));
                     }
 
+                    LinkedList<String> text = new LinkedList<>();
+                    String flags = "", exits = "";
+
                     // draw text, if tiles are large enough
                     if(drawText){
                         g.setColor(Color.BLACK);
@@ -523,80 +586,51 @@ public class MapPainterDefault implements MapPainter {
                         // gets place name if unique, else place name with ID
                         String placeName = ((layer.getWorld().isPlaceNameUnique(curPlace.getName()) && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE)
                                                 ? curPlace.getName() : curPlace.toString();
-                        LinkedList<String> line = fitLineLength(placeName, fm, maxLineLength, maxLines);
-                        for(String str: line){
-                            g.drawString(str,
-                                    placeXpx + tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()),
-                                    placeYpx + tileBorderWidthScaled + fm.getHeight() * (1 + lineNum));
-                            lineNum++;
+                        text.add(placeName);
+
+                        int reclvlmin = curPlace.getRecLevelMin(), reclvlmax = curPlace.getRecLevelMax();
+                        if(reclvlmin > -1 || reclvlmax > -1){
+                            String levelString = "lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?");
+                            text.add(levelString);
                         }
 
-                        if(lineNum < maxLines){ // it isn't unusual for some places to fill up all the lines
-                            // recommended level
-                            int reclvlmin = curPlace.getRecLevelMin(), reclvlmax = curPlace.getRecLevelMax();
-                            if(reclvlmin > -1 || reclvlmax > -1){
-                                g.drawString("lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?"),
-                                        placeXpx + tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()),
-                                        placeYpx + tileBorderWidthScaled + fm.getHeight() * (1 + lineNum));
-                                lineNum++;
+                        // sub areas / parents
+                        if(lineNum < maxLines && !curPlace.getParents().isEmpty()){
+                            int parentsNum = curPlace.getParents().size();
+                            String paStr = "Pa" + (parentsNum > 1 ? " (" + curPlace.getParents().size() + "): " : ": ");
+
+                            boolean firstParent = true;
+                            for(Place parent: curPlace.getParents()){
+                                paStr += (firstParent ? "" : ", ") + parent.getName();
+                                firstParent = false;
                             }
+                            text.add(paStr);
+                        }
 
-                            // sub areas / parents
-                            if(lineNum < maxLines && !curPlace.getParents().isEmpty()){
-                                int parentsNum = curPlace.getParents().size();
-                                String chStr = "Pa" + (parentsNum > 1 ? " (" + curPlace.getParents().size() + "): " : ": ");
+                        // sub areas / children
+                        if(lineNum < maxLines && !curPlace.getChildren().isEmpty()){
+                            int childrenNum = curPlace.getChildren().size();
+                            String chStr = "Ch" + (childrenNum > 1 ? " (" + curPlace.getChildren().size() + "): " : ": ");
 
-                                boolean firstParent = true;
-                                for(Place parent: curPlace.getParents()){
-                                    chStr += (firstParent ? "" : ", ") + parent.getName();
-                                    firstParent = false;
-                                }
-                                line = fitLineLength(chStr, fm, maxLineLength, maxLines - lineNum);
-                                for(String str: line){
-                                    g.drawString(str,
-                                            placeXpx + tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()),
-                                            placeYpx + tileBorderWidthScaled + fm.getHeight() * (1 + lineNum));
-                                    lineNum++;
-                                }
+                            boolean firstChild = true;
+                            for(Place child: curPlace.getChildren()){
+                                chStr += (firstChild ? "" : ", ") + child.getName();
+                                firstChild = false;
                             }
+                            text.add(chStr);
+                        }
 
-                            // sub areas / children
-                            if(lineNum < maxLines && !curPlace.getChildren().isEmpty()){
-                                int childrenNum = curPlace.getChildren().size();
-                                String chStr = "Ch" + (childrenNum > 1 ? " (" + curPlace.getChildren().size() + "): " : ": ");
+                        // flags
+                        if(lineNum < maxLines){
+                            // place has comments
+                            if(!curPlace.getComments().isEmpty()) flags += "Co";
+                            if(!curPlace.getChildren().isEmpty()) flags += "Ch";
+                            if(!curPlace.getParents().isEmpty()) flags += "Pa";
 
-                                boolean firstChild = true;
-                                for(Place child: curPlace.getChildren()){
-                                    chStr += (firstChild ? "" : ", ") + child.getName();
-                                    firstChild = false;
-                                }
-                                line = fitLineLength(chStr, fm, maxLineLength, maxLines - lineNum);
-                                for(String str: line){
-                                    g.drawString(str,
-                                            placeXpx + tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()),
-                                            placeYpx + tileBorderWidthScaled + fm.getHeight() * (1 + lineNum));
-                                    lineNum++;
-                                }
-                            }
-
-                            // flags
-                            if(lineNum < maxLines){
-                                String flags = "";
-                                // place has comments
-                                if(!curPlace.getComments().isEmpty()) flags += "Co";
-                                if(!curPlace.getChildren().isEmpty()) flags += "Ch";
-                                if(!curPlace.getParents().isEmpty()) flags += "Pa";
-
-                                // other flags
-                                for(Map.Entry<String, Boolean> flag: curPlace.getFlags().entrySet()){
-                                    if(flag.getValue()) flags += flag.getKey().toUpperCase();
-                                    if(fm.stringWidth(flags) >= tileSize - 2 * tileBorderWidthScaled) break;
-                                }
-
-                                // draw flags
-                                g.drawString(flags,
-                                        placeXpx + tileBorderWidthScaled + (int) Math.ceil(2 * selectionStrokeWidth),
-                                        placeYpx + tileSize - tileBorderWidthScaled - (int) Math.ceil(2 * selectionStrokeWidth));
+                            // other flags
+                            for(Map.Entry<String, Boolean> flag: curPlace.getFlags().entrySet()){
+                                if(flag.getValue()) flags += flag.getKey().toUpperCase();
+                                if(fm.stringWidth(flags) >= tileSize - 2 * tileBorderWidthScaled) break;
                             }
                         }
                     }
@@ -695,28 +729,14 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // draw exits
-                    if(tileSize >= 20){
-                        // the up / down flags have to be drawn after the
-                        // exits to know whether they have to be drawn
-                        if((exitUp || exitDown) && drawText && lineNum <= maxLines){
-                            g.setColor(Color.BLACK);
-                            // have some arrows: ⬆⬇ ↑↓
-                            String updownstr = "" + (exitnstd ? "+" : "") + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");
-
-                            Font orig = g.getFont();
-                            // derive font: increase font size and decrease character spacing
-                            Map<TextAttribute, Object> attributes = new HashMap<>();
-                            attributes.put(TextAttribute.SIZE, 17);
-                            attributes.put(TextAttribute.TRACKING, 0.0);
-                            g.setFont(orig.deriveFont(attributes));
-
-                            g.drawString(updownstr,
-                                    placeXpx + tileSize - tileBorderWidthScaled - g.getFontMetrics().stringWidth(updownstr) - (int) Math.ceil(selectionStrokeWidth),
-                                    placeYpx + tileSize - tileBorderWidthScaled - (int) Math.ceil(selectionStrokeWidth));
-
-                            g.setFont(orig);
-                        }
+                    if(tileSize >= 20 && (exitUp || exitDown) && drawText && lineNum <= maxLines){
+                        // have some arrows: ⬆⬇ ↑↓
+                        exits = "" + (exitnstd ? "+" : "") + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");
                     }
+
+                    g.setColor(Color.BLACK);
+                    final int border = (int) (tileBorderWidthScaled + getRiskLevelStrokeWidth());
+                    drawText(g, placeXpx + border, placeYpx + border, tileSize - 2 * border, tileSize - 2 * border, text, flags, exits);
                 }
 
                 //TODO: extract from parent loop
