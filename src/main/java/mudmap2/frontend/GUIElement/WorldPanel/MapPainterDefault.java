@@ -321,18 +321,13 @@ public class MapPainterDefault implements MapPainter {
             // find last ' ' before maxLength, if there is no ' ' cut the
             // string at maxLength
             while(fm.stringWidth(str.substring(0, strlen)) > maxLength){
+                // remove last word
                 int whitespace = str.substring(0, strlen).lastIndexOf(' ');
-                // if there is still a whitespace: cut the string
-                if(whitespace != -1) strlen = whitespace;
-                else {
-                    // if there is no whitespace fit the string length to the line pixel width
-                    int lenpx = fm.stringWidth(str.substring(0, (int) Math.ceil(strlen / 1.5)));
-                    while(lenpx > maxLength){
-                        strlen = (int) Math.ceil(strlen / 1.5);
-                        int lenpx2 = fm.stringWidth(str.substring(0, strlen));
-                        lenpx = lenpx2 - ((lenpx <= lenpx2) ? 1 : 0); // prevent infinite loops
-                    }
-                    break;
+                // if a whitespace is found: cut the string
+                if(whitespace != -1){
+                    strlen = whitespace;
+                } else {
+                    --strlen;
                 }
             }
 
