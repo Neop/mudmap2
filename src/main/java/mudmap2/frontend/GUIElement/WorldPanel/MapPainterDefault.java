@@ -24,9 +24,11 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.font.TextAttribute;
 import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -592,7 +594,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // draw path lines here
-                    boolean exitUp = false, exitDown = false;
+                    boolean exitUp = false, exitDown = false, exitnstd = false;
                     if(getShowPaths()){
                         for(Path path: curPlace.getPaths()){
                             Place otherPlace = path.getOtherPlace(curPlace);
@@ -669,7 +671,10 @@ public class MapPainterDefault implements MapPainter {
                                         if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
                                             int exitCircleRadius2 = getExitCircleRadius();
                                             g.fillOval(placeXpx + exitOffset.first - exitCircleRadius2, placeYpx + exitOffset.second - exitCircleRadius2, 2 * exitCircleRadius2, 2 * exitCircleRadius2);
-                                        }   break;
+                                        } else { // non-standard exit
+                                            exitnstd = true;
+                                        }
+                                        break;
                                 }
                             }
                         }
@@ -681,11 +686,21 @@ public class MapPainterDefault implements MapPainter {
                         // exits to know whether they have to be drawn
                         if((exitUp || exitDown) && drawText && lineNum <= maxLines){
                             g.setColor(Color.BLACK);
-                            // have some arrows: ￪￬ ↑↓
-                            String updownstr = "" + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");
+                            // have some arrows: ⬆⬇ ↑↓
+                            String updownstr = "" + (exitnstd ? "+" : "") + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");
+
+                            Font orig = g.getFont();
+                            // derive font: increase font size and decrease character spacing
+                            Map<TextAttribute, Object> attributes = new HashMap<>();
+                            attributes.put(TextAttribute.SIZE, 17);
+                            attributes.put(TextAttribute.TRACKING, 0.0);
+                            g.setFont(orig.deriveFont(attributes));
+
                             g.drawString(updownstr,
-                                    placeXpx + tileSize - tileBorderWidthScaled - fm.stringWidth(updownstr) - (int) Math.ceil(2 * selectionStrokeWidth),
-                                    placeYpx + tileSize - tileBorderWidthScaled - (int) Math.ceil(2 * selectionStrokeWidth));
+                                    placeXpx + tileSize - tileBorderWidthScaled - g.getFontMetrics().stringWidth(updownstr) - (int) Math.ceil(selectionStrokeWidth),
+                                    placeYpx + tileSize - tileBorderWidthScaled - (int) Math.ceil(selectionStrokeWidth));
+
+                            g.setFont(orig);
                         }
                     }
                 }
