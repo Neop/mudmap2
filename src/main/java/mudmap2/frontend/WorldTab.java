@@ -311,7 +311,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
      * Updates the infobar
      */
     private void updateInfobar(){
-        if(labelInfobar != null ){
+        if(labelInfobar != null){
             if(worldPanel.isCursorEnabled()){
                 Layer layer = getWorld().getLayer(worldPanel.getPosition().getLayer());
                 if(layer != null && layer.exist(worldPanel.getCursorX(), worldPanel.getCursorY())){

@@ -55,9 +55,9 @@ public final class ScrollLabel extends JPanel implements Runnable{
 
     public ScrollLabel() {
         super();
-        set_text("");
         messages = new LinkedList<>();
         is_default_text = true;
+        setText("");
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent arg0) {
@@ -69,9 +69,14 @@ public final class ScrollLabel extends JPanel implements Runnable{
 
     public ScrollLabel(String text){
         setText(text);
-        set_text(text);
         is_default_text = true;
         messages = new LinkedList<>();
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                nextMessage();
+            }
+        });
         parent = Thread.currentThread();
     }
 
@@ -91,7 +96,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
      */
     public void setText(String s){
         default_text = s;
-        if(is_default_text) set_text(s);
+        if(is_default_text) setDisplayedText(s);
     }
 
     /**
@@ -122,10 +127,8 @@ public final class ScrollLabel extends JPanel implements Runnable{
      * @param message
      */
     synchronized public void showMessage(String message){
-        // if no message on stack: display it immediately
-        if(messages.isEmpty()){
-            current_text = message;
-        } else messages.addLast(message);
+        messages.addLast(message);
+        if(is_default_text) nextMessage();
     }
 
     /**
@@ -133,15 +136,15 @@ public final class ScrollLabel extends JPanel implements Runnable{
      */
     synchronized private void nextMessage(){
         if(!(is_default_text = messages.isEmpty())){
-            set_text(messages.pollFirst());
-        } else set_text(getText());
+            setDisplayedText(messages.pollFirst());
+        } else setDisplayedText(getText());
     }
 
     /**
      * Sets the shown text and resets the message timer
      * @param s
      */
-    synchronized private void set_text(String s){
+    synchronized private void setDisplayedText(String s){
         if(s == null) s = getText();
         current_text = s;
         message_start_time = getTimeMS();

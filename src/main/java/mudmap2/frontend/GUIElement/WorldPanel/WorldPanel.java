@@ -611,10 +611,11 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     private void callCursorListeners(){
         Place place = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY());
 
-        if(place != null)
+        if(place != null){
             for(MapCursorListener listener: mapCursorListeners)
                 listener.placeSelected(place);
-        else {
+            callPlaceSelectionListeners(place);
+        } else {
             Layer layer = getWorld().getLayer(getPosition().getLayer());
             for(MapCursorListener listener: mapCursorListeners)
                 listener.placeDeselected(layer, getCursorX(), getCursorY());
@@ -676,7 +677,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     }
 
     @Override
-    public void WorldChanged(Object source) {
+    public void worldChanged(Object source) {
         repaint();
     }
 
@@ -1563,7 +1564,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                                     place_it = place_it.getBreadthSearchData().predecessor;
                                     ++path_length;
                                 }
-                                repaint();
+                                //repaint();
+                                worldChanged(place); // workaround: why doesn't repaint work?
                                 callMessageListeners("Path found, length: " + (path_length - 1));
                             }
 

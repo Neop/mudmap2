@@ -195,7 +195,7 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
     }
 
     @Override
-    public void WorldChanged(Object source) {
+    public void worldChanged(Object source) {
         if(!useKeywords){ // don't update when keywords/search is in use
             if(source instanceof Layer){
                 if(layerNodes.containsKey((Layer) source)){

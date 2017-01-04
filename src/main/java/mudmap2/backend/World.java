@@ -637,7 +637,7 @@ public class World implements BreadthSearchGraph {
      */
     public void callListeners(Object source){
         for(WorldChangeListener listener: changeListeners){
-            listener.WorldChanged(source);
+            listener.worldChanged(source);
         }
     }
 }

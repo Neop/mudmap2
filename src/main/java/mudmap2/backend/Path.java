@@ -108,8 +108,9 @@ public class Path {
      * Removes this path from both places
      */
     public void remove() {
-        places[0].paths.remove(this);
-        places[1].paths.remove(this);
+        //places[0].paths.remove(this);
+        //places[1].paths.remove(this);
+        places[0].removePath(this); // also calls the world listener
     }
 
     /**

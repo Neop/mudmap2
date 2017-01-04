@@ -22,6 +22,6 @@ package mudmap2.backend;
  */
 public interface WorldChangeListener {
 
-    public void WorldChanged(Object source);
+    public void worldChanged(Object source);
 
 }

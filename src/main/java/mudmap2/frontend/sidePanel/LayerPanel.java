@@ -219,7 +219,7 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
     public void mouseExited(MouseEvent e) {}
 
     @Override
-    public void WorldChanged(Object source) {
+    public void worldChanged(Object source) {
         // only recreate panel on layer change
         if(source instanceof Layer){
             update();
