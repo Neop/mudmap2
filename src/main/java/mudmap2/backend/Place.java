@@ -484,9 +484,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         if(keywords == null) return false;
 
         for(String kw: keywords){
-            if(matchKeyword(kw)) return true;
+            if(!matchKeyword(kw)) return false;
         }
-        return false;
+        return true;
     }
 
     /**
