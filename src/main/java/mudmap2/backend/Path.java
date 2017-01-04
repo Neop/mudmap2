@@ -30,7 +30,7 @@ package mudmap2.backend;
  */
 public class Path {
 
-    public static final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw", "-"};
+    public static final String[] directions = {"n", "ne", "e", "se", "s", "sw", "w", "nw", "u", "d", "-"};
 
     private final Place[] places;
     private final String[] exitdirections;
@@ -208,6 +208,7 @@ public class Path {
     }
 
     public static Boolean isCardinalDir(String str){
+        if(str.equals("u") || str.equals("d")) return false;
         for(String dir: directions) if(dir.equals(str)) return true;
         return false;
     }
