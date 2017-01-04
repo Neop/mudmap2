@@ -25,6 +25,7 @@ package mudmap2;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import static java.lang.Math.max;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
@@ -154,6 +155,10 @@ public class Paths {
      * @param path
      */
     public static void createDirectory(String path){
+        Integer sep = path.lastIndexOf(File.separator);
+        sep = max(sep, path.lastIndexOf('/'));
+        if(sep > 0) createDirectory(path.substring(0, sep));
+
         File f = new File(path);
         if(!f.exists()) f.mkdir();
     }

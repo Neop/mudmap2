@@ -1,9 +1,0 @@
-# MUD Map (v2) world meta data file
-ver 1.1
-tile_size 42
-enable_place_selection true
-lp 1650 2.0 1.0
-pcv 0 -0.7916666666666655 1.4083333333333328
-pcv 4705 21.0 5.0
-pcv 4705 24.88095238095238 19.238095238095244
-pcv 1650 2.0 1.0
