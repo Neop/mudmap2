@@ -54,6 +54,7 @@ public class WorldManager {
         } else {
             WorldFile worldFile = new WorldFileDefault(file);
             World world = worldFile.readFile();
+            putWorld(file, world);
             return world;
         }
     }
