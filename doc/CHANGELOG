@@ -1,3 +1,12 @@
+2.3.2
+- added u/d directions to exit list
+- fixed: could not create world directory
+- fixed: worlds could be opened more than once
+- fixed: status message were not shown and disappeared too early
+- fixed: no screen update on path removal and path finding
+- changed place search from OR to AND 
+- LayerPanel accepts double click (and right click) to change layer names
+
 2.3.1
 - added '+' on place tiles to show non-standard exits
 - increased up/down arrow size, decreased character spacing
