@@ -25,7 +25,7 @@ import mudmap2.backend.Layer;
  */
 public interface LayerPanelListener {
 
-    public void layerSelected(Layer layer, MouseEvent event);
+    public void layerSelected(Layer layer);
     public void createLayer();
 
 }

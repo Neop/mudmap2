@@ -337,35 +337,8 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
     // ========================= selection listener ============================
     @Override
-    public void layerSelected(Layer layer, MouseEvent event) {
-        switch(event.getButton()){
-            case MouseEvent.BUTTON1: // left click -> go to layer
-                worldPanel.pushPosition(new WorldCoordinate(layer.getId(), layer.getCenterX(), layer.getCenterY()));
-                break;
-            case MouseEvent.BUTTON3: // right click -> set name
-                if(!worldPanel.isPassive()){
-                    String name;
-                    if(layer.hasName()){
-                        name = JOptionPane.showInputDialog(this, "Map name", layer.getName());
-                        if(name != null){
-                            if(name.isEmpty()){
-                                layer.setName(null);
-                                System.out.println("set null");
-                            } else {
-                                layer.setName(name);
-                            }
-                            sidePanel.update();
-                        } else System.out.println("null");
-                    } else {
-                        name = JOptionPane.showInputDialog(this, "Map name");
-                        if(name != null && !name.isEmpty()){
-                            layer.setName(name);
-                            sidePanel.update();
-                        }
-                    }
-                }
-                break;
-        }
+    public void layerSelected(Layer layer) {
+        worldPanel.pushPosition(new WorldCoordinate(layer.getId(), layer.getCenterX(), layer.getCenterY()));
         repaint();
     }
 

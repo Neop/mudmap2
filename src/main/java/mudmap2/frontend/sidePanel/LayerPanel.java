@@ -21,8 +21,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +30,7 @@ import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -43,7 +44,7 @@ import mudmap2.utils.AlphanumComparator;
  *
  * @author neop
  */
-public class LayerPanel extends JPanel implements ActionListener,MouseListener,WorldChangeListener {
+public class LayerPanel extends JPanel implements ActionListener,WorldChangeListener {
     private static final long serialVersionUID = 1L;
 
     final static Integer PREVIEW_WIDTH_X = 100;
@@ -121,7 +122,7 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
 
         Boolean hasKeywords = keyword != null && !keyword.isEmpty();
         String[] keywords = keyword.toLowerCase().split(" ");
-        
+
         // add layers to content panel
         for(Layer layer: layerList){
             if(hasKeywords){
@@ -139,7 +140,26 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
             contentPanel.add(preview);
 
             panels.put(preview, layer);
-            preview.addMouseListener(this);
+            preview.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if(e.getSource() instanceof JPanel && panels.containsKey((JPanel) e.getSource())){
+                        Layer layer = panels.get((JPanel) e.getSource());
+
+                        if(e.getButton() == MouseEvent.BUTTON1){
+                            if(e.getClickCount() == 1){
+                                for(LayerPanelListener listener: layerListeners){
+                                    listener.layerSelected(layer);
+                                }
+                            } else {
+                                editLayer(layer);
+                            }
+                        } else if(e.getButton() == MouseEvent.BUTTON3){
+                            editLayer(layer);
+                        }
+                    }
+                }
+            });
         }
 
         revalidate();
@@ -165,7 +185,18 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
         LayerPreviewPanel layerPreviewPanel = new LayerPreviewPanel(layer);
         panel.add(layerPreviewPanel, BorderLayout.CENTER);
 
+        // layerPreviewPanel stops accepting mouseEvents if using tooltip
+        //layerPreviewPanel.setToolTipText("Click to go to layer, double click or righ click to change layer name");
+
         return panel;
+    }
+
+    private void editLayer(Layer layer){
+        String name = JOptionPane.showInputDialog(this, "Map name", layer.getName());
+        if(name != null && !name.isEmpty()){
+            layer.setName(name);
+            update();
+        }
     }
 
     /**
@@ -194,29 +225,6 @@ public class LayerPanel extends JPanel implements ActionListener,MouseListener,W
                 break;
         }
     }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if(e.getSource() instanceof JPanel && panels.containsKey((JPanel) e.getSource())){
-            // getPlace layer
-            Layer layer = panels.get((JPanel) e.getSource());
-            for(LayerPanelListener listener: layerListeners){
-                listener.layerSelected(layer, e);
-            }
-        }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {}
-
-    @Override
-    public void mouseReleased(MouseEvent e) {}
-
-    @Override
-    public void mouseEntered(MouseEvent e) {}
-
-    @Override
-    public void mouseExited(MouseEvent e) {}
 
     @Override
     public void worldChanged(Object source) {
