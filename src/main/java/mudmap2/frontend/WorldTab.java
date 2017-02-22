@@ -262,6 +262,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                                     "No file chosen: " + getWorld().getName()
                                     + " will not be saved!", "Saving world",
                                     JOptionPane.OK_CANCEL_OPTION);
+                            if(ret == JOptionPane.OK_OPTION) return;
                         }
                     } while(ret != JFileChooser.APPROVE_OPTION || ret != JOptionPane.OK_OPTION);
                 }
