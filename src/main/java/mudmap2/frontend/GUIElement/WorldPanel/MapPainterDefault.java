@@ -553,9 +553,9 @@ public class MapPainterDefault implements MapPainter {
                     // number of drawn text lines
                     int lineNum = 0;
 
-                    // draw area color
-                    if(curPlace.getArea() != null){
-                        g.setColor(curPlace.getArea().getColor());
+                    // draw place group color
+                    if(curPlace.getPlaceGroup() != null){
+                        g.setColor(curPlace.getPlaceGroup().getColor());
                         g.fillRect(placeXpx, placeYpx, tileSize, tileSize);
                     }
 
@@ -594,7 +594,7 @@ public class MapPainterDefault implements MapPainter {
                             text.add(levelString);
                         }
 
-                        // sub areas / parents
+                        // parents
                         if(lineNum < maxLines && !curPlace.getParents().isEmpty()){
                             int parentsNum = curPlace.getParents().size();
                             String paStr = "Pa" + (parentsNum > 1 ? " (" + curPlace.getParents().size() + "): " : ": ");
@@ -607,7 +607,7 @@ public class MapPainterDefault implements MapPainter {
                             text.add(paStr);
                         }
 
-                        // sub areas / children
+                        // children
                         if(lineNum < maxLines && !curPlace.getChildren().isEmpty()){
                             int childrenNum = curPlace.getChildren().size();
                             String chStr = "Ch" + (childrenNum > 1 ? " (" + curPlace.getChildren().size() + "): " : ": ");

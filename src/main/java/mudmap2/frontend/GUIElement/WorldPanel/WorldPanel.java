@@ -53,7 +53,7 @@ import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldChangeListener;
 import mudmap2.backend.WorldCoordinate;
-import mudmap2.frontend.dialog.AreaDialog;
+import mudmap2.frontend.dialog.PlaceGroupDialog;
 import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
@@ -1200,17 +1200,17 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                             }
                         }
                         break;
-                    // modify area
+                    // modify place group
                     case KeyEvent.VK_Q:
                         Place place = getSelectedPlace();
 
                         if(!parent.placeGroupHasSelection()){
                             // no place selected
-                            if(place == null) (new AreaDialog(rootFrame, getWorld())).setVisible(true);
+                            if(place == null) (new PlaceGroupDialog(rootFrame, getWorld())).setVisible(true);
                             // place selected
-                            else (new AreaDialog(rootFrame, getWorld(), place)).setVisible(true);
+                            else (new PlaceGroupDialog(rootFrame, getWorld(), place)).setVisible(true);
                         } else { // place group selection
-                            (new AreaDialog(rootFrame, getWorld(), parent.placeGroupGetSelection(), place)).setVisible(true);
+                            (new PlaceGroupDialog(rootFrame, getWorld(), parent.placeGroupGetSelection(), place)).setVisible(true);
                         }
                         break;
 
@@ -1281,17 +1281,17 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     miComments.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0));
                     add(miComments);
 
-                    JMenuItem miArea;
+                    JMenuItem miPlaceGroup;
                     if(placeGroup.isEmpty()){
-                        miArea = new JMenuItem("Edit area");
-                        miArea.addActionListener(new AreaDialog(rootFrame, getWorld(), place));
-                        miArea.setToolTipText("Edit the area of this place");
+                        miPlaceGroup = new JMenuItem("Edit place group");
+                        miPlaceGroup.addActionListener(new PlaceGroupDialog(rootFrame, getWorld(), place));
+                        miPlaceGroup.setToolTipText("Edit the place group of this place");
                     } else {
-                        miArea = new JMenuItem("*Edit area");
-                        miArea.addActionListener(new AreaDialog(rootFrame, getWorld(), placeGroup, place));
-                        miArea.setToolTipText("Sets a common area for all selected places");
+                        miPlaceGroup = new JMenuItem("*Edit place group");
+                        miPlaceGroup.addActionListener(new PlaceGroupDialog(rootFrame, getWorld(), placeGroup, place));
+                        miPlaceGroup.setToolTipText("Sets a common place group for all selected places");
                     }
-                    add(miArea);
+                    add(miPlaceGroup);
                 }
 
                 // ------------- Paths ------------------
@@ -1419,7 +1419,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         for(Place child: children){
                             JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.getName());
                             m_sa_remove.add(mi_sa_remove);
-                            mi_sa_remove.addActionListener(new RemoveSubAreaActionListener(place, child));
+                            mi_sa_remove.addActionListener(new RemoveChildrenActionListener(place, child));
                         }
                     }
 
@@ -1620,13 +1620,13 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         }
 
         /**
-         * Removes a subarea child from a place, if action performed
+         * Removes a child from a place, if action performed
          */
-        private class RemoveSubAreaActionListener implements ActionListener {
+        private class RemoveChildrenActionListener implements ActionListener {
 
             Place place, child;
 
-            public RemoveSubAreaActionListener(Place place, Place child) {
+            public RemoveChildrenActionListener(Place place, Place child) {
                 this.place = place;
                 this.child = child;
             }

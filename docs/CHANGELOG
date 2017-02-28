@@ -1,3 +1,7 @@
+2.?
+- changed term area to place group
+- changed standard name of risk level "secure" to "safe"
+
 2.3.2
 - added u/d directions to exit list
 - fixed: could not create world directory

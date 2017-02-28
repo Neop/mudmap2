@@ -17,7 +17,7 @@
 
 /*  File description
  *
- *  This file contains all data of a world. Places, Layers, Areas,... can be
+ *  This class contains all data of a world. Places, Layers, PlaceGroups,... can be
  *  accessed via World. It also reads and writes world files
  */
 
@@ -56,7 +56,7 @@ public class World implements BreadthSearchGraph {
 
     // ID and object
     TreeMap<Integer, RiskLevel> riskLevels;
-    HashSet<Area> areas;
+    HashSet<PlaceGroup> placeGroups;
     TreeMap<Integer, Place> places;
     TreeMap<String, Integer> placeNames;
     TreeMap<Integer, Layer> layers;
@@ -87,7 +87,7 @@ public class World implements BreadthSearchGraph {
     private void initialize(){
         changeListeners = new LinkedList<>();
 
-        areas = new HashSet<>();
+        placeGroups = new HashSet<>();
         layers = new TreeMap<>();
         places = new TreeMap<>();
         placeNames = new TreeMap<>();
@@ -259,16 +259,16 @@ public class World implements BreadthSearchGraph {
         try {
             Place place = new Place(Place.PLACEHOLDER_NAME, x, y, null);
 
-            // find or create placeholder area
-            Area area = null;
-            for(Area a: areas) if(a.getName().equals("placeholder")){
-                area = a;
+            // find or create placeholder group
+            PlaceGroup placeGroup = null;
+            for(PlaceGroup a: placeGroups) if(a.getName().equals("placeholder")){
+                placeGroup = a;
                 break;
             }
-            // create new placeholder area
-            if(area == null) addArea(area = new Area("placeholder", Color.GREEN));
+            // create new placeholder group
+            if(placeGroup == null) addPlaceGroup(placeGroup = new PlaceGroup("placeholder", Color.GREEN));
 
-            place.setArea(area);
+            place.setPlaceGroup(placeGroup);
             place.setRiskLevel(getRiskLevel(0));
             putPlace(place, layer, x, y);
         } catch(PlaceNotInsertedException ex){ // ignore
@@ -460,39 +460,38 @@ public class World implements BreadthSearchGraph {
         return showPlaceID;
     }
 
-    // --------- areas ---------------------------------------------------------
+    // --------- PlaceGroupss ---------------------------------------------------------
     /**
-     * Gets all areas (eg. for lists)
-     * @return all areas
+     * Gets all PlaceGroupss (eg. for lists)
+     * @return all PlaceGroupss
      */
-    public ArrayList<Area> getAreas(){
-        ArrayList<Area> ret = new ArrayList<>(areas);
+    public ArrayList<PlaceGroup> getPlaceGroups(){
+        ArrayList<PlaceGroup> ret = new ArrayList<>(placeGroups);
         Collections.sort(ret);
         return ret;
     }
 
     /**
-     * Adds an area
-     * @param area new area
+     * Adds a PlaceGroup
+     * @param placeGroup new PlaceGroup
      */
-    public void addArea(Area area) {
-        if(!areas.contains(area) && area != null){
-            areas.add(area);
+    public void addPlaceGroup(PlaceGroup placeGroup) {
+        if(!placeGroups.contains(placeGroup) && placeGroup != null){
+            placeGroups.add(placeGroup);
         }
-        callListeners(area);
+        callListeners(placeGroup);
     }
 
     /**
-     * Removes an area
-     * @param area area to be removed
+     * Removes a PlaceGroup
+     * @param placeGroup PlaceGroup to be removed
      */
-    public void removeArea(Area area){
-        // removePlace area from places
+    public void removePlaceGroup(PlaceGroup placeGroup){
         for(Place p: places.values()){
-            if(p.getArea() == area) p.setArea(null);
+            if(p.getPlaceGroup() == placeGroup) p.setPlaceGroup(null);
         }
-        areas.remove(area);
-        callListeners(area);
+        placeGroups.remove(placeGroup);
+        callListeners(placeGroup);
     }
 
     // --------- risk levels ---------------------------------------------------

@@ -593,44 +593,44 @@ public class WorldTest {
     }
 
     /**
-     * Test of getAreas method, of class World.
+     * Test of getPlaceGroups method, of class World.
      */
     @Test
-    public void testGetAreas() {
-        System.out.println("getAreas");
+    public void testGetPlaceGroups() {
+        System.out.println("getPlaceGroups");
 
         World instance = new World("MyWorld");
-        ArrayList<Area> result = instance.getAreas();
+        ArrayList<PlaceGroup> result = instance.getPlaceGroups();
         assertNotNull(result);
         assertEquals(0, result.size());
 
-        Area a1 = new Area("MyArea", Color.yellow);
-        Area a2 = new Area("Second Area", Color.yellow);
-        instance.addArea(a1);
-        instance.addArea(a2);
+        PlaceGroup a1 = new PlaceGroup("myGroup", Color.yellow);
+        PlaceGroup a2 = new PlaceGroup("Second Area", Color.yellow);
+        instance.addPlaceGroup(a1);
+        instance.addPlaceGroup(a2);
 
-        result = instance.getAreas();
+        result = instance.getPlaceGroups();
         assertEquals(2, result.size());
         assertTrue(result.contains(a1));
         assertTrue(result.contains(a2));
     }
 
     /**
-     * Test of addArea method, of class World.
+     * Test of addPlaceGroup method, of class World.
      */
     @Test
-    public void testAddArea() {
-        System.out.println("addArea");
+    public void testAddPlaceGroup() {
+        System.out.println("addPlaceGroup");
 
         World instance = new World("MyWorld");
 
-        Area a1 = new Area("MyArea", Color.yellow);
-        Area a2 = new Area("Second Area", Color.yellow);
-        instance.addArea(a1);
-        instance.addArea(a2);
+        PlaceGroup a1 = new PlaceGroup("myGroup", Color.yellow);
+        PlaceGroup a2 = new PlaceGroup("Second group", Color.yellow);
+        instance.addPlaceGroup(a1);
+        instance.addPlaceGroup(a2);
 
-        assertTrue(instance.getAreas().contains(a1));
-        assertTrue(instance.getAreas().contains(a2));
+        assertTrue(instance.getPlaceGroups().contains(a1));
+        assertTrue(instance.getPlaceGroups().contains(a2));
     }
 
     /**
@@ -642,15 +642,15 @@ public class WorldTest {
 
         World instance = new World("MyWorld");
 
-        Area a1 = new Area("MyArea", Color.yellow);
-        Area a2 = new Area("Second Area", Color.yellow);
-        instance.addArea(a1);
-        instance.addArea(a2);
+        PlaceGroup a1 = new PlaceGroup("myGroup", Color.yellow);
+        PlaceGroup a2 = new PlaceGroup("Second Area", Color.yellow);
+        instance.addPlaceGroup(a1);
+        instance.addPlaceGroup(a2);
 
-        instance.removeArea(a1);
+        instance.removePlaceGroup(a1);
 
-        assertFalse(instance.getAreas().contains(a1));
-        assertTrue(instance.getAreas().contains(a2));
+        assertFalse(instance.getPlaceGroups().contains(a1));
+        assertTrue(instance.getPlaceGroups().contains(a2));
     }
 
     /**

@@ -68,11 +68,11 @@ e, enter, insert key, double click	create / edit place at selection
 f									create or remove a placeholder place
 r 			delete key			remove selected place
 c									edit place comments
-q									modify area of selected place. Note that
+q									modify place group of selected place. Note that
 									this also affects other places that
-									belong to the same area. If no place is
+									belong to the same group. If no place is
 									selected or selection is disabled, a new
-									area will be created
+									place group will be created
 l									show place list
 
 path creation shortcuts:

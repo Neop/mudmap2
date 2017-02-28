@@ -154,39 +154,39 @@ public class PlaceTest {
     }
 
     /**
-     * Test of getArea method, of class Place.
+     * Test of getPlaceGroup method, of class Place.
      */
     @Test
-    public void testGetArea() {
-        System.out.println("getArea");
+    public void testGetPlaceGroup() {
+        System.out.println("getPlaceGroup");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
-        Area expResult = null;
-        Area result = instance.getArea();
+        PlaceGroup expResult = null;
+        PlaceGroup result = instance.getPlaceGroup();
         assertEquals(expResult, result);
 
-        Area area = new Area("MyArea", Color.red);
-        instance.setArea(area);
-        expResult = area;
-        result = instance.getArea();
+        PlaceGroup placeGroup = new PlaceGroup("myGroup", Color.red);
+        instance.setPlaceGroup(placeGroup);
+        expResult = placeGroup;
+        result = instance.getPlaceGroup();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setArea method, of class Place.
+     * Test of setPlaceGroup method, of class Place.
      */
     @Test
-    public void testSetArea() {
-        System.out.println("setArea");
+    public void testSetPlaceGroup() {
+        System.out.println("setPlaceGroup");
 
-        Area area = new Area("MyArea", Color.red);
+        PlaceGroup placeGroup = new PlaceGroup("myGroup", Color.red);
         Place instance = new Place("MyPlace", 0, 0, layer);
-        instance.setArea(area);
-        Area result = instance.getArea();
-        assertEquals(area, result);
+        instance.setPlaceGroup(placeGroup);
+        PlaceGroup result = instance.getPlaceGroup();
+        assertEquals(placeGroup, result);
 
-        instance.setArea(null);
-        result = instance.getArea();
+        instance.setPlaceGroup(null);
+        result = instance.getPlaceGroup();
         assertEquals(null, result);
     }
 
@@ -898,7 +898,7 @@ public class PlaceTest {
         assertEquals(instance.getRiskLevel(), result.getRiskLevel());
         assertEquals(instance.getRecLevelMin(), result.getRecLevelMin());
         assertEquals(instance.getRecLevelMax(), result.getRecLevelMax());
-        assertEquals(instance.getArea(), result.getArea());
+        assertEquals(instance.getPlaceGroup(), result.getPlaceGroup());
         assertEquals(instance.getCommentsString(false), result.getCommentsString(false));
         assertEquals(instance.getFlags().entrySet().toString(), result.getFlags().entrySet().toString());
     }

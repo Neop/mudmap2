@@ -189,10 +189,10 @@ public class GaardianMap {
              */
 
             String hexColor = "";
-            if(place.getArea() != null){
-                Color areaCol = place.getArea().getColor();
+            if(place.getPlaceGroup() != null){
+                Color groupCol = place.getPlaceGroup().getColor();
                     hexColor = String.format("#%02x%02x%02x",
-                            areaCol.getRed(), areaCol.getGreen(), areaCol.getBlue());
+                            groupCol.getRed(), groupCol.getGreen(), groupCol.getBlue());
             }
 
             outstream.println("rooms[" + maxPlaceId + "] = "

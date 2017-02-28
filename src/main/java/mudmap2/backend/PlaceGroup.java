@@ -17,7 +17,7 @@
 
 /*  File description
  *
- *  Areas can be assigned to places to loosely group them by a common area name
+ *  Place groups can be assigned to places to loosely group them by a common name
  *  and color
  */
 
@@ -26,38 +26,37 @@ package mudmap2.backend;
 import java.awt.Color;
 
 /**
- * An area is a collection of places, marked by a color
+ * A place group can be used to mark places by a common name and color
  *
  * @author neop
  */
-public class Area implements Comparable<Area> {
+public class PlaceGroup implements Comparable<PlaceGroup> {
 
     String name;
     Color color;
 
     /**
-     * Constructs a new Area
-     * @param name Name of the area
+     * Constructs a new PlaceGroup
+     * @param name Name of the PlaceGroup
      * @param color
      */
-    public Area(String name, Color color) {
+    public PlaceGroup(String name, Color color) {
         this.name = name;
         this.color = color;
     }
 
     /**
-     * Constructs a new Area
-     * @param name Name of the area
+     * Constructs a new PlaceGroup
+     * @param name Name of the PlaceGroup
      */
-    public Area(String name) {
+    public PlaceGroup(String name) {
         this.name = name;
         color = new Color(0, 0, 0);
     }
 
     /**
      * Gets the are name
-     *
-     * @return area name
+     * @return name
      */
     public String getName(){
         return name;
@@ -65,31 +64,31 @@ public class Area implements Comparable<Area> {
 
     /**
      * Sets a new name
-     * @param name new area name
+     * @param name new name
      */
     public void setName(String name){
         this.name = name;
     }
 
     /**
-     * Gets the area color
+     * Gets the color
      *
-     * @return area color
+     * @return color
      */
     public Color getColor(){
         return color;
     }
 
     /**
-     * Sets a new area color
-     * @param color new area color
+     * Sets a new color
+     * @param color new color
      */
     public void setColor(Color color){
         this.color = color;
     }
 
     /**
-     * Gets the name of an area
+     * Gets the name of a PlaceGroup
      * @return name
      */
     @Override
@@ -98,12 +97,12 @@ public class Area implements Comparable<Area> {
     }
 
     /**
-     * Compares areas by their name
+     * Compares PlaceGroups by their name
      * @param arg0
      * @return
      */
     @Override
-    public int compareTo(Area arg0){
+    public int compareTo(PlaceGroup arg0){
         return name.compareTo(arg0.getName());
     }
 }

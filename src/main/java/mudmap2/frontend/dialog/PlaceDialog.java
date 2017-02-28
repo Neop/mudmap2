@@ -36,7 +36,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
-import mudmap2.backend.Area;
+import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.RiskLevel;
@@ -57,11 +57,11 @@ public class PlaceDialog extends ActionDialog {
     Layer layer;
     int px, py;
 
-    // if this area is choosen, it will be replaced with null
-    Area area_null;
+    // if this place_group is choosen, it will be replaced with null
+    PlaceGroup place_group_null;
 
     JTextField textfield_name;
-    JComboBox<Area> combobox_area;
+    JComboBox<PlaceGroup> combobox_place_group;
     JComboBox<RiskLevel> combobox_risk;
     JSpinner spinner_rec_lvl_min, spinner_rec_lvl_max;
 
@@ -111,14 +111,14 @@ public class PlaceDialog extends ActionDialog {
         else textfield_name = new JTextField();
         add(textfield_name);
 
-        area_null = new Area("none", null);
+        place_group_null = new PlaceGroup("none", null);
 
-        add(new JLabel("Area"));
-        combobox_area = new JComboBox<>();
-        combobox_area.addItem(area_null);
-        for(Area a : world.getAreas()) combobox_area.addItem(a);
-        if(place != null && place.getArea() != null) combobox_area.setSelectedItem(place.getArea());
-        add(combobox_area);
+        add(new JLabel("Place group"));
+        combobox_place_group = new JComboBox<>();
+        combobox_place_group.addItem(place_group_null);
+        for(PlaceGroup a : world.getPlaceGroups()) combobox_place_group.addItem(a);
+        if(place != null && place.getPlaceGroup() != null) combobox_place_group.setSelectedItem(place.getPlaceGroup());
+        add(combobox_place_group);
 
         add(new JLabel("Risk level"));
         combobox_risk = new JComboBox<>();
@@ -180,8 +180,8 @@ public class PlaceDialog extends ActionDialog {
                 if(place == null) world.putPlace(place = new Place(textfield_name.getText(), px, py, layer));
                 else place.setName(textfield_name.getText());
 
-                Area a = (Area) combobox_area.getSelectedItem();
-                place.setArea(a != area_null ? a : null); // raplce null area with null
+                PlaceGroup a = (PlaceGroup) combobox_place_group.getSelectedItem();
+                place.setPlaceGroup(a != place_group_null ? a : null); // replace null group with null
                 place.setRiskLevel((RiskLevel) combobox_risk.getSelectedItem());
 
                 place.setRecLevelMin((Integer) spinner_rec_lvl_min.getValue());

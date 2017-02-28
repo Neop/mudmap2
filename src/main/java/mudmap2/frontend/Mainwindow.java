@@ -57,7 +57,7 @@ import mudmap2.backend.WorldManager;
 import mudmap2.backend.html.GaardianMap;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
-import mudmap2.frontend.dialog.AreaDialog;
+import mudmap2.frontend.dialog.PlaceGroupDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
@@ -181,10 +181,10 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menu_edit_path_colors.addActionListener(this);
         menu_edit.add(menu_edit_path_colors);
 
-        JMenuItem menu_edit_add_area = new JMenuItem("Add area");
-        menu_edit_add_area.setActionCommand("add_area");
-        menu_edit_add_area.addActionListener(this);
-        menu_edit.add(menu_edit_add_area);
+        JMenuItem menu_edit_add_place_group = new JMenuItem("Add place group");
+        menu_edit_add_place_group.setActionCommand("add_place_group");
+        menu_edit_add_place_group.addActionListener(this);
+        menu_edit.add(menu_edit_add_place_group);
 
         menu_edit.add(new JSeparator());
 
@@ -360,8 +360,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                     wt.repaint();
                 }
                 break;
-            case "add_area":
-                if(wt != null) (new AreaDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
+            case "add_place_group":
+                if(wt != null) (new PlaceGroupDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
                 break;
             case "set_home": // set home position
                 if(wt != null) wt.getWorldPanel().setHome();

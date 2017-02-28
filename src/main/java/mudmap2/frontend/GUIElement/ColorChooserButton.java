@@ -56,7 +56,7 @@ public class ColorChooserButton extends JButton {
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                Color col = JColorChooser.showDialog(parent, "Choose area color", color);
+                Color col = JColorChooser.showDialog(parent, "Choose color", color);
                 if(col != null) color = col;
             }
         });

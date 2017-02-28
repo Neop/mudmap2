@@ -319,14 +319,14 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                     Place pl;
                         pl = layer.get(worldPanel.getCursorX(), worldPanel.getCursorY());
 
-                        boolean has_area = pl.getArea() != null;
+                        boolean has_place_group = pl.getPlaceGroup() != null;
                         boolean has_comments = !pl.getComments().isEmpty();
 
                         String infotext = pl.getName();
-                        if(has_area || has_comments) infotext += " (";
-                        if(has_area) infotext += pl.getArea().getName();
-                        if(has_comments) infotext += (has_area ? ", " : "") + pl.getCommentsString(false);
-                        if(has_area || has_comments) infotext += ")";
+                        if(has_place_group || has_comments) infotext += " (";
+                        if(has_place_group) infotext += pl.getPlaceGroup().getName();
+                        if(has_comments) infotext += (has_place_group ? ", " : "") + pl.getCommentsString(false);
+                        if(has_place_group || has_comments) infotext += ")";
 
                         labelInfobar.setText(infotext);
                 } else {

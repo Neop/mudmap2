@@ -22,7 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mudmap2.backend.Area;
+import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
@@ -113,14 +113,14 @@ public class WorldFileMM1Test {
 
         pl0.connectChild(pl2);
 
-        String areaName0 = "myArea";
-        String areaName1 = "my second area";
-        Color areaCol0 = Color.orange;
-        Color areaCol1 = Color.blue;
-        Area area0 = new Area(areaName0, areaCol0);
-        Area area1 = new Area(areaName1, areaCol1);
-        pl0.setArea(area0);
-        pl1.setArea(area1);
+        String pgName0 = "myArea";
+        String pgName1 = "my second area";
+        Color pgCol0 = Color.orange;
+        Color pgCol1 = Color.blue;
+        PlaceGroup pg0 = new PlaceGroup(pgName0, pgCol0);
+        PlaceGroup pg1 = new PlaceGroup(pgName1, pgCol1);
+        pl0.setPlaceGroup(pg0);
+        pl1.setPlaceGroup(pg1);
 
         String flag0 = "a";
         String flag1 = "cd e";
@@ -187,11 +187,11 @@ public class WorldFileMM1Test {
         assertEquals(pl0r.getChildren().toArray(new Place[1])[0], pl2r);
         assertEquals(pl2r.getParents().toArray(new Place[1])[0], pl0r);
 
-        assertNotNull(pl0r.getArea());
-        assertNotNull(pl1r.getArea());
-        assertNull(pl2r.getArea());
-        assertEquals(pl0.getArea().getName(), pl0r.getArea().getName());
-        assertEquals(pl1.getArea().getName(), pl1r.getArea().getName());
+        assertNotNull(pl0r.getPlaceGroup());
+        assertNotNull(pl1r.getPlaceGroup());
+        assertNull(pl2r.getPlaceGroup());
+        assertEquals(pl0.getPlaceGroup().getName(), pl0r.getPlaceGroup().getName());
+        assertEquals(pl1.getPlaceGroup().getName(), pl1r.getPlaceGroup().getName());
 
         assertEquals(2, pl0r.getFlags().size());
         assertEquals(0, pl1r.getFlags().size());

@@ -28,9 +28,9 @@ import static org.junit.Assert.*;
  *
  * @author neop
  */
-public class AreaTest {
+public class PlaceGroupTest {
 
-    public AreaTest() {
+    public PlaceGroupTest() {
     }
 
     @BeforeClass
@@ -50,28 +50,28 @@ public class AreaTest {
     }
 
     /**
-     * Test of getName method, of class Area.
+     * Test of getName method, of class PlaceGroup.
      */
     @Test
     public void testGetName() {
         System.out.println("getName");
 
         // test with both contructors
-        String expResult = "MyArea";
-        Area instance = new Area(expResult, Color.CYAN);
+        String expResult = "myGroup";
+        PlaceGroup instance = new PlaceGroup(expResult, Color.CYAN);
         String result = instance.getName();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setName method, of class Area.
+     * Test of setName method, of class PlaceGroup.
      */
     @Test
     public void testSetName() {
         System.out.println("setName");
 
         // test with both contructors
-        Area instance = new Area("MyArea", Color.CYAN);
+        PlaceGroup instance = new PlaceGroup("myGroup", Color.CYAN);
 
         String name = "Another area";
         instance.setName(name);
@@ -80,26 +80,26 @@ public class AreaTest {
     }
 
     /**
-     * Test of getColor method, of class Area.
+     * Test of getColor method, of class PlaceGroup.
      */
     @Test
     public void testGetColor() {
         System.out.println("getColor");
 
         Color expResult = Color.CYAN;
-        Area instance = new Area("MyArea", expResult);
+        PlaceGroup instance = new PlaceGroup("myGroup", expResult);
         Color result = instance.getColor();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setColor method, of class Area.
+     * Test of setColor method, of class PlaceGroup.
      */
     @Test
     public void testSetColor() {
         System.out.println("setColor");
 
-        Area instance = new Area("MyArea", Color.GREEN);
+        PlaceGroup instance = new PlaceGroup("myGroup", Color.GREEN);
 
         Color color = Color.RED;
         instance.setColor(color);
@@ -113,38 +113,38 @@ public class AreaTest {
     }
 
     /**
-     * Test of toString method, of class Area.
+     * Test of toString method, of class PlaceGroup.
      */
     @Test
     public void testToString() {
         System.out.println("toString");
 
-        String name = "MyArea";
-        Area instance = new Area(name, Color.yellow);
+        String name = "myGroup";
+        PlaceGroup instance = new PlaceGroup(name, Color.yellow);
         String result = instance.toString();
         assertEquals(name, result);
     }
 
     /**
-     * Test of compareTo method, of class Area.
+     * Test of compareTo method, of class PlaceGroup.
      */
     @Test
     public void testCompareTo() {
         System.out.println("compareTo");
 
-        String name1 = "MyArea";
-        String name2 = "MyArea";
+        String name1 = "myGroup";
+        String name2 = "myGroup";
         String name3 = "Another area";
-        Area instance = new Area(name1, Color.yellow);
-        Area area1 = new Area(name2, Color.BLACK);
-        Area area2 = new Area(name3, Color.BLACK);
+        PlaceGroup instance = new PlaceGroup(name1, Color.yellow);
+        PlaceGroup pg1 = new PlaceGroup(name2, Color.BLACK);
+        PlaceGroup pg2 = new PlaceGroup(name3, Color.BLACK);
 
         int expResult = name1.compareTo(name2);
-        int result = instance.compareTo(area1);
+        int result = instance.compareTo(pg1);
         assertEquals(expResult, result);
 
         expResult = name1.compareTo(name3);
-        result = instance.compareTo(area2);
+        result = instance.compareTo(pg2);
         assertEquals(expResult, result);
     }
 

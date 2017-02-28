@@ -17,7 +17,7 @@
 
 /*  File description
  *
- *  The area dialog is used to create, modify and removePlace areas
+ *  The PlaceGroup dialog is used to create, modify and remove place groups
  */
 package mudmap2.frontend.dialog;
 
@@ -31,89 +31,89 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import mudmap2.backend.Area;
+import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.frontend.GUIElement.ColorChooserButton;
 
 /**
- * The area dialog is used to create, modify and removePlace areas
+ * The place group dialog is used to create, modify and remove place groups
  * @author neop
  */
-public class AreaDialog extends ActionDialog {
+public class PlaceGroupDialog extends ActionDialog {
 
     private static final long serialVersionUID = 1L;
 
-    boolean new_area;
+    boolean new_group;
 
     JTextField textfield_name;
     ColorChooserButton colorchooserbutton;
 
     World world;
-    Area area;
+    PlaceGroup placeGroup;
     Place place;
     HashSet<Place> place_group;
 
     /**
-     * Constructs a modify / delete dialog for existing areas
+     * Constructs a modify / delete dialog for existing palce groups
      * @param parent parent window
      * @param world world
-     * @param area area to be modified
+     * @param placeGroup PlaceGroup to be modified
      */
-    public AreaDialog(JFrame parent, World world, Area area){
-        super(parent, "Edit area - " + area, true);
+    public PlaceGroupDialog(JFrame parent, World world, PlaceGroup placeGroup){
+        super(parent, "Edit place group - " + placeGroup, true);
 
-        new_area = false;
+        new_group = false;
         this.world = world;
-        this.area = area;
+        this.placeGroup = placeGroup;
         place = null;
     }
 
     /**
-     * Constructs a dialog to create a new area
+     * Constructs a dialog to create a new place group
      * @param parent parent window
      * @param world world
      */
-    public AreaDialog(JFrame parent, World world){
-        super(parent, "New area", true);
+    public PlaceGroupDialog(JFrame parent, World world){
+        super(parent, "New place group", true);
 
-        new_area = true;
+        new_group = true;
         this.world = world;
-        area = null;
+        placeGroup = null;
         place = null;
     }
 
     /**
-     * Edits the area of a place or creates a new one and assigns it
+     * Edits the PlaceGroup of a place or creates a new one and assigns it
      * @param parent
      * @param world
      * @param place
      */
-    public AreaDialog(JFrame parent, World world, Place place){
-        super(parent, (place.getArea() == null) ? "New area" : ("Edit area - " + place.getArea()), true);
+    public PlaceGroupDialog(JFrame parent, World world, Place place){
+        super(parent, (place.getPlaceGroup() == null) ? "New place group" : ("Edit place group - " + place.getPlaceGroup()), true);
 
         this.place = place;
-        new_area = place.getArea() == null;
+        new_group = place.getPlaceGroup() == null;
         this.world = world;
-        area = place.getArea();
+        placeGroup = place.getPlaceGroup();
     }
 
     /**
-     * Edits the area of a group of places or creates a new one and assigns it
-     * the default area will be taken from _place, if available
+     * Edits the PlaceGroup of a group of places or creates a new one and assigns it
+     * the default PlaceGroup will be taken from _place, if available
      * @param parent
      * @param world
      * @param placeGroup
      * @param place
      */
-    public AreaDialog(JFrame parent, World world, HashSet<Place> placeGroup, Place place){
-        super(parent, (place.getArea() == null) ? "New area" : ("Edit area - " + place.getArea()), true);
+    public PlaceGroupDialog(JFrame parent, World world, HashSet<Place> placeGroup, Place place){
+        super(parent, (place.getPlaceGroup() == null) ? "New place group" : ("Edit place group - " + place.getPlaceGroup()), true);
 
         this.place = place;
         this.place_group = placeGroup;
-        new_area = place.getArea() == null;
+        new_group = place.getPlaceGroup() == null;
         this.world = world;
-        area = place.getArea();
+        this.placeGroup = place.getPlaceGroup();
     }
 
     /**
@@ -132,7 +132,7 @@ public class AreaDialog extends ActionDialog {
         add(new JLabel("Name"), constraints);
         constraints.gridx = 1;
         constraints.gridwidth = 2;
-        if(area != null) textfield_name = new JTextField(area.toString());
+        if(placeGroup != null) textfield_name = new JTextField(placeGroup.toString());
         else textfield_name = new JTextField();
         add(textfield_name, constraints);
         textfield_name.setColumns(20);
@@ -148,7 +148,7 @@ public class AreaDialog extends ActionDialog {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridwidth = 2;
 
-        if(area != null) colorchooserbutton = new ColorChooserButton(getParent(), area.getColor());
+        if(placeGroup != null) colorchooserbutton = new ColorChooserButton(getParent(), placeGroup.getColor());
         else colorchooserbutton = new ColorChooserButton(getParent());
         add(colorchooserbutton, constraints);
 
@@ -169,22 +169,22 @@ public class AreaDialog extends ActionDialog {
 
         constraints.gridx++;
         JButton button_new = new JButton("Add");
-        button_new.setToolTipText("Create a new area");
+        button_new.setToolTipText("Create a new place group");
         add(button_new, constraints);
         getRootPane().setDefaultButton(button_new);
         button_new.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                new_area = true;
+                new_group = true;
                 save();
                 dispose();
             }
         });
 
-        if(!new_area){ // don't show edit button when creating a new place
+        if(!new_group){ // don't show edit button when creating a new place
             constraints.gridx++;
             JButton button_edit = new JButton("Edit");
-            button_edit.setToolTipText("Edit the current area");
+            button_edit.setToolTipText("Edit the current place group");
             add(button_edit, constraints);
             getRootPane().setDefaultButton(button_edit);
             button_edit.addActionListener(new ActionListener() {
@@ -202,20 +202,20 @@ public class AreaDialog extends ActionDialog {
     }
 
     private void save(){
-        // add new area to world and place
-        if(new_area){
-            area = new Area(textfield_name.getText(), colorchooserbutton.getColor());
-            world.addArea(area);
-            if(place != null && place_group == null) place.setArea(area);
+        // add new PlaceGroup to world and place
+        if(new_group){
+            placeGroup = new PlaceGroup(textfield_name.getText(), colorchooserbutton.getColor());
+            world.addPlaceGroup(placeGroup);
+            if(place != null && place_group == null) place.setPlaceGroup(placeGroup);
         } else {
-            // modify area
-            area.setName(textfield_name.getText());
-            area.setColor(colorchooserbutton.getColor());
+            // modify PlaceGroup
+            placeGroup.setName(textfield_name.getText());
+            placeGroup.setColor(colorchooserbutton.getColor());
         }
         // assign to all places
         if(place_group != null)
             for(Place pl: place_group)
-                pl.setArea(area);
+                pl.setPlaceGroup(placeGroup);
         getParent().repaint();
     }
 

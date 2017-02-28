@@ -41,7 +41,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
 
     int id;
     String name;
-    Area area;
+    PlaceGroup placeGroup;
     int recLevelMin, recLevelMax;
     RiskLevel riskLevel;
 
@@ -80,7 +80,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Initializes the place
      */
     private void initialize(){
-        area = null;
+        placeGroup = null;
         riskLevel = null;
         recLevelMin = recLevelMax = -1;
 
@@ -127,21 +127,21 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Gets the area
-     * @return area
+     * Gets the PlaceGroup
+     * @return placeGroup
      */
-    public Area getArea(){
-        return area;
+    public PlaceGroup getPlaceGroup(){
+        return placeGroup;
     }
 
     /**
-     * Sets the area
-     * @param area
+     * Sets the PlaceGroup
+     * @param placeGroup
      */
-    public void setArea(Area area) {
-        this.area = area;
+    public void setPlaceGroup(PlaceGroup placeGroup) {
+        this.placeGroup = placeGroup;
         if(getLayer() != null && getLayer().getWorld() != null){
-            getLayer().getWorld().addArea(area);
+            getLayer().getWorld().addPlaceGroup(placeGroup);
         }
         callWorldChangeListeners();
     }
@@ -388,7 +388,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Removes a parent - child connection (subarea)
+     * Removes a parent - child connection
      * @param child child to be removed
      */
     public void removeChild(Place child){
@@ -398,7 +398,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Gets the child places / subareas
+     * Gets the child places
      * @return child places
      */
     public HashSet<Place> getChildren(){
@@ -406,7 +406,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Gets the parent places (subarea parents)
+     * Gets the parent places
      * @return parent places
      */
     public HashSet<Place> getParents(){
@@ -437,10 +437,10 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Removes all connections to other places (paths, child-connections)
      */
     void removeConnections() {
-        // removePlace paths (buffer, becaus connected_places will be modified
+        // remove place paths (buffer, since connected_places will be modified)
         HashSet<Path> cp_buffer = (HashSet<Path>) paths.clone();
         for(Path p: cp_buffer) p.remove();
-        // removePlace connection to sub-areas (children / parents)
+        // remove place connection to children / parents
         for(Place pl: children) pl.parents.remove(this);
         children.clear();
         for(Place pl: parents) pl.children.remove(this);
@@ -497,7 +497,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     public Place duplicate(){
         Place place = new Place(name, getX(), getY(), null);
 
-        place.area = area;
+        place.placeGroup = placeGroup;
         place.recLevelMax = recLevelMax;
         place.recLevelMin = recLevelMin;
         place.riskLevel = riskLevel;

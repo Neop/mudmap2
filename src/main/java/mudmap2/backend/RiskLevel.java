@@ -19,7 +19,7 @@
  *
  *  This class describes a risk level which describes how dangerous a place is
  *  The risk level is shown on the map as a colored border around the place
- *  (not to be confused with the area, which also is drawn as a colored border)
+ *  (not to be confused with the PlaceGroup, which also is drawn as a colored border)
  */
 
 package mudmap2.backend;

@@ -38,7 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import mudmap2.utils.Pair;
-import mudmap2.backend.Area;
+import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
@@ -78,8 +78,8 @@ public class WorldFileMM1 extends WorldFile {
     String cur_place_name;
     Place cur_place;
 
-    Area curArea;
-    HashMap<Integer, Area> areas = new HashMap<>();
+    PlaceGroup curArea;
+    HashMap<Integer, PlaceGroup> areas = new HashMap<>();
     ArrayList<Pair<Place, Integer>> children = new ArrayList<>();
     ArrayList<WorldFileMM1.PathTmp> tmp_paths = new ArrayList<>();
     ArrayList<WorldFileMM1.PathTmp> tmp_paths_deprecated = new ArrayList<>();
@@ -289,8 +289,8 @@ public class WorldFileMM1 extends WorldFile {
 
     private void readArea(String line, World world){
         Integer curAreaID = Integer.parseInt(line.split("\\s")[1]);
-        curArea = new Area(configGetText(2, line));
-        world.addArea(curArea);
+        curArea = new PlaceGroup(configGetText(2, line));
+        world.addPlaceGroup(curArea);
         areas.put(curAreaID, curArea);
     }
 
@@ -341,7 +341,7 @@ public class WorldFileMM1 extends WorldFile {
 
     private void readPlaceArea(String line, World world){
         Integer areaID = Integer.parseInt(line.substring(3).trim());
-        cur_place.setArea(areas.get(areaID));
+        cur_place.setPlaceGroup(areas.get(areaID));
     }
 
     private void readPlaceFlag(String line){
@@ -561,13 +561,13 @@ public class WorldFileMM1 extends WorldFile {
     @Override
     public void writeFile(World world) {
         // create IDs for areas
-        HashMap<Area, Integer> areaIDs = new HashMap<>();
+        HashMap<PlaceGroup, Integer> areaIDs = new HashMap<>();
         Integer cnt = 0;
-        for(Area a: world.getAreas()){
+        for(PlaceGroup a: world.getPlaceGroups()){
             Boolean inUse = false;
             // removePlace unused
             for(Place place: world.getPlaces()){
-                if(place.getArea() == a){
+                if(place.getPlaceGroup() == a){
                     inUse = true;
                     break;
                 }
@@ -611,7 +611,7 @@ public class WorldFileMM1 extends WorldFile {
                 outstream.println("dlc " + rl.getId() + " " + rl.getColor().getRed() + " " + rl.getColor().getGreen() + " " + rl.getColor().getBlue() + " " + rl.getDescription());
 
             // areas
-            for(Map.Entry<Area, Integer> area: areaIDs.entrySet()){
+            for(Map.Entry<PlaceGroup, Integer> area: areaIDs.entrySet()){
                 if(area.getValue() != null){
                     outstream.println("a " + area.getValue() + " " + area.getKey().getName());
                     outstream.println("acol " + area.getKey().getColor().getRed()
@@ -631,7 +631,7 @@ public class WorldFileMM1 extends WorldFile {
             for(Place p: world.getPlaces()){
                 outstream.println("p " + p.getId() + " " + p.getName());
                 outstream.println("ppos " + p.getLayer().getId() + " " + p.getX() + " " + p.getY());
-                if(p.getArea() != null) outstream.println("par " + areaIDs.get(p.getArea()));
+                if(p.getPlaceGroup() != null) outstream.println("par " + areaIDs.get(p.getPlaceGroup()));
 
                 // paths
                 for(Path path: p.getPaths()){

@@ -32,7 +32,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import mudmap2.backend.Area;
+import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Label;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
@@ -213,7 +213,7 @@ public class WorldFileJSON extends WorldFile {
             }
 
             // areaArray
-            HashMap<Integer, Area> areas = new HashMap<>();
+            HashMap<Integer, PlaceGroup> areas = new HashMap<>();
 
             if(root.has("areas")){
                 JSONArray areaArray = root.getJSONArray("areas");
@@ -227,9 +227,9 @@ public class WorldFileJSON extends WorldFile {
                         String name = area.getString("name");
                         Color col = hexToCol(area.getString("col"));
 
-                        Area a = new Area(name, col);
+                        PlaceGroup a = new PlaceGroup(name, col);
                         areas.put(id, a);
-                        world.addArea(a);
+                        world.addPlaceGroup(a);
                     }
                 }
             }
@@ -285,7 +285,7 @@ public class WorldFileJSON extends WorldFile {
                         // area
                         if(place.has("a")){
                             Integer area = place.getInt("a");
-                            p.setArea(areas.get(area));
+                            p.setPlaceGroup(areas.get(area));
                         }
                         // risk level
                         if(place.has("r")){
@@ -487,13 +487,13 @@ public class WorldFileJSON extends WorldFile {
 
         // areaArray
         // create IDs for areaArray
-        HashMap<Area, Integer> areaIDs = new HashMap<>();
+        HashMap<PlaceGroup, Integer> areaIDs = new HashMap<>();
         Integer cnt = 0; // incremental id
-        for(Area a: world.getAreas()){
+        for(PlaceGroup a: world.getPlaceGroups()){
             Boolean inUse = false;
             // removePlace unused
             for(Place place: world.getPlaces()){
-                if(place.getArea() == a){
+                if(place.getPlaceGroup() == a){
                     inUse = true;
                     break;
                 }
@@ -504,7 +504,7 @@ public class WorldFileJSON extends WorldFile {
         // add areaArray
         JSONArray areas = new JSONArray();
         root.put("areas", areas);
-        for(Area area: world.getAreas()){
+        for(PlaceGroup area: world.getPlaceGroups()){
             JSONObject areaObj = new JSONObject();
             areaObj.put("id", areaIDs.get(area));
             areaObj.put("name", area.getName());
@@ -548,7 +548,7 @@ public class WorldFileJSON extends WorldFile {
             placeObj.put("x", place.getX());
             placeObj.put("y", place.getY());
 
-            if(place.getArea() != null) placeObj.put("a", areaIDs.get(place.getArea()));
+            if(place.getPlaceGroup() != null) placeObj.put("a", areaIDs.get(place.getPlaceGroup()));
             if(place.getRiskLevel() != null) placeObj.put("r", place.getRiskLevel().getId());
             if(place.getRecLevelMin() > -1) placeObj.put("lvlMin", place.getRecLevelMin());
             if(place.getRecLevelMax() > -1) placeObj.put("lvlMax", place.getRecLevelMax());

@@ -161,7 +161,7 @@ public final class CopyPaste {
             for(Place place: places){
                 try {
                     if(place.getLayer().getWorld() != layer.getWorld()){
-                        if(place.getArea() != null && !layer.getWorld().getAreas().contains(place.getArea())) layer.getWorld().addArea(place.getArea());
+                        if(place.getPlaceGroup() != null && !layer.getWorld().getPlaceGroups().contains(place.getPlaceGroup())) layer.getWorld().addPlaceGroup(place.getPlaceGroup());
                     }
                     if(copyMode){ // copy places -> duplicate on new layer
                         Place new_place = place.duplicate();
@@ -176,7 +176,7 @@ public final class CopyPaste {
                 }
             }
 
-            // recreate paths and subareas after copy-paste
+            // recreate paths and child connections after copy-paste
             if(copyMode){
                 for(Place place: copyPlaces){
                     Place new_place = place_to_new_place.get(place);
