@@ -1,4 +1,5 @@
 2.?
+- added worlds list to file menu, remove available worlds tab
 - added label to map zoom slider
 - added message dialog when path search failed
 - fixed: place history won't add new entries when stepping back to home place

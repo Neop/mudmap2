@@ -35,6 +35,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -83,7 +84,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     JCheckBoxMenuItem menuEditCurvedPaths, menuEditShowCursor;
 
     JTabbedPane tabbedPane;
-    AvailableWorldsTab availableWorldsTab;
 
     // for experimental html export message
     Boolean firstHtmlExport;
@@ -118,7 +118,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         // ---
         tabbedPane = new JTabbedPane();
         add(tabbedPane);
-        tabbedPane.addTab("Available worlds", availableWorldsTab = new AvailableWorldsTab(this));
         tabbedPane.addChangeListener(this);
     }
 
@@ -143,6 +142,27 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menu_file_open.addActionListener(new OpenWorldDialog(this));
         menu_file.add(menu_file_open);
 
+        // available worlds
+        JMenu menu_file_open_recent = new JMenu("Open available map");
+        menu_file.add(menu_file_open_recent);
+        
+        WorldFileList.findWorlds();
+        for(final Entry<String, String> entry: WorldFileList.getWorlds().entrySet()){
+            JMenuItem open_world_entry = new JMenuItem(entry.getValue() + " (" + entry.getKey() + ")");
+            menu_file_open_recent.add(open_world_entry);
+            open_world_entry.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    try {
+                        createTab(WorldManager.getWorld(entry.getKey()), entry.getKey());
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(getParent(), "Could not open world: " + ex.getMessage());
+                        Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+        }
+        
         menu_file.addSeparator();
         JMenuItem menu_file_save = new JMenuItem("Save");
         menu_file_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -220,7 +240,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             // create a new world
             try {
                 World world = WorldManager.createWorld(name);
-                availableWorldsTab.update();
                 createTab(world, null);
             } catch (Exception ex) {
                 Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -248,8 +267,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
         WorldTab curTab = getSelectedTab();
         if(curTab != null){
-            availableWorldsTab.update();
-
             // update menu entry
             menuEditShowCursor.setState(curTab.getWorldPanel().isCursorEnabled());
         }
@@ -351,7 +368,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             case "edit_world":
                 if(wt != null){
                     (new EditWorldDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
-                            availableWorldsTab.update();
                 }
                 break;
             case "path_colors":
