@@ -101,7 +101,7 @@ public class World implements BreadthSearchGraph {
         // risk levels
         riskLevels = new TreeMap<>();
         riskLevels.put(0, new RiskLevel(0, "not evaluated", new Color(188, 188, 188)));
-        riskLevels.put(1, new RiskLevel(1, "secure", new Color(0, 255, 0)));
+        riskLevels.put(1, new RiskLevel(1, "safe", new Color(0, 255, 0)));
         riskLevels.put(2, new RiskLevel(2, "mobs don't attack", new Color(255, 255, 0)));
         riskLevels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
         riskLevels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
