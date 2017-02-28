@@ -1,4 +1,5 @@
 2.?
+- fixed: place history won't add new entries when stepping back to home place
 - changed term area to place group
 - changed standard name of risk level "secure" to "safe"
 

@@ -876,7 +876,7 @@ public class PlaceTest {
         keywords[0] = "Forest";
         keywords[1] = "car";
         result = instance.matchKeywords(keywords);
-        assertTrue(result);
+        assertFalse(result);
 
         keywords = new String[1];
         keywords[0] = "small";
