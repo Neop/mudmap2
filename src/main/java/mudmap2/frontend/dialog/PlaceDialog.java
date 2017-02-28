@@ -28,6 +28,7 @@ import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -61,6 +62,7 @@ public class PlaceDialog extends ActionDialog {
     PlaceGroup place_group_null;
 
     JTextField textfield_name;
+    JCheckBox checkbox_lvl_min, checkbox_lvl_max;
     JComboBox<PlaceGroup> combobox_place_group;
     JComboBox<RiskLevel> combobox_risk;
     JSpinner spinner_rec_lvl_min, spinner_rec_lvl_max;
@@ -125,17 +127,45 @@ public class PlaceDialog extends ActionDialog {
         for(RiskLevel rl : world.getRiskLevels()) combobox_risk.addItem(rl);
         if(place != null && place.getRiskLevel() != null) combobox_risk.setSelectedItem(place.getRiskLevel());
         add(combobox_risk);
-
-        add(new JLabel("Recommended level min"));
+        
+        Integer min_lvl = 0, max_lvl = 0;
+        if(place != null){
+            min_lvl = place.getRecLevelMin();
+            max_lvl = place.getRecLevelMax();
+        }
+        
+        add(new JLabel("Minimal level"));
         spinner_rec_lvl_min = new JSpinner();
-        spinner_rec_lvl_min.setModel(new SpinnerNumberModel((place != null ? place.getRecLevelMin() : -1), -1, 1000, 1));
+        spinner_rec_lvl_min.setModel(new SpinnerNumberModel(Integer.max(min_lvl, 0), 0, 1000, 1));
         add(spinner_rec_lvl_min);
+        if(min_lvl < 0) spinner_rec_lvl_min.setEnabled(false);
 
-        add(new JLabel("Recommended level max"));
+        add(new JLabel());
+        add(checkbox_lvl_min = new JCheckBox("Show min level"));
+        checkbox_lvl_min.setSelected(min_lvl >= 0);
+        checkbox_lvl_min.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                spinner_rec_lvl_min.setEnabled(((JCheckBox) ae.getSource()).isSelected());
+            }
+        });
+
+        add(new JLabel("Maximum level"));
         spinner_rec_lvl_max = new JSpinner();
-        spinner_rec_lvl_max.setModel(new SpinnerNumberModel((place != null ? place.getRecLevelMax() : -1), -1, 1000, 1));
+        spinner_rec_lvl_max.setModel(new SpinnerNumberModel(Integer.max(max_lvl, 0), 0, 1000, 1));
         add(spinner_rec_lvl_max);
+        if(max_lvl < 0) spinner_rec_lvl_max.setEnabled(false);
 
+        add(new JLabel());
+        add(checkbox_lvl_max = new JCheckBox("Show max level"));
+        checkbox_lvl_max.setSelected(max_lvl >= 0);
+        checkbox_lvl_max.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                spinner_rec_lvl_max.setEnabled(((JCheckBox) ae.getSource()).isSelected());
+            }
+        });
+        
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel);
         button_cancel.addActionListener(new ActionListener() {
@@ -184,8 +214,16 @@ public class PlaceDialog extends ActionDialog {
                 place.setPlaceGroup(a != place_group_null ? a : null); // replace null group with null
                 place.setRiskLevel((RiskLevel) combobox_risk.getSelectedItem());
 
-                place.setRecLevelMin((Integer) spinner_rec_lvl_min.getValue());
-                place.setRecLevelMax((Integer) spinner_rec_lvl_max.getValue());
+                if(checkbox_lvl_min.isSelected()){
+                    place.setRecLevelMin((Integer) spinner_rec_lvl_min.getValue());
+                } else {
+                    place.setRecLevelMin(-1);
+                }
+                if(checkbox_lvl_max.isSelected()){
+                    place.setRecLevelMax((Integer) spinner_rec_lvl_max.getValue());
+                } else {
+                    place.setRecLevelMax(-1);
+                }
             } catch (Exception ex) {
                 Logger.getLogger(PlaceDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
