@@ -1558,8 +1558,10 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         if(end != null){
                             placeGroupReset();
                             Place place_it = getWorld().breadthSearch(place, end);
-                            if(place_it == null) callMessageListeners("No Path found");
-                            else {
+                            if(place_it == null){
+                                callMessageListeners("No Path found");
+                                JOptionPane.showMessageDialog(this, "Could not find path to " + end.getName());
+                            } else {
                                 int path_length = 0;
                                 while(place_it != null){
                                     placeGroup.add(place_it);
