@@ -1,4 +1,5 @@
 2.?
+- added label to map zoom slider
 - added message dialog when path search failed
 - fixed: place history won't add new entries when stepping back to home place
 - changed term area to place group

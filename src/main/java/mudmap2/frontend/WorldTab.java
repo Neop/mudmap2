@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -192,10 +193,13 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         // set default selected place to hte center place
         worldPanel.setCursor((int) Math.round(worldPanel.getPosition().getX()), (int) Math.round(worldPanel.getPosition().getY()));
 
-        sliderZoom = new JSlider(0, 100, (int) (100.0 / WorldPanel.TILE_SIZE_MAX * worldPanel.getTileSize()));
         constraints.gridx++;
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
+        panelSouth.add(new JLabel("Map zoom:"), constraints);
+        
+        constraints.gridx++;
+        sliderZoom = new JSlider(0, 100, (int) (100.0 / WorldPanel.TILE_SIZE_MAX * worldPanel.getTileSize()));
         panelSouth.add(sliderZoom, constraints);
         sliderZoom.addChangeListener(new ChangeListener() {
             @Override
