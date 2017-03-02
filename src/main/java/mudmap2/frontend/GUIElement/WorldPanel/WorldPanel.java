@@ -1266,6 +1266,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             this.posY = py;
             layer = getWorld().getLayer(getPosition().getLayer());
             place = (layer != null ? layer.get(posX, posY) : null);
+            
+            parent.setCursor(posX, posY);
 
             if(layer != null && place != null){ // if place exists
                 if(!passive){
