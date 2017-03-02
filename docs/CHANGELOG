@@ -5,6 +5,7 @@
 - added label to map zoom slider
 - added checkbox for min/max level to place dialog
 - added message dialog when path search failed
+- more usability tweaks
 - fixed: place history won't add new entries when stepping back to home place
 - changed term area to place group
 - changed standard name of risk level "secure" to "safe"

@@ -333,6 +333,13 @@ public class World implements BreadthSearchGraph {
      * Creates a new and empty layer and returns it
      * @return new layer
      */
+    public Layer getNewLayer(String name){
+        Layer layer = getNewLayer();
+        if(!name.isEmpty()) layer.setName(name);
+        callListeners(layer);
+        return layer;
+    }
+    
     public Layer getNewLayer(){
         Layer layer = new Layer(this);
         layers.put(layer.getId(), layer);

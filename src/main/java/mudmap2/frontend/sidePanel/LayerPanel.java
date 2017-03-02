@@ -81,14 +81,8 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         // add button
         JButton buttonAdd = new JButton("Add new map");
         south.add(buttonAdd);
-        buttonAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                for(LayerPanelListener listener: layerListeners){
-                    listener.createLayer();
-                }
-            }
-        });
+        buttonAdd.setActionCommand("create_layer");
+        buttonAdd.addActionListener(this);
 
         add(south, BorderLayout.SOUTH);
 
