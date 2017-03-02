@@ -8,6 +8,7 @@
 - added message dialog when path search failed
 - more usability tweaks
 - fixed: place history won't add new entries when stepping back to home place
+- fixed: safe as dialog didn't work for new worlds
 - changed term area to place group
 - changed standard name of risk level "secure" to "safe"
 
