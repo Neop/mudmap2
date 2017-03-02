@@ -81,7 +81,9 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     HashMap<World, WorldTab> worldTabs;
 
     // GUI elements
-    JCheckBoxMenuItem menuEditCurvedPaths, menuEditShowCursor;
+    JCheckBoxMenuItem menuEditCurvedPaths;
+    JCheckBoxMenuItem menuEditShowCursor;
+    JCheckBoxMenuItem menuEditShowGrid;
 
     JTabbedPane tabbedPane;
 
@@ -123,34 +125,34 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
     private void initGui() {
         // Add GUI components
-        JMenuBar menu_bar = new JMenuBar();
-        add(menu_bar, BorderLayout.NORTH);
+        JMenuBar menuBar = new JMenuBar();
+        add(menuBar, BorderLayout.NORTH);
 
-        JMenu menu_file = new JMenu("File");
-        menu_bar.add(menu_file);
-        JMenu menu_edit = new JMenu("World"); // Edit renamed to World
-        menu_bar.add(menu_edit);
-        JMenu menu_help = new JMenu("Help");
-        menu_bar.add(menu_help);
+        JMenu menuFile = new JMenu("File");
+        menuBar.add(menuFile);
+        JMenu menuEdit = new JMenu("World"); // Edit renamed to World
+        menuBar.add(menuEdit);
+        JMenu menuHelp = new JMenu("Help");
+        menuBar.add(menuHelp);
 
-        JMenuItem menu_file_new = new JMenuItem("New");
-        menu_file.add(menu_file_new);
-        menu_file_new.setActionCommand("new_world");
-        menu_file_new.addActionListener(this);
+        JMenuItem menuFileNew = new JMenuItem("New");
+        menuFile.add(menuFileNew);
+        menuFileNew.setActionCommand("new_world");
+        menuFileNew.addActionListener(this);
 
-        JMenuItem menu_file_open = new JMenuItem("Open");
-        menu_file_open.addActionListener(new OpenWorldDialog(this));
-        menu_file.add(menu_file_open);
+        JMenuItem menuFileOpen = new JMenuItem("Open");
+        menuFileOpen.addActionListener(new OpenWorldDialog(this));
+        menuFile.add(menuFileOpen);
 
         // available worlds
-        JMenu menu_file_open_recent = new JMenu("Open available map");
-        menu_file.add(menu_file_open_recent);
+        JMenu menuFileOpenRecent = new JMenu("Open available map");
+        menuFile.add(menuFileOpenRecent);
         
         WorldFileList.findWorlds();
         for(final Entry<String, String> entry: WorldFileList.getWorlds().entrySet()){
-            JMenuItem open_world_entry = new JMenuItem(entry.getValue() + " (" + entry.getKey() + ")");
-            menu_file_open_recent.add(open_world_entry);
-            open_world_entry.addActionListener(new ActionListener() {
+            JMenuItem openWorldEntry = new JMenuItem(entry.getValue() + " (" + entry.getKey() + ")");
+            menuFileOpenRecent.add(openWorldEntry);
+            openWorldEntry.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent ae) {
                     try {
@@ -163,75 +165,79 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             });
         }
         
-        menu_file.addSeparator();
-        JMenuItem menu_file_save = new JMenuItem("Save");
-        menu_file_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-        menu_file_save.setActionCommand("save_world");
-        menu_file_save.addActionListener(this);
-        menu_file.add(menu_file_save);
+        menuFile.addSeparator();
+        JMenuItem menuFileSave = new JMenuItem("Save");
+        menuFileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        menuFileSave.setActionCommand("save_world");
+        menuFileSave.addActionListener(this);
+        menuFile.add(menuFileSave);
 
-        JMenuItem menu_file_save_as = new JMenuItem("Save as");
-        menu_file_save_as.setActionCommand("save_world_as");
-        menu_file_save_as.addActionListener(this);
-        menu_file.add(menu_file_save_as);
+        JMenuItem menuFileSaveAs = new JMenuItem("Save as");
+        menuFileSaveAs.setActionCommand("save_world_as");
+        menuFileSaveAs.addActionListener(this);
+        menuFile.add(menuFileSaveAs);
 
-        JMenuItem menu_file_save_as_image = new JMenuItem("Export as image");
-        menu_file_save_as_image.setActionCommand("export_image");
-        menu_file_save_as_image.addActionListener(this);
-        menu_file.add(menu_file_save_as_image);
+        JMenuItem menuFileSaveAsImage = new JMenuItem("Export as image");
+        menuFileSaveAsImage.setActionCommand("export_image");
+        menuFileSaveAsImage.addActionListener(this);
+        menuFile.add(menuFileSaveAsImage);
 
-        JMenuItem menu_file_save_as_html = new JMenuItem("Export as html");
-        menu_file_save_as_html.setActionCommand("export_html");
-        menu_file_save_as_html.addActionListener(this);
-        menu_file.add(menu_file_save_as_html);
+        JMenuItem menuFileSaveAsHtml = new JMenuItem("Export as html");
+        menuFileSaveAsHtml.setActionCommand("export_html");
+        menuFileSaveAsHtml.addActionListener(this);
+        menuFile.add(menuFileSaveAsHtml);
 
-        menu_file.addSeparator();
-        JMenuItem menu_file_quit = new JMenuItem("Quit");
-        menu_file_quit.setActionCommand("quit");
-        menu_file_quit.addActionListener(this);
-        menu_file.add(menu_file_quit);
+        menuFile.addSeparator();
+        JMenuItem menuFileQuit = new JMenuItem("Quit");
+        menuFileQuit.setActionCommand("quit");
+        menuFileQuit.addActionListener(this);
+        menuFile.add(menuFileQuit);
 
-        JMenuItem menu_edit_edit_world = new JMenuItem("Edit world");
-        menu_edit_edit_world.setActionCommand("edit_world");
-        menu_edit_edit_world.addActionListener(this);
-        menu_edit.add(menu_edit_edit_world);
+        JMenuItem menuEditEditWorld = new JMenuItem("Edit world");
+        menuEditEditWorld.setActionCommand("edit_world");
+        menuEditEditWorld.addActionListener(this);
+        menuEdit.add(menuEditEditWorld);
 
-        JMenuItem menu_edit_path_colors = new JMenuItem("Path colors");
-        menu_edit_path_colors.setActionCommand("path_colors");
-        menu_edit_path_colors.addActionListener(this);
-        menu_edit.add(menu_edit_path_colors);
+        JMenuItem menuEditPathColors = new JMenuItem("Path colors");
+        menuEditPathColors.setActionCommand("path_colors");
+        menuEditPathColors.addActionListener(this);
+        menuEdit.add(menuEditPathColors);
 
-        JMenuItem menu_edit_add_place_group = new JMenuItem("Add place group");
-        menu_edit_add_place_group.setActionCommand("add_place_group");
-        menu_edit_add_place_group.addActionListener(this);
-        menu_edit.add(menu_edit_add_place_group);
+        JMenuItem menuEditAddPlaceGroup = new JMenuItem("Add place group");
+        menuEditAddPlaceGroup.setActionCommand("add_place_group");
+        menuEditAddPlaceGroup.addActionListener(this);
+        menuEdit.add(menuEditAddPlaceGroup);
 
-        menu_edit.add(new JSeparator());
+        menuEdit.add(new JSeparator());
 
-        JMenuItem menu_edit_set_home_position = new JMenuItem("Set home position");
-        menu_edit_set_home_position.setActionCommand("set_home");
-        menu_edit_set_home_position.addActionListener(this);
-        menu_edit.add(menu_edit_set_home_position);
+        JMenuItem menuEditSetHomePosition = new JMenuItem("Set home position");
+        menuEditSetHomePosition.setActionCommand("set_home");
+        menuEditSetHomePosition.addActionListener(this);
+        menuEdit.add(menuEditSetHomePosition);
 
-        JMenuItem menu_edit_goto_home_position = new JMenuItem("Go to home position");
-        menu_edit_goto_home_position.setActionCommand("goto_home");
-        menu_edit_goto_home_position.addActionListener(this);
-        menu_edit.add(menu_edit_goto_home_position);
+        JMenuItem menuEditGotoHomePosition = new JMenuItem("Go to home position");
+        menuEditGotoHomePosition.setActionCommand("goto_home");
+        menuEditGotoHomePosition.addActionListener(this);
+        menuEdit.add(menuEditGotoHomePosition);
 
-        menu_edit.add(new JSeparator());
+        menuEdit.add(new JSeparator());
 
         menuEditCurvedPaths = new JCheckBoxMenuItem("Curved paths");
-        menu_edit.add(menuEditCurvedPaths);
+        menuEdit.add(menuEditCurvedPaths);
         menuEditCurvedPaths.addChangeListener(this);
 
         menuEditShowCursor = new JCheckBoxMenuItem("Show place cursor");
-        menu_edit.add(menuEditShowCursor);
+        menuEdit.add(menuEditShowCursor);
         menuEditShowCursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
         menuEditShowCursor.addChangeListener(this);
+        
+        menuEditShowGrid = new JCheckBoxMenuItem("Show grid");
+        menuEdit.add(menuEditShowGrid);
+        menuEditShowGrid.addChangeListener(this);
 
-        JMenuItem menu_help_about = new JMenuItem("About");
-        menu_help.add(menu_help_about);
-        menu_help_about.addActionListener((ActionListener) new AboutDialog(this));
+        JMenuItem menuHelpAbout = new JMenuItem("About");
+        menuHelp.add(menuHelpAbout);
+        menuHelpAbout.addActionListener((ActionListener) new AboutDialog(this));
     }
 
     public void createNewWorld(){
@@ -407,10 +413,17 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 wt.getWorldPanel().setCursorEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
                 wt.repaint();
             }
+        } else if(e.getSource() == menuEditShowGrid){
+            if(wt != null){
+                MapPainterDefault mapPainter = (MapPainterDefault) wt.getWorldPanel().getMappainter();
+                mapPainter.setGridEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
+                wt.repaint();
+            }
         } else if(e.getSource() == tabbedPane){ // tab changed
             if(wt != null){
                 wt.getWorldPanel().callStatusUpdateListeners();
                 menuEditCurvedPaths.setState(((MapPainterDefault) wt.getWorldPanel().getMappainter()).getPathsCurved());
+                menuEditShowGrid.setState(((MapPainterDefault) wt.getWorldPanel().getMappainter()).isGridEnabled());
             }
         } else {
             String message = getClass().getName() + ": ChangeEvent not recognized";

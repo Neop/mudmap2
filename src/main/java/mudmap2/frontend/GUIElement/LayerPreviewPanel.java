@@ -39,6 +39,7 @@ public class LayerPreviewPanel extends JPanel {
         this.layer = layer;
         mappainter = new MapPainterDefault();
         ((MapPainterDefault) mappainter).setShowPaths(false);
+        ((MapPainterDefault) mappainter).setGridEnabled(false);
     }
 
     private WorldCoordinate getCenter(){

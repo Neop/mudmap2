@@ -38,6 +38,8 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.frontend.GUIElement.WorldPanel.MapCursorListener;
+import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
+import mudmap2.frontend.GUIElement.WorldPanel.WorldPanel;
 import mudmap2.frontend.WorldTab;
 
 /**
@@ -71,6 +73,7 @@ public class PathConnectDialog extends ActionDialog{
         worldtab.getWorldPanel().setCursorForced(true);
         worldtab.getWorldPanel().resetHistory(place.getCoordinate());
         worldtab.getWorldPanel().setFocusForced(false);
+        ((MapPainterDefault) worldtab.getWorldPanel().getMappainter()).setGridEnabled(false);
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx = constraints.gridy = 0;

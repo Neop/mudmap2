@@ -69,6 +69,7 @@ public class MapPainterDefault implements MapPainter {
 
     Boolean showPaths;
     Boolean showPathsCurved;
+    Boolean showGrid;
 
     public MapPainterDefault() {
         selectePlaces = null;
@@ -78,6 +79,7 @@ public class MapPainterDefault implements MapPainter {
 
         showPaths = true;
         showPathsCurved = true;
+        showGrid = true;
     }
 
     @Override
@@ -123,6 +125,14 @@ public class MapPainterDefault implements MapPainter {
             if(selectePlaces != null && selectePlaces.contains(place)) return true;
         }
         return false;
+    }
+    
+    public Boolean isGridEnabled(){
+        return showGrid;
+    }
+    
+    public void setGridEnabled(Boolean state){
+        showGrid = state;
     }
 
     /**
@@ -533,6 +543,19 @@ public class MapPainterDefault implements MapPainter {
         // clear screen
         g.clearRect(0, 0, (int) graphicsWidth + 1, (int) graphicsHeight + 1);
 
+        // ------------------ draw the grid --------------------------------
+        if(isGridEnabled()){
+            g.setColor(Color.lightGray);
+            for(int tileX = (g.getClipBounds().x / tileSize) - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
+                final int x = (int) Math.round((tileX + placeXpxConst) * tileSize);
+                g.drawLine(x, 0, x, (int) graphicsHeight);
+            }
+            for(int tileY = (g.getClipBounds().y / tileSize) - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
+                final int y = (int) Math.round((tileY + placeYPXConst) * tileSize);
+                g.drawLine(0, y, (int) graphicsWidth, y);
+            }
+        }
+        
         // ------------------ draw the tiles / places ----------------------
         for(int tileX = (g.getClipBounds().x / tileSize) - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
             for(int tileY = (g.getClipBounds().y / tileSize) - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){

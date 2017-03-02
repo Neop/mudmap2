@@ -119,6 +119,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
         worldPanel.setTileSize(wt.getWorldPanel().getTileSize());
         worldPanel.setCursorEnabled(wt.getWorldPanel().isCursorEnabled());
+        ((MapPainterDefault) worldPanel.getMappainter()).setGridEnabled(((MapPainterDefault) getWorldPanel().getMappainter()).isGridEnabled());
     }
 
     /**
@@ -382,6 +383,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         root.put("showPaths", mapPainter.getShowPaths());
         root.put("pathsCurved", mapPainter.getPathsCurved());
         root.put("showCursor", getWorldPanel().isCursorEnabled());
+        root.put("showGrid", mapPainter.isGridEnabled());
         root.put("tileSize", getWorldPanel().getTileSize());
 
         JSONArray history = new JSONArray();
@@ -423,6 +425,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             if(meta.has("showPaths")) mapPainter.setShowPaths(meta.getBoolean("showPaths"));
             if(meta.has("pathsCurved")) mapPainter.setPathsCurved(meta.getBoolean("pathsCurved"));
             if(meta.has("showCursor")) getWorldPanel().setCursorEnabled(meta.getBoolean("showCursor"));
+            if(meta.has("showGrid")) mapPainter.setGridEnabled(meta.getBoolean("showGrid"));
             if(meta.has("tileSize")) getWorldPanel().setTileSize(meta.getInt("tileSize"));
 
             if(meta.has("history")){
