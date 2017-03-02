@@ -70,7 +70,7 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
 
         useKeywords = false;
 
-        JTextField textFieldSearch = new JTextField("Search");
+        JTextField textFieldSearch = new JTextField("Search places");
         textFieldSearch.setToolTipText("Search for places");
         textFieldSearch.addActionListener(new ActionListener() {
             @Override

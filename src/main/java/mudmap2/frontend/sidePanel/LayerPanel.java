@@ -68,7 +68,7 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         JPanel south = new JPanel(new GridLayout(2, 1));
 
         // search box
-        JTextField textFieldSearch = new JTextField("Search");
+        JTextField textFieldSearch = new JTextField("Search maps");
         south.add(textFieldSearch);
         textFieldSearch.setToolTipText("Search for layers");
         textFieldSearch.addActionListener(new ActionListener() {
