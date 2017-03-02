@@ -351,7 +351,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
     @Override
     public void createLayer() {
         String name = JOptionPane.showInputDialog(this, "Map name", "New map");
-        worldPanel.pushPosition(new WorldCoordinate(getWorld().getNewLayer(name).getId(), 0, 0));
+        if(name != null) worldPanel.pushPosition(new WorldCoordinate(getWorld().getNewLayer(name).getId(), 0, 0));
         repaint();
     }
 
