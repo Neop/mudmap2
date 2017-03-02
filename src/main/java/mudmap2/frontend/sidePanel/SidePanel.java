@@ -57,6 +57,14 @@ public class SidePanel extends JPanel {
         placePanel.update();
     }
 
+    public LayerPanel getLayerPanel() {
+        return layerPanel;
+    }
+
+    public PlacePanel getPlacePanel() {
+        return placePanel;
+    }
+    
     /**
      * Add LayerPanelListener
      * @param listener

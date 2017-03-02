@@ -88,7 +88,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     HashSet<PlaceSelectionListener> placeSelectionListeners;
     HashSet<MapCursorListener> mapCursorListeners;
     HashSet<StatusListener> statusListeners;
-    HashSet<TileSizeListener> tileSizeListeners;
+    HashSet<WorldPanelListener> tileSizeListeners;
 
     LinkedList<WorldCoordinate> positionHistory;
     Integer positionIdx;
@@ -296,12 +296,14 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             positionHistory.pop();
             positionIdx--;
         }
+        
+        callLayerChangeListeners(getWorld().getLayer(coord.getLayer()));
+        
         // add new position
         positionHistory.push(pos);
 
         // move place selection
         setCursor((int) pos.getX(), (int) pos.getY());
-        //while(positionHistory.size() > history_max_length) positionHistory.removeLast();
     }
 
     /**
@@ -317,6 +319,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         }
 
         setCursor((int) getPosition().getX(), (int) getPosition().getY());
+        
+        callLayerChangeListeners(getWorld().getLayer(getPosition().getLayer()));
     }
 
     public WorldCoordinate getPosition(){
@@ -333,6 +337,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             positionIdx--;
             setCursor((int) getPosition().getX(), (int) getPosition().getY());
         }
+        
+        callLayerChangeListeners(getWorld().getLayer(getPosition().getLayer()));
     }
 
     public void resetHistory(WorldCoordinate pos){
@@ -340,6 +346,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         positionHistory.clear();
         positionHistory.add(pos);
         setCursor((int) Math.round(pos.getX()), (int) Math.round(pos.getY()));
+        
+        callLayerChangeListeners(getWorld().getLayer(pos.getLayer()));
     }
 
     public LinkedList<WorldCoordinate> getHistory(){
@@ -630,7 +638,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * Adds a tileSize listener
      * @param listener
      */
-    public void addTileSiteListener(TileSizeListener listener){
+    public void addTileSiteListener(WorldPanelListener listener){
         if(!tileSizeListeners.contains(listener))
             tileSizeListeners.add(listener);
     }
@@ -639,7 +647,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * Removes a tileSize listener
      * @param listener
      */
-    public void removeTileSizeListener(TileSizeListener listener){
+    public void removeTileSizeListener(WorldPanelListener listener){
         tileSizeListeners.remove(listener);
     }
 
@@ -653,11 +661,17 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     }
 
     public void callTileSizeListeners(){
-        for(TileSizeListener listener: tileSizeListeners){
+        for(WorldPanelListener listener: tileSizeListeners){
             listener.TileSizeChanged();
         }
     }
 
+    public void callLayerChangeListeners(Layer l){
+        for(WorldPanelListener listener: tileSizeListeners){
+            listener.LayerChanged(l);
+        }
+    }
+    
     /**
      * Removes a status listener
      * @param listener

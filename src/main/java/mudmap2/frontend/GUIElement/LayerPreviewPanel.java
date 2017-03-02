@@ -16,6 +16,7 @@
  */
 package mudmap2.frontend.GUIElement;
 
+import java.awt.Color;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainter;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import java.awt.Graphics;
@@ -34,12 +35,14 @@ public class LayerPreviewPanel extends JPanel {
 
     Layer layer;
     MapPainter mappainter;
+    Boolean marked;
 
     public LayerPreviewPanel(Layer layer) {
         this.layer = layer;
         mappainter = new MapPainterDefault();
         ((MapPainterDefault) mappainter).setShowPaths(false);
         ((MapPainterDefault) mappainter).setGridEnabled(false);
+        marked = false;
     }
 
     private WorldCoordinate getCenter(){
@@ -48,7 +51,6 @@ public class LayerPreviewPanel extends JPanel {
         Double centerX = layer.getXMin() + (tileCntX / 2.0);
         Double centerY = layer.getYMin() + (tileCntY / 2.0) - 1;
 
-        //return new WorldCoordinate(layer.getId(), layer.getCenterX(), layer.getCenterY());
         return new WorldCoordinate(layer.getId(), centerX, centerY);
     }
 
@@ -56,13 +58,24 @@ public class LayerPreviewPanel extends JPanel {
         Integer tileCntX = layer.getXMax() - layer.getXMin() + 1;
         Integer tileCntY = layer.getYMax() - layer.getYMin() + 1;
 
-        //return Math.max(MIN_TILE_SIZE, Math.min(width / tileCntX, height / tileCntY));
         return Math.min(getWidth() / tileCntX, getHeight() / tileCntY);
     }
 
+    public Boolean getMarked() {
+        return marked;
+    }
+
+    public void setMarked(Boolean marked) {
+        this.marked = marked;
+    }
+    
     @Override
     public void paintComponent(Graphics g){
-        //mappainter.paint(g, getTileSize(), width, height, layer, getCenter());
+        if(marked){
+            ((MapPainterDefault) mappainter).setBackgroundColor(Color.lightGray);
+        } else {
+            ((MapPainterDefault) mappainter).setBackgroundColor(null);
+        }
         mappainter.paint(g, getTileSize(), getWidth(), getHeight(), layer, getCenter());
     }
 

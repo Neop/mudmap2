@@ -65,7 +65,9 @@ public class MapPainterDefault implements MapPainter {
     int tileSize;
     WorldCoordinate curPos;
 
-    Font lastTileFont;
+    Color backgroundColor;
+    
+    Font tileFont;
 
     Boolean showPaths;
     Boolean showPathsCurved;
@@ -75,11 +77,13 @@ public class MapPainterDefault implements MapPainter {
         selectePlaces = null;
         placeSelectedX = placeSelectedY = 0;
         placeSelectionEnabled = false;
-        lastTileFont = null;
+        tileFont = null;
 
         showPaths = true;
         showPathsCurved = true;
         showGrid = true;
+        
+        backgroundColor = null;
     }
 
     @Override
@@ -177,7 +181,7 @@ public class MapPainterDefault implements MapPainter {
     }
 
     public Font getTileFont(){
-        return lastTileFont;
+        return tileFont;
     }
 
     public Boolean getShowPaths() {
@@ -204,6 +208,14 @@ public class MapPainterDefault implements MapPainter {
         this.showPathsCurved = showPathsCurved;
     }
 
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+    
     /**
      * Calculates the offset of the exit visualization (dot/circle) to the
      * upper left corner of a tile
@@ -506,7 +518,7 @@ public class MapPainterDefault implements MapPainter {
         this.tileSize = tileSize;
         this.curPos = curPos;
 
-        lastTileFont = g.getFont();
+        tileFont = g.getFont();
 
         final float selectionStrokeWidth = getTileSelectionStrokeWidth();
         final int tileBorderWidthScaled = getTileBorderWidth();
@@ -541,7 +553,12 @@ public class MapPainterDefault implements MapPainter {
         HashSet<Pair<Integer, Integer>> copiedPlaceLocations = mudmap2.CopyPaste.getCopyPlaceLocations();
 
         // clear screen
-        g.clearRect(0, 0, (int) graphicsWidth + 1, (int) graphicsHeight + 1);
+        if(backgroundColor == null){
+            g.clearRect(0, 0, (int) graphicsWidth + 1, (int) graphicsHeight + 1);
+        } else {
+            g.setColor(backgroundColor);
+            g.fillRect(0, 0, (int) graphicsWidth + 1, (int) graphicsHeight + 1);
+        }
 
         // ------------------ draw the grid --------------------------------
         if(isGridEnabled()){

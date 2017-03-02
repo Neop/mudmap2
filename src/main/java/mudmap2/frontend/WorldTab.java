@@ -59,20 +59,20 @@ import mudmap2.frontend.GUIElement.WorldPanel.PlaceSelectionListener;
 import mudmap2.frontend.GUIElement.ScrollLabel;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.GUIElement.WorldPanel.StatusListener;
-import mudmap2.frontend.GUIElement.WorldPanel.TileSizeListener;
 import mudmap2.frontend.GUIElement.WorldPanel.WorldPanel;
 import mudmap2.frontend.sidePanel.LayerPanelListener;
 import mudmap2.frontend.sidePanel.PlacePanelListener;
 import mudmap2.frontend.sidePanel.SidePanel;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import mudmap2.frontend.GUIElement.WorldPanel.WorldPanelListener;
 
 /**
  * A tab in the main window that displays a world
  *
  * @author neop
  */
-public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelListener,StatusListener,TileSizeListener,WorldMetaJSON {
+public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelListener,StatusListener,WorldPanelListener,WorldMetaJSON {
     private static final long serialVersionUID = 1L;
 
     String filename;
@@ -375,6 +375,11 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         sliderZoom.setValue((int) (100.0 / WorldPanel.TILE_SIZE_MAX * worldPanel.getTileSize()));
     }
 
+    @Override
+    public void LayerChanged(Layer l) {
+        ((SidePanel) sidePanel).getLayerPanel().setActiveLayer(l);
+    }
+    
     @Override
     public JSONObject getMeta(HashMap<Integer, Integer> layerTranslation){
         JSONObject root = new JSONObject();

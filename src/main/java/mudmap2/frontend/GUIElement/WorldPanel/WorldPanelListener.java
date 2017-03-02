@@ -16,12 +16,15 @@
  */
 package mudmap2.frontend.GUIElement.WorldPanel;
 
+import mudmap2.backend.Layer;
+
 /**
  *
  * @author neop
  */
-public interface TileSizeListener {
+public interface WorldPanelListener {
 
+    public void LayerChanged(Layer l);
     public void TileSizeChanged();
 
 }

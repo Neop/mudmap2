@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -95,6 +96,16 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         update();
     }
 
+    public void setActiveLayer(Layer l){
+        for(Map.Entry<JPanel, Layer> entry : panels.entrySet()){
+            if(entry.getValue() == l){
+                ((LayerPreviewPanel) entry.getKey().getComponent(0)).setMarked(true);
+            } else {
+                ((LayerPreviewPanel) entry.getKey().getComponent(0)).setMarked(false);
+            }
+        }
+    }
+    
     public final void update(){
         update("");
     }
