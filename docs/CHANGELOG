@@ -1,4 +1,5 @@
 2.?
+- added help text to empty map
 - added mark for selected map in sidebar
 - added worlds list to file menu, remove available worlds tab
 - added grid to map

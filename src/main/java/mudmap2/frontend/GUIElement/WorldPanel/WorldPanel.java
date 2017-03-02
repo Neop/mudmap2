@@ -18,6 +18,7 @@ package mudmap2.frontend.GUIElement.WorldPanel;
 
 import java.awt.Component;
 import java.awt.Event;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -569,7 +570,22 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         mappainter.selectPlaceAt(getCursorX(), getCursorY());
         mappainter.setSelectionVisible(isCursorEnabled());
 
-        mappainter.paint(g, (int) getTileSize(), getWidth(), getHeight(), getWorld().getLayer(getPosition().getLayer()), getPosition());
+        Layer layer = getWorld().getLayer(getPosition().getLayer());
+
+        if(layer == null || layer.isEmpty()){
+            FontMetrics fm = g.getFontMetrics();
+
+            String strAddPLace = "Do a right click to add and change places";
+            g.drawString(strAddPLace, (getWidth() - fm.stringWidth(strAddPLace)) / 2, getHeight() / 2 - fm.getHeight() * 2);
+
+            String strEditWorld = "Change world settings in the World menu";
+            g.drawString(strEditWorld, (getWidth() - fm.stringWidth(strEditWorld)) / 2, getHeight() / 2);
+
+            String strSidebar = "Use the side bar to go to other maps and places";
+            g.drawString(strSidebar, (getWidth() - fm.stringWidth(strSidebar)) / 2, getHeight() / 2 + fm.getHeight() * 2);
+        } else {
+            mappainter.paint(g, (int) getTileSize(), getWidth(), getHeight(), layer, getPosition());
+        }
     }
 
     // ========================= Listeners and context menu ================
