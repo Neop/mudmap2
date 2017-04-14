@@ -158,11 +158,12 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double ts = getTileSize();
-                ts = Math.exp(Math.log(ts / 10) + e.getWheelRotation() * 0.05) * 10;
-                if(e.getWheelRotation() > 0) ts = Math.max(ts, getTileSize() + 1);
-                else if(e.getWheelRotation() < 0) ts = Math.min(ts, getTileSize() - 1);
+                int delta = -e.getWheelRotation();
+                
+                ts = Math.exp(Math.log(ts / 10) + delta * 0.05) * 10;
+                if(delta > 0) ts = Math.max(ts, getTileSize() + 1);
+                else if(delta < 0) ts = Math.min(ts, getTileSize() - 1);
                 setTileSize(ts);
-                //parent.setTileSize(parent.getTileSize() + e.getWheelRotation());
             }
         });
         addMouseMotionListener((MouseMotionListener) new TabMouseMotionListener());

@@ -1,4 +1,7 @@
-2.?
+2.4.1
+- reversed mouse scroll zoom direction
+
+2.4.0
 - added help text to empty map
 - added mark for selected map in sidebar
 - added worlds list to file menu, remove available worlds tab
