@@ -56,6 +56,7 @@ public class ExportImageDialog extends ActionDialog {
     JSpinner spinner_tile_size;
     JLabel label_image_width;
     JCheckBox checkbox_transparent;
+    JCheckBox checkbox_grid;
     ColorChooserButton colorchooser;
 
     int image_width, image_height;
@@ -87,14 +88,14 @@ public class ExportImageDialog extends ActionDialog {
 
         constraints.gridx = constraints.gridy = 1;
         add(new JLabel("Export:"), constraints);
-        ++constraints.gridx;
+        constraints.gridx++;
         add(rb_cur_view = new JRadioButton("current view"), constraints);
-        ++constraints.gridx;
+        constraints.gridx++;
         add(rb_layer = new JRadioButton("everything on layer"), constraints);
-        ++constraints.gridx;
+        constraints.gridx++;
         add(rb_selection = new JRadioButton("selection"), constraints);
         if(worldtab.getWorldPanel().placeGroupGetSelection().isEmpty()) rb_selection.setEnabled(false);
-        ++constraints.gridx;
+        constraints.gridx++;
         add(rb_each_layer = new JRadioButton("each layer"), constraints);
 
         rb_group = new ButtonGroup();
@@ -104,10 +105,10 @@ public class ExportImageDialog extends ActionDialog {
         rb_group.add(rb_each_layer);
 
         constraints.gridx = 1;
-        ++constraints.gridy;
+        constraints.gridy++;
 
         add(new JLabel("Tile size:"), constraints);
-        ++constraints.gridx;
+        constraints.gridx++;
 
         spinner_tile_size = new JSpinner(new SpinnerNumberModel((int) worldtab.getWorldPanel().getTileSize(),
                 WorldPanel.TILE_SIZE_MIN, WorldPanel.TILE_SIZE_MAX, 1));
@@ -137,7 +138,7 @@ public class ExportImageDialog extends ActionDialog {
         rb_layer.addActionListener(new RadioButtonActionListener());
         rb_selection.addActionListener(new RadioButtonActionListener());
 
-        ++constraints.gridx;
+        constraints.gridx++;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridwidth = GridBagConstraints.REMAINDER;
 
@@ -146,7 +147,7 @@ public class ExportImageDialog extends ActionDialog {
 
         constraints.gridx = 1;
         constraints.gridwidth = 2;
-        ++constraints.gridy;
+        constraints.gridy++;
         add(checkbox_transparent = new JCheckBox("Transparent Background"), constraints);
         checkbox_transparent.setSelected(true);
 
@@ -154,10 +155,15 @@ public class ExportImageDialog extends ActionDialog {
         constraints.gridx += 2;
         add(new JLabel("Background color:"), constraints);
 
-        ++constraints.gridx;
+        constraints.gridx++;
         constraints.fill = GridBagConstraints.BOTH;
         add(colorchooser = new ColorChooserButton(this, Color.white), constraints);
 
+        constraints.gridx = 1;
+        constraints.gridy++;
+        add(checkbox_grid = new JCheckBox("Draw grid"), constraints);
+        checkbox_grid.setSelected(((MapPainterDefault) worldtab.getWorldPanel().getMappainter()).isGridEnabled());
+        
         constraints.fill = GridBagConstraints.NONE;
         constraints.gridx = 1;
         ++constraints.gridy;
@@ -264,6 +270,7 @@ public class ExportImageDialog extends ActionDialog {
             graphics.setFont(worldtab.getFont());
 
             MapPainterDefault mappainter = new MapPainterDefault();
+            mappainter.setGridEnabled(checkbox_grid.isSelected());
             mappainter.paint(graphics, tile_size, image_width, image_height,
                     worldtab.getWorld().getLayer(center.getLayer()),
                     center);
