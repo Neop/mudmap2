@@ -49,14 +49,19 @@ public class WorldManager {
      * @throws Exception if world could not be loaded
      */
     public static World getWorld(String file) throws Exception{
-        if(loadedWorlds.containsKey(file)){
-            return loadedWorlds.get(file);
-        } else {
+        World world = null;
+        if(loadedWorlds.containsKey(file)){ // world in list
+            world = loadedWorlds.get(file);
+        } else { // world not loaded
             WorldFile worldFile = new WorldFileDefault(file);
-            World world = worldFile.readFile();
-            putWorld(file, world);
-            return world;
+            if(worldFile.canRead()){
+                world = worldFile.readFile();
+                putWorld(file, world);
+            } else {
+                throw new Exception("Could not read world file");
+            }
         }
+        return world;
     }
 
     /**

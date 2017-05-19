@@ -43,8 +43,9 @@ public class WorldFileDefault extends WorldFile {
             File file = new File(filename);
             if(file.exists()){
                 WorldFileJSON wfj = new WorldFileJSON(filename);
-                if(wfj.canRead()) worldFileType = WorldFileType.JSON;
-                else {
+                if(wfj.canRead()){
+                    worldFileType = WorldFileType.JSON;
+                } else {
                     WorldFileMM1 wfmm1 = new WorldFileMM1(filename);
                     if(wfmm1.canRead()) worldFileType = WorldFileType.MUDMAP1;
                     else worldFileType = WorldFileType.INVALID;

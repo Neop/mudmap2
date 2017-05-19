@@ -160,7 +160,9 @@ public class WorldFileList {
                     WorldFileDefault worldFile = new WorldFileDefault(w.getKey());
                     String fw = null;
                     try {
-                        fw = worldFile.readWorldName();
+                        if(worldFile.canRead()){
+                            fw = worldFile.readWorldName();
+                        }
                     } catch (Exception ex) {
                         Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
                     }
