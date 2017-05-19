@@ -71,7 +71,8 @@ public class ColorChooserButton extends JButton {
         g.fillRect(2, 2, getSize().width - 4, getSize().height - 4);
         g.setColor(Color.LIGHT_GRAY);
         if(isFocusOwner()) g.drawRect(4, 4, getSize().width - 9, getSize().height - 9);
-
+        
+        g.drawRect(1, 1, getSize().width - 3, getSize().height - 3);
     }
 
     /**

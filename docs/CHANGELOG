@@ -1,6 +1,7 @@
 2.4.2
 - fixed: exception on opening world
 - fixed/added checkbox for grid in image export dialog
+- added grey border to chooser button for better visibility
 
 2.4.1
 - reversed mouse scroll zoom direction
