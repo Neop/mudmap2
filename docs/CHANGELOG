@@ -1,5 +1,6 @@
 2.4.3
 - fixed: exception on opening world
+- fixed: potential NoSuchMethodError in place creation dialog
 
 2.4.2
 - fixed: exception on opening world

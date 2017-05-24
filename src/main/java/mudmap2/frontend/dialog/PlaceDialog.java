@@ -136,7 +136,7 @@ public class PlaceDialog extends ActionDialog {
         
         add(new JLabel("Minimal level"));
         spinner_rec_lvl_min = new JSpinner();
-        spinner_rec_lvl_min.setModel(new SpinnerNumberModel(Integer.max(min_lvl, 0), 0, 1000, 1));
+        spinner_rec_lvl_min.setModel(new SpinnerNumberModel(max(min_lvl, 0), 0, 1000, 1));
         add(spinner_rec_lvl_min);
         if(min_lvl < 0) spinner_rec_lvl_min.setEnabled(false);
 
@@ -152,7 +152,7 @@ public class PlaceDialog extends ActionDialog {
 
         add(new JLabel("Maximum level"));
         spinner_rec_lvl_max = new JSpinner();
-        spinner_rec_lvl_max.setModel(new SpinnerNumberModel(Integer.max(max_lvl, 0), 0, 1000, 1));
+        spinner_rec_lvl_max.setModel(new SpinnerNumberModel(max(max_lvl, 0), 0, 1000, 1));
         add(spinner_rec_lvl_max);
         if(max_lvl < 0) spinner_rec_lvl_max.setEnabled(false);
 
@@ -196,6 +196,12 @@ public class PlaceDialog extends ActionDialog {
 
         pack();
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
+    }
+
+    // Integer.max() causes java.lang.NoSuchMethodError in some cases
+    private int max(int a, int b){
+        if(a > b) return a;
+        else return b;
     }
 
     /**
