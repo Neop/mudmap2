@@ -112,7 +112,7 @@ public class WorldFileDefault extends WorldFile {
      */
     @Override
     public String readWorldName() throws Exception {
-        if(worldFile != null){
+        if(worldFile != null && worldFile.canRead()){
             return worldFile.readWorldName();
         }
         return "";

@@ -1,3 +1,6 @@
+2.4.3
+- fixed: exception on opening world
+
 2.4.2
 - fixed: exception on opening world
 - fixed/added checkbox for grid in image export dialog

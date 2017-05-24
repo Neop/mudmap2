@@ -685,8 +685,9 @@ public class WorldFileJSON extends WorldFile {
     public String readWorldName() throws Exception {
         try{
             JSONObject object = getJSONRoot();
-            if(object != null) return object.getString("worldName");
-            else return null;
+            if(object != null && object.has("worldName")){
+                return object.getString("worldName");
+            } else return null;
         } catch(JSONException ex) {
             return "";
         }
