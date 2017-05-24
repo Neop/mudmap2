@@ -29,7 +29,7 @@ then
 		#cp doc/README $TMPDIRREADME.txt
 		#cp doc/CHANGELOG $TMPDIRCHANGELOG.txt
 		
-		sed "s/$/\r/" < ${DOCSDIR}README > ${TMPDIR}README.txt
+		sed "s/$/\r/" < ${DOCSDIR}README.md > ${TMPDIR}README.md.txt
 		sed "s/$/\r/" < ${DOCSDIR}CHANGELOG > ${TMPDIR}CHANGELOG.txt
 
 		zip -j $ZIPPREFIX$VERSION$ZIPSUFFIX ${TMPDIR}*

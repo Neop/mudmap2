@@ -1,5 +1,5 @@
 # MUD Map v2
-by Neop 
+by Neop (contact: email: mneop@web.de)
 
 A mapping tool for text-based games like text adventures, MUDs and MUSHs.
 
