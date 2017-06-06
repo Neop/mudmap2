@@ -56,6 +56,7 @@ public class WorldManager {
             WorldFile worldFile = new WorldFileDefault(file);
             if(worldFile.canRead()){
                 world = worldFile.readFile();
+                worldFile.backup();
                 putWorld(file, world);
             } else {
                 throw new Exception("Could not read world file");
