@@ -62,6 +62,8 @@ public class WorldFileJSON extends WorldFile {
     JSONObject metaData;
     WorldMetaJSON metaWriter;
 
+    final Color defaultColor = new Color(0x808080);
+    
     /**
      * Constructor
      * @param filename world filename with path
@@ -422,7 +424,11 @@ public class WorldFileJSON extends WorldFile {
      * @return
      */
     private String colToHex(Color col){
-        return "#" + Integer.toHexString(col.getRGB()).substring(2);
+        if(col != null){
+            return "#" + Integer.toHexString(col.getRGB()).substring(2);
+        } else {
+            return "#" + Integer.toHexString(defaultColor.getRGB()).substring(2);
+        }
     }
 
     /**
@@ -431,7 +437,15 @@ public class WorldFileJSON extends WorldFile {
      * @return
      */
     private Color hexToCol(String hex){
-        return new Color(Integer.decode(hex));
+        Color ret = new Color(defaultColor.getRGB());
+        
+        if(hex != null && !hex.isEmpty()){
+            Integer col = Integer.decode(hex);
+            if(col >= 0 && col <= 0xffffff){
+                ret = new Color(col);
+            }
+        }
+        return ret;
     }
 
     /**
@@ -460,18 +474,23 @@ public class WorldFileJSON extends WorldFile {
         root.put("showPlaceID", world.getShowPlaceId());
 
         // tile center color
-        root.put("tileCenterCol", colToHex(world.getTileCenterColor()));
+        if(world.getTileCenterColor() != null)
+            root.put("tileCenterCol", colToHex(world.getTileCenterColor()));
         // cardinal and non cardinal path color
-        root.put("pathCol", colToHex(world.getPathColor()));
+        if(world.getPathColor() != null)
+            root.put("pathCol", colToHex(world.getPathColor()));
+        if(world.getPathColorNstd() != null)
         root.put("pathColNonCardinal", colToHex(world.getPathColorNstd()));
         // other path colors
         JSONArray pathColorsArray = new JSONArray();
         root.put("pathColDefs", pathColorsArray);
         for(Map.Entry<String, Color> pathCol: world.getPathColors().entrySet()){
-            JSONObject pathColObj = new JSONObject();
-            pathColObj.put("path", pathCol.getKey());
-            pathColObj.put("col", colToHex(pathCol.getValue()));
-            pathColorsArray.put(pathColObj);
+            if(pathCol.getValue() != null){
+                JSONObject pathColObj = new JSONObject();
+                pathColObj.put("path", pathCol.getKey());
+                pathColObj.put("col", colToHex(pathCol.getValue()));
+                pathColorsArray.put(pathColObj);
+            }
         }
 
         // risk level colors

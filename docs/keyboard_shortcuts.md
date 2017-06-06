@@ -15,7 +15,7 @@ Note: 'direction keys' are w/a/s/d, the arrow keys and the numberpad numbers (ex
 
 | Key combination         | Effect                                       |
 | ----------------------- | -------------------------------------------- |
-| p                       | enable / disable place selection             |
+| **p**                   | **enable / disable place selection**         |
 | right click             | show context menu of the map tile pointed at |
 | context menu key        | show context menu of the selected place      |
 | +/- / page up/down      | zoom in and out                              |
@@ -54,6 +54,7 @@ Warning! copy / paste operations can not be undone! Be sure to save your world b
 | shift + *direction keys* | box selection                           |
 | ctrl + a                 | select all places on current layer      |
 | escape                   | deselect everything                     |
+| ------------------------ | --------------------------------------- |
 | ctrl + x                 | cut selected places                     |
 | ctrl + c                 | copy selected places                    |
 | ctrl + v                 | paste places (this can not be undone!)  |

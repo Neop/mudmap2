@@ -1,3 +1,7 @@
+2.4.4
+- added: world file backup after successful loading
+- fixed: exception on opening world file caused by faulty color string
+
 2.4.3
 - fixed: exception on opening world
 - fixed: potential NoSuchMethodError in place creation dialog
