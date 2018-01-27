@@ -36,7 +36,6 @@ import mudmap2.backend.prquadtree.Quadtree;
 public class Layer {
 
     World world;
-    static int nextID;
     Integer id;
     String name;
     Quadtree<Place> elements;
@@ -46,7 +45,7 @@ public class Layer {
 
     public Layer(int id, World world){
         this.id = id;
-        if(id >= nextID) nextID = id + 1;
+        if(id >= world.getNextLayerID()) world.setNextLayerID(id + 1);
         this.world = world;
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
@@ -55,7 +54,8 @@ public class Layer {
     }
 
     public Layer(World world){
-        id = nextID++;
+        id = world.getNextLayerID();
+        world.setNextLayerID(id+1);
         this.world = world;
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
@@ -64,7 +64,7 @@ public class Layer {
     }
 
     public String getName() {
-        if(name == null) return "Layer " + getId();
+        if(name == null) return "Map " + getId();
         return name;
     }
 

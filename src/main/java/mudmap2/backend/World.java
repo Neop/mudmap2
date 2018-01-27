@@ -61,6 +61,8 @@ public class World implements BreadthSearchGraph {
     TreeMap<String, Integer> placeNames;
     TreeMap<Integer, Layer> layers;
 
+    Integer nextLayerID = 1;
+
     ShowPlaceID showPlaceID;
 
     LinkedList<WorldChangeListener> changeListeners;
@@ -345,6 +347,14 @@ public class World implements BreadthSearchGraph {
         layers.put(layer.getId(), layer);
         callListeners(layer);
         return layer;
+    }
+    
+    public Integer getNextLayerID(){
+        return nextLayerID;
+    }
+
+    public void setNextLayerID(Integer id){
+        nextLayerID = id;
     }
 
     /**
