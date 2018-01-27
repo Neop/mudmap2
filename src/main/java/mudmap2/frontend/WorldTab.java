@@ -38,6 +38,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -75,6 +76,8 @@ import mudmap2.frontend.GUIElement.WorldPanel.WorldPanelListener;
 public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelListener,StatusListener,WorldPanelListener,WorldMetaJSON {
     private static final long serialVersionUID = 1L;
 
+    JFrame parentFrame;
+
     String filename;
 
     // GUI elements
@@ -96,7 +99,8 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
      * @param file
      * @param passive world won't be changed, if true
      */
-    public WorldTab(World world, String file, boolean passive){
+    public WorldTab(JFrame parent, World world, String file, boolean passive){
+        parentFrame = parent;
         this.filename = file;
         create(world, passive);
     }
@@ -106,7 +110,8 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
      * @param world world
      * @param passive world won't be changed, if true
      */
-    public WorldTab(World world, boolean passive){
+    public WorldTab(JFrame parent, World world, boolean passive){
+        parentFrame = parent;
         create(world, passive);
     }
 
@@ -115,6 +120,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
      * @param wt
      */
     public WorldTab(WorldTab wt){
+        parentFrame = wt.parentFrame;
         createGui(wt.getWorld(), true);
 
         worldPanel.setTileSize(wt.getWorldPanel().getTileSize());
@@ -136,7 +142,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
     private void createGui(World world, boolean passive){
         setLayout(new BorderLayout());
 
-        worldPanel = new WorldPanel(world, passive);
+        worldPanel = new WorldPanel(parentFrame, world, passive);
         add(worldPanel, BorderLayout.CENTER);
         worldPanel.addTileSiteListener(this);
         worldPanel.addStatusListener(this);

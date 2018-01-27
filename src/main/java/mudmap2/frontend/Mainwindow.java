@@ -264,7 +264,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
         if(!worldTabs.containsKey(world)){
             // open new tab
-            WorldTab tab = new WorldTab(world, file, false);
+            WorldTab tab = new WorldTab(this, world, file, false);
             worldTabs.put(world, tab);
             tabbedPane.addTab(tab.getWorld().getName(), tab);
         }

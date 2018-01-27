@@ -46,14 +46,14 @@ public class PlaceSelectionDialog extends ActionDialog {
 
     WorldCoordinate default_coordinate;
 
-    JFrame parent;
+    JFrame parentFrame;
     JOptionPane optionPane;
 
     WorldTab worldtab;
 
     public PlaceSelectionDialog(JFrame parent, World world, WorldCoordinate defaultCoordinate, boolean layerChangeAllowed) {
         super(parent, "Select a place - " + world.getName(), true);
-        this.parent = parent;
+        this.parentFrame = parent;
         this.world = world;
         ok = false;
 
@@ -97,7 +97,7 @@ public class PlaceSelectionDialog extends ActionDialog {
         optionPane.setOptionType(JOptionPane.OK_CANCEL_OPTION);
 
         setContentPane(optionPane);
-        optionPane.setMessage(worldtab = new WorldTab(world, true));
+        optionPane.setMessage(worldtab = new WorldTab(parentFrame, world, true));
         worldtab.getWorldPanel().setCursorForced(true);
         worldtab.getWorldPanel().resetHistory(new WorldCoordinate(default_coordinate));
 
@@ -110,7 +110,7 @@ public class PlaceSelectionDialog extends ActionDialog {
                     int value = ((Integer) optionPane.getValue());
                     ok = value == JOptionPane.OK_OPTION;
                     dispose();
-                    if(parent != null) parent.repaint();
+                    if(parentFrame != null) parentFrame.repaint();
                 }
             }
         });

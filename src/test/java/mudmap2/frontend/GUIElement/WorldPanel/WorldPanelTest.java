@@ -61,7 +61,7 @@ public class WorldPanelTest {
     public void testGetMappainter() {
         System.out.println("getMappainter");
 
-        WorldPanel instance = new WorldPanel(new World(), false);
+        WorldPanel instance = new WorldPanel(null, new World(), false);
         assertNotNull(instance.getMappainter());
     }
 
@@ -72,10 +72,10 @@ public class WorldPanelTest {
     public void testIsPassive() {
         System.out.println("isPassive");
 
-        WorldPanel instance = new WorldPanel(new World(), false);
+        WorldPanel instance = new WorldPanel(null, new World(), false);
         assertFalse(instance.isPassive());
 
-        instance = new WorldPanel(new World(), true);
+        instance = new WorldPanel(null, new World(), true);
         assertTrue(instance.isPassive());
     }
 
@@ -86,7 +86,7 @@ public class WorldPanelTest {
     public void testIsFocusForced() {
         System.out.println("isFocusForced");
 
-        WorldPanel instance = new WorldPanel(new World(), false);
+        WorldPanel instance = new WorldPanel(null, new World(), false);
         assertFalse(instance.isFocusForced());
         instance.setFocusForced(true);
         assertTrue(instance.isFocusForced());
@@ -103,7 +103,7 @@ public class WorldPanelTest {
 
         World world = new World();
 
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
         assertEquals(world, instance.getWorld());
     }
 
@@ -136,7 +136,7 @@ public class WorldPanelTest {
         World world = new World();
         WorldCoordinate coord = new WorldCoordinate(1, 6, 9);
 
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
         instance.pushPosition(coord);
         coord = instance.getPosition(); // might be changed by moveScreenToCursor()
         instance.setHome();
@@ -161,7 +161,7 @@ public class WorldPanelTest {
             Place pl2 = new Place("Blub", 7, 1, l);
             l.put(pl2);
 
-            WorldPanel instance = new WorldPanel(world, false);
+            WorldPanel instance = new WorldPanel(null, world, false);
             instance.pushPosition(new WorldCoordinate(l.getId(), 0, 0));
 
             instance.setCursor(2, 3);
@@ -185,7 +185,7 @@ public class WorldPanelTest {
         System.out.println("getTileSize");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         double ts = 57.5;
         instance.setTileSize(ts);
@@ -200,7 +200,7 @@ public class WorldPanelTest {
         System.out.println("tileSizeIncrement");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         double ts = 57.5;
         instance.setTileSize(ts);
@@ -216,7 +216,7 @@ public class WorldPanelTest {
         System.out.println("tileSizeDecrement");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         double ts = 57.5;
         instance.setTileSize(ts);
@@ -232,7 +232,7 @@ public class WorldPanelTest {
         System.out.println("pushPosition");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         WorldCoordinate home = new WorldCoordinate(1, 2, 3);
         WorldCoordinate pos1 = new WorldCoordinate(4, 6, 1);
@@ -295,7 +295,7 @@ public class WorldPanelTest {
         System.out.println("getCursorX");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         instance.setCursor(4, 6);
         int result = instance.getCursorX();
@@ -310,7 +310,7 @@ public class WorldPanelTest {
         System.out.println("getCursorY");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         instance.setCursor(4, 6);
         int result = instance.getCursorY();
@@ -325,7 +325,7 @@ public class WorldPanelTest {
         System.out.println("isCursorForced");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         boolean result = instance.isCursorForced();
         assertFalse(result);
@@ -347,7 +347,7 @@ public class WorldPanelTest {
         System.out.println("isCursorEnabled");
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         boolean result = instance.isCursorEnabled();
         assertTrue(result);
@@ -372,7 +372,7 @@ public class WorldPanelTest {
         int dy = -4;
 
         World world = new World();
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
 
         instance.setCursor(4, 6);
         instance.moveCursor(4 + dx, 6 + dy);

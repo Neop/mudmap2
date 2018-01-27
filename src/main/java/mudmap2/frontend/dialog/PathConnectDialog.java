@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import mudmap2.backend.Layer;
@@ -39,7 +40,6 @@ import mudmap2.backend.Place;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.frontend.GUIElement.WorldPanel.MapCursorListener;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
-import mudmap2.frontend.GUIElement.WorldPanel.WorldPanel;
 import mudmap2.frontend.WorldTab;
 
 /**
@@ -51,14 +51,17 @@ public class PathConnectDialog extends ActionDialog{
 
     private static final long serialVersionUID = 1L;
 
+    JFrame parentFrame;
+
     Place place, other;
 
     WorldTab worldtab;
     JLabel labelOtherPlace;
     JComboBox<String> directionComboBox1, directionComboBox2;
 
-    public PathConnectDialog(Place place) {
-        super(null, "Connect path to " + place, true);
+    public PathConnectDialog(JFrame parent, Place place) {
+        super(parent, "Connect path to " + place, true);
+        parentFrame = parent;
         this.place = place;
         this.other = null;
     }
@@ -68,7 +71,7 @@ public class PathConnectDialog extends ActionDialog{
         setMinimumSize(new Dimension(600, 600));
         setLayout(new GridBagLayout());
 
-        worldtab = new WorldTab(place.getLayer().getWorld(), true);
+        worldtab = new WorldTab(parentFrame, place.getLayer().getWorld(), true);
         worldtab.getWorldPanel().resetHistory(new WorldCoordinate(place.getLayer().getId(), place.getX(), place.getY()));
         worldtab.getWorldPanel().setCursorForced(true);
         worldtab.getWorldPanel().resetHistory(place.getCoordinate());

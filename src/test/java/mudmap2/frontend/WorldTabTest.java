@@ -62,16 +62,16 @@ public class WorldTabTest {
     public void testGetWorldPanel() {
         System.out.println("getWorldPanel");
 
-        WorldTab instance = new WorldTab(new World(), false);
+        WorldTab instance = new WorldTab(null, new World(), false);
         assertNotNull(instance.getWorldPanel());
 
-        instance = new WorldTab(new World(), true);
+        instance = new WorldTab(null, new World(), true);
         assertNotNull(instance.getWorldPanel());
 
-        instance = new WorldTab(new World(), "", false);
+        instance = new WorldTab(null, new World(), "", false);
         assertNotNull(instance.getWorldPanel());
 
-        instance = new WorldTab(new World(), "", true);
+        instance = new WorldTab(null, new World(), "", true);
         assertNotNull(instance.getWorldPanel());
 
         instance = new WorldTab(instance);
@@ -85,16 +85,16 @@ public class WorldTabTest {
     public void testGetWorld() {
         System.out.println("getWorld");
 
-        WorldTab instance = new WorldTab(new World(), false);
+        WorldTab instance = new WorldTab(null, new World(), false);
         assertNotNull(instance.getWorld());
 
-        instance = new WorldTab(new World(), true);
+        instance = new WorldTab(null, new World(), true);
         assertNotNull(instance.getWorld());
 
-        instance = new WorldTab(new World(), "", false);
+        instance = new WorldTab(null, new World(), "", false);
         assertNotNull(instance.getWorld());
 
-        instance = new WorldTab(new World(), "", true);
+        instance = new WorldTab(null, new World(), "", true);
         assertNotNull(instance.getWorld());
 
         instance = new WorldTab(instance);
@@ -108,7 +108,7 @@ public class WorldTabTest {
     public void testGetFilename() {
         System.out.println("getFilename");
 
-        WorldTab instance = new WorldTab(new World(), false);
+        WorldTab instance = new WorldTab(null, new World(), false);
 
         String filename = "/tmp/foobar/baz";
         instance.setFilename(filename);
@@ -164,7 +164,7 @@ public class WorldTabTest {
 
         World world = new World();
 
-        WorldTab instance = new WorldTab(world, false);
+        WorldTab instance = new WorldTab(null, world, false);
 
         int layerCnt = world.getLayers().size();
 

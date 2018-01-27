@@ -73,6 +73,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     public static final int TILE_SIZE_MIN = 10;
     public static final int TILE_SIZE_MAX = 200;
 
+    JFrame parentFrame;
+
     MapPainter mappainter;
 
     // passive worldpanels don't modify the world
@@ -112,7 +114,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param world
      * @param passive
      */
-    public WorldPanel(World world, boolean passive) {
+    public WorldPanel(JFrame parent, World world, boolean passive) {
+        parentFrame = parent;
         this.world = world;
         this.passive = passive;
 
@@ -1051,7 +1054,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         }
                         break;
                     case KeyEvent.VK_NUMPAD5: // open add path dialog
-                        (new PathConnectDialog(getSelectedPlace())).setVisible(true);
+                        (new PathConnectDialog(parentFrame, getSelectedPlace())).setVisible(true);
                         break;
                 }
             } else if(e.isShiftDown()){ // shift key pressed -> modify selection
@@ -1342,7 +1345,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     JMenuItem miPathConnectSelect = new JMenuItem("Select");
                     mPathConnect.add(miPathConnectSelect);
                     miPathConnectSelect.setToolTipText("Select any place from the map");
-                    miPathConnectSelect.addActionListener(new PathConnectDialog(place));
+                    miPathConnectSelect.addActionListener(new PathConnectDialog(parentFrame, place));
                     miPathConnectSelect.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, Event.CTRL_MASK));
 
                     JMenuItem miPathConnectNeighbors = new JMenuItem("Neighbors");
