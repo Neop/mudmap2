@@ -1429,20 +1429,20 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                 }
 
                 // ------------- layers / maps ------------------
-                JMenu mChildren = new JMenu("Children");
-                mChildren.setToolTipText("Child relationships, eg. for maps within maps");
+                JMenu mChildren = new JMenu("Maps");
+                mChildren.setToolTipText("Related places, eg. for maps within maps");
                 if(!parent.passive || !place.getChildren().isEmpty())
                     add(mChildren);
 
                 if(!parent.passive){
-                    JMenuItem miChildConnect = new JMenuItem("Connect with place");
-                    miChildConnect.setToolTipText("Connect another place as child place");
+                    JMenuItem miChildConnect = new JMenuItem("Connect with existing place");
+                    miChildConnect.setToolTipText("Connect another place with \"" + place.getName() + "\"");
                     miChildConnect.setActionCommand("connect_child");
                     miChildConnect.addActionListener(this);
                     mChildren.add(miChildConnect);
 
-                    JMenuItem miChildNewLayer = new JMenuItem("Add child on new map layer");
-                    miChildNewLayer.setToolTipText("Creates a new place on a new map layer and connects it with \"" + place.getName() + "\" as it'S parent place");
+                    JMenuItem miChildNewLayer = new JMenuItem("New place on new map");
+                    miChildNewLayer.setToolTipText("Creates a new place on a new map layer and connects it with \"" + place.getName() + "\"");
                     miChildNewLayer.setActionCommand("create_child_new_layer");
                     miChildNewLayer.addActionListener(this);
                     mChildren.add(miChildNewLayer);
@@ -1455,7 +1455,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         mChildren.add(m_sa_remove);
 
                         for(Place child: children){
-                            JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.getName());
+                            JMenuItem mi_sa_remove = new JMenuItem("Remove " + child.getName() + " (" + child.getLayer().getName() + ")");
                             m_sa_remove.add(mi_sa_remove);
                             mi_sa_remove.addActionListener(new RemoveChildrenActionListener(place, child));
                         }
@@ -1464,7 +1464,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     mChildren.add(new JSeparator());
 
                     for(Place child: children){
-                        JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.getName());
+                        JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.getName() + " (" + child.getLayer().getName() + ")");
                         mChildren.add(mi_sa_goto);
                         mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                     }
@@ -1475,7 +1475,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     mChildren.add(new JSeparator());
 
                     for(Place child: parents){
-                        JMenuItem mi_sa_goto = new JMenuItem("Go to parent " + child.getName());
+                        JMenuItem mi_sa_goto = new JMenuItem("Go to " + child.getName() + " (" + child.getLayer().getName() + ")");
                         mChildren.add(mi_sa_goto);
                         mi_sa_goto.addActionListener(new GotoPlaceActionListener(parent, child));
                     }
