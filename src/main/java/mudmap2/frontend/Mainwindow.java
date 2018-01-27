@@ -42,13 +42,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mudmap2.backend.World;
@@ -85,7 +88,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     JCheckBoxMenuItem menuEditShowCursor;
     JCheckBoxMenuItem menuEditShowGrid;
 
-    JTabbedPane tabbedPane;
+    JTabbedPane tabbedPane = null;
+    JPanel infoPanel = null;
 
     // for experimental html export message
     Boolean firstHtmlExport;
@@ -116,11 +120,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         });
 
         initGui();
-
-        // ---
-        tabbedPane = new JTabbedPane();
-        add(tabbedPane);
-        tabbedPane.addChangeListener(this);
     }
 
     private void initGui() {
@@ -145,7 +144,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuFile.add(menuFileOpen);
 
         // available worlds
-        JMenu menuFileOpenRecent = new JMenu("Open available map");
+        JMenu menuFileOpenRecent = new JMenu("Open known world");
         menuFile.add(menuFileOpenRecent);
         
         WorldFileList.findWorlds();
@@ -238,6 +237,11 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         JMenuItem menuHelpAbout = new JMenuItem("About");
         menuHelp.add(menuHelpAbout);
         menuHelpAbout.addActionListener((ActionListener) new AboutDialog(this));
+        
+        BorderLayout infoPanelLayout = new BorderLayout();
+        infoPanel = new JPanel(infoPanelLayout);
+        add(infoPanel, BorderLayout.CENTER);
+        infoPanel.add(new JLabel("Load or create a world in the File menu.", SwingConstants.CENTER));
     }
 
     public void createNewWorld(){
@@ -262,6 +266,13 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     public void createTab(World world, String file){
         setMinimumSize(new Dimension(500, 400));
 
+        if(tabbedPane == null){
+            remove(infoPanel);
+            tabbedPane = new JTabbedPane();
+            add(tabbedPane);
+            tabbedPane.addChangeListener(this);
+        }
+        
         if(!worldTabs.containsKey(world)){
             // open new tab
             WorldTab tab = new WorldTab(this, world, file, false);
@@ -295,7 +306,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
      * @param tab
      */
     public void removeTab(WorldTab tab){
-        tabbedPane.remove(tab);
+        if(tabbedPane != null) tabbedPane.remove(tab);
     }
 
     /**
@@ -419,7 +430,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 mapPainter.setGridEnabled(((JCheckBoxMenuItem) e.getSource()).isSelected());
                 wt.repaint();
             }
-        } else if(e.getSource() == tabbedPane){ // tab changed
+        } else if(tabbedPane != null && e.getSource() == tabbedPane){ // tab changed
             if(wt != null){
                 wt.getWorldPanel().callStatusUpdateListeners();
                 menuEditCurvedPaths.setState(((MapPainterDefault) wt.getWorldPanel().getMappainter()).getPathsCurved());
