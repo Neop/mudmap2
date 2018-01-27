@@ -284,7 +284,6 @@ public class WorldFileJSONTest {
         World world = new World("foobar");
 
         String wfjFile = folder.getRoot() + "/wfj";
-        String wfmFile = folder.getRoot() + "/wfm";
 
         try {
             WorldFileJSON wfj = new WorldFileJSON(wfjFile);
@@ -294,16 +293,9 @@ public class WorldFileJSONTest {
             fail("Could not create files for test");
         }
 
-        WorldFileMM1 wfm = new WorldFileMM1(wfmFile);
-        wfm.writeFile(world);
-
         WorldFileJSON instancewfj = new WorldFileJSON(wfjFile);
         Boolean result = instancewfj.canRead();
         assertTrue(result);
-
-        WorldFileJSON instancewfm = new WorldFileJSON(wfmFile);
-        result = instancewfm.canRead();
-        assertFalse(result);
     }
 
     /**

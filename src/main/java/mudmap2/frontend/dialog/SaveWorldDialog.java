@@ -16,19 +16,13 @@
  */
 package mudmap2.frontend.dialog;
 
-import java.io.File;
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import mudmap2.Paths;
 import mudmap2.backend.WorldFileReader.WorldFile;
-import mudmap2.backend.WorldFileReader.WorldFileType;
 import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
-import mudmap2.backend.WorldFileReader.current.WorldFileMM1;
 import mudmap2.frontend.WorldTab;
 
 /**
@@ -48,45 +42,14 @@ public class SaveWorldDialog extends JFileChooser {
         super(wt.getWorld().getWorldFile() != null ? wt.getWorld().getWorldFile().getFilename() : Paths.getWorldsDir());
 
         this.wt = wt;
-
-        JPanel fileType = new JPanel();
-        fileType.setLayout(new BoxLayout(fileType, BoxLayout.PAGE_AXIS));
-
-        radioMM1 = new JRadioButton("v1 (deprecated)");
-        radioJSON = new JRadioButton("v2 (recommended)");
-        radioMM1.setToolTipText("Use this for compatibility to MUD Map versions prior to v2.3. Does not support all features of v2.3+!");
-        radioJSON.setToolTipText("Use this for MUD Map v2.3+");
-
-        fileTypeGroup = new ButtonGroup();
-        fileTypeGroup.add(radioMM1);
-        fileTypeGroup.add(radioJSON);
-        radioJSON.setSelected(true);
-
-        fileType.add(new JLabel("File version:"));
-        fileType.add(radioMM1);
-        fileType.add(radioJSON);
-
-        this.setAccessory(fileType);
     }
 
-    public WorldFileType getFileVersion(){
-        if(radioMM1.isSelected()) return WorldFileType.MUDMAP1;
-        return WorldFileType.JSON;
-    }
 
     public WorldFile getWorldFile(){
         String file = getSelectedFile().getAbsolutePath();
         WorldFile worldFile;
 
-        switch(getFileVersion()){
-            case MUDMAP1:
-                worldFile = new WorldFileMM1(file);
-                break;
-            default:
-            case JSON:
-                worldFile = new WorldFileJSON(file);
-                break;
-        }
+        worldFile = new WorldFileJSON(file);
 
         return worldFile;
     }

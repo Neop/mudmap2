@@ -88,11 +88,6 @@ public class WorldFileDefaultTest {
             instance.setWorldFile(worldFile);
             assertEquals(worldFile, field.get(instance));
 
-            worldFile = new WorldFileMM1(null);
-            instance = new WorldFileDefault(null);
-            instance.setWorldFile(worldFile);
-            assertEquals(worldFile, field.get(instance));
-
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
             Logger.getLogger(WorldFileDefaultTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
@@ -323,7 +318,6 @@ public class WorldFileDefaultTest {
         World world = new World("foobar");
 
         String wfjFile = folder.getRoot() + "/wfj";
-        String wfmFile = folder.getRoot() + "/wfm";
 
         try {
             WorldFileJSON wfj = new WorldFileJSON(wfjFile);
@@ -333,15 +327,8 @@ public class WorldFileDefaultTest {
             fail("Could not create files for test");
         }
 
-        WorldFileMM1 wfm = new WorldFileMM1(wfmFile);
-        wfm.writeFile(world);
-
         WorldFileDefault instancewfj = new WorldFileDefault(wfjFile);
         Boolean result = instancewfj.canRead();
-        assertTrue(result);
-
-        WorldFileDefault instancewfm = new WorldFileDefault(wfmFile);
-        result = instancewfm.canRead();
         assertTrue(result);
     }
 
