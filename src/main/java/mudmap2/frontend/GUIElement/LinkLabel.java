@@ -30,7 +30,7 @@ import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
-import mudmap2.Paths;
+import mudmap2.Environment;
 
 /**
  * A Label, that opens a link in a web browser, when clicked
@@ -57,7 +57,7 @@ public class LinkLabel extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Paths.openWebsite(url);
+                Environment.openWebsite(url);
             }
         });
     }

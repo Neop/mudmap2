@@ -33,6 +33,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -76,9 +78,6 @@ import mudmap2.frontend.dialog.SaveWorldDialog;
 public final class Mainwindow extends JFrame implements KeyEventDispatcher,ActionListener,ChangeListener {
 
     private static final long serialVersionUID = 1L;
-
-    static final Integer CONFIG_FILE_VER_MAJOR = 2;
-    static final Integer CONFI_FILE_VER_MINOR = 0;
 
     // Contains all opened maps <name, worldtab>
     HashMap<World, WorldTab> worldTabs;
@@ -373,7 +372,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                     if(retVal == JFileChooser.APPROVE_OPTION){
                         String filename = fc.getSelectedFile().getAbsolutePath();
                         if(!filename.endsWith(".html")) filename = filename + ".html";
-                        System.out.println(">>>> " + filename);
                         GaardianMap.writeFile(filename,
                                 wt.getWorld().getLayer(wt.getWorldPanel().getPosition().getLayer()));
                     }

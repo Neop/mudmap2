@@ -32,7 +32,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import mudmap2.Paths;
+import mudmap2.Environment;
 import mudmap2.frontend.GUIElement.LinkLabel;
 
 /**
@@ -81,9 +81,9 @@ public class AboutDialog extends ActionDialog {
         ++constraints.gridy;
         add(new JLabel("Use it on your own risk!"), constraints);
         ++constraints.gridy;
-        add(new LinkLabel("GitHub", Paths.github_url), constraints);
+        add(new LinkLabel("GitHub", Environment.github_url), constraints);
         ++constraints.gridy;
-        add(new LinkLabel("Sourceforge", Paths.sourceforge_url), constraints);
+        add(new LinkLabel("Sourceforge", Environment.sourceforge_url), constraints);
         ++constraints.gridy;
         add(new JLabel("by Neop (mneop@web.de)"), constraints);
         ++constraints.gridy;

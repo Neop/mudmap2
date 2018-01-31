@@ -43,7 +43,6 @@ public final class Mudmap2 {
      */
     public static void main(String[] args) {
         try {
-            // TODO code application logic here
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
             mwin = new Mainwindow();

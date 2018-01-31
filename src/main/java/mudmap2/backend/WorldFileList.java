@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import mudmap2.Paths;
+import mudmap2.Environment;
 import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
 
 /**
@@ -78,7 +78,7 @@ public class WorldFileList {
      */
     public static void readDirectory(){
         // get file list
-        File dir = new File(Paths.getWorldsDir());
+        File dir = new File(Environment.getWorldsDir());
         File[] fileList = dir.listFiles();
 
         if(fileList != null){
@@ -113,7 +113,7 @@ public class WorldFileList {
     public static void readWorldList(){
         try {
             // read from available worlds file
-            BufferedReader reader = new BufferedReader(new FileReader(Paths.getAvailableWorldsFile()));
+            BufferedReader reader = new BufferedReader(new FileReader(Environment.getAvailableWorldsFile()));
 
             String line;
             while((line = reader.readLine()) != null){
@@ -147,10 +147,10 @@ public class WorldFileList {
      * do this after writing the world files or new places won't appear in list
      */
     public static void writeWorldList(){
-        final String file = Paths.getWorldsDir() + "worlds";
+        final String file = Environment.getWorldsDir() + "worlds";
         try {
             // open file
-            if(!Paths.isDirectory(Paths.getWorldsDir())) Paths.createDirectory(Paths.getWorldsDir());
+            if(!Environment.isDirectory(Environment.getWorldsDir())) Environment.createDirectory(Environment.getWorldsDir());
             try (PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)))) {
                 outstream.println("# MUD Map (v2) worlds file");
                 outstream.println("ver " + META_FILE_VER_MAJOR + "." + META_FILE_VER_MINOR);
@@ -170,8 +170,8 @@ public class WorldFileList {
                         outstream.println("n " + fw);
                         String w_file = w.getKey();
                         outstream.println("f " + w_file);
-                        if(w_file.startsWith(Paths.getWorldsDir())){
-                            w_file = w_file.substring(Paths.getWorldsDir().length());
+                        if(w_file.startsWith(Environment.getWorldsDir())){
+                            w_file = w_file.substring(Environment.getWorldsDir().length());
                             outstream.println("g " + w_file);
                         }
                     }
@@ -182,7 +182,7 @@ public class WorldFileList {
             Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
             JOptionPane.showMessageDialog(null, "Could not write worlds list file "
                     + file + ".\nYou might have to open your worlds manually from "
-                    + Paths.getWorldsDir(), "WorldManager", JOptionPane.WARNING_MESSAGE);
+                    + Environment.getWorldsDir(), "WorldManager", JOptionPane.WARNING_MESSAGE);
         }
     }
 }

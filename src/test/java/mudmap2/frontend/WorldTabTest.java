@@ -16,13 +16,7 @@
  */
 package mudmap2.frontend;
 
-import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import mudmap2.backend.Layer;
-import mudmap2.backend.Place;
 import mudmap2.backend.World;
-import mudmap2.frontend.GUIElement.WorldPanel.WorldPanel;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

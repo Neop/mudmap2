@@ -45,7 +45,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import mudmap2.Paths;
+import mudmap2.Environment;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -264,7 +264,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                     // get new filename
                     int ret;
                     do {
-                        JFileChooser fileChooser = new JFileChooser(Paths.getWorldsDir());
+                        JFileChooser fileChooser = new JFileChooser(Environment.getWorldsDir());
                         ret = fileChooser.showSaveDialog(this);
                         if(ret == JFileChooser.APPROVE_OPTION){
                             filename = fileChooser.getSelectedFile().getAbsolutePath();

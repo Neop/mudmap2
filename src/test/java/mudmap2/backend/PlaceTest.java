@@ -19,14 +19,12 @@ package mudmap2.backend;
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.TreeMap;
-import mudmap2.backend.sssp.BreadthSearch;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 
 /**
  *

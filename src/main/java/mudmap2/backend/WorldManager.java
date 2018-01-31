@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import mudmap2.Paths;
+import mudmap2.Environment;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
 
@@ -128,11 +128,11 @@ public class WorldManager {
         String shortname = name.replaceAll("\\s", ""); // removePlace whitespaces
         String filename = shortname;
         Integer cnt = 1;
-        while((new File(Paths.getWorldsDir() + filename).exists())){
+        while((new File(Environment.getWorldsDir() + filename).exists())){
             filename = shortname + cnt++;
         }
 
-        putWorld(Paths.getWorldsDir() + filename, world);
+        putWorld(Environment.getWorldsDir() + filename, world);
 
         return world;
     }

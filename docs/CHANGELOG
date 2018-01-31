@@ -1,3 +1,10 @@
+2.X.X
+- fixed: place connect dialog was stuck in screen border
+- removed support for MUD Map v1 world files
+- added introductory info text
+- changed wording: 'layer' -> 'map', 'children'/'parent' -> map relation
+- changed: layer ids are unique for their world, not globally unique
+
 2.4.4
 - added: world file backup after successful loading
 - fixed: exception on opening world file caused by faulty color string

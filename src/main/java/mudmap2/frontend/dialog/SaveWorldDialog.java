@@ -20,7 +20,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JRadioButton;
-import mudmap2.Paths;
+import mudmap2.Environment;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
 import mudmap2.frontend.WorldTab;
@@ -39,7 +39,7 @@ public class SaveWorldDialog extends JFileChooser {
     JRadioButton radioJSON;
 
     public SaveWorldDialog(JFrame parent, WorldTab wt){
-        super(wt.getWorld().getWorldFile() != null ? wt.getWorld().getWorldFile().getFilename() : Paths.getWorldsDir());
+        super(wt.getWorld().getWorldFile() != null ? wt.getWorld().getWorldFile().getFilename() : Environment.getWorldsDir());
 
         this.wt = wt;
     }
