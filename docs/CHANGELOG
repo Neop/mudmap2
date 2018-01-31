@@ -1,4 +1,4 @@
-2.X.X
+2.4.5
 - fixed: place connect dialog was stuck in screen border
 - removed support for MUD Map v1 world files
 - added introductory info text
