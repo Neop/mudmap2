@@ -1294,7 +1294,6 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     JMenuItem miEdit = new JMenuItem("Edit place");
                     PlaceDialog pdlg = new PlaceDialog(rootFrame, getWorld(), place);
                     miEdit.addActionListener(pdlg);
-                    if(layer == null) pushPosition(pdlg.getPlace().getCoordinate());
 
                     add(miEdit);
                     miEdit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0));
