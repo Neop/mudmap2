@@ -26,6 +26,7 @@ package mudmap2.backend;
 import java.util.HashSet;
 import java.util.LinkedList;
 import mudmap2.backend.prquadtree.Quadtree;
+import mudmap2.utils.Pair;
 
 /**
  * A layer stores places relatively to each other by position on the map.
@@ -50,7 +51,7 @@ public class Layer {
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
 
-        if(world != null) world.addLayer(this);
+        world.addLayer(this);
     }
 
     public Layer(World world){
@@ -60,7 +61,7 @@ public class Layer {
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
 
-        if(world != null) world.addLayer(this);
+        world.addLayer(this);
     }
 
     public String getName() {
@@ -99,6 +100,37 @@ public class Layer {
      */
     public int getCenterY(){
         return (maxY + minY) / 2;
+    }
+
+    /**
+     * Gets the exact center
+     * @return
+     */
+    public Pair<Double, Double> getExactCenter(){
+        Pair<Double, Double> center = new Pair<>(0.0, 0.0);
+
+        int layerXMin, layerXMax, layerYMin, layerYMax;
+
+        HashSet<Place> places = getPlaces();
+        if(!places.isEmpty()){
+            layerXMax = layerXMin = places.iterator().next().getX();
+            layerYMax = layerYMin = places.iterator().next().getY();
+
+            for(Place place: places){
+                layerXMax = Math.max(layerXMax, place.getX());
+                layerXMin = Math.min(layerXMin, place.getX());
+                layerYMax = Math.max(layerYMax, place.getY());
+                layerYMin = Math.min(layerYMin, place.getY());
+            }
+
+            int centerX = layerXMax - layerXMin + 1;
+            int centerY = layerYMax - layerYMin + 1;
+
+            center.first = 0.5 * (double) centerX + (double) layerXMin;
+            center.second = 0.5 * (double) centerY + (double) layerYMin - 1;
+        }
+
+        return center;
     }
 
     /**
