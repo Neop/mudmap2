@@ -58,7 +58,6 @@ import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldManager;
-import mudmap2.backend.html.GaardianMap;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.PlaceGroupDialog;
@@ -177,11 +176,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuFileSaveAsImage.setActionCommand("export_image");
         menuFileSaveAsImage.addActionListener(this);
         menuFile.add(menuFileSaveAsImage);
-
-        JMenuItem menuFileSaveAsHtml = new JMenuItem("Export as html");
-        menuFileSaveAsHtml.setActionCommand("export_html");
-        menuFileSaveAsHtml.addActionListener(this);
-        menuFile.add(menuFileSaveAsHtml);
 
         menuFile.addSeparator();
         JMenuItem menuFileQuit = new JMenuItem("Quit");
@@ -356,23 +350,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 if(wt != null){
                     ExportImageDialog dlg = new ExportImageDialog(Mainwindow.this, wt);
                     dlg.setVisible(true);
-                }
-                break;
-            case "export_html":
-                if(wt != null){
-                    if(firstHtmlExport){
-                        JOptionPane.showMessageDialog(Mainwindow.this, "The html export is experimental, some paths might not show up on the exported map. Thanks to gaardian.com for the html/js code!");
-                        firstHtmlExport = false;
-                    }
-
-                    JFileChooser fc = new JFileChooser();
-                    int retVal = fc.showSaveDialog(Mainwindow.this);
-                    if(retVal == JFileChooser.APPROVE_OPTION){
-                        String filename = fc.getSelectedFile().getAbsolutePath();
-                        if(!filename.endsWith(".html")) filename = filename + ".html";
-                        GaardianMap.writeFile(filename,
-                                wt.getWorld().getLayer(wt.getWorldPanel().getPosition().getLayer()));
-                    }
                 }
                 break;
             case "quit":

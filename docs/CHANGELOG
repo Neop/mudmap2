@@ -1,5 +1,6 @@
 2.x.x
 - implemented legend for image export
+- removed html export
 - rewrote image export dialog
 
 2.4.5
