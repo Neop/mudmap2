@@ -436,7 +436,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     /**
      * Removes all connections to other places (paths, child-connections)
      */
-    void removeConnections() {
+    public void removeConnections() {
         // remove place paths (buffer, since connected_places will be modified)
         HashSet<Path> cp_buffer = (HashSet<Path>) paths.clone();
         for(Path p: cp_buffer) p.remove();
@@ -455,7 +455,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
     public void remove() throws RuntimeException, PlaceNotFoundException {
-        getLayer().getWorld().removePlace(this);
+        removeConnections();
+        getLayer().remove(this);
     }
 
     /**

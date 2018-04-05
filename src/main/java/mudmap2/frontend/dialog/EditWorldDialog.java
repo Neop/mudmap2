@@ -131,8 +131,8 @@ public class EditWorldDialog extends ActionDialog {
         buttongroup_place_id.add(radiobutton_place_id_all);
         constraints_l.gridy = ++constraints_r.gridy;
         add(radiobutton_place_id_none, constraints_l);
-        constraints_l.gridy = ++constraints_r.gridy;
-        add(radiobutton_place_id_unique, constraints_l);
+        /*constraints_l.gridy = ++constraints_r.gridy; // feature (temporarily?) removed
+        add(radiobutton_place_id_unique, constraints_l);*/
         constraints_l.gridy = ++constraints_r.gridy;
         add(radiobutton_place_id_all, constraints_l);
         switch(world.getShowPlaceId()){

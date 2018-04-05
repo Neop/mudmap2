@@ -143,6 +143,7 @@ public class WorldFileDefaultTest {
 
     /**
      * Test of readFile an writeFile methods, of class WorldFileDefault.
+     * @throws java.lang.Exception
      */
     @Test
     public void testReadWriteFile() throws Exception {
@@ -160,9 +161,9 @@ public class WorldFileDefaultTest {
         Place pl0 = new Place(placeNames[0], placeX[0], placeY[0], layer1);
         Place pl1 = new Place(placeNames[1], placeX[1], placeY[1], layer1);
         Place pl2 = new Place(placeNames[2], placeX[2], placeY[2], layer2);
-        world.putPlace(pl0);
-        world.putPlace(pl1);
-        world.putPlace(pl2);
+        layer1.put(pl0);
+        layer1.put(pl1);
+        layer2.put(pl2);
 
         Path path0 = new Path(pl0, "n", pl1, "s");
         Path path1 = new Path(pl1, "e", pl0, "w");
@@ -202,12 +203,25 @@ public class WorldFileDefaultTest {
         World result = instanceReader.readFile();
 
         assertEquals(worldName, result.getName());
-        assertEquals(3, result.getPlaces().size());
         assertEquals(2, result.getLayers().size());
 
-        Place pl0r = result.getPlace(pl0.getId());
-        Place pl1r = result.getPlace(pl1.getId());
-        Place pl2r = result.getPlace(pl2.getId());
+        int placeNum = 0;
+        Layer layer1new = null;
+        Layer layer2new = null;
+        for(Layer layer: result.getLayers()){
+            placeNum += layer.getPlaces().size();
+
+            // find corresponding layers
+            if(layer.getPlaces().size() == 1) layer2new = layer;
+            else if(layer.getPlaces().size() == 2) layer1new = layer;
+        }
+        assertEquals(3, placeNum);
+        assertNotNull(layer1new);
+        assertNotNull(layer2new);
+
+        Place pl0r = layer1new.get(placeX[0], placeY[0]);
+        Place pl1r = layer1new.get(placeX[1], placeY[1]);
+        Place pl2r = layer2new.get(placeX[2], placeY[2]);
         assertNotNull(pl0r);
         assertNotNull(pl1r);
         assertNotNull(pl2r);

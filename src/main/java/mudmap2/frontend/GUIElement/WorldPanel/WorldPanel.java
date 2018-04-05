@@ -162,7 +162,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double ts = getTileSize();
                 int delta = -e.getWheelRotation();
-                
+
                 ts = Math.exp(Math.log(ts / 10) + delta * 0.05) * 10;
                 if(delta > 0) ts = Math.max(ts, getTileSize() + 1);
                 else if(delta < 0) ts = Math.min(ts, getTileSize() - 1);
@@ -231,7 +231,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @return place or null
      */
     public Place getSelectedPlace(){
-        return getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY());
+        return getWorld().getLayer(getPosition().getLayer()).get(getCursorX(), getCursorY());
     }
 
     // ========================= context menu ==================================
@@ -301,9 +301,9 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             positionHistory.pop();
             positionIdx--;
         }
-        
+
         callLayerChangeListeners(getWorld().getLayer(coord.getLayer()));
-        
+
         // add new position
         positionHistory.push(pos);
 
@@ -324,7 +324,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         }
 
         setCursor((int) getPosition().getX(), (int) getPosition().getY());
-        
+
         callLayerChangeListeners(getWorld().getLayer(getPosition().getLayer()));
     }
 
@@ -342,7 +342,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             positionIdx--;
             setCursor((int) getPosition().getX(), (int) getPosition().getY());
         }
-        
+
         callLayerChangeListeners(getWorld().getLayer(getPosition().getLayer()));
     }
 
@@ -351,7 +351,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         positionHistory.clear();
         positionHistory.add(pos);
         setCursor((int) Math.round(pos.getX()), (int) Math.round(pos.getY()));
-        
+
         callLayerChangeListeners(getWorld().getLayer(pos.getLayer()));
     }
 
@@ -639,14 +639,18 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * calls all place selection listeners
      */
     private void callCursorListeners(){
-        Place place = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY());
+        Layer layer = getWorld().getLayer(getPosition().getLayer());
+        Place place = null;
+
+        if(layer != null){
+            place = layer.get(getCursorX(), getCursorY());
+        }
 
         if(place != null){
             for(MapCursorListener listener: mapCursorListeners)
                 listener.placeSelected(place);
             callPlaceSelectionListeners(place);
         } else {
-            Layer layer = getWorld().getLayer(getPosition().getLayer());
             for(MapCursorListener listener: mapCursorListeners)
                 listener.placeDeselected(layer, getCursorX(), getCursorY());
         }
@@ -691,7 +695,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             listener.LayerChanged(l);
         }
     }
-    
+
     /**
      * Removes a status listener
      * @param listener
@@ -746,7 +750,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             JFrame rootFrame = (JFrame) SwingUtilities.getRoot(e.getComponent());
 
             if(e.getButton() == MouseEvent.BUTTON1){ // left click
-                Place place = getWorld().getPlace(getPosition().getLayer(), getPlacePosX(e.getX()), getPlacePosY(e.getY()));
+                Place place = getWorld().getLayer(getPosition().getLayer()).get(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
                 if(e.isControlDown()){ // left click + ctrl
                     if(place != null) placeGroupAdd(place);
                 } else if(!e.isShiftDown()) { // left click and not shift
@@ -977,7 +981,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     case KeyEvent.VK_UP:
                     //case KeyEvent.VK_W: // add path to direction 'n'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY() + 1);
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX(), getCursorY() + 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("n") == null && other.getExit("s") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "n", other, "s"));
@@ -986,7 +990,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         break;
                     case KeyEvent.VK_NUMPAD9: // add path to direction 'ne'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() + 1, getCursorY() + 1);
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() + 1, getCursorY() + 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("ne") == null && other.getExit("sw") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "ne", other, "sw"));
@@ -997,7 +1001,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     case KeyEvent.VK_RIGHT:
                     //case KeyEvent.VK_D: // add path to direction 'e'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() + 1, getCursorY());
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() + 1, getCursorY());
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("e") == null && other.getExit("w") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "e", other, "w"));
@@ -1006,7 +1010,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         break;
                     case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() + 1, getCursorY() - 1);
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() + 1, getCursorY() - 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("se") == null && other.getExit("nw") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "se", other, "nw"));
@@ -1017,7 +1021,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     case KeyEvent.VK_DOWN:
                     //case KeyEvent.VK_S: // add path to direction 's'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX(), getCursorY() - 1);
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX(), getCursorY() - 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("s") == null && other.getExit("n") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "s", other, "n"));
@@ -1026,7 +1030,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         break;
                     case KeyEvent.VK_NUMPAD1: // add path to direction 'sw'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() - 1, getCursorY() - 1);
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() - 1, getCursorY() - 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("sw") == null && other.getExit("ne") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "sw", other, "ne"));
@@ -1037,7 +1041,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     case KeyEvent.VK_LEFT:
                     //case KeyEvent.VK_A: // add path to direction 'w'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() - 1, getCursorY());
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() - 1, getCursorY());
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("w") == null && other.getExit("e") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "w", other, "e"));
@@ -1046,7 +1050,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         break;
                     case KeyEvent.VK_NUMPAD7: // add path to direction 'nw'
                         place = getSelectedPlace();
-                        other = getWorld().getPlace(getPosition().getLayer(), getCursorX() - 1, getCursorY() + 1);
+                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() - 1, getCursorY() + 1);
                         if(place != null && other != null){ // if places exist
                             if(place.getExit("nw") == null && other.getExit("se") == null){ // if exits aren't occupied
                                 place.connectPath(new Path(place, "nw", other, "se"));
@@ -1286,7 +1290,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             this.posY = py;
             layer = getWorld().getLayer(getPosition().getLayer());
             place = (layer != null ? layer.get(posX, posY) : null);
-            
+
             parent.setCursor(posX, posY);
 
             if(layer != null && place != null){ // if place exists

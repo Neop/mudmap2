@@ -33,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import mudmap2.backend.PlaceGroup;
-import mudmap2.backend.Label;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
@@ -63,7 +62,7 @@ public class WorldFileJSON extends WorldFile {
     WorldMetaJSON metaWriter;
 
     final Color defaultColor = new Color(0x808080);
-    
+
     /**
      * Constructor
      * @param filename world filename with path
@@ -263,52 +262,62 @@ public class WorldFileJSON extends WorldFile {
             }
 
             // places
+            HashMap<Integer, Place> places = new HashMap<>();
             HashMap<Place, HashSet<Integer>> childrenMapping = new HashMap<>();
-            //HashMap<Place, HashSet<Integer>> parentMapping = new HashMap<>();
 
             if(root.has("places")){
-                JSONArray places = root.getJSONArray("places");
-                Integer length = places.length();
+                JSONArray jPlaces = root.getJSONArray("places");
+                Integer length = jPlaces.length();
                 for(Integer i = 0; i < length; ++i){
-                    JSONObject place = places.getJSONObject(i);
-                    if(place.has("id")
-                            && place.has("n")
-                            && place.has("l")
-                            && place.has("x")
-                            && place.has("y")){
-                        Integer id = place.getInt("id");
-                        String name = place.getString("n");
-                        Integer layer = place.getInt("l");
-                        Integer x = place.getInt("x");
-                        Integer y = place.getInt("y");
+                    JSONObject jPlace = jPlaces.getJSONObject(i);
+                    if(jPlace.has("id")
+                            && jPlace.has("n")
+                            && jPlace.has("l")
+                            && jPlace.has("x")
+                            && jPlace.has("y")){
+                        Integer id = jPlace.getInt("id");
+                        String name = jPlace.getString("n");
+                        Integer layerId = jPlace.getInt("l");
+                        Integer x = jPlace.getInt("x");
+                        Integer y = jPlace.getInt("y");
+
+                        // get layer
+                        Layer layer = world.getLayer(layerId);
+                        if(layer == null){
+                            layer = new Layer(layerId, world);
+                            world.addLayer(layer);
+                        }
+
                         // create place
-                        Place p = new Place(id, name, x, y, world.getLayer(layer));
+                        Place place = new Place(id, name, x, y, layer);
+
+                        places.put(id, place);
 
                         // area
-                        if(place.has("a")){
-                            Integer area = place.getInt("a");
-                            p.setPlaceGroup(areas.get(area));
+                        if(jPlace.has("a")){
+                            Integer area = jPlace.getInt("a");
+                            place.setPlaceGroup(areas.get(area));
                         }
                         // risk level
-                        if(place.has("r")){
-                            Integer risk = place.getInt("r");
-                            p.setRiskLevel(world.getRiskLevel(risk));
+                        if(jPlace.has("r")){
+                            Integer risk = jPlace.getInt("r");
+                            place.setRiskLevel(world.getRiskLevel(risk));
                         }
                         // rec level
-                        if(place.has("lvlMin")){
-                            Integer lvlMin = place.getInt("lvlMin");
-                            p.setRecLevelMin(lvlMin);
+                        if(jPlace.has("lvlMin")){
+                            Integer lvlMin = jPlace.getInt("lvlMin");
+                            place.setRecLevelMin(lvlMin);
                         }
-                        if(place.has("lvlMax")){
-                            Integer lvlMax = place.getInt("lvlMax");
-                            p.setRecLevelMin(lvlMax);
+                        if(jPlace.has("lvlMax")){
+                            Integer lvlMax = jPlace.getInt("lvlMax");
+                            place.setRecLevelMin(lvlMax);
                         }
 
                         // children
-                        if(place.has("c")){
-                            JSONArray children = place.getJSONArray("c");
+                        if(jPlace.has("c")){
+                            JSONArray children = jPlace.getJSONArray("c");
                             HashSet<Integer> set = new HashSet<>();
-                            childrenMapping.put(p, set);
+                            childrenMapping.put(place, set);
 
                             Integer lc = children.length();
                             for(Integer c = 0; c < lc; ++c){
@@ -316,39 +325,26 @@ public class WorldFileJSON extends WorldFile {
                             }
                         }
 
-                        // parents
-                        /* don't need to read parents: implicitly defined by children relations
-                        if(place.has("p")){
-                            JSONArray parents = place.getJSONArray("p");
-                            HashSet<Integer> set = new HashSet<>();
-                            parentMapping.putPlace(p, set);
-
-                            Integer lp = parents.length();
-                            for(Integer pa = 0; pa < lp; ++pa){
-                                set.add(parents.getInt(pa));
-                            }
-                        }*/
-
                         // flags
-                        if(place.has("f")){
-                            JSONArray flags = place.getJSONArray("f");
+                        if(jPlace.has("f")){
+                            JSONArray flags = jPlace.getJSONArray("f");
                             Integer lf = flags.length();
                             for(Integer f = 0; f < lf; ++f){
                                 String flagname = flags.getString(f);
-                                p.setFlag(flagname, true);
+                                place.setFlag(flagname, true);
                             }
                         }
 
                         // comments
-                        if(place.has("co")){
-                            JSONArray comments = place.getJSONArray("co");
+                        if(jPlace.has("co")){
+                            JSONArray comments = jPlace.getJSONArray("co");
                             Integer lc = comments.length();
                             for(Integer c = 0; c < lc; ++c){
-                                p.addComment(comments.getString(c));
+                                place.addComment(comments.getString(c));
                             }
                         }
 
-                        world.putPlace(p);
+                        layer.put(place);
                     }
                 }
             }
@@ -357,7 +353,7 @@ public class WorldFileJSON extends WorldFile {
             for(Entry<Place, HashSet<Integer>> entry: childrenMapping.entrySet()){
                 Place place = entry.getKey();
                 for(Integer id: entry.getValue()){
-                    place.connectChild(world.getPlace(id));
+                    place.connectChild(places.get(id));
                 }
             }
 
@@ -372,36 +368,13 @@ public class WorldFileJSON extends WorldFile {
                         JSONObject p1 = path.getJSONObject(1);
                         if(p0.has("p") && p0.has("e")
                                 && p1.has("p") && p1.has("e")){
-                            Place pl0 = world.getPlace(p0.getInt("p"));
-                            Place pl1 = world.getPlace(p1.getInt("p"));
+                            Place pl0 = places.get(p0.getInt("p"));
+                            Place pl1 = places.get(p1.getInt("p"));
                             if(pl0 != null && pl1 != null){
                                 Path p = new Path(pl0, p0.getString("e"),
                                         pl1, p1.getString("e"));
                                 pl0.connectPath(p);
                             }
-                        }
-                    }
-                }
-            }
-
-            // labels
-            if(root.has("labels")){
-                JSONArray labels = root.getJSONArray("labels");
-                Integer length = labels.length();
-                for(Integer i = 0; i < length; ++i){
-                    JSONObject label = labels.getJSONObject(i);
-                    if(label.has("x")
-                            && label.has("y")
-                            && label.has("l")
-                            && label.has("fontSize")
-                            && label.has("t")){
-                        Double x = label.getDouble("x");
-                        Double y = label.getDouble("y");
-                        Layer l = world.getLayer(label.getInt("l"));
-                        Double fontSize = label.getDouble("fontSize");
-                        String text = label.getString("t");
-                        if(l != null){
-                            world.addLabel(new Label(text, x, y, l, fontSize));
                         }
                     }
                 }
@@ -438,7 +411,7 @@ public class WorldFileJSON extends WorldFile {
      */
     private Color hexToCol(String hex){
         Color ret = new Color(defaultColor.getRGB());
-        
+
         if(hex != null && !hex.isEmpty()){
             Integer col = Integer.decode(hex);
             if(col >= 0 && col <= 0xffffff){
@@ -474,13 +447,16 @@ public class WorldFileJSON extends WorldFile {
         root.put("showPlaceID", world.getShowPlaceId());
 
         // tile center color
-        if(world.getTileCenterColor() != null)
+        if(world.getTileCenterColor() != null){
             root.put("tileCenterCol", colToHex(world.getTileCenterColor()));
+        }
         // cardinal and non cardinal path color
-        if(world.getPathColor() != null)
+        if(world.getPathColor() != null){
             root.put("pathCol", colToHex(world.getPathColor()));
-        if(world.getPathColorNstd() != null)
-        root.put("pathColNonCardinal", colToHex(world.getPathColorNstd()));
+        }
+        if(world.getPathColorNstd() != null){
+            root.put("pathColNonCardinal", colToHex(world.getPathColorNstd()));
+        }
         // other path colors
         JSONArray pathColorsArray = new JSONArray();
         root.put("pathColDefs", pathColorsArray);
@@ -511,10 +487,12 @@ public class WorldFileJSON extends WorldFile {
         for(PlaceGroup a: world.getPlaceGroups()){
             Boolean inUse = false;
             // removePlace unused
-            for(Place place: world.getPlaces()){
-                if(place.getPlaceGroup() == a){
-                    inUse = true;
-                    break;
+            for(Layer layer: world.getLayers()){
+                for(Place place: layer.getPlaces()){
+                    if(place.getPlaceGroup() == a){
+                        inUse = true;
+                        break;
+                    }
                 }
             }
             if(inUse) areaIDs.put(a, ++cnt);
@@ -558,81 +536,85 @@ public class WorldFileJSON extends WorldFile {
         // places
         JSONArray places = new JSONArray();
         root.put("places", places);
-        for(Place place: world.getPlaces()){
-            JSONObject placeObj = new JSONObject();
+        for(Layer layer: world.getLayers()){
+            for(Place place: layer.getPlaces()){
+                JSONObject placeObj = new JSONObject();
 
-            placeObj.put("id", place.getId());
-            placeObj.put("n", place.getName());
-            placeObj.put("l", translateLayerID(place.getLayer().getId()));
-            placeObj.put("x", place.getX());
-            placeObj.put("y", place.getY());
+                placeObj.put("id", place.getId());
+                placeObj.put("n", place.getName());
+                placeObj.put("l", translateLayerID(place.getLayer().getId()));
+                placeObj.put("x", place.getX());
+                placeObj.put("y", place.getY());
 
-            if(place.getPlaceGroup() != null) placeObj.put("a", areaIDs.get(place.getPlaceGroup()));
-            if(place.getRiskLevel() != null) placeObj.put("r", place.getRiskLevel().getId());
-            if(place.getRecLevelMin() > -1) placeObj.put("lvlMin", place.getRecLevelMin());
-            if(place.getRecLevelMax() > -1) placeObj.put("lvlMax", place.getRecLevelMax());
+                if(place.getPlaceGroup() != null) placeObj.put("a", areaIDs.get(place.getPlaceGroup()));
+                if(place.getRiskLevel() != null) placeObj.put("r", place.getRiskLevel().getId());
+                if(place.getRecLevelMin() > -1) placeObj.put("lvlMin", place.getRecLevelMin());
+                if(place.getRecLevelMax() > -1) placeObj.put("lvlMax", place.getRecLevelMax());
 
-            // child places
-            if(!place.getChildren().isEmpty()){
-                JSONArray children = new JSONArray();
-                placeObj.put("c", children);
-                for(Place child: place.getChildren()){
-                    children.put(child.getId());
+                // child places
+                if(!place.getChildren().isEmpty()){
+                    JSONArray children = new JSONArray();
+                    placeObj.put("c", children);
+                    for(Place child: place.getChildren()){
+                        children.put(child.getId());
+                    }
                 }
-            }
 
-            // parent places
-            if(!place.getParents().isEmpty()){
-                JSONArray parents = new JSONArray();
-                placeObj.put("p", parents);
-                for(Place parent: place.getParents()){
-                    parents.put(parent.getId());
+                // parent places
+                if(!place.getParents().isEmpty()){
+                    JSONArray parents = new JSONArray();
+                    placeObj.put("p", parents);
+                    for(Place parent: place.getParents()){
+                        parents.put(parent.getId());
+                    }
                 }
-            }
 
-            // flags
-            if(!place.getFlags().isEmpty()){
-                JSONArray flags = new JSONArray();
-                placeObj.put("f", flags);
-                for(Map.Entry<String, Boolean> flag: place.getFlags().entrySet()){
-                    if(flag.getValue()) flags.put(flag.getKey());
+                // flags
+                if(!place.getFlags().isEmpty()){
+                    JSONArray flags = new JSONArray();
+                    placeObj.put("f", flags);
+                    for(Map.Entry<String, Boolean> flag: place.getFlags().entrySet()){
+                        if(flag.getValue()) flags.put(flag.getKey());
+                    }
                 }
-            }
 
-            // comments
-            if(!place.getComments().isEmpty()){
-                JSONArray comments = new JSONArray();
-                placeObj.put("co", comments);
-                int idx = 0;
-                for(String comment: place.getComments()){
-                    comments.put(idx++, comment);
+                // comments
+                if(!place.getComments().isEmpty()){
+                    JSONArray comments = new JSONArray();
+                    placeObj.put("co", comments);
+                    int idx = 0;
+                    for(String comment: place.getComments()){
+                        comments.put(idx++, comment);
+                    }
                 }
-            }
 
-            places.put(placeObj);
+                places.put(placeObj);
+            }
         }
 
         // paths
         JSONArray pathsArray = new JSONArray();
         root.put("paths", pathsArray);
         HashSet<Path> paths = new HashSet<>(); // paths that have already been added
-        for(Place place: world.getPlaces()){
-            for(Path path: place.getPaths()){
-                if(!paths.contains(path)){
-                    JSONArray pathObj = new JSONArray();
+        for(Layer layer: world.getLayers()){
+            for(Place place: layer.getPlaces()){
+                for(Path path: place.getPaths()){
+                    if(!paths.contains(path)){
+                        JSONArray pathObj = new JSONArray();
 
-                    JSONObject p1 = new JSONObject();
-                    p1.put("p", path.getPlaces()[0].getId());
-                    p1.put("e", path.getExit(path.getPlaces()[0]));
-                    pathObj.put(p1);
+                        JSONObject p1 = new JSONObject();
+                        p1.put("p", path.getPlaces()[0].getId());
+                        p1.put("e", path.getExit(path.getPlaces()[0]));
+                        pathObj.put(p1);
 
-                    JSONObject p2 = new JSONObject();
-                    p2.put("p", path.getPlaces()[1].getId());
-                    p2.put("e", path.getExit(path.getPlaces()[1]));
-                    pathObj.put(p2);
+                        JSONObject p2 = new JSONObject();
+                        p2.put("p", path.getPlaces()[1].getId());
+                        p2.put("e", path.getExit(path.getPlaces()[1]));
+                        pathObj.put(p2);
 
-                    pathsArray.put(pathObj);
-                    paths.add(path);
+                        pathsArray.put(pathObj);
+                        paths.add(path);
+                    }
                 }
             }
         }
@@ -644,21 +626,6 @@ public class WorldFileJSON extends WorldFile {
         obj.put("x", home.getX());
         obj.put("y", home.getY());
         root.put("home", obj);
-
-        // text laels
-        Label[] labelsArray = world.getLabels();
-        if(labelsArray != null && labelsArray.length > 0){
-            JSONArray labels = new JSONArray();
-            root.put("labels", labels);
-            for(Label label: world.getLabels()){
-                JSONObject labelObj = new JSONObject();
-                labelObj.put("x", label.getX());
-                labelObj.put("y", label.getY());
-                labelObj.put("l", label.getLayer());
-                labelObj.put("fontSize", label.getFontSize());
-                labelObj.put("t", label.getText());
-            }
-        }
 
         // add metaWriter data from WorldTab
         if(metaWriter != null) root.put("meta", metaWriter.getMeta(layerIDs));

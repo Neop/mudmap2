@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Layer.PlaceNotInsertedException;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.sssp.BreadthSearchGraph;
@@ -57,8 +56,6 @@ public class World implements BreadthSearchGraph {
     // ID and object
     TreeMap<Integer, RiskLevel> riskLevels;
     HashSet<PlaceGroup> placeGroups;
-    TreeMap<Integer, Place> places;
-    TreeMap<String, Integer> placeNames;
     TreeMap<Integer, Layer> layers;
 
     Integer nextLayerID = 1;
@@ -91,8 +88,6 @@ public class World implements BreadthSearchGraph {
 
         placeGroups = new HashSet<>();
         layers = new TreeMap<>();
-        places = new TreeMap<>();
-        placeNames = new TreeMap<>();
         pathColors = new HashMap<>();
 
         home = new WorldCoordinate(0, 0, 0);
@@ -164,92 +159,6 @@ public class World implements BreadthSearchGraph {
     }
 
     // --------- places --------------------------------------------------------
-    /**
-     * Gets a place
-     * @param id place id
-     * @return place
-     */
-    public Place getPlace(int id){
-        return places.get(id);
-    }
-
-    /**
-     * Gets all places
-     * @return
-     */
-    public Collection<Place> getPlaces(){
-        return places.values();
-    }
-
-    /**
-     * Gets a place
-     * @param layer layer id
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return place or null if it doesn't exist
-     */
-    public Place getPlace(int layer, int x, int y){
-        Layer l = getLayer(layer);
-        if(l == null) return null;
-        else return l.get(x, y);
-    }
-
-    /**
-     * Places a place in the world, the layer and coordinates described by the
-     * place will be used
-     * @param place new place
-     * @throws java.lang.Exception if place couldn't be added to layer
-     */
-    public void putPlace(Place place) throws Exception{
-        // create layer, if it doesn't exist
-        Layer layer = place.getLayer();
-        if(layer == null){
-            layer = new Layer(this);
-            layers.put(home.getLayer(), layer);
-            place.setLayer(layer);
-        }
-        putPlace(place, place.getLayer().getId(), place.getX(), place.getY());
-    }
-
-    /**
-     * Places a place in the world
-     * @param place new place
-     * @param layer layer for the place to be putPlace on, will be created if it doesnt exist
-     * @param x x coordinate
-     * @param y y coordinate
-     * @throws java.lang.Exception if place couldn't be added to layer
-     */
-    public void putPlace(Place place, int layer, int x, int y) throws Exception{
-        // getPlace layer, create a new one, if necessary
-        Layer l = getLayer(layer);
-        if(l == null) layers.put(layer, l = new Layer(layer, this));
-
-        // removePlace from old layer and world
-        if(place.getLayer() != null){
-            try{
-                // if place belongs to a different world
-                if(place.getLayer().getWorld() != this) place.getLayer().getWorld().removePlace(place);
-                else {
-                    try{
-                        if(place.getLayer() != l) place.getLayer().remove(place);
-                    } catch(RuntimeException | PlaceNotFoundException ex){}
-                }
-            } catch(RuntimeException | PlaceNotFoundException ex){
-                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        // add to layer
-        place.setLayer(l);
-        l.put(place, x, y);
-
-        // add to place list
-        if(!places.containsKey(place.getId())) places.put(place.getId(), place);
-        if(!placeNames.containsKey(place.getName())) placeNames.put(place.getName(), 1);
-        else placeNames.put(place.getName(), placeNames.get(place.getName()) + 1);
-
-        callListeners(place);
-    }
 
     /**
      * Creates a placeholder place
@@ -272,42 +181,12 @@ public class World implements BreadthSearchGraph {
 
             place.setPlaceGroup(placeGroup);
             place.setRiskLevel(getRiskLevel(0));
-            putPlace(place, layer, x, y);
+
+            getLayer(layer).put(place, x, y);
         } catch(PlaceNotInsertedException ex){ // ignore
         } catch (Exception ex) {
             Logger.getLogger(World.class.getName()).log(Level.WARNING, "Couldn't put placeholder to map: " + ex, ex);
         }
-    }
-
-    /**
-     * Removes a place from the world and removes it's connections to other places
-     * @param place place to be removed
-     * @throws RuntimeException
-     * @throws mudmap2.backend.Layer.PlaceNotFoundException
-     */
-    public void removePlace(Place place) throws RuntimeException, PlaceNotFoundException {
-        Layer layer = layers.get(place.getLayer().getId());
-        if(layer == null || layer != place.getLayer()){
-            // error, wrong layer? (shouldn't occur)
-            throw new RuntimeException("Couldn't remove \"" + place + ": layer mismatch");
-        } else {
-            layer.remove(place);
-            place.removeConnections();
-            places.remove(place.getId());
-            if(placeNames.containsKey(place.getName()))
-                placeNames.put(place.getName(), Math.max(0, placeNames.get(place.getName()) - 1));
-        }
-
-        callListeners(place);
-    }
-
-    /**
-     * Returns true, if the worldname of the place is unique in its world
-     * @param name
-     * @return true if the place worldname is unique
-     */
-    public Boolean isPlaceNameUnique(String name){
-        return placeNames.containsKey(name);
     }
 
     // --------- layers --------------------------------------------------------
@@ -333,6 +212,7 @@ public class World implements BreadthSearchGraph {
 
     /**
      * Creates a new and empty layer and returns it
+     * @param name
      * @return new layer
      */
     public Layer getNewLayer(String name){
@@ -341,14 +221,14 @@ public class World implements BreadthSearchGraph {
         callListeners(layer);
         return layer;
     }
-    
+
     public Layer getNewLayer(){
         Layer layer = new Layer(this);
         layers.put(layer.getId(), layer);
         callListeners(layer);
         return layer;
     }
-    
+
     public Integer getNextLayerID(){
         return nextLayerID;
     }
@@ -504,8 +384,10 @@ public class World implements BreadthSearchGraph {
      * @param placeGroup PlaceGroup to be removed
      */
     public void removePlaceGroup(PlaceGroup placeGroup){
-        for(Place p: places.values()){
-            if(p.getPlaceGroup() == placeGroup) p.setPlaceGroup(null);
+        for(Layer layer: getLayers()){
+            for(Place p: layer.getPlaces()){
+                if(p.getPlaceGroup() == placeGroup) p.setPlaceGroup(null);
+            }
         }
         placeGroups.remove(placeGroup);
         callListeners(placeGroup);
@@ -557,46 +439,13 @@ public class World implements BreadthSearchGraph {
         // remode from risk level list
         riskLevels.remove(rl.getId());
         // removePlace from places
-        for(Place place: places.values())
-            if(place.getRiskLevel() == rl) place.setRiskLevel(null);
+        for(Layer layer: getLayers()){
+            for(Place place: layer.getPlaces()){
+                if(place.getRiskLevel() == rl) place.setRiskLevel(null);
+            }
+        }
 
         callListeners(rl);
-    }
-
-    // --------- labels --------------------------------------------------------
-    /**
-     * Add new label
-     * @param label
-     */
-    public void addLabel(Label label){
-
-        callListeners(label);
-    }
-
-    /**
-     * Remove label
-     * @param label
-     */
-    public void removeLabel(Label label){
-
-        callListeners(label);
-    }
-
-    /**
-     * Get all labels
-     * @return
-     */
-    public Label[] getLabels(){
-        return null;
-    }
-
-    /**
-     * getPlace all labels of layer
-     * @param layer
-     * @return
-     */
-    public Label[] getLabels(Integer layer){
-        return null;
     }
 
     // --------- path finding --------------------------------------------------
@@ -608,7 +457,11 @@ public class World implements BreadthSearchGraph {
      */
     @Override
     public Place breadthSearch(Place start, Place end) {
-        for(Place pl: getPlaces()) pl.breadthSearchReset();
+        for(Layer layer: getLayers()){
+            for(Place place: layer.getPlaces()){
+                place.breadthSearchReset();
+            }
+        }
         start.getBreadthSearchData().marked = true;
 
         LinkedList<Place> queue = new LinkedList<>();

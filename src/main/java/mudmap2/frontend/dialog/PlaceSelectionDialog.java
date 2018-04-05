@@ -25,6 +25,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
@@ -66,9 +67,9 @@ public class PlaceSelectionDialog extends ActionDialog {
      * @return
      */
     public Place getSelection(){
-        return worldtab.getWorldPanel().getWorld().getPlace(
-                worldtab.getWorldPanel().getPosition().getLayer(),
-                worldtab.getWorldPanel().getCursorX(),
+        Layer layer = worldtab.getWorldPanel().getWorld().getLayer(
+                worldtab.getWorldPanel().getPosition().getLayer());
+        return layer.get(worldtab.getWorldPanel().getCursorX(),
                 worldtab.getWorldPanel().getCursorY());
     }
 

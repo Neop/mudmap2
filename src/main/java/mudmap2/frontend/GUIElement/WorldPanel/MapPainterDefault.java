@@ -66,7 +66,7 @@ public class MapPainterDefault implements MapPainter {
     WorldCoordinate curPos;
 
     Color backgroundColor;
-    
+
     Font tileFont;
 
     Boolean showPaths;
@@ -82,7 +82,7 @@ public class MapPainterDefault implements MapPainter {
         showPaths = true;
         showPathsCurved = true;
         showGrid = true;
-        
+
         backgroundColor = null;
     }
 
@@ -130,11 +130,11 @@ public class MapPainterDefault implements MapPainter {
         }
         return false;
     }
-    
+
     public Boolean isGridEnabled(){
         return showGrid;
     }
-    
+
     public void setGridEnabled(Boolean state){
         showGrid = state;
     }
@@ -215,7 +215,7 @@ public class MapPainterDefault implements MapPainter {
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
-    
+
     /**
      * Calculates the offset of the exit visualization (dot/circle) to the
      * upper left corner of a tile
@@ -572,7 +572,7 @@ public class MapPainterDefault implements MapPainter {
                 g.drawLine(0, y, (int) graphicsWidth, y);
             }
         }
-        
+
         // ------------------ draw the tiles / places ----------------------
         for(int tileX = (g.getClipBounds().x / tileSize) - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
             for(int tileY = (g.getClipBounds().y / tileSize) - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
@@ -624,8 +624,17 @@ public class MapPainterDefault implements MapPainter {
 
                         // place name
                         // gets place name if unique, else place name with ID
-                        String placeName = ((layer.getWorld().isPlaceNameUnique(curPlace.getName()) && layer.getWorld().getShowPlaceId() == World.ShowPlaceID.UNIQUE) || layer.getWorld().getShowPlaceId() == World.ShowPlaceID.NONE)
-                                                ? curPlace.getName() : curPlace.toString();
+                        String placeName;
+                        switch(layer.getWorld().getShowPlaceId()){
+                            default:
+                            case UNIQUE:
+                            case NONE:
+                                placeName = curPlace.getName(); // name only
+                                break;
+                            case ALL:
+                                placeName = curPlace.toString(); // name and id
+                                break;
+                        }
                         text.add(placeName);
 
                         int reclvlmin = curPlace.getRecLevelMin(), reclvlmax = curPlace.getRecLevelMax();

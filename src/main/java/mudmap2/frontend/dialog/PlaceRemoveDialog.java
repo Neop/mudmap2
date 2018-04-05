@@ -66,11 +66,15 @@ public class PlaceRemoveDialog implements ActionListener {
         if(ret == 0){
             places_removed = true;
             try {
-                if(place != null) // removePlace single place
-                    world.removePlace(place);
-                else if(places != null) // removePlace multiple places
-                    for(Place pl: places)
-                        world.removePlace(pl);
+                if(place != null){ // removePlace single place
+                    place.removeConnections();
+                    place.getLayer().remove(place);
+                } else if(places != null){ // removePlace multiple places
+                    for(Place pl: places){
+                        pl.removeConnections();
+                        place.getLayer().remove(place);
+                    }
+                }
                 parent.repaint();
             } catch (RuntimeException ex) {
                 Logger.getLogger(PlaceRemoveDialog.class.getName()).log(Level.SEVERE, null, ex);

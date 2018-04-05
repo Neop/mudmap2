@@ -213,7 +213,7 @@ public class PlaceDialog extends ActionDialog {
                 if(layer == null) layer = world.getNewLayer();
 
                 // create place if it doesn't exist else just set the name
-                if(place == null) world.putPlace(place = new Place(textfield_name.getText(), px, py, layer));
+                if(place == null) layer.put(place = new Place(textfield_name.getText(), px, py, layer));
                 else place.setName(textfield_name.getText());
 
                 PlaceGroup a = (PlaceGroup) combobox_place_group.getSelectedItem();

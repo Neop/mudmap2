@@ -166,9 +166,15 @@ public final class CopyPaste {
                     if(copyMode){ // copy places -> duplicate on new layer
                         Place new_place = place.duplicate();
                         place_to_new_place.put(place, new_place);
-                        layer.getWorld().putPlace(new_place, layer.getId(), place.getX() - copydx + x, place.getY() - copydy + y);
+                        layer.put(new_place, place.getX() - copydx + x, place.getY() - copydy + y);
                     } else {
-                        layer.getWorld().putPlace(place, layer.getId(), place.getX() - copydx + x, place.getY() - copydy + y);
+                        // remove place from old layer
+                        Layer layerOld = place.getLayer();
+                        layerOld.remove(place);
+
+                        // add place to new layer
+                        place.setLayer(layer);
+                        layer.put(place, place.getX() - copydx + x, place.getY() - copydy + y);
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, ex);
