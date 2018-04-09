@@ -82,5 +82,14 @@ public class ColorChooserButton extends JButton {
     public Color getColor() {
         return color;
     }
+
+    /**
+     * Sets the color
+     * @param color
+     */
+    public void setColor(Color color) {
+        this.color = color;
+        repaint();
+    }
     
 }
