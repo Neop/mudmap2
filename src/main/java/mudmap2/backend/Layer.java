@@ -279,8 +279,6 @@ public class Layer {
      * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
     public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException {
-        if(element.getLayer() != this) throw new RuntimeException("Element not in this layer");
-        
         // check if position is available
         LayerElement el_bef = get(element.getX(), element.getY());
         if(el_bef != element){
