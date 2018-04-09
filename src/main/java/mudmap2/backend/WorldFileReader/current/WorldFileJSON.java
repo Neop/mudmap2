@@ -380,7 +380,12 @@ public class WorldFileJSON extends WorldFile {
                 }
             }
 
-            // remember meta data for WorldTab
+            // world preferences (dialog settings etc.)
+            if(root.has("preferences")){
+                world.setPreferences(root.getJSONObject("preferences"));
+            }
+
+            // save meta data for WorldTab
             if(root.has("meta")) metaData = root.getJSONObject("meta");
 
         } catch(JSONException ex) {
@@ -542,7 +547,7 @@ public class WorldFileJSON extends WorldFile {
 
                 placeObj.put("id", place.getId());
                 placeObj.put("n", place.getName());
-                placeObj.put("l", translateLayerID(place.getLayer().getId()));
+                placeObj.put("l", translateLayerID(layer.getId()));
                 placeObj.put("x", place.getX());
                 placeObj.put("y", place.getY());
 
@@ -626,6 +631,9 @@ public class WorldFileJSON extends WorldFile {
         obj.put("x", home.getX());
         obj.put("y", home.getY());
         root.put("home", obj);
+
+        // world preferences (dialog settings etc.)
+        root.put("preferences", world.getPreferences());
 
         // add metaWriter data from WorldTab
         if(metaWriter != null) root.put("meta", metaWriter.getMeta(layerIDs));

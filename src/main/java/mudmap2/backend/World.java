@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import mudmap2.backend.Layer.PlaceNotInsertedException;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.sssp.BreadthSearchGraph;
+import org.json.JSONObject;
 
 /**
  *
@@ -58,10 +59,17 @@ public class World implements BreadthSearchGraph {
     HashSet<PlaceGroup> placeGroups;
     TreeMap<Integer, Layer> layers;
 
+    // For creating world-unique layer ids
     Integer nextLayerID = 1;
 
+    // Preferences
     ShowPlaceID showPlaceID;
 
+    // World-related preferences for dialogs etc.
+    JSONObject preferences;
+    public final static String PREFERENCES_KEY_DIALOG = "dialog";
+
+    // Listeners
     LinkedList<WorldChangeListener> changeListeners;
 
     /**
@@ -84,6 +92,8 @@ public class World implements BreadthSearchGraph {
      * Initializes the world
      */
     private void initialize(){
+        preferences = new JSONObject();
+
         changeListeners = new LinkedList<>();
 
         placeGroups = new HashSet<>();
@@ -446,6 +456,23 @@ public class World implements BreadthSearchGraph {
         }
 
         callListeners(rl);
+    }
+
+    // --------- preference ----------------------------------------------------
+    /**
+     * Get preferences object
+     * @return JSON object
+     */
+    public JSONObject getPreferences() {
+        return preferences;
+    }
+
+    /**
+     * Replace preferences object
+     * @param preferences JSON object
+     */
+    public void setPreferences(JSONObject preferences) {
+        this.preferences = preferences;
     }
 
     // --------- path finding --------------------------------------------------

@@ -94,6 +94,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
     /**
      * Constructs the world tab, opens the world if necessary
+     * @param parent
      * @param world world
      * @param file
      * @param passive world won't be changed, if true
@@ -106,6 +107,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
     /**
      * Constructs the world tab, opens the world if necessary
+     * @param parent
      * @param world world
      * @param passive world won't be changed, if true
      */

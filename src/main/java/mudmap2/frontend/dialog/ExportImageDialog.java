@@ -28,6 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -57,12 +58,15 @@ import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.GUIElement.WorldPanel.WorldPanel;
 import mudmap2.frontend.WorldTab;
 import mudmap2.utils.Pair;
+import org.json.JSONObject;
 
 /**
  * Image export dialog
  * @author neop
  */
 public class ExportImageDialog extends ActionDialog {
+
+    final static String PREFERENCES_KEY_EXPORTIMAGE = "exportimage";
 
     final WorldTab worldTab;
 
@@ -109,6 +113,8 @@ public class ExportImageDialog extends ActionDialog {
         panel.add(createLegendPanel());
         panel.add(new JSeparator());
         panel.add(createFileChooserPanel());
+
+        readPreferences(worldTab.getWorld().getPreferences());
 
         updateImageSize();
         updateDialogComponents();
@@ -235,7 +241,11 @@ public class ExportImageDialog extends ActionDialog {
         cbBackgroundGrid = new JCheckBox("Draw grid");
         panel.add(cbBackgroundGrid, constraints);
 
-        // TODO: read colors and settings
+        Boolean gridEnabled = false;
+        if(worldTab.getWorldPanel().getMappainter() instanceof MapPainterDefault){
+            gridEnabled = ((MapPainterDefault) worldTab.getWorldPanel().getMappainter()).isGridEnabled();
+        }
+        cbBackgroundGrid.setSelected(gridEnabled);
 
         return panel;
     }
@@ -524,6 +534,8 @@ public class ExportImageDialog extends ActionDialog {
                     }
                 }
             }
+
+            writePreferences(worldTab.getWorld().getPreferences());
         } catch (IOException ex) {
             Logger.getLogger(ExportImageDialog.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(getParent(),
@@ -712,6 +724,116 @@ public class ExportImageDialog extends ActionDialog {
         }
 
         return image;
+    }
+
+    void readPreferences(JSONObject preferences){
+        if(preferences.has(PREFERENCES_KEY_EXPORTIMAGE)){
+            JSONObject jDlgPrefs = preferences.getJSONObject(PREFERENCES_KEY_EXPORTIMAGE);
+
+            if(jDlgPrefs.has("scope")){
+                switch(jDlgPrefs.getInt("scope")){
+                    case 0:
+                        rbCurrentView.setSelected(true);
+                        break;
+                    case 1:
+                        rbCurrentMap.setSelected(true);
+                        break;
+                    case 2:
+                        rbAllMaps.setSelected(true);
+                        break;
+                    case 3:
+                        rbSelection.setSelected(true);
+                        break;
+                }
+            }
+
+            if(jDlgPrefs.has("bgDrawCol")){
+                if(jDlgPrefs.getBoolean("bgDrawCol")){
+                    rbBackgroundColor.setSelected(true);
+                } else {
+                    rbBackgroundTransparent.setSelected(true);
+                }
+            }
+
+            if(jDlgPrefs.has("bgCol")){
+                ccbBackgroundColor.setColor(new Color(jDlgPrefs.getInt("bgCol")));
+            }
+
+            if(jDlgPrefs.has("bgDrawGrid")){
+                cbBackgroundGrid.setSelected(jDlgPrefs.getBoolean("bgDrawGrid"));
+            }
+
+            if(jDlgPrefs.has("legendPathCols")){
+                cbLegendPathColors.setSelected(jDlgPrefs.getBoolean("legendPathCols"));
+            }
+            if(jDlgPrefs.has("legendPlaceGroups")){
+                cbLegendPlaceGroups.setSelected(jDlgPrefs.getBoolean("legendPlaceGroups"));
+            }
+            if(jDlgPrefs.has("legendRiskLevels")){
+                cbLegendRiskLevels.setSelected(jDlgPrefs.getBoolean("legendRiskLevels"));
+            }
+
+            if(jDlgPrefs.has("legendPos")){
+                switch(jDlgPrefs.getInt("legendPos")){
+                    case 0:
+                        rbLegendPosTop.setSelected(true);
+                        break;
+                    default:
+                    case 1:
+                        rbLegendPosBottom.setSelected(true);
+                        break;
+                    case 2:
+                        rbLegendPosLeft.setSelected(true);
+                        break;
+                    case 3:
+                        rbLegendPosRight.setSelected(true);
+                        break;
+                }
+            }
+
+            if(jDlgPrefs.has("legendCol")){
+                ccbLegendBackground.setColor(new Color(jDlgPrefs.getInt("legendCol")));
+            }
+        }
+    }
+
+    void writePreferences(JSONObject preferences){
+        JSONObject jDlgPrefs = new JSONObject();
+        preferences.remove(PREFERENCES_KEY_EXPORTIMAGE);
+        preferences.put(PREFERENCES_KEY_EXPORTIMAGE, jDlgPrefs);
+
+        int scope = 0;
+        if(rbCurrentView.isSelected())     scope = 0;
+        else if(rbCurrentMap.isSelected()) scope = 1;
+        else if(rbAllMaps.isSelected())    scope = 2;
+        else if(rbSelection.isSelected())  scope = 3;
+        jDlgPrefs.put("scope", scope);
+
+        boolean backgroundColor = rbBackgroundColor.isSelected();
+        jDlgPrefs.put("bgDrawCol", backgroundColor);
+
+        boolean backgroundGrid = cbBackgroundGrid.isSelected();
+        jDlgPrefs.put("bgDrawGrid", backgroundGrid);
+
+        Color bgCol = ccbBackgroundColor.getColor();
+        jDlgPrefs.put("bgCol", bgCol.getRGB());
+
+        boolean legendPathCols = cbLegendPathColors.isSelected();
+        boolean legendPlaceGroups = cbLegendPlaceGroups.isSelected();
+        boolean legendRiskLevels = cbLegendRiskLevels.isSelected();
+        jDlgPrefs.put("legendPathCols", legendPathCols);
+        jDlgPrefs.put("legendPlaceGroups", legendPlaceGroups);
+        jDlgPrefs.put("legendRiskLevels", legendRiskLevels);
+
+        int legendPos = 1;
+        if(rbLegendPosTop.isSelected())         legendPos = 0;
+        else if(rbLegendPosBottom.isSelected()) legendPos = 1;
+        else if(rbLegendPosLeft.isSelected())   legendPos = 2;
+        else if(rbLegendPosRight.isSelected())  legendPos = 3;
+        jDlgPrefs.put("legendPos", legendPos);
+
+        Color legendCol = ccbLegendBackground.getColor();
+        jDlgPrefs.put("legendCol", legendCol.getRGB());
     }
 
     /**
