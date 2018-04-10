@@ -28,7 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -76,6 +75,8 @@ public class ExportImageDialog extends ActionDialog {
     JFileChooser fileChooser;
     JSpinner spTileSize;
     JLabel lImageSize;
+    // paths
+    JRadioButton rbPathNo, rbPathStraight, rbPathCurved;
     // background
     JRadioButton rbBackgroundTransparent, rbBackgroundColor;
     ColorChooserButton ccbBackgroundColor;
@@ -107,6 +108,7 @@ public class ExportImageDialog extends ActionDialog {
 
         panel.add(createScopePanel());
         panel.add(createTileSizePanel());
+        panel.add(createPathPanel());
         panel.add(new JSeparator());
         panel.add(createBackgroundPanel());
         panel.add(new JSeparator());
@@ -165,8 +167,6 @@ public class ExportImageDialog extends ActionDialog {
             rbSelection.setEnabled(false);
         }
 
-        // TODO: read setting from file
-
         return panel;
     }
 
@@ -198,7 +198,38 @@ public class ExportImageDialog extends ActionDialog {
     }
 
     /**
-     * Creats backround (color, grid) panel
+     * Creates path panel
+     * @return
+     */
+    JPanel createPathPanel(){
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+
+        panel.add(new JLabel("Paths: "));
+
+        rbPathNo = new JRadioButton("no paths");
+        rbPathStraight = new JRadioButton("straight paths");
+        rbPathCurved = new JRadioButton("curved paths");
+
+        panel.add(rbPathNo);
+        panel.add(rbPathStraight);
+        panel.add(rbPathCurved);
+
+        MapPainterDefault painter = ((MapPainterDefault) worldTab.getWorldPanel().getMappainter());
+        if(!painter.getShowPaths()) rbPathNo.setSelected(true);
+        else if(!painter.getPathsCurved()) rbPathStraight.setSelected(true);
+        else rbPathCurved.setSelected(true);
+
+        ButtonGroup bgPath = new ButtonGroup();
+        bgPath.add(rbPathNo);
+        bgPath.add(rbPathStraight);
+        bgPath.add(rbPathCurved);
+
+        return panel;
+    }
+
+    /**
+     * Creates backround (color, grid) panel
      * @return panel
      */
     JPanel createBackgroundPanel(){
@@ -330,8 +361,6 @@ public class ExportImageDialog extends ActionDialog {
         constraints2.weightx = 2;
         ccbLegendBackground = new ColorChooserButton(pRow2, Color.LIGHT_GRAY);
         pRow2.add(ccbLegendBackground, constraints2);
-
-        // TODO: read color and settings
 
         return panel;
     }
@@ -682,6 +711,8 @@ public class ExportImageDialog extends ActionDialog {
 
             MapPainterDefault mappainter = new MapPainterDefault();
             mappainter.setGridEnabled(cbBackgroundGrid.isSelected());
+            mappainter.setShowPaths(!rbPathNo.isSelected());
+            mappainter.setPathsCurved(rbPathCurved.isSelected());
             mappainter.paint(graphics, tileSize, width, height,
                     worldTab.getWorld().getLayer(center.getLayer()),
                     center);
@@ -747,6 +778,20 @@ public class ExportImageDialog extends ActionDialog {
                 }
             }
 
+            if(jDlgPrefs.has("drawPaths")){
+                switch(jDlgPrefs.getInt("drawPaths")){
+                    case 0:
+                        rbPathNo.setSelected(true);
+                        break;
+                    case 1:
+                        rbPathStraight.setSelected(true);
+                        break;
+                    case 2:
+                        rbPathCurved.setSelected(true);
+                        break;
+                }
+            }
+
             if(jDlgPrefs.has("bgDrawCol")){
                 if(jDlgPrefs.getBoolean("bgDrawCol")){
                     rbBackgroundColor.setSelected(true);
@@ -808,6 +853,12 @@ public class ExportImageDialog extends ActionDialog {
         else if(rbAllMaps.isSelected())    scope = 2;
         else if(rbSelection.isSelected())  scope = 3;
         jDlgPrefs.put("scope", scope);
+
+        int drawPaths = 0;
+        if(rbPathNo.isSelected())               drawPaths = 0;
+        else if(rbPathStraight.isSelected())    drawPaths = 1;
+        else if(rbPathCurved.isSelected())      drawPaths = 2;
+        jDlgPrefs.put("drawPaths", drawPaths);
 
         boolean backgroundColor = rbBackgroundColor.isSelected();
         jDlgPrefs.put("bgDrawCol", backgroundColor);
