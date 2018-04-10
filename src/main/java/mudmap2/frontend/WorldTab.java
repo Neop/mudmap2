@@ -205,7 +205,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         constraints.weightx = 0.0;
         constraints.fill = GridBagConstraints.NONE;
         panelSouth.add(new JLabel("Map zoom:"), constraints);
-        
+
         constraints.gridx++;
         sliderZoom = new JSlider(0, 100, (int) (100.0 / WorldPanel.TILE_SIZE_MAX * worldPanel.getTileSize()));
         panelSouth.add(sliderZoom, constraints);
@@ -387,7 +387,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
     public void LayerChanged(Layer l) {
         ((SidePanel) sidePanel).getLayerPanel().setActiveLayer(l);
     }
-    
+
     @Override
     public JSONObject getMeta(HashMap<Integer, Integer> layerTranslation){
         JSONObject root = new JSONObject();
@@ -456,6 +456,10 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                         worldPanel.getHistory().add(new WorldCoordinate(layer, x, y));
                     }
                 }
+            }
+
+            if(worldPanel.getHistory().isEmpty()){
+                worldPanel.gotoHome();
             }
         }
     }

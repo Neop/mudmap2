@@ -318,10 +318,6 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     public void popPosition() {
         // if end not reached
         if(positionIdx < positionHistory.size() - 1) positionIdx++;
-        // add home coord at list end (unlike gotoHome())
-        else if(positionHistory.getLast().compareTo(getWorld().getHome()) != 0) {
-            positionHistory.addLast(getWorld().getHome());
-        }
 
         setCursor((int) getPosition().getX(), (int) getPosition().getY());
 
