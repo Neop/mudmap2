@@ -84,6 +84,17 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     JCheckBoxMenuItem menuEditShowCursor;
     JCheckBoxMenuItem menuEditShowGrid;
 
+    JMenuItem menuFileSave;
+    JMenuItem menuFileSaveAs;
+    JMenuItem menuFileSaveAsImage;
+
+    JMenuItem menuEditEditWorld;
+    JMenuItem menuEditPathColors;
+    JMenuItem menuEditAddPlaceGroup;
+
+    JMenuItem menuEditSetHomePosition;
+    JMenuItem menuEditGotoHomePosition;
+
     JTabbedPane tabbedPane = null;
     JPanel infoPanel = null;
 
@@ -142,7 +153,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         // available worlds
         JMenu menuFileOpenRecent = new JMenu("Open known world");
         menuFile.add(menuFileOpenRecent);
-        
+
         WorldFileList.findWorlds();
         for(final Entry<String, String> entry: WorldFileList.getWorlds().entrySet()){
             JMenuItem openWorldEntry = new JMenuItem(entry.getValue() + " (" + entry.getKey() + ")");
@@ -159,20 +170,20 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 }
             });
         }
-        
+
         menuFile.addSeparator();
-        JMenuItem menuFileSave = new JMenuItem("Save");
+        menuFileSave = new JMenuItem("Save");
         menuFileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         menuFileSave.setActionCommand("save_world");
         menuFileSave.addActionListener(this);
         menuFile.add(menuFileSave);
 
-        JMenuItem menuFileSaveAs = new JMenuItem("Save as");
+        menuFileSaveAs = new JMenuItem("Save as");
         menuFileSaveAs.setActionCommand("save_world_as");
         menuFileSaveAs.addActionListener(this);
         menuFile.add(menuFileSaveAs);
 
-        JMenuItem menuFileSaveAsImage = new JMenuItem("Export as image");
+        menuFileSaveAsImage = new JMenuItem("Export as image");
         menuFileSaveAsImage.setActionCommand("export_image");
         menuFileSaveAsImage.addActionListener(this);
         menuFile.add(menuFileSaveAsImage);
@@ -183,29 +194,29 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuFileQuit.addActionListener(this);
         menuFile.add(menuFileQuit);
 
-        JMenuItem menuEditEditWorld = new JMenuItem("Edit world");
+        menuEditEditWorld = new JMenuItem("Edit world");
         menuEditEditWorld.setActionCommand("edit_world");
         menuEditEditWorld.addActionListener(this);
         menuEdit.add(menuEditEditWorld);
 
-        JMenuItem menuEditPathColors = new JMenuItem("Path colors");
+        menuEditPathColors = new JMenuItem("Path colors");
         menuEditPathColors.setActionCommand("path_colors");
         menuEditPathColors.addActionListener(this);
         menuEdit.add(menuEditPathColors);
 
-        JMenuItem menuEditAddPlaceGroup = new JMenuItem("Add place group");
+        menuEditAddPlaceGroup = new JMenuItem("Add place group");
         menuEditAddPlaceGroup.setActionCommand("add_place_group");
         menuEditAddPlaceGroup.addActionListener(this);
         menuEdit.add(menuEditAddPlaceGroup);
 
         menuEdit.add(new JSeparator());
 
-        JMenuItem menuEditSetHomePosition = new JMenuItem("Set home position");
+        menuEditSetHomePosition = new JMenuItem("Set home position");
         menuEditSetHomePosition.setActionCommand("set_home");
         menuEditSetHomePosition.addActionListener(this);
         menuEdit.add(menuEditSetHomePosition);
 
-        JMenuItem menuEditGotoHomePosition = new JMenuItem("Go to home position");
+        menuEditGotoHomePosition = new JMenuItem("Go to home position");
         menuEditGotoHomePosition.setActionCommand("goto_home");
         menuEditGotoHomePosition.addActionListener(this);
         menuEdit.add(menuEditGotoHomePosition);
@@ -220,7 +231,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuEdit.add(menuEditShowCursor);
         menuEditShowCursor.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
         menuEditShowCursor.addChangeListener(this);
-        
+
         menuEditShowGrid = new JCheckBoxMenuItem("Show grid");
         menuEdit.add(menuEditShowGrid);
         menuEditShowGrid.addChangeListener(this);
@@ -228,11 +239,13 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         JMenuItem menuHelpAbout = new JMenuItem("About");
         menuHelp.add(menuHelpAbout);
         menuHelpAbout.addActionListener((ActionListener) new AboutDialog(this));
-        
+
         BorderLayout infoPanelLayout = new BorderLayout();
         infoPanel = new JPanel(infoPanelLayout);
         add(infoPanel, BorderLayout.CENTER);
         infoPanel.add(new JLabel("Load or create a world in the File menu.", SwingConstants.CENTER));
+
+        updateMenus();
     }
 
     public void createNewWorld(){
@@ -263,7 +276,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             add(tabbedPane);
             tabbedPane.addChangeListener(this);
         }
-        
+
         if(!worldTabs.containsKey(world)){
             // open new tab
             WorldTab tab = new WorldTab(this, world, file, false);
@@ -323,6 +336,24 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         closeTabs();
         WorldFileList.writeWorldList();
         System.exit(0);
+    }
+
+    private void updateMenus(){
+        boolean worldTabActive = tabbedPane != null &&
+                tabbedPane.getSelectedComponent() instanceof WorldTab;
+
+        menuFileSave.setEnabled(worldTabActive);
+        menuFileSaveAs.setEnabled(worldTabActive);
+        menuFileSaveAsImage.setEnabled(worldTabActive);
+
+        menuEditAddPlaceGroup.setEnabled(worldTabActive);
+        menuEditCurvedPaths.setEnabled(worldTabActive);
+        menuEditEditWorld.setEnabled(worldTabActive);
+        menuEditGotoHomePosition.setEnabled(worldTabActive);
+        menuEditPathColors.setEnabled(worldTabActive);
+        menuEditSetHomePosition.setEnabled(worldTabActive);
+        menuEditShowCursor.setEnabled(worldTabActive);
+        menuEditShowGrid.setEnabled(worldTabActive);
     }
 
     @Override
@@ -414,6 +445,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, message);
             JOptionPane.showMessageDialog(this, message, "MUD Map error", JOptionPane.ERROR_MESSAGE);
         }
+        updateMenus();
     }
 
     @Override

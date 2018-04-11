@@ -3,6 +3,7 @@
 - rewrote image export dialog
 - removed html export
 - fixed: prev button created invalid entries
+- minor UI changes
 
 2.4.5
 - fixed: place connect dialog was stuck in screen border
