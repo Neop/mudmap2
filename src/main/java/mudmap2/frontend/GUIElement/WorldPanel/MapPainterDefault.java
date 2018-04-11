@@ -628,6 +628,11 @@ public class MapPainterDefault implements MapPainter {
                         switch(layer.getWorld().getShowPlaceId()){
                             default:
                             case UNIQUE:
+                                placeName = curPlace.getName();
+                                if(!layer.isPlaceNameUnique(placeName)){
+                                    placeName = curPlace.toString();
+                                }
+                                break;
                             case NONE:
                                 placeName = curPlace.getName(); // name only
                                 break;

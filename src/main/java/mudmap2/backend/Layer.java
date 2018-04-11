@@ -23,6 +23,7 @@
 
 package mudmap2.backend;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import mudmap2.backend.prquadtree.Quadtree;
@@ -34,7 +35,7 @@ import mudmap2.utils.Pair;
  *
  * @author neop
  */
-public class Layer {
+public class Layer implements WorldChangeListener {
 
     World world;
     Integer id;
@@ -44,12 +45,16 @@ public class Layer {
     // for quadtree optimization
     int maxX, minX, maxY, minY;
 
+    // place name cache for unique check
+    HashMap<String, Integer> placeNameCache;
+
     public Layer(int id, World world){
         this.id = id;
         if(id >= world.getNextLayerID()) world.setNextLayerID(id + 1);
         this.world = world;
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
+        placeNameCache = new HashMap<>();
     }
 
     public Layer(World world){
@@ -58,6 +63,7 @@ public class Layer {
         this.world = world;
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
+        placeNameCache = new HashMap<>();
     }
 
     public String getName() {
@@ -203,9 +209,7 @@ public class Layer {
 
     /**
      * Adds an element to the layer (but not to the world!), uses the position
- of the element.
- NOTICE: use World::putPlace(), if you want to add a place to a layer of a
- world! This method won't add the place to the world!
+     * of the element
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
@@ -317,6 +321,41 @@ public class Layer {
     @Override
     public String toString(){
         return getName();
+    }
+
+    /**
+     * Check if place name is unique
+     * @param name place name to check
+     * @return true if name is unique on this layer
+     */
+    public boolean isPlaceNameUnique(String name){
+        Integer num = placeNameCache.get(name);
+        return num == null || num <= 1;
+    }
+
+    /**
+     * Recreates place name chache
+     */
+    private void updatePlaceNameCache(){
+        placeNameCache.clear();
+
+        for(Place place: getPlaces()){
+            Integer value = placeNameCache.get(place.getName());
+            if(value == null){
+                value = 1;
+            } else {
+                value += 1;
+            }
+            placeNameCache.put(place.getName(), value);
+        }
+    }
+
+    @Override
+    public void worldChanged(Object source) {
+        // if source is a place on this layer
+        if(source instanceof Place && elements.contains((Place) source)){
+            updatePlaceNameCache();
+        }
     }
 
     /**

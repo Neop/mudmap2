@@ -217,6 +217,7 @@ public class World implements BreadthSearchGraph {
         if(!layers.containsKey(layer.getId()))
             layers.put(layer.getId(), layer);
 
+        addChangeListener(layer);
         callListeners(layer);
     }
 
