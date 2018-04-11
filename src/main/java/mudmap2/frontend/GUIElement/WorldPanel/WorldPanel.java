@@ -1196,7 +1196,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                                 getWorld().putPlaceholder(getPosition().getLayer(), parent.getCursorX(), parent.getCursorY());
                             } else if(place.getName().equals(Place.PLACEHOLDER_NAME)){
                                 try {
-                                    place.remove();
+                                    place.getLayer().remove(place);
                                 } catch (RuntimeException ex) {
                                     Logger.getLogger(TabKeyListener.class.getName()).log(Level.SEVERE, null, ex);
                                     JOptionPane.showMessageDialog(parent, "Could not remove place: " + ex.getMessage());

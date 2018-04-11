@@ -25,7 +25,6 @@ package mudmap2.backend;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
-import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.sssp.BreadthSearch;
 
 /**
@@ -252,8 +251,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public HashSet<Path> getPaths(Place place){
         HashSet<Path> ret = new HashSet<>();
-        for(Path path: paths)
+        for(Path path: paths){
             if(path.hasPlace(place)) ret.add(path);
+        }
         return ret;
     }
 
@@ -450,16 +450,6 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Removes the place from its layer
-     * @throws RuntimeException
-     * @throws mudmap2.backend.Layer.PlaceNotFoundException
-     */
-    public void remove() throws RuntimeException, PlaceNotFoundException {
-        removeConnections();
-        getLayer().remove(this);
-    }
-
-    /**
      * Returns true, if the keyword is found in any of the places data
      * it searches in name, comments and flags
      * @param keyword
@@ -470,8 +460,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         // search in name
         if(name.toLowerCase().contains(keyword)) return true;
         // search in comments
-        for(String comment: comments)
+        for(String comment: comments){
             if(comment.toLowerCase().contains(keyword)) return true;
+        }
         return false;
     }
 
@@ -522,7 +513,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     @Override
     public BreadthSearchData getBreadthSearchData() {
-        if(breadthSearchData == null) breadthSearchData = new BreadthSearchData();
+        if(breadthSearchData == null){
+            breadthSearchData = new BreadthSearchData();
+        }
         return breadthSearchData;
     }
 
@@ -530,8 +523,9 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * Call world change listeners on place changes
      */
     private void callWorldChangeListeners(){
-        if(getLayer() != null && getLayer().getWorld() != null)
+        if(getLayer() != null && getLayer().getWorld() != null){
             getLayer().getWorld().callListeners(this);
+        }
     }
 
 }

@@ -810,43 +810,6 @@ public class PlaceTest {
     }
 
     /**
-     * Test of removePlace method, of class Place.
-     */
-    @Test
-    public void testRemove() {
-        System.out.println("remove");
-
-        int x = 1, y = 2;
-        Place instance = new Place("MyPlace", x, y, layer);
-
-        try { // TODO: removePlace this if place puts itself to layer in constructor
-            layer.put(instance);
-        } catch (Layer.PlaceNotInsertedException ex) {
-            fail(ex.getMessage());
-        }
-        assertFalse(layer.isEmpty());
-        assertEquals(instance, layer.get(x, y));
-
-        try {
-            instance.remove();
-        } catch (RuntimeException ex) {
-            fail(ex.getMessage());
-        } catch (Layer.PlaceNotFoundException ex) {
-            fail(ex.getMessage());
-        }
-
-        assertTrue(layer.isEmpty());
-        assertNull(layer.get(x, y));
-
-        try {
-            instance.remove();
-            fail();
-        } catch (RuntimeException ex) {
-            fail(ex.getMessage());
-        } catch (Layer.PlaceNotFoundException ex) {} // expected exception
-    }
-
-    /**
      * Test of matchKeywords method, of class Place.
      */
     @Test
