@@ -48,33 +48,62 @@ public class Layer implements WorldChangeListener {
     // place name cache for unique check
     HashMap<String, Integer> placeNameCache;
 
+    /**
+     * Constructor, sets layer id
+     * @param id layer id
+     * @param world world
+     */
     public Layer(int id, World world){
+        if(world == null) throw new NullPointerException();
+
         this.id = id;
+        this.world = world;
+
         if(id >= world.getNextLayerID()) world.setNextLayerID(id + 1);
-        this.world = world;
+
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
         placeNameCache = new HashMap<>();
     }
 
+    /**
+     * Constructor, generates unique layer id
+     * @param world world
+     */
     public Layer(World world){
+        if(world == null) throw new NullPointerException();
+
         id = world.getNextLayerID();
-        world.setNextLayerID(id+1);
         this.world = world;
+
+        world.setNextLayerID(id+1);
+
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
         placeNameCache = new HashMap<>();
     }
 
+    /**
+     * Get layer name or generated name if no name is set
+     * @return layer name or name generated from layer id
+     */
     public String getName() {
         if(name == null) return "Map " + getId();
         return name;
     }
 
+    /**
+     * Set layer name
+     * @param name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Check whether the layer has an explicitly set name
+     * @return
+     */
     public Boolean hasName(){
         return name != null;
     }
@@ -221,6 +250,7 @@ public class Layer implements WorldChangeListener {
             maxY = Math.max(maxY, element.getY());
 
             elements.insert(element, element.getX(), element.getY());
+            world.callListeners(element);
         } catch (Exception ex) {
             throw new PlaceNotInsertedException(element.getX(), element.getY());
         }
@@ -286,6 +316,7 @@ public class Layer implements WorldChangeListener {
             else throw new PlaceNotFoundException(element.getX(), element.getY());
         }
         elements.remove(element.getX(), element.getY());
+        world.callListeners(this);
     }
 
     /**
@@ -354,6 +385,8 @@ public class Layer implements WorldChangeListener {
     public void worldChanged(Object source) {
         // if source is a place on this layer
         if(source instanceof Place && elements.contains((Place) source)){
+            updatePlaceNameCache();
+        } else if(source instanceof Layer && source == this){
             updatePlaceNameCache();
         }
     }

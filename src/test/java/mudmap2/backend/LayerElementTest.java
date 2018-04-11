@@ -111,6 +111,10 @@ public class LayerElementTest {
         LayerElement instance = new LayerElement(0, 2, layer);
         Layer result = instance.getLayer();
         assertEquals(layer, result);
+
+        LayerElement instance2 = new LayerElement(1, 2, null);
+        Layer result2 = instance2.getLayer();
+        assertNull(result2);
     }
 
     /**
@@ -126,6 +130,9 @@ public class LayerElementTest {
 
         instance.setLayer(layer1);
         assertEquals(layer1, instance.getLayer());
+
+        instance.setLayer(null);
+        assertNull(instance.getLayer());
     }
 
     /**
