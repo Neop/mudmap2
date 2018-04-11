@@ -50,6 +50,7 @@ public class PlaceTest {
     @Before
     public void setUp() {
         layer = new Layer(world);
+        world.addLayer(layer);
     }
 
     @After

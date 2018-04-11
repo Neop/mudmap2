@@ -47,6 +47,7 @@ public class PathTest {
     @Before
     public void setUp() {
         Layer layer = new Layer(world);
+        world.addLayer(layer);
         places = new Place[3];
         places[0] = new Place("MyPlace", 1, 2, layer);
         places[1] = new Place("Other place", 3, -1, layer);

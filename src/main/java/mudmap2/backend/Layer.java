@@ -50,8 +50,6 @@ public class Layer {
         this.world = world;
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
-
-        world.addLayer(this);
     }
 
     public Layer(World world){
@@ -60,8 +58,6 @@ public class Layer {
         this.world = world;
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
-
-        world.addLayer(this);
     }
 
     public String getName() {
@@ -291,13 +287,17 @@ public class Layer {
     /**
      * Returns true, if an element at position x,y exists
      * @param x x position
-     * @param y < position
+     * @param y y position
      * @return true, if an element exists
      */
     public boolean exist(int x, int y){
         return elements.exist(x, y);
     }
 
+    /**
+     * Check whether the layer is empty
+     * @return true if empty
+     */
     public boolean isEmpty(){
         return elements.isEmpty();
     }

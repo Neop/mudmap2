@@ -48,6 +48,7 @@ public class LayerElementTest {
     @Before
     public void setUp() {
         layer = new Layer(world);
+        world.addLayer(layer);
     }
 
     @After

@@ -85,10 +85,8 @@ public class WorldTest {
         Layer l1 = new Layer(instance);
         Layer l2 = new Layer(instance);
 
-        /*
         instance.addLayer(l1);
         instance.addLayer(l2);
-        */
 
         result = instance.getLayer(l1.getId());
         assertEquals(l1, result);

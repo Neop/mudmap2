@@ -234,8 +234,7 @@ public class World implements BreadthSearchGraph {
 
     public Layer getNewLayer(){
         Layer layer = new Layer(this);
-        layers.put(layer.getId(), layer);
-        callListeners(layer);
+        addLayer(layer);
         return layer;
     }
 
