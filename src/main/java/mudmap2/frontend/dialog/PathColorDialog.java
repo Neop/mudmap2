@@ -74,7 +74,7 @@ public class PathColorDialog extends ActionDialog {
 
         constraints_l.gridy = ++constraints_r.gridy;
         add(new JLabel("Cardinal path color"), constraints_l);
-        if(colchooser_cardinal == null) colchooser_cardinal = new ColorChooserButton(getParent(), world.getPathColor());
+        if(colchooser_cardinal == null) colchooser_cardinal = new ColorChooserButton(getParent(), world.getPathColorStd());
         add(colchooser_cardinal, constraints_r);
 
         constraints_l.gridy = ++constraints_r.gridy;
@@ -148,7 +148,7 @@ public class PathColorDialog extends ActionDialog {
      * Saves the changes
      */
     private void save(){
-        world.setPathColor(colchooser_cardinal.getColor());
+        world.setPathColorStd(colchooser_cardinal.getColor());
         world.setPathColorNstd(colchooser_non_cardinal.getColor());
 
         world.getPathColors().clear();

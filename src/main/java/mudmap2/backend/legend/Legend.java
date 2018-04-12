@@ -151,7 +151,7 @@ public class Legend {
     private void prepareLegendEntriesPathColors(){
         legendEntries.add(new LegendEntryTitle("Path Colors"));
 
-        Color colCardinal = layer.getWorld().getPathColor();
+        Color colCardinal = layer.getWorld().getPathColorStd();
         Color colNonCardinal = layer.getWorld().getPathColorNstd();
 
         legendEntries.add(new LegendEntryColor("cardinal direction", colCardinal));

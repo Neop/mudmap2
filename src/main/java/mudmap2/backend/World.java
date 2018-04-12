@@ -139,7 +139,11 @@ public class World implements BreadthSearchGraph {
      * @return world worldname
      */
     public String getName(){
-        return worldname;
+        if(worldname == null){
+            return "unnamed";
+        } else {
+            return worldname;
+        }
     }
 
     /**
@@ -172,11 +176,11 @@ public class World implements BreadthSearchGraph {
 
     /**
      * Creates a placeholder place
-     * @param layer layer
+     * @param layerId layer
      * @param x x coordinate
      * @param y y coordinate
      */
-    public void putPlaceholder(int layer, int x, int y){
+    public void putPlaceholder(int layerId, int x, int y){
         try {
             Place place = new Place(Place.PLACEHOLDER_NAME, x, y, null);
 
@@ -192,7 +196,12 @@ public class World implements BreadthSearchGraph {
             place.setPlaceGroup(placeGroup);
             place.setRiskLevel(getRiskLevel(0));
 
-            getLayer(layer).put(place, x, y);
+            Layer layer = getLayer(layerId);
+            if(layer == null){
+                addLayer(new Layer(layerId, this));
+                layer = getLayer(layerId);
+            }
+            layer.put(place, x, y);
         } catch(PlaceNotInsertedException ex){ // ignore
         } catch (Exception ex) {
             Logger.getLogger(World.class.getName()).log(Level.WARNING, "Couldn't put placeholder to map: " + ex, ex);
@@ -214,6 +223,10 @@ public class World implements BreadthSearchGraph {
      * @param layer
      */
     public void addLayer(Layer layer){ // TODO: throw Exception if layer exists
+        if(layer == null){
+            throw new NullPointerException();
+        }
+
         if(!layers.containsKey(layer.getId()))
             layers.put(layer.getId(), layer);
 
@@ -222,27 +235,41 @@ public class World implements BreadthSearchGraph {
     }
 
     /**
-     * Creates a new and empty layer and returns it
-     * @param name
+     * Creates a new and empty layer
+     * @param name layer name
      * @return new layer
      */
     public Layer getNewLayer(String name){
         Layer layer = getNewLayer();
-        if(!name.isEmpty()) layer.setName(name);
+        if(name != null && !name.isEmpty()){
+            layer.setName(name);
+        }
         callListeners(layer);
         return layer;
     }
 
+    /**
+     * Create a new anonymous, empty layer
+     * @return new layer
+     */
     public Layer getNewLayer(){
         Layer layer = new Layer(this);
         addLayer(layer);
         return layer;
     }
 
+    /**
+     * Gets the next layer id and increases the internal counter
+     * @return
+     */
     public Integer getNextLayerID(){
-        return nextLayerID;
+        return nextLayerID++;
     }
 
+    /**
+     * Sets the next layer id
+     * @param id
+     */
     public void setNextLayerID(Integer id){
         nextLayerID = id;
     }
@@ -257,10 +284,10 @@ public class World implements BreadthSearchGraph {
 
     // --------- colors --------------------------------------------------------
     /**
-     * Gets the path color
+     * Gets the standard path color
      * @return path color
      */
-    public Color getPathColor(){
+    public Color getPathColorStd(){
         return pathColorCardinal;
     }
 
@@ -274,12 +301,15 @@ public class World implements BreadthSearchGraph {
 
     /**
      * Gets the color of an exit direction
-     * @param dir
-     * @return
+     * @param dir exit direction
+     * @return path color
      */
     public Color getPathColor(String dir){
         Color ret;
-        if(!pathColors.containsKey(dir)){
+
+        if(dir == null){
+            ret = getPathColorStd();
+        } else if(!pathColors.containsKey(dir)){
             if(dir.equals("n") || dir.equals("s") || dir.equals("e") || dir.equals("q") ||
                dir.equals("ne") || dir.equals("nw") || dir.equals("se") || dir.equals("sw") ||
                dir.equals("w") || dir.equals("e"))
@@ -291,16 +321,6 @@ public class World implements BreadthSearchGraph {
     }
 
     /**
-     * Sets the color of an exit direction
-     * @param dir
-     * @param color
-     */
-    public void setPathColor(String dir, Color color){
-        pathColors.put(dir, color);
-        callListeners(this);
-    }
-
-    /**
      * Gets exit direction colors (without default colors)
      * @return
      */
@@ -309,10 +329,31 @@ public class World implements BreadthSearchGraph {
     }
 
     /**
+     * Sets the color of an exit direction
+     * @param dir
+     * @param color
+     */
+    public void setPathColor(String dir, Color color){
+        if(dir == null){
+            throw new NullPointerException();
+        }
+        if(color == null){
+            throw new NullPointerException();
+        }
+
+        pathColors.put(dir, color);
+        callListeners(this);
+    }
+
+    /**
      * Sets the path color
      * @param color new color
      */
-    public void setPathColor(Color color){
+    public void setPathColorStd(Color color){
+        if(color == null){
+            throw new NullPointerException();
+        }
+
         pathColorCardinal = color;
         callListeners(this);
     }
@@ -322,6 +363,10 @@ public class World implements BreadthSearchGraph {
      * @param color
      */
     public void setPathColorNstd(Color color){
+        if(color == null){
+            throw new NullPointerException();
+        }
+
         pathColorNonCardinal = color;
         callListeners(this);
     }
@@ -339,6 +384,10 @@ public class World implements BreadthSearchGraph {
      * @param color
      */
     public void setTileCenterColor(Color color){
+        if(color == null){
+            throw new NullPointerException();
+        }
+
         tileCenterColor = color;
         callListeners(this);
     }
@@ -383,7 +432,11 @@ public class World implements BreadthSearchGraph {
      * @param placeGroup new PlaceGroup
      */
     public void addPlaceGroup(PlaceGroup placeGroup) {
-        if(!placeGroups.contains(placeGroup) && placeGroup != null){
+        if(placeGroup == null){
+            throw new NullPointerException();
+        }
+
+        if(!placeGroups.contains(placeGroup)){
             placeGroups.add(placeGroup);
         }
         callListeners(placeGroup);
@@ -422,19 +475,29 @@ public class World implements BreadthSearchGraph {
     }
 
     /**
-     * Adds a risk level
+     * Adds a risk level, assignes a unique id
      * @param rl new risk level
      */
     public void addRiskLevel(RiskLevel rl){
-        if(!riskLevels.containsValue(rl) && rl != null){
+        if(rl == null){
+            throw new NullPointerException();
+        }
+
+        if(!riskLevels.containsValue(rl)){
             // ID-collision?
-            while(riskLevels.containsKey(rl.getId())) ++rl.id;
+            while(riskLevels.containsKey(rl.getId())){
+                ++rl.id;
+            }
             riskLevels.put(rl.getId(), rl);
         }
 
         callListeners(rl);
     }
 
+    /**
+     * Adds or replaces a risk level by it's id
+     * @param rl risk level to add or replace
+     */
     public void setRiskLevel(RiskLevel rl){
         riskLevels.put(rl.getId(), rl);
     }
@@ -445,17 +508,19 @@ public class World implements BreadthSearchGraph {
      * @throws java.lang.Exception
      */
     public void removeRiskLevel(RiskLevel rl) throws Exception {
-        if(!riskLevels.containsValue(rl)) throw new Exception("Tried to remove risk level that does not belong to this world");
-        // remode from risk level list
-        riskLevels.remove(rl.getId());
-        // removePlace from places
-        for(Layer layer: getLayers()){
-            for(Place place: layer.getPlaces()){
-                if(place.getRiskLevel() == rl) place.setRiskLevel(null);
+        if(rl != null){
+            if(!riskLevels.containsValue(rl)) throw new Exception("Tried to remove risk level that does not belong to this world");
+            // remode from risk level list
+            riskLevels.remove(rl.getId());
+            // removePlace from places
+            for(Layer layer: getLayers()){
+                for(Place place: layer.getPlaces()){
+                    if(place.getRiskLevel() == rl) place.setRiskLevel(null);
+                }
             }
-        }
 
-        callListeners(rl);
+            callListeners(rl);
+        }
     }
 
     // --------- preference ----------------------------------------------------
@@ -480,7 +545,8 @@ public class World implements BreadthSearchGraph {
      * does a breadth search
      * @param start start place
      * @param end end place
-     * @return
+     * @return end place or null. Following the predecessors of this path leads
+     * to the start place
      */
     @Override
     public Place breadthSearch(Place start, Place end) {

@@ -59,7 +59,9 @@ public class Layer implements WorldChangeListener {
         this.id = id;
         this.world = world;
 
-        if(id >= world.getNextLayerID()) world.setNextLayerID(id + 1);
+        if(id > world.getNextLayerID()+1){
+            world.setNextLayerID(id + 1);
+        }
 
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();
@@ -75,8 +77,6 @@ public class Layer implements WorldChangeListener {
 
         id = world.getNextLayerID();
         this.world = world;
-
-        world.setNextLayerID(id+1);
 
         maxX = minX = maxY = minY = 0;
         elements = new Quadtree<>();

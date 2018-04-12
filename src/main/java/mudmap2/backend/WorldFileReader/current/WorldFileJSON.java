@@ -160,7 +160,7 @@ public class WorldFileJSON extends WorldFile {
 
             // pathCol
             if(root.has("pathCol")){
-                world.setPathColor(hexToCol(root.getString("pathCol")));
+                world.setPathColorStd(hexToCol(root.getString("pathCol")));
             }
 
             // pathColNonCardinal
@@ -456,8 +456,8 @@ public class WorldFileJSON extends WorldFile {
             root.put("tileCenterCol", colToHex(world.getTileCenterColor()));
         }
         // cardinal and non cardinal path color
-        if(world.getPathColor() != null){
-            root.put("pathCol", colToHex(world.getPathColor()));
+        if(world.getPathColorStd() != null){
+            root.put("pathCol", colToHex(world.getPathColorStd()));
         }
         if(world.getPathColorNstd() != null){
             root.put("pathColNonCardinal", colToHex(world.getPathColorNstd()));
@@ -709,7 +709,7 @@ public class WorldFileJSON extends WorldFile {
                 }
                 if(line.contains("\"worldName\"")) return true;
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             return false;
         }
 
