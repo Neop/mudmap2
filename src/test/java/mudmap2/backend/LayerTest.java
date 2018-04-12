@@ -16,10 +16,12 @@
  */
 package mudmap2.backend;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mudmap2.backend.prquadtree.Quadtree;
 import mudmap2.utils.Pair;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -27,7 +29,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 
 /**
  *
@@ -156,17 +157,32 @@ public class LayerTest {
     /**
      * Test of setQuadtree method, of class Layer.
      */
-    @Ignore("test not implemented")
     @Test
     public void testSetQuadtree() {
         System.out.println("setQuadtree");
 
-        int centerX = -4;
-        int centerY = 5;
-        Layer instance = new Layer(world);
-        instance.setQuadtree(centerX, centerY);
+        try {
+            // use reflection to access private field
+            Field fieldElements = Layer.class.getDeclaredField("elements");
+            fieldElements.setAccessible(true);
 
-        // how to check this? Reflection?
+            int centerX = -4;
+            int centerY = 5;
+            Layer instance = new Layer(world);
+
+            // remember original quadtree
+            Quadtree quadtreeOrig = (Quadtree) fieldElements.get(instance);
+            assertNotNull(quadtreeOrig);
+
+            instance.setQuadtree(centerX, centerY);
+            Quadtree quadtreeNew = (Quadtree) fieldElements.get(instance);
+            assertNotNull(quadtreeNew);
+            assertNotSame(quadtreeOrig, quadtreeNew);
+
+            instance.setQuadtree(centerX, centerY);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            fail(ex.getMessage());
+        }
     }
 
     /**
