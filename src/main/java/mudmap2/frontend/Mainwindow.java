@@ -338,22 +338,35 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         System.exit(0);
     }
 
+    /**
+     * Updates menu items when the tab changes
+     */
     private void updateMenus(){
-        boolean worldTabActive = tabbedPane != null &&
+        boolean enabled = tabbedPane != null &&
                 tabbedPane.getSelectedComponent() instanceof WorldTab;
+        menuFileSave.setEnabled(enabled);
+        menuFileSaveAs.setEnabled(enabled);
+        menuFileSaveAsImage.setEnabled(enabled);
 
-        menuFileSave.setEnabled(worldTabActive);
-        menuFileSaveAs.setEnabled(worldTabActive);
-        menuFileSaveAsImage.setEnabled(worldTabActive);
+        menuEditAddPlaceGroup.setEnabled(enabled);
+        //menuEditCurvedPaths.setEnabled(enabled);
+        menuEditEditWorld.setEnabled(enabled);
+        menuEditGotoHomePosition.setEnabled(enabled);
+        menuEditPathColors.setEnabled(enabled);
+        menuEditSetHomePosition.setEnabled(enabled);
+        //menuEditShowCursor.setEnabled(enabled);
+        //menuEditShowGrid.setEnabled(enabled);
+        /* TODO: deactivated for toggle buttons since they did not accept
+        *  correct state
+        */
 
-        menuEditAddPlaceGroup.setEnabled(worldTabActive);
-        menuEditCurvedPaths.setEnabled(worldTabActive);
-        menuEditEditWorld.setEnabled(worldTabActive);
-        menuEditGotoHomePosition.setEnabled(worldTabActive);
-        menuEditPathColors.setEnabled(worldTabActive);
-        menuEditSetHomePosition.setEnabled(worldTabActive);
-        menuEditShowCursor.setEnabled(worldTabActive);
-        menuEditShowGrid.setEnabled(worldTabActive);
+        /*WorldTab selectedTab = getSelectedTab();
+        if(selectedTab != null){
+            MapPainterDefault mapPainter = ((MapPainterDefault) selectedTab.getWorldPanel().getMappainter());
+            menuEditShowCursor.setState(selectedTab.getWorldPanel().isCursorEnabled());
+            menuEditShowGrid.setState(mapPainter.isGridEnabled());
+            menuEditCurvedPaths.setState(mapPainter.getPathsCurved());
+        }*/
     }
 
     @Override
@@ -439,6 +452,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 wt.getWorldPanel().callStatusUpdateListeners();
                 menuEditCurvedPaths.setState(((MapPainterDefault) wt.getWorldPanel().getMappainter()).getPathsCurved());
                 menuEditShowGrid.setState(((MapPainterDefault) wt.getWorldPanel().getMappainter()).isGridEnabled());
+                menuEditShowCursor.setState(wt.getWorldPanel().isCursorEnabled());
             }
         } else {
             String message = getClass().getName() + ": ChangeEvent not recognized";
