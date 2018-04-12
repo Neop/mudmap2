@@ -91,7 +91,7 @@ public class RiskLevel {
      * @return description
      */
     public String getDescription(){
-        return toString();
+        return description;
     }
 
     /**
@@ -108,6 +108,10 @@ public class RiskLevel {
      */
     @Override
     public String toString(){
-        return description;
+        if(description == null){
+            return "";
+        } else {
+            return description;
+        }
     }
 }

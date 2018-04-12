@@ -49,6 +49,48 @@ public class WorldCoordinateTest {
     }
 
     /**
+     * Test of constructor
+     */
+    @Test
+    public void testWorldCoordinate_3Args(){
+        WorldCoordinate instance1 = new WorldCoordinate(0, 6, -7);
+        assertEquals(0, instance1.getLayer());
+        assertTrue(instance1.getX() == (double) 6.0);
+        assertTrue(instance1.getY() == (double) -7.0);
+
+        WorldCoordinate instance2 = new WorldCoordinate(-5, 0, 7);
+        assertEquals(-5, instance2.getLayer());
+        assertTrue(instance2.getX() == (double) 0.0);
+        assertTrue(instance2.getY() == (double) 7.0);
+
+        WorldCoordinate instance3 = new WorldCoordinate(5, -6, 0);
+        assertEquals(5, instance3.getLayer());
+        assertTrue(instance3.getX() == (double) -6.0);
+        assertTrue(instance3.getY() == (double) 0.0);
+    }
+
+    /**
+     * Test of constructor
+     */
+    @Test
+    public void testWorldCoordinate_1Arg(){
+        WorldCoordinate instance1 = new WorldCoordinate(new WorldCoordinate(0, 6, -7));
+        assertEquals(0, instance1.getLayer());
+        assertTrue(instance1.getX() == (double) 6.0);
+        assertTrue(instance1.getY() == (double) -7.0);
+
+        WorldCoordinate instance2 = new WorldCoordinate(new WorldCoordinate(-5, 0, 7));
+        assertEquals(-5, instance2.getLayer());
+        assertTrue(instance2.getX() == (double) 0.0);
+        assertTrue(instance2.getY() == (double) 7.0);
+
+        WorldCoordinate instance3 = new WorldCoordinate(new WorldCoordinate(5, -6, 0));
+        assertEquals(5, instance3.getLayer());
+        assertTrue(instance3.getX() == (double) -6.0);
+        assertTrue(instance3.getY() == (double) 0.0);
+    }
+
+    /**
      * Test of getLayer method, of class WorldCoordinate.
      */
     @Test
@@ -68,11 +110,21 @@ public class WorldCoordinateTest {
     public void testSetLayer() {
         System.out.println("setLayer");
 
-        int layerId = 5, layerId2 = 7;
+        int layerId = 5, layerId2 = 7, layerId3 = 0, layerId4 = -2;
+
         WorldCoordinate instance = new WorldCoordinate(layerId, 0, 0);
+
         instance.setLayer(layerId2);
-        int result = instance.getLayer();
-        assertEquals(layerId2, result);
+        int result2 = instance.getLayer();
+        assertEquals(layerId2, result2);
+
+        instance.setLayer(layerId3);
+        int result3 = instance.getLayer();
+        assertEquals(layerId3, result3);
+
+        instance.setLayer(layerId4);
+        int result4 = instance.getLayer();
+        assertEquals(layerId4, result4);
     }
 
     /**
