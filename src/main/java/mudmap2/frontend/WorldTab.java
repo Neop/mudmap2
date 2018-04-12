@@ -337,7 +337,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                         String infotext = pl.getName();
                         if(has_place_group || has_comments) infotext += " (";
                         if(has_place_group) infotext += pl.getPlaceGroup().getName();
-                        if(has_comments) infotext += (has_place_group ? ", " : "") + pl.getCommentsString(false);
+                        if(has_comments) infotext += (has_place_group ? ", " : "") + pl.getCommentsString().replace('\n', ' ');
                         if(has_place_group || has_comments) infotext += ")";
 
                         labelInfobar.setText(infotext);

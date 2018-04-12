@@ -50,6 +50,29 @@ public class PlaceGroupTest {
     }
 
     /**
+     * Test of constructors
+     */
+    @Test
+    public void testPlaceGroup(){
+        System.out.println("PlaceGroup");
+
+        PlaceGroup instance1 = new PlaceGroup("MyGroup");
+        assertEquals("MyGroup", instance1.getName());
+        assertEquals(Color.BLACK, instance1.getColor());
+
+        PlaceGroup instance2 = new PlaceGroup("Another group", Color.ORANGE);
+        assertEquals("Another group", instance2.getName());
+        assertEquals(Color.ORANGE, instance2.getColor());
+
+        PlaceGroup instance3 = new PlaceGroup(null);
+        assertNull(instance3.getName());
+
+        PlaceGroup instance4 = new PlaceGroup(null, null);
+        assertNull(instance4.getName());
+        assertNull(instance4.getColor());
+    }
+
+    /**
      * Test of getName method, of class PlaceGroup.
      */
     @Test
@@ -105,7 +128,7 @@ public class PlaceGroupTest {
         instance.setColor(color);
         Color result = instance.getColor();
         assertEquals(color, result);
-        
+
         color = null;
         instance.setColor(color);
         result = instance.getColor();

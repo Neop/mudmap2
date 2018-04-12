@@ -52,7 +52,7 @@ public class PlaceCommentDialog extends ActionDialog {
         optionPane.setOptionType(JOptionPane.YES_NO_OPTION);
 
         setContentPane(optionPane);
-        optionPane.setMessage(commentarea = new JTextArea(place.getCommentsString(true)));
+        optionPane.setMessage(commentarea = new JTextArea(place.getCommentsString()));
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 

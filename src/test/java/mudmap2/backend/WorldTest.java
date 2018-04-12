@@ -470,7 +470,9 @@ public class WorldTest {
         assertTrue(layers.isEmpty());
 
         Layer l1 = new Layer(instance);
+        instance.addLayer(l1);
         Layer l2 = new Layer(instance);
+        instance.addLayer(l2);
         Layer l3 = instance.getNewLayer();
 
         layers = instance.getLayers();

@@ -58,6 +58,46 @@ public class PlaceTest {
     }
 
     /**
+     * Test of constructor
+     */
+    @Test
+    public void testPlace(){
+        System.out.println("Place");
+
+        Place instance1 = new Place("MyPlace", 123, 456, layer);
+        assertEquals("MyPlace", instance1.getName());
+        assertEquals(123,       instance1.getX());
+        assertEquals(456,       instance1.getY());
+        assertEquals(layer,     instance1.getLayer());
+
+        Place instance2 = new Place("MyPlace", -123, 456, layer);
+        assertEquals("MyPlace", instance2.getName());
+        assertEquals(-123,      instance2.getX());
+        assertEquals(456,       instance2.getY());
+        assertEquals(layer,         instance2.getLayer());
+
+        Place instance3 = new Place("MyPlace", 123, -456, layer);
+        assertEquals("MyPlace", instance3.getName());
+        assertEquals(123,      instance3.getX());
+        assertEquals(-456,       instance3.getY());
+        assertEquals(layer,     instance3.getLayer());
+
+        // test name = null
+        Place instance4 = new Place(null, 123, 456, layer);
+        assertNull(instance4.getName());
+        assertEquals(123,      instance4.getX());
+        assertEquals(456,       instance4.getY());
+        assertEquals(layer,     instance4.getLayer());
+
+        // test layer = null
+        Place instance5 = new Place("MyPlace", 123, 456, null);
+        assertEquals("MyPlace", instance5.getName());
+        assertEquals(123,      instance5.getX());
+        assertEquals(456,       instance5.getY());
+        assertNull(instance5.getLayer());
+    }
+
+    /**
      * Test of getId method, of class Place.
      */
     @Test
@@ -87,10 +127,14 @@ public class PlaceTest {
     public void testGetName() {
         System.out.println("getName");
 
-        String expResult = "MyPlace";
-        Place instance = new Place(expResult, 0, 0, layer);
-        String result = instance.getName();
-        assertEquals(expResult, result);
+        String expResult1 = "MyPlace";
+        Place instance1 = new Place(expResult1, 0, 0, layer);
+        String result = instance1.getName();
+        assertEquals(expResult1, result);
+
+        // test null
+        Place instance2 = new Place(null, 0, 0, layer);
+        assertNull(instance2.getName());
     }
 
     /**
@@ -112,6 +156,8 @@ public class PlaceTest {
         instance.setName(name);
         result = instance.getName();
         assertEquals(name, result);
+
+        // set null
     }
 
     /**
@@ -160,15 +206,11 @@ public class PlaceTest {
         System.out.println("getPlaceGroup");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
-        PlaceGroup expResult = null;
-        PlaceGroup result = instance.getPlaceGroup();
-        assertEquals(expResult, result);
+        assertNull(instance.getPlaceGroup());
 
         PlaceGroup placeGroup = new PlaceGroup("myGroup", Color.red);
         instance.setPlaceGroup(placeGroup);
-        expResult = placeGroup;
-        result = instance.getPlaceGroup();
-        assertEquals(expResult, result);
+        assertEquals(placeGroup, instance.getPlaceGroup());
     }
 
     /**
@@ -184,6 +226,7 @@ public class PlaceTest {
         PlaceGroup result = instance.getPlaceGroup();
         assertEquals(placeGroup, result);
 
+        // test null
         instance.setPlaceGroup(null);
         result = instance.getPlaceGroup();
         assertEquals(null, result);
@@ -197,10 +240,23 @@ public class PlaceTest {
         System.out.println("getRecLevelMin");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
-        instance.setRecLevelMin(5);
-        int expResult = 5;
-        int result = instance.getRecLevelMin();
-        assertEquals(expResult, result);
+        // test default value
+        assertEquals(-1, instance.getRecLevelMin());
+
+        int expResult1 = 5;
+        instance.setRecLevelMin(expResult1);
+        int result1 = instance.getRecLevelMin();
+        assertEquals(expResult1, result1);
+
+        int expResult2 = -3;
+        instance.setRecLevelMin(expResult2);
+        int result2 = instance.getRecLevelMin();
+        assertEquals(expResult2, result2);
+
+        int expResult3 = 0;
+        instance.setRecLevelMin(expResult3);
+        int result3 = instance.getRecLevelMin();
+        assertEquals(expResult3, result3);
     }
 
     /**
@@ -210,21 +266,26 @@ public class PlaceTest {
     public void testSetRecLevelMin() {
         System.out.println("setRecLevelMin");
 
-        int rec_level_min = 0;
+        int recLevelMin1 = 0;
         Place instance = new Place("MyPlace", 0, 0, layer);
-        instance.setRecLevelMin(rec_level_min);
-        int result = instance.getRecLevelMin();
-        assertEquals(rec_level_min, result);
+        instance.setRecLevelMin(recLevelMin1);
+        int result1 = instance.getRecLevelMin();
+        assertEquals(recLevelMin1, result1);
 
-        rec_level_min = 10;
-        instance.setRecLevelMin(rec_level_min);
-        result = instance.getRecLevelMin();
-        assertEquals(rec_level_min, result);
+        int recLevelMin2 = 10;
+        instance.setRecLevelMin(recLevelMin2);
+        int result2 = instance.getRecLevelMin();
+        assertEquals(recLevelMin2, result2);
 
-        rec_level_min = -1;
-        instance.setRecLevelMin(rec_level_min);
-        result = instance.getRecLevelMin();
-        assertEquals(rec_level_min, result);
+        int recLevelMin3 = -2;
+        instance.setRecLevelMin(recLevelMin3);
+        int result3 = instance.getRecLevelMin();
+        assertEquals(recLevelMin3, result3);
+
+        int recLevelMin4 = 0;
+        instance.setRecLevelMin(recLevelMin4);
+        int result4 = instance.getRecLevelMin();
+        assertEquals(recLevelMin4, result4);
     }
 
     /**
@@ -238,6 +299,21 @@ public class PlaceTest {
         int expResult = -1; // default value
         int result = instance.getRecLevelMax();
         assertEquals(expResult, result);
+
+        int expResult1 = 5;
+        instance.setRecLevelMax(expResult1);
+        int result1 = instance.getRecLevelMax();
+        assertEquals(expResult1, result1);
+
+        int expResult2 = -3;
+        instance.setRecLevelMax(expResult2);
+        int result2 = instance.getRecLevelMax();
+        assertEquals(expResult2, result2);
+
+        int expResult3 = 0;
+        instance.setRecLevelMax(expResult3);
+        int result3 = instance.getRecLevelMax();
+        assertEquals(expResult3, result3);
     }
 
     /**
@@ -247,21 +323,22 @@ public class PlaceTest {
     public void testSetRecLevelMax() {
         System.out.println("setRecLevelMax");
 
-        int rec_level_max = 0;
         Place instance = new Place("MyPlace", 0, 0, layer);
-        instance.setRecLevelMax(rec_level_max);
-        int result = instance.getRecLevelMax();
-        assertEquals(rec_level_max, result);
 
-        rec_level_max = 4;
-        instance.setRecLevelMax(rec_level_max);
-        result = instance.getRecLevelMax();
-        assertEquals(rec_level_max, result);
+        int recLevelMax1 = 0;
+        instance.setRecLevelMax(recLevelMax1);
+        int result1 = instance.getRecLevelMax();
+        assertEquals(recLevelMax1, result1);
 
-        rec_level_max = -1;
-        instance.setRecLevelMax(rec_level_max);
-        result = instance.getRecLevelMax();
-        assertEquals(rec_level_max, result);
+        int recLevelMax2 = 4;
+        instance.setRecLevelMax(recLevelMax2);
+        int result2 = instance.getRecLevelMax();
+        assertEquals(recLevelMax2, result2);
+
+        int recLevelMax3 = -1;
+        instance.setRecLevelMax(recLevelMax3);
+        int result3 = instance.getRecLevelMax();
+        assertEquals(recLevelMax3, result3);
     }
 
     /**
@@ -272,6 +349,9 @@ public class PlaceTest {
         System.out.println("getRiskLevel");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
+        // default value
+        assertNull(instance.getRiskLevel());
+
         RiskLevel expResult = new RiskLevel("description", Color.yellow);
         instance.setRiskLevel(expResult);
         RiskLevel result = instance.getRiskLevel();
@@ -285,12 +365,14 @@ public class PlaceTest {
     public void testSetRiskLevel() {
         System.out.println("setRiskLevel");
 
-        RiskLevel risk_level = new RiskLevel("description", Color.yellow);
         Place instance = new Place("MyPlace", 0, 0, layer);
+
+        RiskLevel risk_level = new RiskLevel("description", Color.yellow);
         instance.setRiskLevel(risk_level);
         RiskLevel result = instance.getRiskLevel();
         assertEquals(risk_level, result);
 
+        // test null
         instance.setRiskLevel(null);
         result = instance.getRiskLevel();
         assertEquals(null, result);
@@ -372,20 +454,18 @@ public class PlaceTest {
         System.out.println("getCommentsString");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
+
+        assertNotNull(instance.getCommentsString());
+        assertEquals("", instance.getCommentsString());
+
         String comment1 = "My Comment";
         String comment2 = "Another comment";
         instance.addComment(comment1);
         instance.addComment(comment2);
         assertEquals(2, instance.getComments().size());
 
-        boolean newlines = false;
-        String expResult = comment1 + " " + comment2;
-        String result = instance.getCommentsString(newlines);
-        assertEquals(expResult, result);
-
-        newlines = true;
-        expResult = comment1 + "\n" + comment2;
-        result = instance.getCommentsString(newlines);
+        String expResult = comment1 + "\n" + comment2;
+        String result = instance.getCommentsString();
         assertEquals(expResult, result);
     }
 
@@ -418,107 +498,24 @@ public class PlaceTest {
 
         Place instance = new Place("MyPlace", 1, 1, layer);
         Place place1 = new Place("Another place", 1, 2, layer);
-        Place place2 = new Place("Another place", 1, 2, layer);
 
-        HashSet<Path> result = instance.getPaths(place1);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        HashSet<Path> result1 = instance.getPaths(place1);
+        assertNotNull(result1);
+        assertTrue(result1.isEmpty());
 
         Path p1 = new Path(instance, "n", place1, "s");
         Path p2 = new Path(place1, "n", instance, "s");
-        Path p3 = new Path(place2, "e", instance, "w");
         instance.connectPath(p1);
         instance.connectPath(p2);
 
-        result = instance.getPaths(place1);
-        assertEquals(2, result.size());
-        assertTrue(result.contains(p1));
-        assertTrue(result.contains(p2));
-    }
+        HashSet<Path> result2 = instance.getPaths(place1);
+        assertEquals(2, result2.size());
+        assertTrue(result2.contains(p1));
+        assertTrue(result2.contains(p2));
 
-    /**
-     * Test of removePath method, of class Place.
-     */
-    @Test
-    public void testRemovePath_3args() {
-        System.out.println("removePath");
-
-        Place instance = new Place("MyPlace", 1, 1, layer);
-        Place place = new Place("Another place", 1, 2, layer);
-
-        Path p1 = new Path(instance, "n", place, "s");
-        Path p2 = new Path(place, "e", instance, "w");
-        instance.connectPath(p1);
-        instance.connectPath(p2);
-
-        HashSet<Path> result = instance.getPaths(place);
-        assertEquals(2, result.size());
-
-        try {
-            instance.removePath("n", place, "s");
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
-        result = instance.getPaths(place);
-        assertEquals(1, result.size());
-        assertFalse(result.contains(p1));
-
-        try {
-            instance.removePath("n", place, "s");
-            fail();
-        } catch (Exception ex) {}
-
-        try {
-            instance.removePath("w", place, "e");
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
-        result = instance.getPaths(place);
-        assertEquals(0, result.size());
-        assertFalse(result.contains(p2));
-    }
-
-    /**
-     * Test of removePath method, of class Place.
-     */
-    @Test
-    public void testRemovePath_Path() {
-        System.out.println("removePath");
-
-        Place instance = new Place("MyPlace", 1, 1, layer);
-        Place place = new Place("Another place", 1, 2, layer);
-
-        try {
-            instance.removePath(new Path(instance, "n", place, "s"));
-            //fail(); // TODO: should this method throw an exception?
-        } catch(Exception e){}
-
-        Path p1 = new Path(instance, "n", place, "s");
-        Path p2 = new Path(place, "n", instance, "s");
-        instance.connectPath(p1);
-        instance.connectPath(p2);
-
-        HashSet<Path> result = instance.getPaths(place);
-        assertEquals(2, result.size());
-
-        instance.removePath(p1);
-        result = instance.getPaths(place);
-        assertEquals(1, result.size());
-        assertFalse(result.contains(p1));
-
-        instance.removePath(p2);
-        result = instance.getPaths(place);
-        assertEquals(0, result.size());
-        assertFalse(result.contains(p2));
-    }
-
-    /**
-     * Test of connectPath method, of class Place.
-     */
-    @Test
-    public void testConnectPath() {
-        System.out.println("connectPath");
-        // testGetPaths_Place(); // also tests connectPath
+        HashSet<Path> result3 = instance.getPaths(null);
+        assertNotNull(result3);
+        assertTrue(result3.isEmpty());
     }
 
     /**
@@ -544,6 +541,123 @@ public class PlaceTest {
         assertEquals(2, result.size());
         assertTrue(result.contains(p1));
         assertTrue(result.contains(p2));
+    }
+
+    /**
+     * Test of removePath method, of class Place.
+     */
+    @Test
+    public void testRemovePath() {
+        System.out.println("removePath");
+
+        Place instance = new Place("MyPlace", 1, 1, layer);
+        Place place = new Place("Another place", 1, 2, layer);
+
+        // path does not exist in place
+        try {
+            instance.removePath(new Path(instance, "n", place, "s"));
+        } catch(Exception e){
+            // don't throw if path has already been removed
+            fail();
+        }
+
+        // test null
+        try {
+            instance.removePath(null);
+            fail();
+        } catch(Exception e){
+            // expected
+        }
+
+        Path p1 = new Path(instance, "n", place, "s");
+        Path p2 = new Path(place, "n", instance, "s");
+        instance.connectPath(p1);
+        instance.connectPath(p2);
+
+        HashSet<Path> result = instance.getPaths(place);
+        assertEquals(2, result.size());
+        assertTrue(result.contains(p1));
+        assertTrue(result.contains(p2));
+
+        instance.removePath(p1);
+        result = instance.getPaths(place);
+        assertEquals(1, result.size());
+        assertFalse(result.contains(p1));
+        assertTrue(result.contains(p2));
+
+        instance.removePath(p2);
+        result = instance.getPaths(place);
+        assertEquals(0, result.size());
+        assertFalse(result.contains(p2));
+    }
+
+    /**
+     * Test of connectPath method, of class Place.
+     */
+    @Test
+    public void testConnectPath() {
+        System.out.println("connectPath");
+
+        Place instance = new Place("MyPlace", 1, 1, layer);
+        Place place1 = new Place("Another place", 1, 2, layer);
+        Place place2 = new Place("Another place", 1, 2, layer);
+
+        assertTrue(instance.getPaths().isEmpty());
+
+        Path p1 = new Path(instance, "n", place1, "s");
+        instance.connectPath(p1);
+        assertEquals(1, instance.getPaths().size());
+        assertTrue(instance.getPaths().contains(p1));
+
+        Path p2 = new Path(place1, "n", instance, "s");
+        instance.connectPath(p2);
+        assertEquals(2, instance.getPaths().size());
+        assertTrue(instance.getPaths().contains(p1));
+        assertTrue(instance.getPaths().contains(p2));
+
+        // test null
+        try {
+            instance.connectPath(null);
+            fail();
+        } catch(RuntimeException e){
+            // expected
+        }
+        assertEquals(2, instance.getPaths().size());
+
+        // test other place is null
+        Path p3 = new Path(null, "n", instance, "s");
+        try {
+            instance.connectPath(p3);
+            fail();
+        } catch(RuntimeException e){
+            // expected
+        }
+
+        // test instance not in path
+        Path p4 = new Path(place1, "n", place2, "s");
+        try {
+            instance.connectPath(p4);
+            fail();
+        } catch(RuntimeException e){
+            // expected
+        }
+
+        // test instance to instance, different exits
+        Path p5 = new Path(instance, "n", instance, "s");
+        try {
+            instance.connectPath(p5);
+        } catch(RuntimeException e){
+            fail();
+        }
+
+        // test instance to instance, same exit
+        Path p6 = new Path(instance, "n", instance, "n");
+        try {
+            instance.connectPath(p6);
+            fail();
+        } catch(RuntimeException e){
+            // expected
+        }
     }
 
     /**
@@ -580,12 +694,16 @@ public class PlaceTest {
     public void testGetFlag() {
         System.out.println("getFlag");
 
+        Place instance = new Place("MyPlace", 0, 0, layer);
+
         String key = "abc";
         boolean state = false;
-        Place instance = new Place("MyPlace", 0, 0, layer);
         instance.setFlag(key, state);
         boolean result = instance.getFlag(key);
         assertEquals(state, result);
+
+        // test null
+        assertFalse(instance.getFlag(null));
     }
 
     /**
@@ -595,18 +713,23 @@ public class PlaceTest {
     public void testSetFlag() {
         System.out.println("setFlag");
 
-        String key = "abc";
-        boolean state = false;
         Place instance = new Place("MyPlace", 0, 0, layer);
-        instance.setFlag(key, state);
-        boolean result = instance.getFlag(key);
-        assertEquals(state, result);
+
+        String key = "abc";
+        boolean state1 = false;
+        instance.setFlag(key, state1);
+        boolean result1 = instance.getFlag(key);
+        assertEquals(state1, result1);
 
         // change previously set value
-        state = true;
-        instance.setFlag(key, state);
-        result = instance.getFlag(key);
-        assertEquals(state, result);
+        boolean state2 = true;
+        instance.setFlag(key, state2);
+        boolean result2 = instance.getFlag(key);
+        assertEquals(state2, result2);
+
+        // test null
+        boolean state3 = true;
+        instance.setFlag(null, state3);
     }
 
     /**
@@ -617,7 +740,7 @@ public class PlaceTest {
         System.out.println("getFlags");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
-        TreeMap<String, Boolean> expResult = new TreeMap<String, Boolean>();
+        TreeMap<String, Boolean> expResult = new TreeMap<>();
         instance.setFlag("a", true);
         expResult.put("a", true);
         instance.setFlag("b", false);
@@ -657,6 +780,14 @@ public class PlaceTest {
         assertEquals(2, instance.getChildren().size());
         assertTrue(instance.getChildren().contains(p1));
         assertTrue(instance.getChildren().contains(p2));
+
+        // test null
+        try {
+            instance.connectChild(null);
+            fail();
+        } catch(NullPointerException ex){
+            // expected
+        }
     }
 
     /**
@@ -692,6 +823,8 @@ public class PlaceTest {
         assertEquals(0, instance.getChildren().size());
         assertEquals(0, p1.getParents().size());
         assertEquals(1, p2.getParents().size());
+
+        // test null
     }
 
     /**
@@ -861,36 +994,52 @@ public class PlaceTest {
         assertEquals(instance.getRecLevelMin(), result.getRecLevelMin());
         assertEquals(instance.getRecLevelMax(), result.getRecLevelMax());
         assertEquals(instance.getPlaceGroup(), result.getPlaceGroup());
-        assertEquals(instance.getCommentsString(false), result.getCommentsString(false));
+        assertEquals(instance.getCommentsString(), result.getCommentsString());
         assertEquals(instance.getFlags().entrySet().toString(), result.getFlags().entrySet().toString());
     }
 
     /**
      * Test of breadthSearchReset method, of class Place.
      */
-/*    @Test
-    @Ignore
+    @Test
     public void testBreadthSearchReset() {
         System.out.println("breadthSearchReset");
-        Place instance = null;
+
+        Place instance = new Place("MyPlace", 1, 2, layer);
+        Place place1 = new Place("MyPlace", 1, 3, layer);
+        Place place2 = new Place("MyPlace", 1, 4, layer);
+
+        instance.connectPath(new Path(instance, "n", place1, "s"));
+        place1.connectPath(new Path(place1, "n", place2, "s"));
+
+        world.breadthSearch(instance, place2);
+
+        assertTrue(instance.getBreadthSearchData().marked);
+
         instance.breadthSearchReset();
-        // TODO review the generated test code and removePlace the default call to fail.
-        fail("The test case is a prototype.");
+        assertFalse(instance.getBreadthSearchData().marked);
     }
-*/
+
     /**
      * Test of getBreadthSearchData method, of class Place.
      */
-/*    @Test
-    @Ignore
+    @Test
     public void testGetBreadthSearchData() {
         System.out.println("getBreadthSearchData");
-        Place instance = null;
-        BreadthSearch.BreadthSearchData expResult = null;
-        BreadthSearch.BreadthSearchData result = instance.getBreadthSearchData();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and removePlace the default call to fail.
-        fail("The test case is a prototype.");
+
+        Place instance = new Place("MyPlace", 1, 2, layer);
+        Place place1 = new Place("MyPlace", 1, 3, layer);
+        Place place2 = new Place("MyPlace", 1, 4, layer);
+
+        instance.connectPath(new Path(instance, "n", place1, "s"));
+        place1.connectPath(new Path(place1, "n", place2, "s"));
+
+        assertFalse(instance.getBreadthSearchData().marked);
+
+        world.breadthSearch(instance, place2);
+
+        assertTrue(instance.getBreadthSearchData().marked);
+        assertNull(instance.getBreadthSearchData().predecessor);
+        assertNotNull(place2.getBreadthSearchData().predecessor);
     }
-*/
 }

@@ -222,13 +222,12 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
 
     /**
      * Gets the comments as a single string
-     * @param newlines insert \n at lineendings, if true
      * @return
      */
-    public String getCommentsString(boolean newlines){
+    public String getCommentsString(){
         String ret = "";
-        String lineending = newlines ? "\n" : " ";
-        for(String c: comments) ret += (ret.length() == 0 ? "" : lineending) + c;
+        final String separator = "\n";
+        for(String c: comments) ret += (ret.length() == 0 ? "" : separator) + c;
         return ret;
     }
 
@@ -258,23 +257,11 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Removes a path
-     * @param dir1 exit direction on this place
-     * @param other connected place
-     * @param dir2 exit direction of the other place
-     * @throws java.lang.Exception if path could not be removed
+     * Gets all paths
+     * @return all paths
      */
-    public void removePath(String dir1, Place other, String dir2) throws Exception{
-        boolean ok = false;
-        for(Path path: Place.this.getPaths(other)){
-            if(path.getExit(this).equals(dir1) && path.getExit(other).equals(dir2)){
-                paths.remove(path);
-                other.paths.remove(path);
-                ok = true;
-            }
-        }
-        if(!ok) throw new RuntimeException("Couldn't remove path connection (" + this + " [" + dir1 + "] - " + other + " [" + dir2 + "]), path not found");
-        callWorldChangeListeners();
+    public HashSet<Path> getPaths(){
+        return paths;
     }
 
     /**
@@ -293,7 +280,8 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param path
      * @return true, if successfully connected
      */
-    public boolean connectPath(Path path) throws RuntimeException{
+    public boolean connectPath(Path path)
+            throws RuntimeException,NullPointerException {
         Place[] pp = path.getPlaces();
         Place other;
 
@@ -301,40 +289,45 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         else if(pp[1] == this) other = pp[0];
         else throw new RuntimeException("This place is not specified in given path");
 
-        boolean exit_occupied = false;
-        String exit_this = path.getExit(this);
+        // check whether other place is null
+        if(other == null){
+            throw new NullPointerException();
+        }
 
-        // check if exit is already connected with path
+        // check whether the path connects a place with itself on the same exit
+        if(other == this &&
+                path.getExitDirections()[0].equals(path.getExitDirections()[1])){
+            throw new RuntimeException("Can not connect path to the same exit of one place");
+        }
+
+        boolean exitOccupied = false;
+        String exitThis = path.getExit(this);
+
+        // check if exit is already connected to a path
         for(Path p: paths){
-            if(p.getExit(this).equals(exit_this)){
-                exit_occupied = true;
+            if(p.getExit(this).equals(exitThis)){
+                exitOccupied = true;
                 break;
             }
         }
-        if(!exit_occupied){
-            exit_this = path.getExit(other);
+        // check if exit of other place is already connected to a path
+        if(!exitOccupied){
+            exitThis = path.getExit(other);
             for(Path p: other.paths){
-                if(p.getExit(other).equals(exit_this)){
-                    exit_occupied = true;
+                if(p.getExit(other).equals(exitThis)){
+                    exitOccupied = true;
                     break;
                 }
             }
 
-            if(!exit_occupied){
+            if(!exitOccupied){
                 paths.add(path);
                 other.paths.add(path);
             }
         }
-        callWorldChangeListeners();
-        return !exit_occupied;
-    }
 
-    /**
-     * Gets all paths
-     * @return all paths
-     */
-    public HashSet<Path> getPaths(){
-        return paths;
+        callWorldChangeListeners();
+        return !exitOccupied;
     }
 
     /**
@@ -355,7 +348,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return flag value
      */
     public boolean getFlag(String key){
-        if(flags.containsKey(key)) return flags.get(key);
+        if(key != null && flags.containsKey(key)) return flags.get(key);
         return false;
     }
 
@@ -365,8 +358,10 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param state value
      */
     public void setFlag(String key, boolean state){
-        flags.put(key, state);
-        callWorldChangeListeners();
+        if(key != null){
+            flags.put(key, state);
+            callWorldChangeListeners();
+        }
     }
 
     /**
@@ -378,23 +373,29 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Connects a place as child, this place will be added to it as parent
-     * @param p
+     * Connects a place as child, this place will be added to the child as parent
+     * @param place
      */
-    public void connectChild(Place p){
-        children.add(p);
-        p.parents.add(this);
-        callWorldChangeListeners();
+    public void connectChild(Place place){
+        if(place != null){
+            children.add(place);
+            place.parents.add(this);
+            callWorldChangeListeners();
+        } else {
+            throw new NullPointerException();
+        }
     }
 
     /**
      * Removes a parent - child connection
-     * @param child child to be removed
+     * @param place child to be removed
      */
-    public void removeChild(Place child){
-        children.remove(child);
-        child.parents.remove(this);
-        callWorldChangeListeners();
+    public void removeChild(Place place){
+        if(place != null){
+            children.remove(place);
+            place.parents.remove(this);
+            callWorldChangeListeners();
+        } // don't throw
     }
 
     /**
@@ -455,7 +456,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param keyword
      * @return true, if the keyword is found
      */
-    public boolean matchKeyword(String keyword){
+    private boolean matchKeyword(String keyword){
         keyword = keyword.toLowerCase();
         // search in name
         if(name.toLowerCase().contains(keyword)) return true;
