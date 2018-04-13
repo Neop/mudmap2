@@ -892,7 +892,7 @@ public class WorldTest {
             BreadthSearch.BreadthSearchData breadthSearchData3 = result3.getBreadthSearchData();
             assertNotNull(breadthSearchData3);
 
-            assertEquals(place12, breadthSearchData3.predecessor);
+            assertTrue(place12 == breadthSearchData3.predecessor || place14 == breadthSearchData3.predecessor);
             breadthSearchData3 = breadthSearchData3.predecessor.getBreadthSearchData();
             assertNotNull(breadthSearchData3);
 
