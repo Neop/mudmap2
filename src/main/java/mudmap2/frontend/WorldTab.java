@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -198,8 +199,9 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         panelSouth.add(labelInfobar = new ScrollLabel(), constraints);
         labelInfobar.startThread();
 
-        // set default selected place to hte center place
+        // set default selected place to the center place
         worldPanel.setCursor((int) Math.round(worldPanel.getPosition().getX()), (int) Math.round(worldPanel.getPosition().getY()));
+        worldPanel.moveScreenToCursor();
 
         constraints.gridx++;
         constraints.weightx = 0.0;
@@ -441,9 +443,9 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             if(meta.has("showGrid")) mapPainter.setGridEnabled(meta.getBoolean("showGrid"));
             if(meta.has("tileSize")) getWorldPanel().setTileSize(meta.getInt("tileSize"));
 
-            if(meta.has("history")){
-                worldPanel.getHistory().clear();
+            LinkedList<WorldCoordinate> positionHistory = new LinkedList<>();
 
+            if(meta.has("history")){
                 JSONArray history = meta.getJSONArray("history");
                 Integer size = history.length();
 
@@ -453,14 +455,16 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                         Integer layer = histEl.getInt("l");
                         Integer x = histEl.getInt("x");
                         Integer y = histEl.getInt("y");
-                        worldPanel.getHistory().add(new WorldCoordinate(layer, x, y));
+                        positionHistory.add(new WorldCoordinate(layer, x, y));
                     }
                 }
             }
 
-            if(worldPanel.getHistory().isEmpty()){
-                worldPanel.gotoHome();
+            if(positionHistory.isEmpty()){
+                positionHistory.push(new WorldCoordinate(worldPanel.getWorld().getHome()));
             }
+
+            worldPanel.setHistory(positionHistory);
         }
     }
 }

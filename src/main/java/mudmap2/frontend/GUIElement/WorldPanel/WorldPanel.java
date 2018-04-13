@@ -93,8 +93,14 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     HashSet<StatusListener> statusListeners;
     HashSet<WorldPanelListener> tileSizeListeners;
 
-    LinkedList<WorldCoordinate> positionHistory;
-    Integer positionIdx;
+    /**
+     * positionsTail contains all previously visited positions up to the current
+     * position, positionsHead contains all positions visited after the current
+     * one. In case the 'previous button' gets used the top position of head
+     * gets popped and pushed to tail. At least one position needs to remain in
+     * tail.
+     */
+    LinkedList<WorldCoordinate> positionsHead, positionsTail;
 
     // true, if the mouse is in the panel, for relative motion calculation
     boolean mouseInPanel;
@@ -111,6 +117,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
     /**
      * Constructs a world panel
+     * @param parent
      * @param world
      * @param passive
      */
@@ -126,8 +133,9 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         tileSizeListeners = new HashSet<>();
         statusListeners = new HashSet<>();
 
-        positionIdx = 0;
-        positionHistory = new LinkedList<>();
+        positionsHead = new LinkedList<>();
+        positionsTail = new LinkedList<>();
+
         placeGroup = new HashSet<>();
 
         mappainter = new MapPainterDefault();
@@ -199,7 +207,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param val
      * @return
      */
-    private double remint(double val){
+    private static double remint(double val){
         return val - Math.round(val);
     }
 
@@ -294,65 +302,95 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
     // ========================= position history ==============================
 
+    /**
+     * Add new position to history, discard positions ahead, go to new position
+     * @param coord
+     */
     public void pushPosition(WorldCoordinate coord){
-        WorldCoordinate pos = new WorldCoordinate(coord);
-        // remove all entries after the current one
-        while(positionIdx > 0){
-            positionHistory.pop();
-            positionIdx--;
-        }
+        positionsTail.push(new WorldCoordinate(coord));
+        positionsHead.clear();
 
         callLayerChangeListeners(getWorld().getLayer(coord.getLayer()));
 
-        // add new position
-        positionHistory.push(pos);
-
         // move place selection
-        setCursor((int) pos.getX(), (int) pos.getY());
+        setCursor((int) coord.getX(), (int) coord.getY());
     }
 
     /**
-     * Removes the first position from the position stack,
-     * go to home position if the stack is empty
+     * Goes to previous position while moving the current position to the list
+     * of positions ahead. Goes to home position if history is empty
      */
     public void popPosition() {
-        // if end not reached
-        if(positionIdx < positionHistory.size() - 1) positionIdx++;
+        if(positionsTail.size() > 1){
+            positionsHead.push(positionsTail.pop());
+        }
 
-        setCursor((int) getPosition().getX(), (int) getPosition().getY());
-
-        callLayerChangeListeners(getWorld().getLayer(getPosition().getLayer()));
+        final WorldCoordinate position = getPosition();
+        setCursor((int) position.getX(), (int) position.getY());
+        callLayerChangeListeners(getWorld().getLayer(position.getLayer()));
     }
 
+    /**
+     * Get current position or home if history is empty
+     * @return current position or home position
+     */
     public WorldCoordinate getPosition(){
-        if(positionHistory.isEmpty()){
-            positionHistory.add(new WorldCoordinate(getWorld().getHome()));
-        } else if(positionIdx >= positionHistory.size()){
-            return new WorldCoordinate(new WorldCoordinate(getWorld().getHome()));
+        WorldCoordinate ret;
+        if(positionsTail.isEmpty()){
+            ret = new WorldCoordinate(world.getHome());
+        } else {
+            ret = positionsTail.peek();
         }
-        return positionHistory.get(positionIdx);
+        return ret;
     }
 
+    /**
+     * Moves position from list of positions ahead to current position.
+     * Does nothing if list of positions ahead is empty.
+     */
     public void restorePosition(){
-        if(positionIdx > 0){
-            positionIdx--;
-            setCursor((int) getPosition().getX(), (int) getPosition().getY());
-        }
+        if(!positionsHead.isEmpty()){
+            positionsTail.push(positionsHead.pop());
 
-        callLayerChangeListeners(getWorld().getLayer(getPosition().getLayer()));
+            final WorldCoordinate position = getPosition();
+            setCursor((int) position.getX(), (int) position.getY());
+            callLayerChangeListeners(getWorld().getLayer(position.getLayer()));
+        }
     }
 
+    /**
+     * Clears history
+     * @param pos new position
+     */
     public void resetHistory(WorldCoordinate pos){
-        positionIdx = 0;
-        positionHistory.clear();
-        positionHistory.add(pos);
-        setCursor((int) Math.round(pos.getX()), (int) Math.round(pos.getY()));
+        positionsHead.clear();
+        positionsTail.clear();
+        positionsTail.push(new WorldCoordinate(pos));
 
+        setCursor((int) Math.round(pos.getX()), (int) Math.round(pos.getY()));
         callLayerChangeListeners(getWorld().getLayer(pos.getLayer()));
     }
 
+    /**
+     * Get copy of history
+     * @return
+     */
     public LinkedList<WorldCoordinate> getHistory(){
-        return positionHistory;
+        return new LinkedList<>(positionsTail);
+    }
+
+    /**
+     * Replace history, clears list of positions ahead
+     * @param list
+     */
+    public void setHistory(LinkedList<WorldCoordinate> list){
+        positionsHead.clear();
+        positionsTail.clear();
+        positionsTail.addAll(list);
+
+        final WorldCoordinate position = getPosition();
+        setCursor((int) Math.round(position.getX()), (int) Math.round(position.getY()));
+        callLayerChangeListeners(getWorld().getLayer(position.getLayer()));
     }
 
     // ========================= map cursor ====================================
@@ -385,7 +423,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     public void setCursor(int x, int y){
         cursorX = x;
         cursorY = y;
-        moveScreenToCursor();
+        callCursorListeners();
     }
 
     public void moveCursor(int dx, int dy){
@@ -398,22 +436,22 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * moves the shown places so the selection is on the screen
      */
     public void moveScreenToCursor(){
-        double screenX = getScreenPosX(cursorX);
-        double screenY = getScreenPosY(cursorY);
-        double tileSize = getTileSize();
+        final double screenX = getScreenPosX(cursorX);
+        final double screenY = getScreenPosY(cursorY);
+        final double ts = getTileSize();
 
         double dx = 0, dy = 0;
 
         if(screenX < 0){
-            dx = screenX / tileSize;
-        } else if(screenX > getWidth() - tileSize){
-            dx = (screenX - getWidth()) / tileSize + 1;
+            dx = screenX / ts;
+        } else if(screenX > getWidth() - ts){
+            dx = (screenX - getWidth()) / ts + 1;
         }
 
         if(screenY < 0){
-            dy = -screenY / tileSize;
-        } else if(screenY > getHeight() - tileSize){
-            dy = -(screenY - getHeight()) / tileSize - 1;
+            dy = -screenY / ts;
+        } else if(screenY > getHeight() - ts){
+            dy = -(screenY - getHeight()) / ts - 1;
         }
 
         if(dx != 0 || dy != 0) getPosition().move((int) dx, (int) dy);

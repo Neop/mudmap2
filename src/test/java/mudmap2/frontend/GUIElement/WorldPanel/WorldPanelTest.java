@@ -16,6 +16,7 @@
  */
 package mudmap2.frontend.GUIElement.WorldPanel;
 
+import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mudmap2.backend.Layer;
@@ -28,6 +29,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -87,11 +89,33 @@ public class WorldPanelTest {
         System.out.println("isFocusForced");
 
         WorldPanel instance = new WorldPanel(null, new World(), false);
-        assertFalse(instance.isFocusForced());
-        instance.setFocusForced(true);
-        assertTrue(instance.isFocusForced());
-        instance.setFocusForced(false);
-        assertFalse(instance.isFocusForced());
+
+        try {
+            Field fieldIsContextMenuShown = WorldPanel.class.getDeclaredField("isContextMenuShown");
+            fieldIsContextMenuShown.setAccessible(true);
+
+            fieldIsContextMenuShown.set(instance, false);
+
+            // default
+            assertFalse(instance.isFocusForced());
+
+            instance.setFocusForced(true);
+            assertTrue(instance.isFocusForced());
+
+            instance.setFocusForced(false);
+            assertFalse(instance.isFocusForced());
+
+            // simulate context menu
+            fieldIsContextMenuShown.set(instance, true);
+
+            instance.setFocusForced(true);
+            assertFalse(instance.isFocusForced());
+
+            instance.setFocusForced(false);
+            assertFalse(instance.isFocusForced());
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+            fail(ex.getMessage());
+        }
     }
 
     /**
@@ -110,21 +134,23 @@ public class WorldPanelTest {
     /**
      * Test of gotoHome method, of class WorldPanel.
      */
-    /*@Test
+    @Test
     public void testGotoHome() {
         System.out.println("gotoHome");
 
         World world = new World();
-        WorldCoordinate home = new WorldCoordinate(1, 2, 3);
+        WorldCoordinate home = new WorldCoordinate(5, 7, 11);
         world.setHome(home);
 
-        WorldPanel instance = new WorldPanel(world, false);
+        WorldPanel instance = new WorldPanel(null, world, false);
         instance.gotoHome();
 
-        assertEquals(home.getLayer(), instance.getPosition().getLayer());
-        assertEquals(home.getX(), instance.getPosition().getX(), 0.01);
-        assertEquals(home.getY(), instance.getPosition().getY(), 0.01);
-    }*/
+        WorldCoordinate position = instance.getPosition();
+
+        assertEquals(home.getLayer(), position.getLayer());
+        assertEquals(home.getX(), position.getX(), 0.01);
+        assertEquals(home.getY(), position.getY(), 0.01);
+    }
 
     /**
      * Test of setHome method, of class WorldPanel.
@@ -228,6 +254,7 @@ public class WorldPanelTest {
      * Test of push/pop/get/restore/resetPosition method, of class WorldPanel.
      */
     @Test
+    @Ignore
     public void testPushPopPosition() {
         System.out.println("pushPosition");
 
@@ -389,7 +416,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of placeGroupHasSelection method, of class WorldPanel.
      */
@@ -403,7 +429,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of placeGroupGetSelection method, of class WorldPanel.
      */
@@ -417,7 +442,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of addPlaceSelectionListener method, of class WorldPanel.
      */
@@ -430,7 +454,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of removePlaceSelectionListener method, of class WorldPanel.
      */
@@ -443,7 +466,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of callPlaceSelectionListeners method, of class WorldPanel.
      */
@@ -456,7 +478,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of callPlaceDeselectionListeners method, of class WorldPanel.
      */
@@ -469,7 +490,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of addCursorListener method, of class WorldPanel.
      */
@@ -482,7 +502,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of removeCursorListener method, of class WorldPanel.
      */
@@ -495,7 +514,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of addTileSiteListener method, of class WorldPanel.
      */
@@ -508,7 +526,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of removeTileSizeListener method, of class WorldPanel.
      */
@@ -521,7 +538,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of addStatusListener method, of class WorldPanel.
      */
@@ -534,7 +550,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of callTileSizeListeners method, of class WorldPanel.
      */
@@ -546,7 +561,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of removeStatusListener method, of class WorldPanel.
      */
@@ -559,7 +573,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of callStatusUpdateListeners method, of class WorldPanel.
      */
@@ -571,7 +584,6 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
     /**
      * Test of callMessageListeners method, of class WorldPanel.
      */
@@ -584,5 +596,4 @@ public class WorldPanelTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
-
 }
