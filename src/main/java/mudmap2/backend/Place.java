@@ -139,7 +139,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      */
     public void setPlaceGroup(PlaceGroup placeGroup) {
         this.placeGroup = placeGroup;
-        if(getLayer() != null && getLayer().getWorld() != null){
+        if(placeGroup != null && getLayer() != null && getLayer().getWorld() != null){
             getLayer().getWorld().addPlaceGroup(placeGroup);
         }
         callWorldChangeListeners();
