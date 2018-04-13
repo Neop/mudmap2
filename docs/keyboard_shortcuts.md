@@ -1,4 +1,4 @@
-#MUD Map v2 - Keyboard shortcuts
+# MUD Map v2 - Keyboard shortcuts
 You can use these keyboard shortcuts in speed up your work flow:
 
 Be aware that there is no undo in MUD Map so remember to save your world file often!
@@ -46,7 +46,7 @@ Note: 'direction keys' are w/a/s/d, the arrow keys and the numberpad numbers (ex
 ## Place selection
 Warning! copy / paste operations can not be undone! Be sure to save your world before using this.
 
-| Key combination          | Effect                                  | 
+| Key combination          | Effect                                  |
 | ------------------------ | --------------------------------------- |
 | ctrl + click             | add / remove place to selection         |
 | space                    | add / remove place marked by cursor     |

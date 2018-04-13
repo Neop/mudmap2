@@ -1,5 +1,5 @@
 # MUD Map v2
-by Neop 
+by Neop
 
 A mapping tool for text-based games like text adventures, MUDs and MUSHs.
 
@@ -13,27 +13,26 @@ MUD Map v1 sources, v1 + v2 binary packages: [https://sourceforge.net/projects/m
 
 MUD Map v1 user manual / quick start guide: [http://mudmap.sourceforge.net/](http://mudmap.sourceforge.net/)
 
-## Bugs and problems
-If you encounter any bugs or other problems please contact me or write a bug report on GitHub [https://github.com/Neop/mudmap2/issues](https://github.com/Neop/mudmap2/issues) so I can fix it.
+## Building MUD Map
+To build MUD Map from source you will need a Java 7 JDK and Maven. The following command compiles MUD Map and creates a JAR file in the 'target' directory:
+```
+mvn package
+```
+Note: The correct JAR file is 'mudmap2-2.x.x-jar-with-dependencies.jar', NOT 'mudmap2-2.x.x.jar'! The following description assumes that the former JAR got renamed to 'mudmap2-2.x.x.jar'.
 
 ## Installation
-A Java Runtime Environment (JRE, Version 7 or newer) needs to be installed on your computer. [You can get it here.](https://www.java.com/de/download/index.jsp)
+You will need a Java 7 Runtime Environment (JRE) to run MUD Map and the MUD Map JAR file which you can download (see links above) or compile yourself. Place it wherever you like.
 
-Put mudmap.jar or mudmap-2.X.X.jar wherever you like. Most systems should start it by a double click. If it doesn't try a right click, select "open with" or similiar, then select "Java JRE" (depending on your operating system.
+## Starting MUD Map
+If your operating system is set up to associate JAR file with Java you will be able to start MUD Map with a double click on the JAR file.
 
-Another option is to start it from command line / shell by calling "java -jar mudmap.jar". Use this to get for more detailed information in case errors occur.
+Otherwise call the following command on command line or use start_mudmap.sh (Linux). This might also provide more information in case of problems.
+```
+java -jar mudmap2-2.x.x.jar
+```
 
-## Portable mode
-When you start MUD Map for the first time you will be asked whether you'd like to use MUD Map in portable mode. In this case the world files will be stored in the same directory as the mudmap2.jar.
-
-If you don't use portable mode, you can find the files here:
-
-Linux: ~/.mudmap/
-
-Windows: %appdata%\mudmap\
-
-## Compatibility to MUD Map v1
-MUD Map v2 can read and write world files created by MUD Map v1. This is not recommended though since some flaws in the old file format can cause data loss, also some new features are not supported.
+## Bugs and problems
+If you encounter any bugs or other problems please write a [bug report on Github](https://github.com/Neop/mudmap2/issues) or send me an e-mail so I can fix it.
 
 ## Keyboard shortcuts
-See keyboard_shortcuts.md
+See docs/keyboard_shortcuts.md
