@@ -146,7 +146,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
         worldPanel = new WorldPanel(parentFrame, world, passive);
         add(worldPanel, BorderLayout.CENTER);
-        worldPanel.addTileSiteListener(this);
+        worldPanel.addTileSizeListener(this);
         worldPanel.addStatusListener(this);
         worldPanel.addPlaceSelectionListener(new PlaceSelectionListener() {
             @Override
@@ -214,12 +214,12 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         sliderZoom.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent arg0) {
-                worldPanel.setTileSize((int) ((double) worldPanel.TILE_SIZE_MAX * ((JSlider) arg0.getSource()).getValue() / 100.0));
+                worldPanel.setTileSize((int) ((double) WorldPanel.TILE_SIZE_MAX * ((JSlider) arg0.getSource()).getValue() / 100.0));
             }
         });
     }
 
-    public WorldPanel getWorldPanel() {
+    public final WorldPanel getWorldPanel() {
         return worldPanel;
     }
 

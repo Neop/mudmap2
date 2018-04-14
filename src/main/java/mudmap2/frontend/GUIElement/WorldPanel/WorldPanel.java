@@ -195,7 +195,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @return
      */
     public boolean isFocusForced(){
-        return forcedFocus && !isContextMenuShown;
+        return forcedFocus && !hasContextMenu();
     }
 
     public void setFocusForced(Boolean b){
@@ -239,7 +239,12 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @return place or null
      */
     public Place getSelectedPlace(){
-        return getWorld().getLayer(getPosition().getLayer()).get(getCursorX(), getCursorY());
+        Layer layer = getWorld().getLayer(getPosition().getLayer());
+        Place ret = null;
+        if(layer != null){
+            ret = layer.get(getCursorX(), getCursorY());
+        }
+        return ret;
     }
 
     // ========================= context menu ==================================
@@ -330,21 +335,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         callLayerChangeListeners(getWorld().getLayer(position.getLayer()));
     }
 
-    /**
-     * Get current position or home if history is empty
-     * @return current position or home position
-     */
-    public WorldCoordinate getPosition(){
-        WorldCoordinate ret;
-        if(positionsTail.isEmpty()){
-            ret = new WorldCoordinate(world.getHome());
-        } else {
-            ret = positionsTail.peek();
-        }
-        return ret;
-    }
-
-    /**
+        /**
      * Moves position from list of positions ahead to current position.
      * Does nothing if list of positions ahead is empty.
      */
@@ -372,6 +363,20 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     }
 
     /**
+     * Get current position or home if history is empty
+     * @return current position or home position
+     */
+    public WorldCoordinate getPosition(){
+        WorldCoordinate ret;
+        if(positionsTail.isEmpty()){
+            ret = new WorldCoordinate(world.getHome());
+        } else {
+            ret = positionsTail.peek();
+        }
+        return ret;
+    }
+
+    /**
      * Get copy of history
      * @return
      */
@@ -395,14 +400,6 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
     // ========================= map cursor ====================================
 
-    public int getCursorX() {
-        return cursorX;
-    }
-
-    public int getCursorY() {
-        return cursorY;
-    }
-
     public boolean isCursorForced() {
         return cursorForced;
     }
@@ -418,6 +415,14 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     public void setCursorEnabled(boolean cursorEnabled) {
         this.cursorEnabled = cursorEnabled;
         callCursorListeners();
+    }
+
+    public int getCursorX() {
+        return cursorX;
+    }
+
+    public int getCursorY() {
+        return cursorY;
     }
 
     public void setCursor(int x, int y){
@@ -696,7 +701,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * Adds a tileSize listener
      * @param listener
      */
-    public void addTileSiteListener(WorldPanelListener listener){
+    public void addTileSizeListener(WorldPanelListener listener){
         if(!tileSizeListeners.contains(listener))
             tileSizeListeners.add(listener);
     }

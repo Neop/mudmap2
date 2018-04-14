@@ -17,6 +17,8 @@
 package mudmap2.frontend.GUIElement.WorldPanel;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mudmap2.backend.Layer;
@@ -188,6 +190,9 @@ public class WorldPanelTest {
             l.put(pl2);
 
             WorldPanel instance = new WorldPanel(null, world, false);
+            // no position in history
+            assertNull(instance.getSelectedPlace());
+
             instance.pushPosition(new WorldCoordinate(l.getId(), 0, 0));
 
             instance.setCursor(2, 3);
@@ -219,6 +224,29 @@ public class WorldPanelTest {
     }
 
     /**
+     * Test of get/setTileSize method, of class WorldPanel.
+     */
+    @Test
+    public void testSetTileSize() {
+        System.out.println("setTileSize");
+
+        World world = new World();
+        WorldPanel instance = new WorldPanel(null, world, false);
+
+        double ts = 57.5;
+        instance.setTileSize(ts);
+        assertEquals(ts, instance.getTileSize(), 0.1);
+
+        // max limit
+        instance.setTileSize(WorldPanel.TILE_SIZE_MAX + 0.1);
+        assertEquals(WorldPanel.TILE_SIZE_MAX, instance.getTileSize(), 0.01);
+
+        // min limit
+        instance.setTileSize(WorldPanel.TILE_SIZE_MIN - 0.1);
+        assertEquals(WorldPanel.TILE_SIZE_MIN, instance.getTileSize(), 0.01);
+    }
+
+    /**
      * Test of tileSizeIncrement method, of class WorldPanel.
      */
     @Test
@@ -232,6 +260,11 @@ public class WorldPanelTest {
         instance.setTileSize(ts);
         instance.tileSizeIncrement();
         assertTrue(ts < instance.getTileSize());
+
+        // maximum value
+        instance.setTileSize(WorldPanel.TILE_SIZE_MAX);
+        instance.tileSizeIncrement();
+        assertEquals(WorldPanel.TILE_SIZE_MAX, instance.getTileSize(), 0.01);
     }
 
     /**
@@ -248,15 +281,21 @@ public class WorldPanelTest {
         instance.setTileSize(ts);
         instance.tileSizeDecrement();
         assertTrue(ts > instance.getTileSize());
+
+        // minimum value
+        instance.setTileSize(WorldPanel.TILE_SIZE_MIN);
+        instance.tileSizeDecrement();
+        assertEquals(WorldPanel.TILE_SIZE_MIN, instance.getTileSize(), 0.01);
     }
 
     /**
      * Test of push/pop/get/restore/resetPosition method, of class WorldPanel.
      */
     @Test
-    @Ignore
     public void testPushPopPosition() {
         System.out.println("pushPosition");
+        System.out.println("popPosition");
+        System.out.println("getPosition");
 
         World world = new World();
         WorldPanel instance = new WorldPanel(null, world, false);
@@ -268,50 +307,106 @@ public class WorldPanelTest {
 
         world.setHome(home);
 
+        // empty history, get home position
         assertTrue(home.compareTo(instance.getPosition()) == 0);
 
+        // empty history, pop has no effect
         instance.popPosition();
         assertTrue(home.compareTo(instance.getPosition()) == 0);
 
+        // 1 pos in history
         instance.pushPosition(pos1);
-        WorldCoordinate push1 = instance.getPosition();
-        //assertTrue(pos1.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos1.compareTo(instance.getPosition()) == 0);
 
+        // 2 pos in history
         instance.pushPosition(pos2);
-        WorldCoordinate push2 = instance.getPosition();
-        //assertTrue(pos2.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos2.compareTo(instance.getPosition()) == 0);
 
+        // 3 pos in history
         instance.pushPosition(pos3);
-        WorldCoordinate push3 = instance.getPosition();
-        //assertTrue(pos3.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos3.compareTo(instance.getPosition()) == 0);
 
+        // 2 pos in history, 1 ahead
         instance.popPosition();
-        assertTrue(push2.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos2.compareTo(instance.getPosition()) == 0);
 
+        // 1 pos in history, 2 ahead
         instance.popPosition();
-        assertTrue(push1.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos1.compareTo(instance.getPosition()) == 0);
 
+        // 1 pos in history, 2 ahead, pop has no effect
         instance.popPosition();
-        assertTrue(home.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos1.compareTo(instance.getPosition()) == 0);
 
-        instance.popPosition();
-        assertTrue(home.compareTo(instance.getPosition()) == 0);
-
+        // 2 pos in history, 1 ahead
         instance.restorePosition();
-        assertTrue(push1.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos2.compareTo(instance.getPosition()) == 0);
 
+        // 3 pos in history, 0 ahead
         instance.restorePosition();
-        assertTrue(push2.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos3.compareTo(instance.getPosition()) == 0);
 
+        // 3 pos in history, 0 ahead, restore has no effect
         instance.restorePosition();
-        assertTrue(push3.compareTo(instance.getPosition()) == 0);
-
-        instance.restorePosition();
-        assertTrue(push3.compareTo(instance.getPosition()) == 0);
+        assertTrue(pos3.compareTo(instance.getPosition()) == 0);
 
         WorldCoordinate reset = new WorldCoordinate(12, 1, 6);
         instance.resetHistory(reset);
         assertTrue(reset.compareTo(instance.getPosition()) == 0);
+    }
+
+    /**
+     * Test of resetHistory
+     */
+    @Test
+    public void testResetHistory(){
+        System.out.println("resetHistory");
+
+        World world = new World();
+        WorldPanel instance = new WorldPanel(null, world, false);
+
+        WorldCoordinate pos1 = new WorldCoordinate(4, 6, 1);
+        WorldCoordinate pos2 = new WorldCoordinate(1, 2, 6);
+        WorldCoordinate pos3 = new WorldCoordinate(1, 8, 4);
+
+        WorldCoordinate pos4 = new WorldCoordinate(5, 2, 9);
+
+        instance.pushPosition(pos1);
+        instance.pushPosition(pos2);
+        instance.pushPosition(pos3);
+
+        assertTrue(pos3.compareTo(instance.getPosition()) == 0);
+        assertEquals(3, instance.getHistory().size());
+
+        instance.resetHistory(pos4);
+        assertTrue(pos4.compareTo(instance.getPosition()) == 0);
+        assertEquals(1, instance.getHistory().size());
+    }
+
+    /**
+     * Test of getHistory
+     */
+    @Test
+    public void testGetHistory(){
+        System.out.println("getHistory");
+
+        World world = new World();
+        WorldPanel instance = new WorldPanel(null, world, false);
+
+        WorldCoordinate pos1 = new WorldCoordinate(4, 6, 1);
+        WorldCoordinate pos2 = new WorldCoordinate(1, 2, 6);
+        WorldCoordinate pos3 = new WorldCoordinate(1, 8, 4);
+
+        instance.pushPosition(pos1);
+        instance.pushPosition(pos2);
+        instance.pushPosition(pos3);
+
+        LinkedList<WorldCoordinate> history = instance.getHistory();
+
+        assertEquals(3, history.size());
+        assertTrue(pos1.compareTo(history.get(2)) == 0);
+        assertTrue(pos2.compareTo(history.get(1)) == 0);
+        assertTrue(pos3.compareTo(history.get(0)) == 0);
     }
 
     /**
@@ -402,24 +497,74 @@ public class WorldPanelTest {
         WorldPanel instance = new WorldPanel(null, world, false);
 
         instance.setCursor(4, 6);
-        instance.moveCursor(4 + dx, 6 + dy);
+        instance.moveCursor(dx, dy);
+        assertEquals(4+dx, instance.getCursorX());
+        assertEquals(6+dy, instance.getCursorY());
+
+        instance.setCursor(4, 6);
+        instance.moveCursor(-dx, -dy);
+        assertEquals(4-dx, instance.getCursorX());
+        assertEquals(6-dy, instance.getCursorY());
     }
 
     /**
      * Test of moveScreenToCursor method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testMoveScreenToCursor() {
         System.out.println("moveScreenToCursor");
         WorldPanel instance = null;
         instance.moveScreenToCursor();
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
+    /**
+     * Test for getPlacePosX
+     */
+    @Test
+    @Ignore
+    public void testGetPlacePosX(){
+        System.out.println("getPlacePosX");
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test for getPlacePosY
+     */
+    @Test
+    @Ignore
+    public void testGetPlacePosY(){
+        System.out.println("getPlacePosY");
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test for getScreenPosX
+     */
+    @Test
+    @Ignore
+    public void testGetScreenPosX(){
+        System.out.println("getScreenPosX");
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test for getScreenPosY
+     */
+    @Test
+    @Ignore
+    public void testGetScreenPosY(){
+        System.out.println("getScreenPosX");
+        fail("The test case is a prototype.");
+    }
+
     /**
      * Test of placeGroupHasSelection method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testPlaceGroupHasSelection() {
         System.out.println("placeGroupHasSelection");
         WorldPanel instance = null;
@@ -428,11 +573,13 @@ public class WorldPanelTest {
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of placeGroupGetSelection method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testPlaceGroupGetSelection() {
         System.out.println("placeGroupGetSelection");
         WorldPanel instance = null;
@@ -441,11 +588,13 @@ public class WorldPanelTest {
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of addPlaceSelectionListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testAddPlaceSelectionListener() {
         System.out.println("addPlaceSelectionListener");
         PlaceSelectionListener listener = null;
@@ -453,11 +602,13 @@ public class WorldPanelTest {
         instance.addPlaceSelectionListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of removePlaceSelectionListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testRemovePlaceSelectionListener() {
         System.out.println("removePlaceSelectionListener");
         PlaceSelectionListener listener = null;
@@ -465,11 +616,13 @@ public class WorldPanelTest {
         instance.removePlaceSelectionListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of callPlaceSelectionListeners method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testCallPlaceSelectionListeners() {
         System.out.println("callPlaceSelectionListeners");
         Place place = null;
@@ -477,11 +630,13 @@ public class WorldPanelTest {
         instance.callPlaceSelectionListeners(place);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of callPlaceDeselectionListeners method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testCallPlaceDeselectionListeners() {
         System.out.println("callPlaceDeselectionListeners");
         Place place = null;
@@ -489,11 +644,13 @@ public class WorldPanelTest {
         instance.callPlaceDeselectionListeners(place);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of addCursorListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testAddCursorListener() {
         System.out.println("addCursorListener");
         MapCursorListener listener = null;
@@ -501,11 +658,13 @@ public class WorldPanelTest {
         instance.addCursorListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of removeCursorListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testRemoveCursorListener() {
         System.out.println("removeCursorListener");
         MapCursorListener listener = null;
@@ -513,35 +672,41 @@ public class WorldPanelTest {
         instance.removeCursorListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
-     * Test of addTileSiteListener method, of class WorldPanel.
+     * Test of addTileSizeListener method, of class WorldPanel.
      */
-    /*@Test
-    public void testAddTileSiteListener() {
+    @Test
+    @Ignore
+    public void testAddTileSizeListener() {
         System.out.println("addTileSiteListener");
-        TileSizeListener listener = null;
+        //TileSizeListener listener = null;
         WorldPanel instance = null;
-        instance.addTileSiteListener(listener);
+        //instance.addTileSizeListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of removeTileSizeListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testRemoveTileSizeListener() {
         System.out.println("removeTileSizeListener");
-        TileSizeListener listener = null;
+        //TileSizeListener listener = null;
         WorldPanel instance = null;
-        instance.removeTileSizeListener(listener);
+        //instance.removeTileSizeListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of addStatusListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testAddStatusListener() {
         System.out.println("addStatusListener");
         StatusListener listener = null;
@@ -549,22 +714,26 @@ public class WorldPanelTest {
         instance.addStatusListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of callTileSizeListeners method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testCallTileSizeListeners() {
         System.out.println("callTileSizeListeners");
         WorldPanel instance = null;
         instance.callTileSizeListeners();
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of removeStatusListener method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testRemoveStatusListener() {
         System.out.println("removeStatusListener");
         StatusListener listener = null;
@@ -572,22 +741,26 @@ public class WorldPanelTest {
         instance.removeStatusListener(listener);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of callStatusUpdateListeners method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testCallStatusUpdateListeners() {
         System.out.println("callStatusUpdateListeners");
         WorldPanel instance = null;
         instance.callStatusUpdateListeners();
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
+
     /**
      * Test of callMessageListeners method, of class WorldPanel.
      */
-    /*@Test
+    @Test
+    @Ignore
     public void testCallMessageListeners() {
         System.out.println("callMessageListeners");
         String message = "";
@@ -595,5 +768,5 @@ public class WorldPanelTest {
         instance.callMessageListeners(message);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
-    }*/
+    }
 }

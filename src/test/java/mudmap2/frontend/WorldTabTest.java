@@ -16,6 +16,10 @@
  */
 package mudmap2.frontend;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mudmap2.backend.World;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -23,6 +27,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -113,27 +118,26 @@ public class WorldTabTest {
     /**
      * Test of save method, of class WorldTab.
      */
-    /*@Test
+    @Test
     public void testSave() {
-        System.out.println("save");
-        WorldTab instance = null;
-        instance.save();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }*/
+        try {
+            System.out.println("save");
 
-    /**
-     * Test of showMessage method, of class WorldTab.
-     */
-    /*@Test
-    public void testShowMessage() {
-        System.out.println("showMessage");
-        String message = "";
-        WorldTab instance = null;
-        instance.showMessage(message);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }*/
+            File file = File.createTempFile("mudmap2_junit_WorldTabTest_testSave", "");
+            file.delete();
+            assertFalse(file.exists());
+
+            WorldTab instance = new WorldTab(null, new World(), false);
+            instance.setFilename(file.getAbsolutePath());
+            instance.save();
+
+            assertTrue(file.exists());
+            file.delete();
+            assertFalse(file.exists());
+        } catch (IOException ex) {
+            fail(ex.getMessage());
+        }
+    }
 
     /**
      * Test of layerSelected method, of class WorldTab.
@@ -153,6 +157,7 @@ public class WorldTabTest {
      * Test of createLayer method, of class WorldTab.
      */
     @Test
+    @Ignore
     public void testCreateLayer() {
         System.out.println("createLayer");
 
