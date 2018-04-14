@@ -3,6 +3,7 @@
 - rewrote image export dialog
 - removed html export
 - fixed: prev button created invalid entries
+- fixed: creating places in a new world added them on a new map each
 - minor UI changes
 
 2.4.5

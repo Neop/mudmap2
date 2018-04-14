@@ -54,7 +54,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import mudmap2.backend.Layer;
 import mudmap2.backend.World;
+import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldManager;
@@ -254,6 +256,11 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             // create a new world
             try {
                 World world = WorldManager.createWorld(name);
+                // move to default layer
+                if(world.getLayers().isEmpty()){
+                    Layer layer = world.getNewLayer();
+                    world.setHome(new WorldCoordinate(layer.getId(), 0, 0));
+                }
                 createTab(world, null);
             } catch (Exception ex) {
                 Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
