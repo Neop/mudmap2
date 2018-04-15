@@ -20,8 +20,11 @@ import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JRadioButton;
+import javax.swing.filechooser.FileFilter;
 import mudmap2.Environment;
 import mudmap2.backend.WorldFileReader.WorldFile;
+import mudmap2.backend.WorldFileReader.WorldFileFilterJSON;
+import mudmap2.backend.WorldFileReader.WorldFileFilterM2W;
 import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
 import mudmap2.frontend.WorldTab;
 
@@ -39,17 +42,29 @@ public class SaveWorldDialog extends JFileChooser {
     JRadioButton radioJSON;
 
     public SaveWorldDialog(JFrame parent, WorldTab wt){
-        super(wt.getWorld().getWorldFile() != null ? wt.getWorld().getWorldFile().getFilename() : Environment.getWorldsDir());
+        super(wt.getWorld().getWorldFile() != null ? wt.getWorld().getWorldFile().getFilename() : Environment.getHome());
+
+        setFileHidingEnabled(false);
+
+        FileFilter filter;
+        addChoosableFileFilter(filter = new WorldFileFilterM2W());
+        addChoosableFileFilter(new WorldFileFilterJSON());
+
+        setFileFilter(filter);
 
         this.wt = wt;
     }
 
-
     public WorldFile getWorldFile(){
         String file = getSelectedFile().getAbsolutePath();
-        WorldFile worldFile;
 
-        worldFile = new WorldFileJSON(file);
+        if(getFileFilter() instanceof WorldFileFilterM2W){
+            if(!file.endsWith(".m2w")){
+                file = file + ".m2w";
+            }
+        }
+
+        WorldFile worldFile = new WorldFileJSON(file);
 
         return worldFile;
     }

@@ -132,7 +132,7 @@ public class WorldFileList {
 
         for(WorldFileEntry entry: worldFileHistory){
             if(!entry.getFile().exists()){
-                worldFileHistory.remove(entry);
+                toBeRemoved.add(entry);
             }
         }
 

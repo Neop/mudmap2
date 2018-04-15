@@ -43,6 +43,18 @@ public class Environment {
     public static final String GITHUB_URL = "https://github.com/Neop/mudmap2";
     public static final String SOURCEFORGE_URL = "http://sf.net/p/mudmap";
 
+    public static String getHome(){
+        String ret = "";
+        if(System.getProperty("os.name").toLowerCase().contains("win")){
+            // operating system Windows
+            ret = System.getenv().get("APPDATA");
+        } else {
+            // other operating systems
+            ret = System.getProperty("user.home");
+        }
+        return ret;
+    }
+
     /**
      * Gets the user data path
      * @return user data path
@@ -50,17 +62,19 @@ public class Environment {
     public static String getUserDataDir(){
         if(userDataDir == null || userDataDir.isEmpty()){
             // read the user data path from environment variables
-            // operating system Windows
-            if(System.getProperty("os.name").toLowerCase().contains("win"))
+            if(System.getProperty("os.name").toLowerCase().contains("win")){
+                // operating system Windows
                 userDataDir = System.getenv().get("APPDATA") + File.separator + "mudmap" + File.separator;
-            // other operating systems
-            else userDataDir = System.getProperty("user.home") + File.separator + ".mudmap" + File.separator;
+            } else {
+                // other operating systems
+                userDataDir = System.getProperty("user.home") + File.separator + ".mudmap" + File.separator;
+            }
         }
         return userDataDir;
     }
 
     /**
-     * Changes the user data dir for debugging purposes 
+     * Changes the user data dir for debugging purposes
      * @param userDataDir
      */
     public static void setUserDataDir(String userDataDir) {
@@ -95,26 +109,4 @@ public class Environment {
         }
     }
 
-    /**
-     * checks if path is a directory
-     * @param path
-     * @return true, if path is a directory
-     */
-    public static boolean isDirectory(String path){
-        File f = new File(path);
-        return f.exists() && f.isDirectory();
-    }
-
-    /**
-     * Creates a directory
-     * @param path
-     */
-    public static void createDirectory(String path){
-        Integer sep = path.lastIndexOf(File.separator);
-        sep = max(sep, path.lastIndexOf('/'));
-        if(sep > 0) createDirectory(path.substring(0, sep));
-
-        File f = new File(path);
-        if(!f.exists()) f.mkdir();
-    }
 }

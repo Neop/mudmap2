@@ -24,14 +24,14 @@ package mudmap2.frontend.dialog;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import mudmap2.backend.World;
-import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
+import mudmap2.backend.WorldFileReader.WorldFileFilterJSON;
+import mudmap2.backend.WorldFileReader.WorldFileFilterM2W;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.Mainwindow;
 
@@ -55,27 +55,13 @@ public class OpenWorldDialog implements ActionListener{
         filechooser.setAcceptAllFileFilterUsed(false);
         filechooser.setDialogTitle("Open world");
         filechooser.setMultiSelectionEnabled(false);
-        filechooser.addChoosableFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                if(file == null) return false;
-                if(file.isDirectory()) return true;
-                String worldname = null;
 
-                try {
-                    worldname = (new WorldFileDefault(file.getPath()).readWorldName());
-                } catch (Exception ex) {
-                    Logger.getLogger(OpenWorldDialog.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        FileFilter filter;
+        filechooser.addChoosableFileFilter(filter = new WorldFileFilterM2W());
+        filechooser.addChoosableFileFilter(new WorldFileFilterJSON());
+        filechooser.setFileHidingEnabled(false);
 
-                return worldname != null && !worldname.equals("");
-            }
-
-            @Override
-            public String getDescription() {
-                return "MUD Map world files";
-            }
-        });
+        filechooser.setFileFilter(filter);
 
         int ret = filechooser.showOpenDialog(parent);
 
