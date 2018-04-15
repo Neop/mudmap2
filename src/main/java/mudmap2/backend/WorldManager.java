@@ -80,7 +80,13 @@ public class WorldManager {
      */
     public static void putWorld(String file, World world){
         loadedWorlds.put(file, world);
-        WorldFileList.setWorldName(file, world.getName());
+
+        WorldFileList.WorldFileEntry entry = WorldFileList.get(new File(file));
+        if(entry == null){
+            entry = new WorldFileList.WorldFileEntry(world.getName(), new File(file));
+        }
+        //entry.setWorld(world);
+        WorldFileList.push(entry);
     }
 
     /**
@@ -111,7 +117,7 @@ public class WorldManager {
         if(worldFile.canRead()){
             File file = new File(filename);
             if(!file.delete()) error = true;
-            WorldFileList.removeWorldFileEntry(filename);
+            //WorldFileList.removeWorldFileEntry(filename);
         }
         return error;
     }

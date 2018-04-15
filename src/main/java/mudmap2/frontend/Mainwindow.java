@@ -153,18 +153,18 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuFile.add(menuFileOpen);
 
         // available worlds
-        JMenu menuFileOpenRecent = new JMenu("Open known world");
+        JMenu menuFileOpenRecent = new JMenu("Open recent world");
         menuFile.add(menuFileOpenRecent);
 
-        WorldFileList.findWorlds();
-        for(final Entry<String, String> entry: WorldFileList.getWorlds().entrySet()){
-            JMenuItem openWorldEntry = new JMenuItem(entry.getValue() + " (" + entry.getKey() + ")");
+        WorldFileList.read();
+        for(final WorldFileList.WorldFileEntry entry: WorldFileList.getEntries()){
+            JMenuItem openWorldEntry = new JMenuItem(entry.getWorldName() + " (" + entry.getFile() + ")");
             menuFileOpenRecent.add(openWorldEntry);
             openWorldEntry.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent ae) {
                     try {
-                        createTab(WorldManager.getWorld(entry.getKey()), entry.getKey());
+                        createTab(WorldManager.getWorld(entry.getFile().getAbsolutePath()), entry.getFile().getAbsolutePath());
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(getParent(), "Could not open world: " + ex.getMessage());
                         Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -341,7 +341,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
      */
     public void quit(){
         closeTabs();
-        WorldFileList.writeWorldList();
+        WorldFileList.write();
         System.exit(0);
     }
 

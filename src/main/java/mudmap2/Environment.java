@@ -36,27 +36,35 @@ import java.util.logging.Logger;
  */
 public class Environment {
 
-    static String user_data_dir;
-    public final static String website_url = "http://mudmap.sf.net";
-    public final static String manual_url = website_url;
+    static String userDataDir;
+    public final static String WEBSITE_URL = "http://mudmap.sf.net";
+    public final static String MANUAL_URL = WEBSITE_URL;
 
-    public static final String github_url = "https://github.com/Neop/mudmap2";
-    public static final String sourceforge_url = "http://sf.net/p/mudmap";
+    public static final String GITHUB_URL = "https://github.com/Neop/mudmap2";
+    public static final String SOURCEFORGE_URL = "http://sf.net/p/mudmap";
 
     /**
      * Gets the user data path
      * @return user data path
      */
     public static String getUserDataDir(){
-        if(user_data_dir == null || user_data_dir.isEmpty()){
+        if(userDataDir == null || userDataDir.isEmpty()){
             // read the user data path from environment variables
             // operating system Windows
             if(System.getProperty("os.name").toLowerCase().contains("win"))
-                user_data_dir = System.getenv().get("APPDATA") + File.separator + "mudmap" + File.separator;
+                userDataDir = System.getenv().get("APPDATA") + File.separator + "mudmap" + File.separator;
             // other operating systems
-            else user_data_dir = System.getProperty("user.home") + File.separator + ".mudmap" + File.separator;
+            else userDataDir = System.getProperty("user.home") + File.separator + ".mudmap" + File.separator;
         }
-        return user_data_dir;
+        return userDataDir;
+    }
+
+    /**
+     * Changes the user data dir for debugging purposes 
+     * @param userDataDir
+     */
+    public static void setUserDataDir(String userDataDir) {
+        Environment.userDataDir = userDataDir;
     }
 
     /**
@@ -65,14 +73,6 @@ public class Environment {
      */
     public static String getWorldsDir(){
         return getUserDataDir() + "worlds" + File.separator;
-    }
-
-    /**
-     * Gets the available worlds file (path + filename)
-     * @return available worlds file
-     */
-    public static String getAvailableWorldsFile(){
-        return getWorldsDir() + "worlds";
     }
 
     /**

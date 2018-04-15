@@ -23,14 +23,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 import mudmap2.Environment;
 import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -38,69 +39,198 @@ import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
  */
 public class WorldFileList {
 
-    // availableWorlds: <file, name>
-    private static final HashMap<String, String> availableWorlds = new HashMap<>();
+    static final int FILE_VER_MAJOR = 2;
+    static final int FILE_VER_MINOR = 0;
 
-    static final int META_FILE_VER_MAJOR = 1;
-    static final int META_FILE_VER_MINOR = 1;
+    static final int MAX_HISTORY_ENTRIES = 15;
 
-    public static String getWorldName(String file){
-        return availableWorlds.get(file);
-    }
+    private static final String HISTORY_FILENAME = "history";
+    @Deprecated
+    private static final String AVAILABLE_WORLDS_FILENAME = "worlds";
 
-    public static void setWorldName(String file, String name){
-        availableWorlds.put(file, name);
-    }
 
-    public static void removeWorldFileEntry(String file){
-        availableWorlds.remove(file);
-    }
+    // world file history <file, world name>
+    private static final LinkedList<WorldFileEntry> worldFileHistory = new LinkedList<>();
 
-    public static void clear(){
-        availableWorlds.clear();
-    }
-
-    public static Map<String, String> getWorlds(){
-        return availableWorlds;
+    /**
+     * Get File describing path and name of history file
+     * @return file object
+     */
+    private static File getHistoryFile(){
+        return new File(Environment.getUserDataDir() + File.separator + HISTORY_FILENAME);
     }
 
     /**
-     * Try to find worlds by reading the worlds directory
-     * and by reading the worlds file
+     * Get File describing path and name of available worlds file
+     * @return file object
      */
-    public static void findWorlds(){
-        readDirectory();
-        readWorldList();
+    @Deprecated
+    private static File getAvailableWorldsFile(){
+        return new File(Environment.getWorldsDir() + File.separator + AVAILABLE_WORLDS_FILENAME);
     }
 
     /**
-     * Get available worlds from filesystem
+     * Add entry. Removes previous occurencies of the same file.
+     * @param entry entry to add
      */
-    public static void readDirectory(){
-        // get file list
-        File dir = new File(Environment.getWorldsDir());
-        File[] fileList = dir.listFiles();
+    public static void push(WorldFileEntry entry){
+        if(entry != null){
+            // remove equal entries
+            LinkedList<WorldFileEntry> toBeRemoved = new LinkedList<>();
 
-        if(fileList != null){
-            // find world files in file list
-            for(File file : fileList){
-                // exclude meta and backup files
-                if(!file.getName().equals("worlds")
-                            && !file.getName().endsWith("_meta")
-                            && !file.getName().endsWith(".backup")
-                            && !file.getName().endsWith(".bak")
-                            && file.isFile() && file.canRead()){
+            for(WorldFileEntry it: worldFileHistory){
+                if(it.getFile().equals(entry.getFile())){
+                    toBeRemoved.push(it);
+                }
+            }
 
-                    // check if file is world file
-                    WorldFileDefault worldFile = new WorldFileDefault(file.getPath());
-                    try {
-                        if(worldFile.canRead()){ // is world file
-                            String name = worldFile.readWorldName();
-                            availableWorlds.put(file.getPath(), name);
+            for(WorldFileEntry it: toBeRemoved){
+                worldFileHistory.remove(it);
+            }
+
+            // insert entry
+            worldFileHistory.push(entry);
+        }
+    }
+
+    /**
+     * Get entry by file
+     * @param file file
+     * @return entry or null
+     */
+    public static WorldFileEntry get(File file){
+        WorldFileEntry ret = null;
+        // find entry
+        for(WorldFileEntry entry: worldFileHistory){
+            if(entry.getFile().equals(file)){
+                ret = entry;
+                break;
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Get limited list of entries
+     * @return
+     */
+    public static LinkedList<WorldFileEntry> getEntries(){
+        LinkedList<WorldFileEntry> ret = new LinkedList<>(worldFileHistory);
+
+        while(ret.size() > MAX_HISTORY_ENTRIES){
+            ret.removeLast();
+        }
+
+        return ret;
+    }
+
+    /**
+     * Removes entries that do not exist in file system
+     */
+    private static void cleanList(){
+        LinkedList<WorldFileEntry> toBeRemoved = new LinkedList<>();
+
+        for(WorldFileEntry entry: worldFileHistory){
+            if(!entry.getFile().exists()){
+                worldFileHistory.remove(entry);
+            }
+        }
+
+        for(WorldFileEntry it: toBeRemoved){
+            worldFileHistory.remove(it);
+        }
+    }
+
+    // ------------------- list file handling ----------------------------------
+
+    /**
+     * Read history
+     */
+    public static void read(){
+        final File historyFile = getHistoryFile();
+        final File availableWorldsFile = getAvailableWorldsFile();
+
+        boolean success = false;
+
+        worldFileHistory.clear();
+
+        // read history
+        try {
+            if(historyFile.exists() && historyFile.canRead()){
+                readListJSON(historyFile);
+                success = true;
+            }
+        } catch (Exception ex){
+            Logger.getLogger(WorldFileList.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // fallback: legacy available worlds file
+        if(!success && availableWorldsFile.exists() && availableWorldsFile.canRead()){
+            readWorldList(availableWorldsFile);
+        } else {
+            System.err.println("No world history file or not readable");
+        }
+
+        // remove nonexistant entries
+        cleanList();
+    }
+
+    /**
+     * Write history
+     */
+    public static void write(){
+        final File historyFile = getHistoryFile();
+
+        // remove nonexistant entries
+        cleanList();
+
+        // write history
+        if(!historyFile.exists() || historyFile.canWrite()){
+            writeListJSON(historyFile);
+        } else {
+            System.err.println("Could not write world history file "
+                    + historyFile.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Read JSON-formatted history file
+     * @param file
+     */
+    private static void readListJSON(File file){
+        JSONObject jRoot = null;
+        try {
+            byte[] bytes = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+            jRoot = new JSONObject(new String(bytes));
+        } catch (IOException ex) {
+            Logger.getLogger(WorldFileList.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if(jRoot != null){
+            jRoot.has("ver");
+            String fileVersion = jRoot.getString("ver");
+
+            Integer verMajor = 0, verMinor = 0;
+
+            String[] split = fileVersion.split("\\.");
+            if(split.length >= 2){
+                verMajor = Integer.decode(split[0]);
+                verMinor = Integer.decode(split[1]);
+            }
+
+            if(verMajor == FILE_VER_MAJOR && verMinor >= 0){
+                if(jRoot.has("history")){
+                    JSONArray jHistory = jRoot.getJSONArray("history");
+
+                    for(int i = jHistory.length()-1; i >= 0; --i){
+                        JSONObject jElement = jHistory.getJSONObject(i);
+
+                        if(jElement.has("file") && jElement.has("name")){
+                            File entryFile = new File(jElement.getString("file"));
+                            String entryName = jElement.getString("name");
+
+                            push(new WorldFileEntry(entryName, entryFile));
                         }
-                    } catch (FileNotFoundException ex) {
-                    } catch (Exception ex) {
-                        Logger.getLogger(WorldFileList.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
@@ -108,20 +238,70 @@ public class WorldFileList {
     }
 
     /**
-     * Get available worlds from worlds file
+     * Write JSON-formatted history file
+     * @param file
      */
-    public static void readWorldList(){
+    private static void writeListJSON(File file){
+        if(!file.exists() || file.canWrite()){
+            BufferedWriter writer = null;
+
+            // create parent directories
+            File parentDir = file.getParentFile();
+            if(!parentDir.exists()){
+                parentDir.mkdirs();
+            }
+
+            try {
+                writer = new BufferedWriter(new FileWriter(file));
+            } catch (IOException ex) {
+                Logger.getLogger(WorldFileList.class.getName()).log(Level.WARNING, null, ex);
+            }
+
+            if(writer != null){
+                JSONObject jRoot = new JSONObject();
+
+                jRoot.put("ver", "" + FILE_VER_MAJOR + "." + FILE_VER_MINOR);
+
+                JSONArray jHistory = new JSONArray();
+                jRoot.put("history", jHistory);
+
+                for(WorldFileEntry entry: getEntries()){
+                    JSONObject jElement = new JSONObject();
+                    jHistory.put(jElement);
+
+                    jElement.put("file", entry.getFile().getAbsoluteFile());
+                    jElement.put("name", entry.getWorldName());
+                }
+
+                jRoot.write(writer, 4, 0);
+
+                try {
+                    writer.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(WorldFileList.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } else {
+            System.err.println("Could not write file " + file.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Read available worlds file (legacy)
+     */
+    @Deprecated
+    private static void readWorldList(File historyFile){
         try {
             // read from available worlds file
-            BufferedReader reader = new BufferedReader(new FileReader(Environment.getAvailableWorldsFile()));
+            BufferedReader reader = new BufferedReader(new FileReader(historyFile));
 
             String line;
             while((line = reader.readLine()) != null){
                 line = line.trim();
                 if(line.startsWith("f ")){ // world file entry
-                    String file = line.substring(2).trim();
+                    String fileName = line.substring(2).trim();
 
-                    WorldFileDefault worldFile = new WorldFileDefault(file);
+                    WorldFileDefault worldFile = new WorldFileDefault(fileName);
                     if(worldFile.canRead()){ // is world file
                         String name;
                         try {
@@ -130,10 +310,10 @@ public class WorldFileList {
                         } catch (Exception ex) {
                             Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
                             // use file name if world name not found
-                            name = file.substring(file.lastIndexOf('/') + 1);
+                            name = fileName.substring(fileName.lastIndexOf('/') + 1);
                         }
                         // add found world to list
-                        availableWorlds.put(file, name);
+                        push(new WorldFileEntry(name, new File(fileName)));
                     }
                 }
             }
@@ -142,47 +322,31 @@ public class WorldFileList {
         }
     }
 
-    /**
-     * Saves the available worlds list
-     * do this after writing the world files or new places won't appear in list
-     */
-    public static void writeWorldList(){
-        final String file = Environment.getWorldsDir() + "worlds";
-        try {
-            // open file
-            if(!Environment.isDirectory(Environment.getWorldsDir())) Environment.createDirectory(Environment.getWorldsDir());
-            try (PrintWriter outstream = new PrintWriter(new BufferedWriter( new FileWriter(file)))) {
-                outstream.println("# MUD Map (v2) worlds file");
-                outstream.println("ver " + META_FILE_VER_MAJOR + "." + META_FILE_VER_MINOR);
+    public static class WorldFileEntry {
 
-                for(Map.Entry<String, String> w: availableWorlds.entrySet()){
-                    // check whether the file name in file equals the name in the list
-                    WorldFileDefault worldFile = new WorldFileDefault(w.getKey());
-                    String fw = null;
-                    try {
-                        if(worldFile.canRead()){
-                            fw = worldFile.readWorldName();
-                        }
-                    } catch (Exception ex) {
-                        Logger.getLogger(WorldManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    if(fw != null){
-                        outstream.println("n " + fw);
-                        String w_file = w.getKey();
-                        outstream.println("f " + w_file);
-                        if(w_file.startsWith(Environment.getWorldsDir())){
-                            w_file = w_file.substring(Environment.getWorldsDir().length());
-                            outstream.println("g " + w_file);
-                        }
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            System.out.printf("Couldn't write worlds file " + file);
-            Logger.getLogger(WorldManager.class.getName()).log(Level.INFO, null, ex);
-            JOptionPane.showMessageDialog(null, "Could not write worlds list file "
-                    + file + ".\nYou might have to open your worlds manually from "
-                    + Environment.getWorldsDir(), "WorldManager", JOptionPane.WARNING_MESSAGE);
+        String worldName;
+        File file;
+
+        public WorldFileEntry(String worldName, File file) {
+            this.worldName = worldName;
+            this.file = file;
         }
+
+        public String getWorldName() {
+            return worldName;
+        }
+
+        public void setWorldName(String worldName) {
+            this.worldName = worldName;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public void setFile(File file) {
+            this.file = file;
+        }
+
     }
 }

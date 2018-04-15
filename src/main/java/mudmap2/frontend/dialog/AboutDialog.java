@@ -81,9 +81,9 @@ public class AboutDialog extends ActionDialog {
         ++constraints.gridy;
         add(new JLabel("Use it on your own risk!"), constraints);
         ++constraints.gridy;
-        add(new LinkLabel("GitHub", Environment.github_url), constraints);
+        add(new LinkLabel("GitHub", Environment.GITHUB_URL), constraints);
         ++constraints.gridy;
-        add(new LinkLabel("Sourceforge", Environment.sourceforge_url), constraints);
+        add(new LinkLabel("Sourceforge", Environment.SOURCEFORGE_URL), constraints);
         ++constraints.gridy;
         add(new JLabel("by Neop (mneop@web.de)"), constraints);
         ++constraints.gridy;
