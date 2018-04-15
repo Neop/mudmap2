@@ -164,7 +164,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 @Override
                 public void actionPerformed(ActionEvent ae) {
                     try {
-                        createTab(WorldManager.getWorld(entry.getFile().getAbsolutePath()), entry.getFile().getAbsolutePath());
+                        createTab(WorldManager.getWorld(entry.getFile().getAbsolutePath()));
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(getParent(), "Could not open world: " + ex.getMessage());
                         Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -255,13 +255,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         if(name != null && !name.isEmpty()){
             // create a new world
             try {
-                World world = WorldManager.createWorld(name);
-                // move to default layer
-                if(world.getLayers().isEmpty()){
-                    Layer layer = world.getNewLayer();
-                    world.setHome(new WorldCoordinate(layer.getId(), 0, 0));
-                }
-                createTab(world, null);
+                World world = WorldManager.getNewWorld(name);
+                createTab(world);
             } catch (Exception ex) {
                 Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(this, "Couldn't create world \"" + name + "\":\n" + ex.getMessage());
@@ -272,9 +267,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     /**
      * create world tab
      * @param world
-     * @param file world file or empty string / null
      */
-    public void createTab(World world, String file){
+    public void createTab(World world){
         setMinimumSize(new Dimension(500, 400));
 
         if(tabbedPane == null){
@@ -286,7 +280,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
         if(!worldTabs.containsKey(world)){
             // open new tab
-            WorldTab tab = new WorldTab(this, world, file, false);
+            WorldTab tab = new WorldTab(this, world, false);
             worldTabs.put(world, tab);
             tabbedPane.addTab(tab.getWorld().getName(), tab);
         }
@@ -307,7 +301,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         for(WorldTab tab: worldTabs.values()){
             int ret = JOptionPane.showConfirmDialog(this, "Save world \"" + tab.getWorld().getName() + "\"?", "Save world", JOptionPane.YES_NO_OPTION);
             if(ret == JOptionPane.YES_OPTION) tab.save();
-            WorldManager.closeFile(tab.getFilename());
+            WorldManager.close(tab.getWorld());
             removeTab(tab);
         }
     }
@@ -392,7 +386,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                     int ret = dlg.showSaveDialog(wt);
                     if(ret == JFileChooser.APPROVE_OPTION){
                         wt.getWorld().setWorldFile(dlg.getWorldFile());
-                        wt.setFilename(dlg.getSelectedFile().getAbsolutePath());
                         wt.save();
                     }
                 }

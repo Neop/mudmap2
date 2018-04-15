@@ -85,7 +85,7 @@ public class OpenWorldDialog implements ActionListener{
                 World world = WorldManager.getWorld(file);
                 if(null != world){
                     // create world tab
-                    parent.createTab(world, file);
+                    parent.createTab(world);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(OpenWorldDialog.class.getName()).log(Level.WARNING, null, ex);

@@ -18,9 +18,8 @@ package mudmap2.frontend;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mudmap2.backend.World;
+import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -67,12 +66,6 @@ public class WorldTabTest {
         instance = new WorldTab(null, new World(), true);
         assertNotNull(instance.getWorldPanel());
 
-        instance = new WorldTab(null, new World(), "", false);
-        assertNotNull(instance.getWorldPanel());
-
-        instance = new WorldTab(null, new World(), "", true);
-        assertNotNull(instance.getWorldPanel());
-
         instance = new WorldTab(instance);
         assertNotNull(instance.getWorldPanel());
     }
@@ -90,29 +83,8 @@ public class WorldTabTest {
         instance = new WorldTab(null, new World(), true);
         assertNotNull(instance.getWorld());
 
-        instance = new WorldTab(null, new World(), "", false);
-        assertNotNull(instance.getWorld());
-
-        instance = new WorldTab(null, new World(), "", true);
-        assertNotNull(instance.getWorld());
-
         instance = new WorldTab(instance);
         assertNotNull(instance.getWorld());
-    }
-
-    /**
-     * Test of get/seFilename methods, of class WorldTab.
-     */
-    @Test
-    public void testGetFilename() {
-        System.out.println("getFilename");
-
-        WorldTab instance = new WorldTab(null, new World(), false);
-
-        String filename = "/tmp/foobar/baz";
-        instance.setFilename(filename);
-
-        assertEquals(filename, instance.getFilename());
     }
 
     /**
@@ -127,8 +99,10 @@ public class WorldTabTest {
             file.delete();
             assertFalse(file.exists());
 
-            WorldTab instance = new WorldTab(null, new World(), false);
-            instance.setFilename(file.getAbsolutePath());
+            World world = new World();
+            world.setWorldFile(new WorldFileDefault(file.getAbsolutePath()));
+
+            WorldTab instance = new WorldTab(null, world, false);
             instance.save();
 
             assertTrue(file.exists());

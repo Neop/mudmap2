@@ -50,12 +50,12 @@ import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
+import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldFileReader.WorldFileType;
 import mudmap2.backend.WorldFileReader.current.WorldFileDefault;
 import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
 import mudmap2.backend.WorldFileReader.current.WorldMetaJSON;
-import mudmap2.backend.WorldManager;
 import mudmap2.frontend.GUIElement.WorldPanel.PlaceSelectionListener;
 import mudmap2.frontend.GUIElement.ScrollLabel;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
@@ -78,8 +78,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
 
     JFrame parentFrame;
 
-    String filename;
-
     // GUI elements
     WorldPanel worldPanel;
     SidePanel sidePanel;
@@ -92,19 +90,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
     static final int META_FILE_VER_MINOR = 0;
 
     // ============================= Methods ===================================
-
-    /**
-     * Constructs the world tab, opens the world if necessary
-     * @param parent
-     * @param world world
-     * @param file
-     * @param passive world won't be changed, if true
-     */
-    public WorldTab(JFrame parent, World world, String file, boolean passive){
-        parentFrame = parent;
-        this.filename = file;
-        create(world, passive);
-    }
 
     /**
      * Constructs the world tab, opens the world if necessary
@@ -232,22 +217,6 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
     }
 
     /**
-     * Get the worlds file name
-     * @return
-     */
-    public String getFilename() {
-        return filename;
-    }
-
-    /**
-     * Set the worlds file name
-     * @param filename
-     */
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    /**
      * Set visibility of the side panel
      * @param b
      */
@@ -263,53 +232,59 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             WorldFile worldFile = getWorld().getWorldFile();
 
             if(worldFile == null){
-                if(filename == null || filename.isEmpty() || (new File(filename)).exists()){
-                    // get new filename
-                    int ret;
-                    do {
-                        JFileChooser fileChooser = new JFileChooser(Environment.getWorldsDir());
-                        ret = fileChooser.showSaveDialog(this);
-                        if(ret == JFileChooser.APPROVE_OPTION){
-                            filename = fileChooser.getSelectedFile().getAbsolutePath();
-                        } else {
-                            ret = JOptionPane.showConfirmDialog(this,
-                                    "No file chosen: " + getWorld().getName()
-                                    + " will not be saved!", "Saving world",
-                                    JOptionPane.OK_CANCEL_OPTION);
-                            if(ret == JOptionPane.OK_OPTION) return;
-                        }
-                    } while(ret != JFileChooser.APPROVE_OPTION || ret != JOptionPane.OK_OPTION);
-                }
+                // get new filename
+                String filename = null;
 
-                worldFile = new WorldFileDefault(filename);
-                getWorld().setWorldFile(worldFile);
+                int ret;
+                do {
+                    JFileChooser fileChooser = new JFileChooser(Environment.getWorldsDir());
+                    ret = fileChooser.showSaveDialog(this);
+                    if(ret == JFileChooser.APPROVE_OPTION){
+                        filename = fileChooser.getSelectedFile().getAbsolutePath();
+                    } else {
+                        ret = JOptionPane.showConfirmDialog(this,
+                                "No file chosen: " + getWorld().getName()
+                                + " will not be saved!", "Saving world",
+                                JOptionPane.OK_CANCEL_OPTION);
+                        if(ret == JOptionPane.OK_OPTION) return;
+                    }
+                } while(ret != JFileChooser.APPROVE_OPTION || ret != JOptionPane.OK_OPTION);
+
+                if(filename != null){
+                    worldFile = new WorldFileDefault(filename);
+                    getWorld().setWorldFile(worldFile);
+                }
             }
 
-            // set meta data writer
-            if(worldFile.getWorldFileType() == WorldFileType.JSON){
-                WorldFileJSON wfj = null;
-                if(worldFile instanceof WorldFileJSON){
-                    wfj = (WorldFileJSON) worldFile;
-                } else if(worldFile instanceof WorldFileDefault){
-                    wfj = (WorldFileJSON) ((WorldFileDefault) worldFile).getWorldFile();
+            if(worldFile != null){
+                // set meta data writer
+                if(worldFile.getWorldFileType() == WorldFileType.JSON){
+                    WorldFileJSON wfj = null;
+                    if(worldFile instanceof WorldFileJSON){
+                        wfj = (WorldFileJSON) worldFile;
+                    } else if(worldFile instanceof WorldFileDefault){
+                        wfj = (WorldFileJSON) ((WorldFileDefault) worldFile).getWorldFile();
+                    }
+                    if(wfj != null) wfj.setMetaGetter(this);
                 }
-                if(wfj != null) wfj.setMetaGetter(this);
-            }
 
-            // write world file
-            try {
-                worldFile.writeFile(getWorld());
-                WorldManager.putWorld(worldFile.getFilename(), getWorld());
-            } catch (IOException ex) {
-                Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(getParent(),
-                        "Could not save world file " + worldFile.getFilename(),
-                        "Saving world file",
-                        JOptionPane.ERROR_MESSAGE);
+                // write world file
+                try {
+                    World world = getWorld();
+                    worldFile.writeFile(world);
+                    // set world as recently used
+                    WorldFileList.push(new WorldFileList.WorldFileEntry(world.getName(), new File(worldFile.getFilename())));
+
+                    showMessage("World saved");
+                } catch (IOException ex) {
+                    Logger.getLogger(WorldTab.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(getParent(),
+                            "Could not save world file " + worldFile.getFilename(),
+                            "Saving world file",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
-
-        showMessage("World saved");
     }
 
     /**
