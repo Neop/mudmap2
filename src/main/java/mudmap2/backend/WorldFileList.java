@@ -165,10 +165,12 @@ public class WorldFileList {
         }
 
         // fallback: legacy available worlds file
-        if(!success && availableWorldsFile.exists() && availableWorldsFile.canRead()){
-            readWorldList(availableWorldsFile);
-        } else {
-            System.err.println("No world history file or not readable");
+        if(!success){
+            if(availableWorldsFile.exists() && availableWorldsFile.canRead()){
+                readWorldList(availableWorldsFile);
+            } else {
+                System.err.println("No world history file or not readable");
+            }
         }
 
         // remove nonexistant entries

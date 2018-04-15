@@ -33,9 +33,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -54,11 +54,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import mudmap2.backend.Layer;
 import mudmap2.backend.World;
-import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldFileList;
-import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
@@ -292,6 +289,10 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             // update menu entry
             menuEditShowCursor.setState(curTab.getWorldPanel().isCursorEnabled());
         }
+
+        if(world.getWorldFile() != null){
+            WorldFileList.push(new WorldFileList.WorldFileEntry(world.getName(), new File(world.getWorldFile().getFilename())));
+        }
     }
 
     /**
@@ -479,10 +480,6 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
             }
         }
         return false;
-    }
-
-    private WorldFile WorldFileJSON() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
