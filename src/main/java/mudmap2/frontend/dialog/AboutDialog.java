@@ -88,10 +88,7 @@ public class AboutDialog extends ActionDialog {
         add(new JLabel("by Neop (mneop@web.de)"), constraints);
         ++constraints.gridy;
 
-        add(new JLabel("HTML/JS map code by Gaardian"), constraints);
-        ++constraints.gridy;
-
-        JButton button_ok = new JButton("Ok");
+        JButton button_ok = new JButton("Close");
         add(button_ok, constraints);
         getRootPane().setDefaultButton(button_ok);
         button_ok.addActionListener(new ActionListener() {

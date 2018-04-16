@@ -1,9 +1,13 @@
 2.x.x
 - implemented legend for image export
+- implemented file extension .m2w for MUD Map world files
+- implemented keyboard shortcut help dialog
 - rewrote image export dialog
+- rewrote internal handling recently used and loaded worlds
 - removed html export
 - fixed: prev button created invalid entries
 - fixed: creating places in a new world added them on a new map each
+- fixed: file chooser dialogs (open / save world) did not show hidden directories)
 - minor UI changes
 
 2.4.5

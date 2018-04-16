@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MUD Map Keyboard Shortcuts</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            tr {
+                background-color: #bbbbbb;
+            }
+            .odd {
+                background-color: #dddddd;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>MUD Map Keyboard Shortcuts</h1>
+        <p>You can use these keyboard shortcuts to speed up your work flow.</p>
+        <p>Be aware that there is no undo in MUD Map, so remember to save your world often!</p>
+        
+        <h2>World File</h2>
+        <table>
+            <tr><th>Key combination</th><th>Effect</th></tr>
+            <tr class="odd"><td>ctrl + s</td><td>Save world</td></tr>
+            <tr><td>ctrl + o</td><td>Show open world dialog</td></tr>
+        </table>
+        
+        <h2>Map navigation</h2>
+        <p>You can create your world by using your pointing device or by using the selection cursor which can be controlled by the direction keys on your keyboard. The selection cursor is displayed on your map as a red box.</p>
+        <p>Note: <i>direction keys</i> are the arrow keys, w/a/s/d and the numpad numbers (except 5).</p>
+        <table>
+            <tr><th>Key combination</th><th>Effect</th></tr>
+            <tr class="odd"><td>p</td><td>Enable / disable place selection cursor</td></tr>
+            <tr><td>right click</td><td>Show context menu of the map tile pointed at</td></tr>
+            <tr class="odd"><td>context menu key</td><td>Show context menu of selected place</td></tr>
+            <tr><td>+/- and page up/down</td><td>Zoom in and out</td></tr>
+            <tr class="odd"><td>h / home / numpad 5</td><td>Go to home position</td></tr>
+            <tr><td>direction keys</td><td>Move cursor</td></tr>
+        </table>
+        
+        <h2>Map manipulation</h2>
+        
+        <h3>Place creation</h3>
+        <table>
+            <tr><th>Key combination</th><th>Effect</th></tr>
+            <tr class="odd"><td>e / enter / insert / double click</td><td>Create / edit place at selection cursor</td></tr>
+            <tr><td>f</td><td>Create a placeholder</td></tr>
+            <tr class="odd"><td>r / delete</td><td>Remove selected place</td></tr>
+            <tr><td>c</td><td>Edit place comments</td></tr>
+            <tr class="odd"><td>q</td><td>Modify group of selected place. Note that this affects all places that this group has been assigned to. A new group will be created if no place is selected.</td></tr>
+        </table>
+        
+        <h3>Path creation</h3>
+        <table>
+            <tr><th>Key combination</th><th>Effect</th></tr>
+            <tr class="odd"><td>ctrl + numpad 5</td><td>Show create path dialog</td></tr>
+            <tr><td>ctrl + direction keys</td><td>Create path to adjacent place (no w/a/s/d)</td></tr>
+            <tr class="odd"><td>alt + direction keys</td><td>Remove all plaths to adjacent place</td></tr>
+        </table>
+        
+        <h2>Place selection</h2>
+        <p>You can select several places at once to change a property to a common value or to move / copy them. Selected places are displayed in pale colors. If you cut or copied places blue place cursors will show you where each place will be inserted.</p>
+        <p><b>Warning!</b> Copy / paste operations can not be undone! Make sure to save your world before using this!</p>
+        <table>
+            <tr><th>Key combination</th><th>Effect</th></tr>
+            <tr class="odd"><td>ctrl + click</td><td>Add / remove place from selection</td></tr>
+            <tr><td>space</td><td>Add / remove place marked by selection</td></tr>
+            <tr class="odd"><td>shift + click</td><td>Box selection</td></tr>
+            <tr><td>shift + direction keys</td><td>Box selection</td></tr>
+            <tr class="odd"><td>ctrl + a</td><td>Select all places on current map</td></tr>
+            <tr><td>escape</td><td>Deselect everything</td></tr>
+            <tr class="odd"><td>ctrl + x</td><td>Cut selected places</td></tr>
+            <tr><td>ctrl + x</td><td>Copy selected places</td></tr>
+            <tr class="odd"><td>Ctrl + v</td><td>Paste places (this can not be undone!)</td></tr>
+        </table>
+    </body>
+</html>

@@ -62,6 +62,7 @@ import mudmap2.frontend.dialog.AboutDialog;
 import mudmap2.frontend.dialog.PlaceGroupDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.ExportImageDialog;
+import mudmap2.frontend.dialog.KeyboardShortcutDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathColorDialog;
 import mudmap2.frontend.dialog.SaveWorldDialog;
@@ -235,6 +236,10 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuEdit.add(menuEditShowGrid);
         menuEditShowGrid.addChangeListener(this);
 
+        JMenuItem menuHelpKeyboardShortcuts = new JMenuItem("Keyboard Shortcuts");
+        menuHelp.add(menuHelpKeyboardShortcuts);
+        menuHelpKeyboardShortcuts.addActionListener((ActionListener) new KeyboardShortcutDialog(this));
+        
         JMenuItem menuHelpAbout = new JMenuItem("About");
         menuHelp.add(menuHelpAbout);
         menuHelpAbout.addActionListener((ActionListener) new AboutDialog(this));
