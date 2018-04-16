@@ -66,6 +66,7 @@ import mudmap2.frontend.dialog.KeyboardShortcutDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathColorDialog;
 import mudmap2.frontend.dialog.SaveWorldDialog;
+import mudmap2.frontend.dialog.UpdateDialog;
 
 /**
  * Main class for the mudmap window
@@ -239,7 +240,11 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         JMenuItem menuHelpKeyboardShortcuts = new JMenuItem("Keyboard Shortcuts");
         menuHelp.add(menuHelpKeyboardShortcuts);
         menuHelpKeyboardShortcuts.addActionListener((ActionListener) new KeyboardShortcutDialog(this));
-        
+
+        JMenuItem menuHelpCheckUpdates = new JMenuItem("Check for updates");
+        menuHelp.add(menuHelpCheckUpdates);
+        menuHelpCheckUpdates.addActionListener((ActionListener) new UpdateDialog(this));
+
         JMenuItem menuHelpAbout = new JMenuItem("About");
         menuHelp.add(menuHelpAbout);
         menuHelpAbout.addActionListener((ActionListener) new AboutDialog(this));

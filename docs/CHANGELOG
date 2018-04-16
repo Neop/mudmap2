@@ -2,6 +2,7 @@
 - implemented legend for image export
 - implemented file extension .m2w for MUD Map world files
 - implemented keyboard shortcut help dialog
+- implemented update dialog
 - rewrote image export dialog
 - rewrote internal handling recently used and loaded worlds
 - removed html export
