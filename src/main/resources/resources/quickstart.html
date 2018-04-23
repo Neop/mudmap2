@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MUD Map Quick Start Guide</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            tr {
+                background-color: #bbbbbb;
+            }
+            .odd {
+                background-color: #dddddd;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>MUD Map Quick Start Guide</h1>
+        <p>MUD Map is a tool for mapping text based games like MUDs, MUSHs and text adventures.</p>
+
+        <h2>Worlds</h2>
+        <p>MUD Map groups maps in worlds. In most cases you will want to create one world for each game you map. Each world can contain several maps while each map consists of a number of places.</p>
+        <p>You can create a world by clicking <i>New</i> in the <i>File</i>-menu. Enter the name of your world and you are ready to start mapping.</p>
+        <p>Remember to save your world often (<i>Save</i> in <i>File</i>-menu), since there is no undo in MUD Map (state v2.5.0).</p>
+
+        <h2>Creating places</h2>
+        <p>Once you created a world MUD Map will show an empty map. Do a <b>double click</b> on the map to create a new place. A dialog will appear, prompting you to enter some information about the new place:</p>
+
+        <table>
+            <tr><th>Field</th><th>Description</th></tr>
+            <tr class="odd"><td>Name</td><td>The name of the place.</td></tr>
+            <tr><td>Place group</td><td>Places that belong together, like a city or a building with multiple rooms, can be grouped visually. Selecting a place group will add a colored ring to the place on the map. We will later explain how to create place groups.</td></tr>
+            <tr class="odd"><td>Risk level</td><td>Adds a visual hint describing how safe or dangerous a place is. We will later explain how to create custom risk levels.</td></tr>
+            <tr><td>Minimal and maximum level</td><td>These can be used to add a hint about recommended player levels on the map.</td></tr>
+        </table>
+
+        <p>You can change an existing place by doing a <b>double click</b> on it. The place dialog will appear.</p>
+        <p>If you do a <b>right click</b> on a place the context menu will appear. You can use it to open the place dialog, to remove the place, to add comments, to quickly edit the place group, to create and navigate paths (explained later) and connections to places on other maps (also explained later).</p>
+        <p>You can also cut/copy and paste places via the context menu. Be careful and save your world file before doing this, since it can not be undone!</p>
+
+        <h2>Place groups</h2>
+        <p>As explained in the previous section place groups can be used to group places visually. The place group corresponds to the outer colored ring of each place.</p>
+        <p>To create place groups click <i>Add place group</i> in <i>World</i>-menu. Enter a name for the group and choose a color. You can change the group color later on in by clicking <i>Edit place group</i> in the context menu of a place.</p>
+        <p>Don't worry about deleting place groups, unused groups will automatically be removed once the world is saved and loaded from file again.</p>
+
+        <h2>Risk levels</h2>
+        <p>Risk levels are shown as the inner ring of each place.</p>
+        <p>A few common risk levels are included in each new world. If you like to create your own risk level click <i>Edit World</i> in <i>World</i> menu. A list of risk levels will be shown in the World dialog. Add a name for your risk level in the empty text field and click <i>Ok</i> to create a new risk level. If you open the dialog again you wil be able to add another risk level.</p>
+
+        <h2>Creating paths</h2>
+        <p>Connections between places can be added and removed via the <i>Paths / Exits</i> submenu of the context menu (<b>right click</b> on a place). You will also find a list of all connections from/to the selected place, clicking an entry will show the corresponding place.</p>
+        <p>Paths can be added in three different ways:</p>
+        <ul>
+            <li><i>Paths / Exits</i> -> <i>Connect</i> -> <i>Select</i>: A dialog will open, showing a map. You can choose the corresponding place on the map and select the used exits of both places on the bottom of the dialog.</li>
+            <li><i>Paths / Exits</i> -> <i>Connect</i> -> <i>Neighbors</i>: Most places are connected to their neighbors. This will open a dialog that allows you to check the direct neighbors in each direction.</li>
+            <li>Keyboard shortcuts: Read the help article on keyboard short cuts to speed up your work flow (See <i>Help</i> -> <i>Keyboard Shortcuts</i>).</li>
+        </ul>
+
+        <h2>Using more than one map</h2>
+        <p>You might want to create multiple maps for a single world, eg. when a town with lots of places would push the 'rural' places apart, or if there are very detailed buildings inside a town.</p>
+        <p>To create a new map click on <i>Add new Map</i> on the bottom of the <i>Maps</i>-tab of the side bar. Enter a name for the map and you will be sent to an empty layer, create your places as usual.</p>
+        <p>The sidebar tab <i>Maps</i> shows a list of maps. Clicking a map shows the map, doing a double click on the map lets you change it's name.</p>
+        <p>Say you are working on a town and decide to create a map for a detailed building. The building can be shown on the town map by a single place representing all 'inside' places on the other map. You can describe this relation in MUD Map by clicking <i>Maps</i> in the context menu of the place on the town map. Clicking <i>Connect with existing place</i> will open a dialog that lets you choose a place on the town map. The <i>Maps</i> sub-menu of these two places then enables you to quickly move between the two maps without needing to find them in the side bar.</p>
+    </body>
+</html>
