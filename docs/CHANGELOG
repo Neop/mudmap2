@@ -9,6 +9,7 @@
 - fixed: prev button created invalid entries
 - fixed: creating places in a new world added them on a new map each
 - fixed: file chooser dialogs (open / save world) did not show hidden directories)
+- fixed: Recommended levels were enabled by default in new place dialog
 - minor UI changes
 
 2.4.5

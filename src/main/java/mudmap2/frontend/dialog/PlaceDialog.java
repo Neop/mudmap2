@@ -128,7 +128,7 @@ public class PlaceDialog extends ActionDialog {
         if(place != null && place.getRiskLevel() != null) combobox_risk.setSelectedItem(place.getRiskLevel());
         add(combobox_risk);
         
-        Integer min_lvl = 0, max_lvl = 0;
+        Integer min_lvl = -1, max_lvl = -1;
         if(place != null){
             min_lvl = place.getRecLevelMin();
             max_lvl = place.getRecLevelMax();
@@ -230,7 +230,7 @@ public class PlaceDialog extends ActionDialog {
                 } else {
                     place.setRecLevelMax(-1);
                 }
-            } catch (Exception ex) {
+            } catch (Layer.PlaceNotInsertedException ex) {
                 Logger.getLogger(PlaceDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         //}
