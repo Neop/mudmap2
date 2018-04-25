@@ -56,7 +56,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
     }
 
     @Override
-    void create(){
+    protected void create(){
         neighbor_checkboxes = new HashMap<>();
 
         setLayout(new GridBagLayout());

@@ -43,7 +43,7 @@ public class KeyboardShortcutDialog extends ActionDialog {
     }
 
     @Override
-    final void create() {
+    protected final void create() {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         

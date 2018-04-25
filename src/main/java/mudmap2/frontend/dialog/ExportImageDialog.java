@@ -101,7 +101,7 @@ public class ExportImageDialog extends ActionDialog {
      * Creates the UI
      */
     @Override
-    void create() {
+    protected void create() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         add(panel);

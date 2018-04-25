@@ -47,7 +47,7 @@ public class PlaceCommentDialog extends ActionDialog {
     }
 
     @Override
-    void create() {
+    protected void create() {
         optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.YES_NO_OPTION);
 

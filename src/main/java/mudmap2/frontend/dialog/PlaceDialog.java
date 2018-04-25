@@ -105,7 +105,7 @@ public class PlaceDialog extends ActionDialog {
      * Creates the dialog
      */
     @Override
-    void create(){
+    protected void create(){
         setLayout(new GridLayout(0, 2, 4, 4));
 
         add(new JLabel("Name"));

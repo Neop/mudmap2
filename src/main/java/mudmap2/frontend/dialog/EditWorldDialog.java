@@ -71,7 +71,7 @@ public class EditWorldDialog extends ActionDialog {
     }
 
     @Override
-    void create() {
+    protected void create() {
         setLayout(new GridBagLayout());
 
         GridBagConstraints constraints = new GridBagConstraints();

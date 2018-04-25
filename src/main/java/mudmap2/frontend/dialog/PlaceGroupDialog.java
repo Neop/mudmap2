@@ -120,7 +120,7 @@ public class PlaceGroupDialog extends ActionDialog {
      * Creates the GUI
      */
     @Override
-    void create(){
+    protected void create(){
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
 

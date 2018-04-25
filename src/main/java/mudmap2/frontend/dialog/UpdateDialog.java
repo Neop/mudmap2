@@ -17,7 +17,6 @@
 package mudmap2.frontend.dialog;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -51,7 +50,7 @@ public class UpdateDialog extends ActionDialog {
     }
 
     @Override
-    void create() {
+    protected void create() {
         setLayout(new BorderLayout());
 
         panel = new JPanel();

@@ -67,7 +67,7 @@ public class PathConnectDialog extends ActionDialog{
     }
 
     @Override
-    void create(){
+    protected void create(){
         setMinimumSize(new Dimension(600, 600));
         setLayout(new GridBagLayout());
 

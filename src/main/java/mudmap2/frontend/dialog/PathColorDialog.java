@@ -59,7 +59,7 @@ public class PathColorDialog extends ActionDialog {
     }
 
     @Override
-    void create() {
+    protected void create() {
         setLayout(new GridBagLayout());
 
         GridBagConstraints constraints_l = new GridBagConstraints();
