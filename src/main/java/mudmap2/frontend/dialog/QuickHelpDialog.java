@@ -40,7 +40,6 @@ public class QuickHelpDialog extends ActionDialog {
 
     public QuickHelpDialog(JFrame parent) {
         super(parent, "MUD Map Quick Start Guide", false);
-        create();
     }
 
     @Override

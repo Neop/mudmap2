@@ -40,7 +40,6 @@ public class KeyboardShortcutDialog extends ActionDialog {
     
     public KeyboardShortcutDialog(JFrame parent) {
         super(parent, "MUD Map Keyboard Shortcuts", false);
-        create();
     }
 
     @Override

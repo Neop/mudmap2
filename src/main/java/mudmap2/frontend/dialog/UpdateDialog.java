@@ -69,10 +69,7 @@ public class UpdateDialog extends ActionDialog {
             }
         });
 
-        setMinimumSize(new Dimension(200, 100));
-
         pack();
-        setSize(new Dimension(200, 150));
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
 
         (new Updater()).start();
