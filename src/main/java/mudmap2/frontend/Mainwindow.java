@@ -59,12 +59,13 @@ import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
-import mudmap2.frontend.dialog.PlaceGroupDialog;
+import mudmap2.frontend.dialog.placeGroup.PlaceGroupDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.KeyboardShortcutDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.PathColorDialog;
+import mudmap2.frontend.dialog.placeGroup.PlaceGroupListDialog;
 import mudmap2.frontend.dialog.QuickHelpDialog;
 import mudmap2.frontend.dialog.SaveWorldDialog;
 import mudmap2.frontend.dialog.UpdateDialog;
@@ -93,6 +94,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
     JMenuItem menuEditEditWorld;
     JMenuItem menuEditPathColors;
     JMenuItem menuEditAddPlaceGroup;
+    JMenuItem menuEditPlaceGroups;
 
     JMenuItem menuEditSetHomePosition;
     JMenuItem menuEditGotoHomePosition;
@@ -210,6 +212,11 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuEditAddPlaceGroup.setActionCommand("add_place_group");
         menuEditAddPlaceGroup.addActionListener(this);
         menuEdit.add(menuEditAddPlaceGroup);
+
+        menuEditPlaceGroups = new JMenuItem("Place groups");
+        menuEditPlaceGroups.setActionCommand("place_group_dialog");
+        menuEditPlaceGroups.addActionListener(this);
+        menuEdit.add(menuEditPlaceGroups);
 
         menuEdit.add(new JSeparator());
 
@@ -373,6 +380,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuEditGotoHomePosition.setEnabled(enabled);
         menuEditPathColors.setEnabled(enabled);
         menuEditSetHomePosition.setEnabled(enabled);
+        menuEditPlaceGroups.setEnabled(enabled);
         //menuEditShowCursor.setEnabled(enabled);
         //menuEditShowGrid.setEnabled(enabled);
         /* TODO: deactivated for toggle buttons since they did not accept
@@ -430,6 +438,9 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 break;
             case "add_place_group":
                 if(wt != null) (new PlaceGroupDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
+                break;
+            case "place_group_dialog":
+                if(wt != null) (new PlaceGroupListDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
                 break;
             case "set_home": // set home position
                 if(wt != null) wt.getWorldPanel().setHome();

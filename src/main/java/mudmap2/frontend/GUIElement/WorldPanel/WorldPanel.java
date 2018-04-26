@@ -54,7 +54,7 @@ import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldChangeListener;
 import mudmap2.backend.WorldCoordinate;
-import mudmap2.frontend.dialog.PlaceGroupDialog;
+import mudmap2.frontend.dialog.placeGroup.PlaceGroupDialog;
 import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
 import mudmap2.frontend.dialog.PlaceCommentDialog;
@@ -1288,8 +1288,6 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                             if(place == null) (new PlaceGroupDialog(rootFrame, getWorld())).setVisible(true);
                             // place selected
                             else (new PlaceGroupDialog(rootFrame, getWorld(), place)).setVisible(true);
-                        } else { // place group selection
-                            (new PlaceGroupDialog(rootFrame, getWorld(), parent.placeGroupGetSelection(), place)).setVisible(true);
                         }
                         break;
 
@@ -1366,12 +1364,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                         miPlaceGroup = new JMenuItem("Edit place group");
                         miPlaceGroup.addActionListener(new PlaceGroupDialog(rootFrame, getWorld(), place));
                         miPlaceGroup.setToolTipText("Edit the place group of this place");
-                    } else {
-                        miPlaceGroup = new JMenuItem("*Edit place group");
-                        miPlaceGroup.addActionListener(new PlaceGroupDialog(rootFrame, getWorld(), placeGroup, place));
-                        miPlaceGroup.setToolTipText("Sets a common place group for all selected places");
+                        add(miPlaceGroup);
                     }
-                    add(miPlaceGroup);
                 }
 
                 // ------------- Paths ------------------

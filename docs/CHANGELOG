@@ -4,8 +4,9 @@
 - implemented keyboard shortcut help dialog
 - implemented quick start guide dialog
 - implemented update dialog
-- rewrote image export dialog
-- rewrote internal handling recently used and loaded worlds
+- implemented place group list dialog, minor changes to place group add/modify dialog
+- rewrite of image export dialog
+- rewrite of internal handling of recently used and loaded worlds
 - removed html export
 - fixed: prev button created invalid entries
 - fixed: creating places in a new world added them on a new map each
