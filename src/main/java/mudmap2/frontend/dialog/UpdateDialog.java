@@ -175,6 +175,8 @@ public class UpdateDialog extends ActionDialog {
 
                     if(recentVal > localVal){
                         return true;
+                    } else if(recentVal < localVal){
+                        break;
                     }
                 }
             } catch (NumberFormatException ex){
