@@ -59,16 +59,16 @@ import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
-import mudmap2.frontend.dialog.placeGroup.PlaceGroupDialog;
 import mudmap2.frontend.dialog.EditWorldDialog;
 import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.KeyboardShortcutDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
-import mudmap2.frontend.dialog.PathColorDialog;
 import mudmap2.frontend.dialog.placeGroup.PlaceGroupListDialog;
 import mudmap2.frontend.dialog.QuickHelpDialog;
 import mudmap2.frontend.dialog.SaveWorldDialog;
 import mudmap2.frontend.dialog.UpdateDialog;
+import mudmap2.frontend.dialog.pathColor.PathColorListDialog;
+import mudmap2.frontend.dialog.riskLevel.RiskLevelListDialog;
 
 /**
  * Main class for the mudmap window
@@ -93,8 +93,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
     JMenuItem menuEditEditWorld;
     JMenuItem menuEditPathColors;
-    JMenuItem menuEditAddPlaceGroup;
     JMenuItem menuEditPlaceGroups;
+    JMenuItem menuEditRiskLevels;
 
     JMenuItem menuEditSetHomePosition;
     JMenuItem menuEditGotoHomePosition;
@@ -208,15 +208,15 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuEditPathColors.addActionListener(this);
         menuEdit.add(menuEditPathColors);
 
-        menuEditAddPlaceGroup = new JMenuItem("Add place group");
-        menuEditAddPlaceGroup.setActionCommand("add_place_group");
-        menuEditAddPlaceGroup.addActionListener(this);
-        menuEdit.add(menuEditAddPlaceGroup);
-
         menuEditPlaceGroups = new JMenuItem("Place groups");
         menuEditPlaceGroups.setActionCommand("place_group_dialog");
         menuEditPlaceGroups.addActionListener(this);
         menuEdit.add(menuEditPlaceGroups);
+
+        menuEditRiskLevels = new JMenuItem("Risk levels");
+        menuEditRiskLevels.setActionCommand("risk_level_dialog");
+        menuEditRiskLevels.addActionListener(this);
+        menuEdit.add(menuEditRiskLevels);
 
         menuEdit.add(new JSeparator());
 
@@ -374,13 +374,13 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
         menuFileSaveAs.setEnabled(enabled);
         menuFileSaveAsImage.setEnabled(enabled);
 
-        menuEditAddPlaceGroup.setEnabled(enabled);
         //menuEditCurvedPaths.setEnabled(enabled);
         menuEditEditWorld.setEnabled(enabled);
         menuEditGotoHomePosition.setEnabled(enabled);
         menuEditPathColors.setEnabled(enabled);
         menuEditSetHomePosition.setEnabled(enabled);
         menuEditPlaceGroups.setEnabled(enabled);
+        menuEditRiskLevels.setEnabled(enabled);
         //menuEditShowCursor.setEnabled(enabled);
         //menuEditShowGrid.setEnabled(enabled);
         /* TODO: deactivated for toggle buttons since they did not accept
@@ -432,21 +432,28 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
                 break;
             case "path_colors":
                 if(wt != null){
-                    (new PathColorDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
-                    wt.repaint();
+                    (new PathColorListDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
                 }
                 break;
-            case "add_place_group":
-                if(wt != null) (new PlaceGroupDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
-                break;
             case "place_group_dialog":
-                if(wt != null) (new PlaceGroupListDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
+                if(wt != null){
+                    (new PlaceGroupListDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
+                }
+                break;
+            case "risk_level_dialog":
+                if(wt != null){
+                    (new RiskLevelListDialog(Mainwindow.this, wt.getWorld())).setVisible(true);
+                }
                 break;
             case "set_home": // set home position
-                if(wt != null) wt.getWorldPanel().setHome();
+                if(wt != null){
+                    wt.getWorldPanel().setHome();
+                }
                 break;
             case "goto_home": // go to home position
-                if(wt != null) wt.getWorldPanel().gotoHome();
+                if(wt != null){
+                    wt.getWorldPanel().gotoHome();
+                }
                 break;
             default:
                 String message = getClass().getName() + ": ActionCommand not recognized";

@@ -14,42 +14,58 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-package mudmap2.frontend.dialog.placeGroup;
+package mudmap2.frontend.dialog.riskLevel;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.awt.Dimension;
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
-import mudmap2.backend.PlaceGroup;
+import javax.swing.ListSelectionModel;
+import mudmap2.backend.RiskLevel;
 import mudmap2.backend.World;
 import mudmap2.frontend.dialog.ListDialog;
 import mudmap2.utils.AlphanumComparator;
 
 /**
- * A dialog for creating, removing and modifying PlaceGroups
+ * A dialog for creating, removing and mdifying RiskLevels
  * @author neop
  */
-public class PlaceGroupListDialog extends ListDialog {
+public class RiskLevelListDialog extends ListDialog {
 
     World world;
 
-    public PlaceGroupListDialog(JFrame parent, World world) {
-        super(parent, "Place Groups", false);
+    public RiskLevelListDialog(JFrame parent, World world) {
+        super(parent, "Risk Levels", false);
         this.world = world;
-        setCellRenderer(new PlaceGroupListCellRenderer());
+        setCellRenderer(new RiskLevelListCellRenderer());
+    }
+
+    @Override
+    protected void create(){
+        super.create();
+
+        // only select one RiskLevel at once
+        getList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        setPreferredSize(new Dimension(250, 300));
+        pack();
+        setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
 
     @Override
     protected void updateList(){
         List selectedValuesList = getList().getSelectedValuesList();
 
-        ArrayList<PlaceGroup> placeGroups = world.getPlaceGroups();
+        Collection<RiskLevel> riskLevels = world.getRiskLevels();
         // sort by name
-        Collections.sort(placeGroups, new AlphanumComparator<>());
-        getList().setListData(placeGroups.toArray());
+        List<Object> sorted = riskLevels.stream().sorted(new AlphanumComparator<>()).collect(Collectors.toList());
+        getList().setListData(sorted.toArray());
 
         // select previously selected value(s)
         if(!selectedValuesList.isEmpty()){
@@ -80,7 +96,7 @@ public class PlaceGroupListDialog extends ListDialog {
 
     @Override
     protected void addEntry(){
-        (new PlaceGroupDialog((JFrame) getParent(), world)).setVisible(true);
+        (new RiskLevelDialog((JFrame) getParent(), world)).setVisible(true);
         updateList();
     }
 
@@ -91,8 +107,12 @@ public class PlaceGroupListDialog extends ListDialog {
         if(response == JOptionPane.OK_OPTION){
             List selectedValuesList = getList().getSelectedValuesList();
             for(Object entry: selectedValuesList){
-                PlaceGroup placeGroup = (PlaceGroup) entry;
-                world.removePlaceGroup(placeGroup);
+                RiskLevel riskLevel = (RiskLevel) entry;
+                try {
+                    world.removeRiskLevel(riskLevel);
+                } catch (Exception ex) {
+                    Logger.getLogger(RiskLevelListDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             updateList();
         }
@@ -100,19 +120,22 @@ public class PlaceGroupListDialog extends ListDialog {
 
     @Override
     protected void modifyEntry(){
-        (new PlaceGroupDialog((JFrame) getParent(), getList().getSelectedValuesList())).setVisible(true);
-        updateList();
+        if(!getList().isSelectionEmpty()){
+            RiskLevel rl = (RiskLevel) getList().getSelectedValue();
+            (new RiskLevelDialog((JFrame) getParent(), world, rl)).setVisible(true);
+            updateList();
+        }
     }
 
-    private class PlaceGroupListCellRenderer extends ColoredListCellRenderer<PlaceGroup> {
+    private class RiskLevelListCellRenderer extends ColoredListCellRenderer<RiskLevel> {
 
         @Override
-        protected String getText(PlaceGroup object) {
-            return object.getName();
+        protected String getText(RiskLevel object) {
+            return object.getDescription();
         }
 
         @Override
-        protected Color getColor(PlaceGroup object) {
+        protected Color getColor(RiskLevel object) {
             return object.getColor();
         }
 

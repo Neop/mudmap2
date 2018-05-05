@@ -28,13 +28,16 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.InputMethodListener;
 import java.util.Collection;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
@@ -132,8 +135,11 @@ public class PlaceGroupDialog extends ActionDialog {
                 }
             }
             textfieldName.setText(text);
-            textfieldName.setEditable(false);
-            textfieldName.setEnabled(false);
+
+            if(placeGroups.size() > 1){
+                textfieldName.setEditable(false);
+                textfieldName.setEnabled(false);
+            }
         }
         contentPanel.add(textfieldName, constraints);
         textfieldName.setColumns(20);
@@ -159,20 +165,10 @@ public class PlaceGroupDialog extends ActionDialog {
         contentPanel.add(colorChooserButton, constraints);
 
         final JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 2));
+        buttonPanel.setLayout(new GridLayout(1, 3));
         add(buttonPanel, BorderLayout.SOUTH);
 
-        final JButton buttonCancel = new JButton("Cancel");
-        buttonPanel.add(buttonCancel);
-        getRootPane().setDefaultButton(buttonCancel);
-        buttonCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                dispose();
-            }
-        });
-
-        JButton buttonAccept;
+        final JButton buttonAccept;
         if(placeGroups == null && world != null && (place == null || place.getPlaceGroup() == null)){
             buttonAccept = new JButton("Add");
             buttonAccept.setToolTipText("Create a new place group");
@@ -198,7 +194,38 @@ public class PlaceGroupDialog extends ActionDialog {
                 }
             });
         }
+        buttonAccept.setEnabled(!textfieldName.getText().isEmpty());
+
+        final JButton buttonCancel = new JButton("Cancel");
+        buttonCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                dispose();
+            }
+        });
+
+        buttonPanel.add(new JLabel());
+        buttonPanel.add(buttonCancel);
         buttonPanel.add(buttonAccept);
+        getRootPane().setDefaultButton(buttonAccept);
+
+
+        textfieldName.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                buttonAccept.setEnabled(!textfieldName.getText().isEmpty());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                buttonAccept.setEnabled(!textfieldName.getText().isEmpty());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                buttonAccept.setEnabled(!textfieldName.getText().isEmpty());
+            }
+        });
 
         pack();
         setResizable(false);
@@ -206,9 +233,11 @@ public class PlaceGroupDialog extends ActionDialog {
     }
 
     void createNew(){
-        PlaceGroup placeGroup = new PlaceGroup(textfieldName.getText(), colorChooserButton.getColor());
-        if(world != null) world.addPlaceGroup(placeGroup);
-        if(place != null) place.setPlaceGroup(placeGroup);
+        if(!textfieldName.getText().isEmpty()){
+            PlaceGroup placeGroup = new PlaceGroup(textfieldName.getText(), colorChooserButton.getColor());
+            if(world != null) world.addPlaceGroup(placeGroup);
+            if(place != null) place.setPlaceGroup(placeGroup);
+        }
     }
 
     void modifyExisting(){

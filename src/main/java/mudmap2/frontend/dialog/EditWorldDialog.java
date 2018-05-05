@@ -27,8 +27,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
@@ -39,8 +37,6 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import mudmap2.utils.Pair;
-import mudmap2.backend.RiskLevel;
 import mudmap2.backend.World;
 import mudmap2.frontend.GUIElement.ColorChooserButton;
 
@@ -58,9 +54,7 @@ public class EditWorldDialog extends ActionDialog {
     JTextField textfield_name;
     ColorChooserButton colorchooser_path;
 
-    HashMap<RiskLevel, Pair<JTextField, ColorChooserButton>> risklevel_colors;
-    JTextField risklevel_new_name; // entry to create a new risk level
-    ColorChooserButton risklevel_new_color, tile_center_color;
+    ColorChooserButton tile_center_color;
 
     ButtonGroup buttongroup_place_id;
     JRadioButton radiobutton_place_id_none, radiobutton_place_id_unique, radiobutton_place_id_all;
@@ -97,34 +91,13 @@ public class EditWorldDialog extends ActionDialog {
         add(new JSeparator(), constraints);
 
         constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
-        add(new JLabel("Risk Levels"), constraints);
-
-        risklevel_colors = new HashMap<>();
-        for(RiskLevel rl: world.getRiskLevels()){
-            constraints_l.gridy = ++constraints_r.gridy;
-            JTextField tf_rl_name = new JTextField(rl.getDescription());
-            add(tf_rl_name, constraints_l);
-            ColorChooserButton colorchooser = new ColorChooserButton(getParent(), rl.getColor());
-            add(colorchooser, constraints_r);
-            risklevel_colors.put(rl, new Pair<>(tf_rl_name, colorchooser));
-        }
-
-        constraints_l.gridy = ++constraints_r.gridy;
-
-        add(risklevel_new_name = new JTextField(), constraints_l);
-        add(risklevel_new_color = new ColorChooserButton(getParent()), constraints_r);
-
-        constraints_l.gridy = ++constraints_r.gridy;
 
         add(new JLabel("Tile center color"), constraints_l);
         add(tile_center_color = new ColorChooserButton(getParent(), world.getTileCenterColor()), constraints_r);
 
-        constraints.gridy = constraints_l.gridy = ++constraints_r.gridy;
-        add(new JSeparator(), constraints);
-
         buttongroup_place_id = new ButtonGroup();
-        radiobutton_place_id_none = new JRadioButton("Don't show place ID on map");
-        radiobutton_place_id_unique = new JRadioButton("Show place ID if name isn't unique");
+        radiobutton_place_id_none = new JRadioButton("Do not show place ID on map");
+        radiobutton_place_id_unique = new JRadioButton("Show place ID if name is not unique on map");
         radiobutton_place_id_all = new JRadioButton("Always show place ID");
         buttongroup_place_id.add(radiobutton_place_id_none);
         buttongroup_place_id.add(radiobutton_place_id_unique);
@@ -191,23 +164,7 @@ public class EditWorldDialog extends ActionDialog {
             world.setName(name);
         }
 
-        // modify risk levels
-        for(Map.Entry<RiskLevel,Pair<JTextField, ColorChooserButton>> rl_color: risklevel_colors.entrySet()){
-            String description = rl_color.getValue().first.getText();
-            if(description.isEmpty()) world.removeRiskLevel(rl_color.getKey());
-            else {
-                rl_color.getKey().setDescription(description);
-                rl_color.getKey().setColor(rl_color.getValue().second.getColor());
-            }
-        }
-
         world.setTileCenterColor(tile_center_color.getColor());
-
-        // add new risk level, if name not empty
-        String name_new = risklevel_new_name.getText();
-        if(!name_new.isEmpty()){
-            world.addRiskLevel(new RiskLevel(name_new, risklevel_new_color.getColor()));
-        }
 
         ButtonModel selection = buttongroup_place_id.getSelection();
         if(selection == radiobutton_place_id_none.getModel()) world.setShowPlaceID(World.ShowPlaceID.NONE);
