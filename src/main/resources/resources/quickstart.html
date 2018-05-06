@@ -20,7 +20,7 @@
         <h2>Worlds</h2>
         <p>MUD Map groups maps in worlds. In most cases you will want to create one world for each game you map. Each world can contain several maps while each map consists of a number of places.</p>
         <p>You can create a world by clicking <i>New</i> in the <i>File</i>-menu. Enter the name of your world and you are ready to start mapping.</p>
-        <p>Remember to save your world often (<i>Save</i> in <i>File</i>-menu), since there is no undo in MUD Map (state v2.5.0).</p>
+        <p>Remember to save your world often (<i>Save</i> in <i>File</i>-menu), since there is no undo in MUD Map.</p>
 
         <h2>Creating places</h2>
         <p>Once you created a world MUD Map will show an empty map. Do a <b>double click</b> on the map to create a new place. A dialog will appear, prompting you to enter some information about the new place:</p>
@@ -39,15 +39,14 @@
 
         <h2>Place groups</h2>
         <p>As explained in the previous section place groups can be used to group places visually. The place group corresponds to the outer colored ring of each place.</p>
-        <p>To create place groups click <i>Add place group</i> in <i>World</i>-menu. Enter a name for the group and choose a color. You can change the group color later on in by clicking <i>Edit place group</i> in the context menu of a place.</p>
-        <p>Don't worry about deleting place groups, unused groups will automatically be removed once the world is saved and loaded from file again.</p>
+        <p>To create place groups click <i>Place Groups</i> in <i>World</i>-menu, then click <i>Add</i> in the list dialog. Enter a name for the group and choose a color. You can change the group color later on in by clicking <i>Edit place group</i> in the context menu of a corresponding place.</p>
 
         <h2>Risk levels</h2>
-        <p>Risk levels are shown as the inner ring of each place.</p>
-        <p>A few common risk levels are included in each new world. If you like to create your own risk level click <i>Edit World</i> in <i>World</i> menu. A list of risk levels will be shown in the World dialog. Add a name for your risk level in the empty text field and click <i>Ok</i> to create a new risk level. If you open the dialog again you wil be able to add another risk level.</p>
+        <p>Risk levels are shown as the inner ring of each place. You can assign them in a place's settings dialog.</p>
+        <p>A few common risk levels are included in each new world. If you like to create your own risk level click <i>Risk Levels</i> in <i>World</i> menu. A list of risk levels will be shown. Add a name for your risk level and choose a color.</p>
 
         <h2>Creating paths</h2>
-        <p>Connections between places can be added and removed via the <i>Paths / Exits</i> submenu of the context menu (<b>right click</b> on a place). You will also find a list of all connections from/to the selected place, clicking an entry will show the corresponding place.</p>
+        <p>Connections between places can be added and removed via the <i>Paths / Exits</i> submenu of the place context menu (<b>right click</b> on a place). You will also find a list of all connections from / to the selected place, clicking an entry will show the corresponding place.</p>
         <p>Paths can be added in three different ways:</p>
         <ul>
             <li><i>Paths / Exits</i> -> <i>Connect</i> -> <i>Select</i>: A dialog will open, showing a map. You can choose the corresponding place on the map and select the used exits of both places on the bottom of the dialog.</li>
@@ -55,10 +54,16 @@
             <li>Keyboard shortcuts: Read the help article on keyboard short cuts to speed up your work flow (See <i>Help</i> -> <i>Keyboard Shortcuts</i>).</li>
         </ul>
 
+        <p>It is recommended to mark one-way paths by typing a hyphen (-) as the blocked exit. If you set a custom path color (<i>World</i> menu -> <i>Path Colors</i> for '-' all one-way paths will be marked on the map.</p>
+
         <h2>Using more than one map</h2>
         <p>You might want to create multiple maps for a single world, eg. when a town with lots of places would push the 'rural' places apart, or if there are very detailed buildings inside a town.</p>
         <p>To create a new map click on <i>Add new Map</i> on the bottom of the <i>Maps</i>-tab of the side bar. Enter a name for the map and you will be sent to an empty layer, create your places as usual.</p>
         <p>The sidebar tab <i>Maps</i> shows a list of maps. Clicking a map shows the map, doing a double click on the map lets you change it's name.</p>
         <p>Say you are working on a town and decide to create a map for a detailed building. The building can be shown on the town map by a single place representing all 'inside' places on the other map. You can describe this relation in MUD Map by clicking <i>Maps</i> in the context menu of the place on the town map. Clicking <i>Connect with existing place</i> will open a dialog that lets you choose a place on the town map. The <i>Maps</i> sub-menu of these two places then enables you to quickly move between the two maps without needing to find them in the side bar.</p>
+
+        <h2>Navigation history and home position</h2>
+        <p>Whenever you jump from map to map or place to place you can use the <i>Prev</i> button on the bottom left to go back to the previous position. The <i>Next</i> button goes the other direction.</p>
+        <p>You can set a home position by clicking <i>Set home position</i> in the <i>World</i> menu. If you click <i>Go to home position</i> the map will be moved back to that position.</p>
     </body>
 </html>
