@@ -66,6 +66,7 @@ import mudmap2.frontend.sidePanel.SidePanel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import mudmap2.frontend.GUIElement.WorldPanel.WorldPanelListener;
+import mudmap2.frontend.dialog.SaveWorldDialog;
 
 /**
  * A tab in the main window that displays a world
@@ -231,27 +232,11 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             WorldFile worldFile = getWorld().getWorldFile();
 
             if(worldFile == null){
-                // get new filename
-                String filename = null;
-
-                int ret;
-                do {
-                    JFileChooser fileChooser = new JFileChooser();
-                    ret = fileChooser.showSaveDialog(this);
-                    if(ret == JFileChooser.APPROVE_OPTION){
-                        filename = fileChooser.getSelectedFile().getAbsolutePath();
-                    } else {
-                        ret = JOptionPane.showConfirmDialog(this,
-                                "No file chosen: " + getWorld().getName()
-                                + " will not be saved!", "Saving world",
-                                JOptionPane.OK_CANCEL_OPTION);
-                        if(ret == JOptionPane.OK_OPTION) return;
-                    }
-                } while(ret != JFileChooser.APPROVE_OPTION || ret != JOptionPane.OK_OPTION);
-
-                if(filename != null){
-                    worldFile = new WorldFileDefault(filename);
-                    getWorld().setWorldFile(worldFile);
+                SaveWorldDialog dlg = new SaveWorldDialog(null, this);
+                int ret = dlg.showSaveDialog(this);
+                if(ret == JFileChooser.APPROVE_OPTION){
+                    getWorld().setWorldFile(dlg.getWorldFile());
+                    save();
                 }
             }
 
