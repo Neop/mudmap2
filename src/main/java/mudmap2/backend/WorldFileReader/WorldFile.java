@@ -38,7 +38,7 @@ public abstract class WorldFile {
     }
 
     public String getFilename() {
-        return filename;
+        return filename == null ? "" : filename;
     }
 
     // Reads a world from file

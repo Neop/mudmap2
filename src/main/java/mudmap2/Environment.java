@@ -22,13 +22,7 @@
 
 package mudmap2;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
-import static java.lang.Math.max;
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Helper class to get common paths and filenames
@@ -44,7 +38,7 @@ public class Environment {
     public static final String SOURCEFORGE_URL = "http://sf.net/p/mudmap";
 
     public static String getHome(){
-        String ret = "";
+        String ret;
         if(System.getProperty("os.name").toLowerCase().contains("win")){
             // operating system Windows
             ret = System.getenv().get("APPDATA");
@@ -85,28 +79,9 @@ public class Environment {
      * Gets the directory that contains the world files
      * @return worlds directory
      */
+    @Deprecated
     public static String getWorldsDir(){
         return getUserDataDir() + "worlds" + File.separator;
-    }
-
-    /**
-     * Gets the config file path
-     * @return
-     */
-    public static String getConfigFile(){
-        return getUserDataDir() + "config";
-    }
-
-    /**
-     * Tries to open the url in a web-browser
-     * @param url
-     */
-    public static void openWebsite(String url){
-        try {
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (IOException ex) {
-            Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
 }

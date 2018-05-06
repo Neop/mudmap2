@@ -25,10 +25,15 @@ package mudmap2.frontend.GUIElement;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import mudmap2.Environment;
 
@@ -57,7 +62,11 @@ public class LinkLabel extends JLabel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Environment.openWebsite(url);
+                try {
+                    Desktop.getDesktop().browse(URI.create(url));
+                } catch (IOException ex) {
+                    Logger.getLogger(Environment.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }

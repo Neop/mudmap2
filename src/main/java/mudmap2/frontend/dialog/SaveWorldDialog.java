@@ -16,6 +16,7 @@
  */
 package mudmap2.frontend.dialog;
 
+import java.io.File;
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -42,7 +43,11 @@ public class SaveWorldDialog extends JFileChooser {
     JRadioButton radioJSON;
 
     public SaveWorldDialog(JFrame parent, WorldTab wt){
-        super(wt.getWorld().getWorldFile() != null ? wt.getWorld().getWorldFile().getFilename() : Environment.getHome());
+        super();
+        if(wt.getWorld().getWorldFile() != null &&
+                !wt.getWorld().getWorldFile().getFilename().isEmpty()){
+            setCurrentDirectory(new File(wt.getWorld().getWorldFile().getFilename()));
+        }
 
         setFileHidingEnabled(false);
 

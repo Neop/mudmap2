@@ -66,7 +66,8 @@ public class WorldManager {
 
         // find world in loaded worlds list
         for(World world: loadedWorlds){
-            if(world.getWorldFile().getFilename().equals(filename)){
+            if(world.getWorldFile() != null &&
+                    world.getWorldFile().getFilename().equals(filename)){
                 ret = world;
                 break;
             }
