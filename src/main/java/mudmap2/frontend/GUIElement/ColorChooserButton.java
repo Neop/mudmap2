@@ -27,6 +27,7 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 
@@ -36,28 +37,35 @@ import javax.swing.JColorChooser;
  * @author neop
  */
 public class ColorChooserButton extends JButton {
-    
+
     Component parent;
     Color color;
-    
+
+    LinkedList<ColorChangeListener> colorChangeListeners;
+
     public ColorChooserButton(Component _parent){
         super("A"); // set text to enlarge the button
         color = new Color(128, 128, 128);
         create();
     }
-    
+
     public ColorChooserButton(Component _parent, Color _color){
         super("A"); // set text to enlarge the button
         color = _color;
         create();
     }
-    
+
     private void create(){
+        colorChangeListeners = new LinkedList();
+
         addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 Color col = JColorChooser.showDialog(parent, "Choose color", color);
-                if(col != null) color = col;
+                if(col != null){
+                    color = col;
+                    callColorChangeListeners();
+                }
             }
         });
     }
@@ -66,12 +74,12 @@ public class ColorChooserButton extends JButton {
     public void paintComponent(Graphics g){
         g.setColor(getBackground());
         g.fillRect(0, 0, (int) g.getClipBounds().getWidth() + 1, (int) g.getClipBounds().getHeight() + 1);
-        
+
         g.setColor(color);
         g.fillRect(2, 2, getSize().width - 4, getSize().height - 4);
         g.setColor(Color.LIGHT_GRAY);
         if(isFocusOwner()) g.drawRect(4, 4, getSize().width - 9, getSize().height - 9);
-        
+
         g.drawRect(1, 1, getSize().width - 3, getSize().height - 3);
     }
 
@@ -91,5 +99,23 @@ public class ColorChooserButton extends JButton {
         this.color = color;
         repaint();
     }
-    
+
+    private void callColorChangeListeners(){
+        for(ColorChangeListener ccl: colorChangeListeners){
+            ccl.colorChanged(this);
+        }
+    }
+
+    public void addColorChangeListener(ColorChangeListener ccl){
+        colorChangeListeners.add(ccl);
+    }
+
+    public void removeColorChangeListener(ColorChangeListener ccl){
+        colorChangeListeners.remove(ccl);
+    }
+
+    public interface ColorChangeListener {
+        void colorChanged(ColorChooserButton ccb);
+    }
+
 }
