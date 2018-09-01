@@ -25,6 +25,7 @@
 package mudmap2.frontend;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -43,6 +45,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSplitPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mudmap2.backend.Layer;
@@ -82,7 +85,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
     WorldPanel worldPanel;
     SidePanel sidePanel;
     JSlider sliderZoom;
-    JPanel panelSouth;
+    JPanel palInfoBar;
     ScrollLabel labelInfobar;
 
     // world_meta file version supported by this WorldTab
@@ -130,7 +133,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         setLayout(new BorderLayout());
 
         worldPanel = new WorldPanel(parentFrame, world, passive);
-        add(worldPanel, BorderLayout.CENTER);
+        //add(worldPanel, BorderLayout.CENTER);
         worldPanel.addTileSizeListener(this);
         worldPanel.addStatusListener(this);
         worldPanel.addPlaceSelectionListener(new PlaceSelectionListener() {
@@ -146,21 +149,33 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         });
 
         sidePanel = new SidePanel(world);
-        add(sidePanel, BorderLayout.EAST);
+        //add(sidePanel, BorderLayout.EAST);
         sidePanel.addLayerPanelListener(this);
         sidePanel.addPlacePanelListener(this);
 
-        add(panelSouth = new JPanel(), BorderLayout.SOUTH);
-        panelSouth.setLayout(new GridBagLayout());
+        // add worldPanel and sidePanel to split pane to make them resizable
+        JSplitPane splitPaneCenter = new JSplitPane(
+                JSplitPane.HORIZONTAL_SPLIT,
+                worldPanel, sidePanel);
+        splitPaneCenter.setOneTouchExpandable(true);
+        splitPaneCenter.setDividerLocation(600);
+        splitPaneCenter.setResizeWeight(1.0);
+        add(splitPaneCenter, BorderLayout.CENTER);
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(1, 2, 0, 2);
+        Dimension worldPanelMinimumSize = new Dimension(300, 100);
+        Dimension sidePanelMinimumSize = new Dimension(150, 100);
+        worldPanel.setMinimumSize(worldPanelMinimumSize);
+        sidePanel.setMinimumSize(sidePanelMinimumSize);
+
+        // create info bar
+        add(palInfoBar = new JPanel(), BorderLayout.SOUTH);
+        palInfoBar.setLayout(new BoxLayout(palInfoBar, BoxLayout.LINE_AXIS));
+
 
         // add bottom panel elements
         // previous / next buttons for the history
         JButton button_prev = new JButton("Prev");
-        constraints.gridx++;
-        panelSouth.add(button_prev, constraints);
+        palInfoBar.add(button_prev);
         button_prev.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -169,8 +184,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         });
 
         JButton button_next = new JButton("Next");
-        constraints.gridx++;
-        panelSouth.add(button_next, constraints);
+        palInfoBar.add(button_next);
         button_next.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -178,24 +192,18 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
             }
         });
 
-        constraints.gridx++;
-        constraints.weightx = 1.0;
-        constraints.fill = GridBagConstraints.BOTH;
-        panelSouth.add(labelInfobar = new ScrollLabel(), constraints);
+        palInfoBar.add(labelInfobar = new ScrollLabel());
         labelInfobar.startThread();
 
         // set default selected place to the center place
         worldPanel.setCursor((int) Math.round(worldPanel.getPosition().getX()), (int) Math.round(worldPanel.getPosition().getY()));
         worldPanel.moveScreenToCursor();
 
-        constraints.gridx++;
-        constraints.weightx = 0.0;
-        constraints.fill = GridBagConstraints.NONE;
-        panelSouth.add(new JLabel("Map zoom:"), constraints);
+        palInfoBar.add(new JLabel("Map zoom: "));
 
-        constraints.gridx++;
         sliderZoom = new JSlider(0, 100, (int) (100.0 / WorldPanel.TILE_SIZE_MAX * worldPanel.getTileSize()));
-        panelSouth.add(sliderZoom, constraints);
+        sliderZoom.setMaximumSize(new Dimension(200, 50));
+        palInfoBar.add(sliderZoom);
         sliderZoom.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent arg0) {
