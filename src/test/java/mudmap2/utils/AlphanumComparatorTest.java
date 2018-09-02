@@ -63,27 +63,33 @@ public class AlphanumComparatorTest {
 
         s1 = "abc";
         s2 = "bbc";
-        instance = new AlphanumComparator();
         result = instance.compare(s1, s2);
         assertTrue(result < 0);
 
         s1 = "bbc";
         s2 = "abc";
-        instance = new AlphanumComparator();
         result = instance.compare(s1, s2);
         assertTrue(result > 0);
 
         s1 = "abc1";
         s2 = "abc10";
-        instance = new AlphanumComparator();
         result = instance.compare(s1, s2);
         assertTrue(result < 0);
 
         s1 = "abc10";
         s2 = "abc1";
-        instance = new AlphanumComparator();
         result = instance.compare(s1, s2);
         assertTrue(result > 0);
+
+        s1 = "a";
+        s2 = "A";
+        result = instance.compare(s1, s2);
+        assertTrue(result == 0);
+
+        s1 = "a";
+        s2 = "B";
+        result = instance.compare(s1, s2);
+        assertTrue(result < 0);
     }
 
 }
