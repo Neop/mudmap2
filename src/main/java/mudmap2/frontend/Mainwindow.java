@@ -500,18 +500,35 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher,Actio
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
+        // ctrl modifier
+        if(e.isControlDown()){
+            // go to search box (side bar of current world tab)
+            if(e.getKeyCode() == KeyEvent.VK_F){
+                WorldTab wt = getSelectedTab();
+                    if(wt != null){
+                        wt.focusSidePanelSearchBox();
+                    }
+                return true;
+            }
+        }
+
+        // no modifier
         if(KeyEvent.KEY_PRESSED == e.getID() && e.isControlDown()){
             switch(e.getKeyCode()){
-                case KeyEvent.VK_S:
+                case KeyEvent.VK_S: // save world
+                {
                     WorldTab wt = getSelectedTab();
                     if(wt != null){
                         wt.save();
                     }
                     return true;
-                case KeyEvent.VK_O:
+                }
+                case KeyEvent.VK_O: // open world
+                {
                     OpenWorldDialog dlg = new OpenWorldDialog(this);
                     dlg.setVisible();
                     return true;
+                }
             }
         }
         return false;

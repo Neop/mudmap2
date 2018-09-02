@@ -19,6 +19,8 @@ package mudmap2.frontend.sidePanel;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,7 +43,8 @@ import mudmap2.utils.AlphanumComparator;
  *
  * @author neop
  */
-public class PlacePanel extends JPanel implements TreeSelectionListener,WorldChangeListener {
+public class PlacePanel extends JPanel
+        implements KeyListener, TreeSelectionListener, WorldChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -49,6 +52,8 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
 
     JTree tree;
     DefaultMutableTreeNode root;
+
+    JTextField textFieldSearch;
 
     HashMap<Layer, LayerTreeNode> layerNodes;
     HashMap<Place, PlaceTreeNode> placeNodes;
@@ -70,7 +75,7 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
 
         useKeywords = false;
 
-        JTextField textFieldSearch = new JTextField("Search places");
+        textFieldSearch = new JTextField("Search places");
         textFieldSearch.setToolTipText("Search for places");
         textFieldSearch.addActionListener(new ActionListener() {
             @Override
@@ -78,6 +83,7 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
                 update(((JTextField) e.getSource()).getText());
             }
         });
+        textFieldSearch.addKeyListener(this);
         add(textFieldSearch, BorderLayout.SOUTH);
 
         root = new DefaultMutableTreeNode(world.getName());
@@ -145,6 +151,10 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
         ((DefaultTreeModel) tree.getModel()).reload();
         tree.setShowsRootHandles(true);
         tree.setRootVisible(false);
+    }
+
+    public void focusSearchBox(){
+        textFieldSearch.requestFocusInWindow();
     }
 
     /**
@@ -258,6 +268,22 @@ public class PlacePanel extends JPanel implements TreeSelectionListener,WorldCha
             setUserObject(place.toString());
         }
 
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {}
+
+    @Override
+    public void keyPressed(KeyEvent ke) {}
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+        int keyCode = ke.getKeyCode();
+
+        if(ke.getExtendedKeyCode() == KeyEvent.VK_ESCAPE){
+            textFieldSearch.setText("");
+            update();
+        }
     }
 
 }

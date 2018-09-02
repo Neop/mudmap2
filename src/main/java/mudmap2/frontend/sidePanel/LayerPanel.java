@@ -21,6 +21,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -45,7 +47,8 @@ import mudmap2.utils.AlphanumComparator;
  *
  * @author neop
  */
-public class LayerPanel extends JPanel implements ActionListener,WorldChangeListener {
+public class LayerPanel extends JPanel
+        implements ActionListener, KeyListener, WorldChangeListener {
     private static final long serialVersionUID = 1L;
 
     final static Integer PREVIEW_WIDTH_X = 100;
@@ -53,6 +56,7 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
 
     World world;
     JScrollPane scrollPane;
+    JTextField textFieldSearch;
 
     HashSet<LayerPanelListener> layerListeners;
     HashMap<JPanel, Layer> panels;
@@ -68,7 +72,7 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         JPanel south = new JPanel(new GridLayout(2, 1));
 
         // search box
-        JTextField textFieldSearch = new JTextField("Search maps");
+        textFieldSearch = new JTextField("Search maps");
         south.add(textFieldSearch);
         textFieldSearch.setToolTipText("Search for layers");
         textFieldSearch.addActionListener(new ActionListener() {
@@ -77,6 +81,7 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
                 update(((JTextField) e.getSource()).getText());
             }
         });
+        textFieldSearch.addKeyListener(this);
 
         // add button
         JButton buttonAdd = new JButton("Add new map");
@@ -85,7 +90,6 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         buttonAdd.addActionListener(this);
 
         add(south, BorderLayout.SOUTH);
-
 
         update();
     }
@@ -99,7 +103,7 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
             }
         }
     }
-    
+
     public final void update(){
         update("");
     }
@@ -190,10 +194,11 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         LayerPreviewPanel layerPreviewPanel = new LayerPreviewPanel(layer);
         panel.add(layerPreviewPanel, BorderLayout.CENTER);
 
-        // layerPreviewPanel stops accepting mouseEvents if using tooltip
-        //layerPreviewPanel.setToolTipText("Click to go to layer, double click or righ click to change layer name");
-
         return panel;
+    }
+
+    public void focusSearchBox(){
+        textFieldSearch.requestFocusInWindow();
     }
 
     private void editLayer(Layer layer){
@@ -239,6 +244,22 @@ public class LayerPanel extends JPanel implements ActionListener,WorldChangeList
         } else {
             revalidate();
             repaint();
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {}
+
+    @Override
+    public void keyPressed(KeyEvent ke) {}
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+        int keyCode = ke.getKeyCode();
+
+        if(ke.getExtendedKeyCode() == KeyEvent.VK_ESCAPE){
+            textFieldSearch.setText("");
+            update();
         }
     }
 

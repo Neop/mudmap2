@@ -232,6 +232,10 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
         sidePanel.setVisible(b);
     }
 
+    public void focusSidePanelSearchBox(){
+        sidePanel.focusSearchBox();
+    }
+
     /**
      * Saves the changes in the world
      */

@@ -17,6 +17,7 @@
 package mudmap2.frontend.sidePanel;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import mudmap2.backend.World;
@@ -31,15 +32,16 @@ public class SidePanel extends JPanel {
 
     World world;
 
+    JTabbedPane tabbedPane;
     LayerPanel layerPanel;
     PlacePanel placePanel;
 
-    public SidePanel(World world){
+    public SidePanel(World world) {
         this.world = world;
 
         setLayout(new BorderLayout());
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane = new JTabbedPane();
         add(tabbedPane, BorderLayout.CENTER);
 
         layerPanel = new LayerPanel(world);
@@ -48,11 +50,14 @@ public class SidePanel extends JPanel {
         placePanel = new PlacePanel(world);
         tabbedPane.addTab("Places", placePanel);
 
+        tabbedPane.addKeyListener(layerPanel);
+        tabbedPane.addKeyListener(placePanel);
+
         world.addChangeListener(layerPanel);
         world.addChangeListener(placePanel);
     }
 
-    public void update(){
+    public void update() {
         layerPanel.update();
         placePanel.update();
     }
@@ -64,39 +69,52 @@ public class SidePanel extends JPanel {
     public PlacePanel getPlacePanel() {
         return placePanel;
     }
-    
+
     /**
      * Add LayerPanelListener
+     *
      * @param listener
      */
-    public void addLayerPanelListener(LayerPanelListener listener){
+    public void addLayerPanelListener(LayerPanelListener listener) {
         layerPanel.addLayerPanelListener(listener);
         placePanel.addLayerPanelListener(listener);
     }
 
     /**
      * Remove LayerPanelListener
+     *
      * @param listener
      */
-    public void removeLayerPanelListener(LayerPanelListener listener){
+    public void removeLayerPanelListener(LayerPanelListener listener) {
         layerPanel.removeLayerPanelListener(listener);
         placePanel.removeLayerPanelListener(listener);
     }
 
     /**
      * Add LayerPanelListener
+     *
      * @param listener
      */
-    public void addPlacePanelListener(PlacePanelListener listener){
+    public void addPlacePanelListener(PlacePanelListener listener) {
         placePanel.addPlacePanelListener(listener);
     }
 
     /**
      * Remove LayerPanelListener
+     *
      * @param listener
      */
-    public void removePlacePanelListener(PlacePanelListener listener){
+    public void removePlacePanelListener(PlacePanelListener listener) {
         placePanel.removePlacePanelListener(listener);
+    }
+
+    public void focusSearchBox() {
+        Component selectedComponent = tabbedPane.getSelectedComponent();
+        if (selectedComponent == layerPanel) {
+            layerPanel.focusSearchBox();
+        } else if (selectedComponent == placePanel) {
+            placePanel.focusSearchBox();
+        }
     }
 
 }
