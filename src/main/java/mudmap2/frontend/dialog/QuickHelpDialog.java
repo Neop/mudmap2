@@ -63,6 +63,7 @@ public class QuickHelpDialog extends ActionDialog {
             editor.setText(textError);
         }
         editor.setBackground(getParent().getBackground());
+        editor.setEditable(false);
 
         JScrollPane scrollPane = new JScrollPane(editor);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
