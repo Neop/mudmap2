@@ -1,3 +1,9 @@
+2.5.1
+- made side bar resizable
+- added keyboard shortcuts: ctrl+f and escape (in search box)
+- fixed: map flickered/'jumped' on movement
+- fixed: help dialogs for keyboard shortcuts and quickstart were editable
+
 2.5.0
 - implemented legend for image export
 - implemented file extension .m2w for MUD Map world files
