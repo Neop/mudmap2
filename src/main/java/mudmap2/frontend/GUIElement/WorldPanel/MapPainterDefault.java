@@ -38,7 +38,6 @@ import mudmap2.utils.Pair;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
-import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 
 /**
@@ -533,12 +532,12 @@ public class MapPainterDefault implements MapPainter {
         final double screenCenterX = (graphicsWidth / tileSize) / 2.0; // note: wdtwd2
         final double screenCenterY = (graphicsHeight / tileSize) / 2.0;
 
-        final int placeXOffset = (int) (Math.round((float) curPos.getX()) - Math.round(screenCenterX));
-        final int placeYOffset = (int) (Math.round((float) curPos.getY()) - Math.floor(screenCenterY));
+        final int placeXOffset = (int) (Math.round(curPos.getX()) - Math.round(screenCenterX));
+        final int placeYOffset = (int) (Math.round(curPos.getY()) - Math.floor(screenCenterY));
 
         // more precalculation
         final double placeXpxConst = remint(screenCenterX) - remint(curPos.getX());
-        final double placeYPXConst = remint(screenCenterY) + remint(curPos.getY());
+        final double placeYpxConst = remint(screenCenterY) + remint(curPos.getY());
 
         // prepare graphic for paths
         // Paths will be drawn on this graphic and later on copied to g
@@ -568,7 +567,7 @@ public class MapPainterDefault implements MapPainter {
                 g.drawLine(x, 0, x, (int) graphicsHeight);
             }
             for(int tileY = (g.getClipBounds().y / tileSize) - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
-                final int y = (int) Math.round((tileY + placeYPXConst) * tileSize);
+                final int y = (int) Math.round((tileY + placeYpxConst) * tileSize);
                 g.drawLine(0, y, (int) graphicsWidth, y);
             }
         }
@@ -586,7 +585,7 @@ public class MapPainterDefault implements MapPainter {
 
                     // place position in pixel on the screen
                     final int placeXpx = (int) Math.round((tileX + placeXpxConst) * tileSize);
-                    final int placeYpx = (int) Math.round((tileY + placeYPXConst) * tileSize);
+                    final int placeYpx = (int) Math.round((tileY + placeYpxConst) * tileSize);
 
                     tilePositions.add(new Pair<>(placeXpx, placeYpx));
 
@@ -805,8 +804,8 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     if(locationFound){
-                        int placeXpx = (int)((tileX + remint(screenCenterX) - remint(curPos.getX())) * tileSize); // alternative: getScreenPosX();
-                        int placeYpx = (int)((tileY + remint(screenCenterY) + remint(curPos.getY())) * tileSize);
+                        int placeXpx = (int)((tileX + placeXpxConst) * tileSize);
+                        int placeYpx = (int)((tileY + placeYpxConst) * tileSize);
 
                         drawCursor(g, Color.BLUE, placeXpx, placeYpx, selectionStrokeWidth);
                     }
@@ -814,8 +813,8 @@ public class MapPainterDefault implements MapPainter {
 
                 // draw cursor / place selection
                 if(placeSelectionEnabled && placeX == placeSelectedX && placeY == placeSelectedY){
-                    int placeXpx = (int)((tileX + remint(screenCenterX) - remint(curPos.getX())) * tileSize); // alternative: getScreenPosX();
-                    int placeYpx = (int)((tileY + remint(screenCenterY) + remint(curPos.getY())) * tileSize);
+                    int placeXpx = (int)((tileX + placeXpxConst) * tileSize);
+                    int placeYpx = (int)((tileY + placeYpxConst) * tileSize);
 
                     drawCursor(g, TILE_SELECTION_COLOR, placeXpx, placeYpx, selectionStrokeWidth);
                 }
