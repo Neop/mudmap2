@@ -40,13 +40,17 @@ public class Layer implements WorldChangeListener {
     World world;
     Integer id;
     String name;
-    Quadtree<Place> elements;
+    Quadtree<Place> elements = new Quadtree<>();
 
     // for quadtree optimization
-    int maxX, minX, maxY, minY;
+    int maxX = 0;
+    int minX = 0;
+    int maxY = 0;
+    int minY = 0;
 
     // place name cache for unique check
-    HashMap<String, Integer> placeNameCache;
+    HashMap<String, Integer> placeNameCache = new HashMap<>();
+    boolean cacheNeedsUpdate = true;
 
     /**
      * Constructor, sets layer id
@@ -62,10 +66,6 @@ public class Layer implements WorldChangeListener {
         if(id > world.getNextLayerID()+1){
             world.setNextLayerID(id + 1);
         }
-
-        maxX = minX = maxY = minY = 0;
-        elements = new Quadtree<>();
-        placeNameCache = new HashMap<>();
     }
 
     /**
@@ -77,10 +77,6 @@ public class Layer implements WorldChangeListener {
 
         id = world.getNextLayerID();
         this.world = world;
-
-        maxX = minX = maxY = minY = 0;
-        elements = new Quadtree<>();
-        placeNameCache = new HashMap<>();
     }
 
     /**
@@ -360,6 +356,10 @@ public class Layer implements WorldChangeListener {
      * @return true if name is unique on this layer
      */
     public boolean isPlaceNameUnique(String name){
+        if(cacheNeedsUpdate){
+            updatePlaceNameCache();
+        }
+
         Integer num = placeNameCache.get(name);
         return num == null || num <= 1;
     }
@@ -384,10 +384,9 @@ public class Layer implements WorldChangeListener {
     @Override
     public void worldChanged(Object source) {
         // if source is a place on this layer
-        if(source instanceof Place && elements.contains((Place) source)){
-            updatePlaceNameCache();
-        } else if(source instanceof Layer && source == this){
-            updatePlaceNameCache();
+        if((source instanceof Place && elements.contains((Place) source)) ||
+                (source instanceof Layer && source == this)){
+            cacheNeedsUpdate = true;
         }
     }
 

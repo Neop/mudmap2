@@ -219,49 +219,49 @@ public class MapPainterDefault implements MapPainter {
      * Calculates the offset of the exit visualization (dot/circle) to the
      * upper left corner of a tile
      * @param dir eit direction
+     * @param tileBorderWidthScaled border width
      * @return false if the dot/circle doesn't have to be drawn
      */
-    private Pair<Integer, Integer> getExitOffset(String dir){
+    private Pair<Integer, Integer> getExitOffset(String dir, int tileBorderWidthScaled){
         Pair<Integer, Integer> ret = new Pair<>(0, 0);
-        int borderWidth = getTileBorderWidth();
         switch (dir) {
             case "n":
                 // north
                 ret.first = tileSize / 2;
-                ret.second = borderWidth;
+                ret.second = tileBorderWidthScaled;
                 break;
             case "e":
                 // east
-                ret.first = tileSize - borderWidth;
+                ret.first = tileSize - tileBorderWidthScaled;
                 ret.second = tileSize / 2;
                 break;
             case "s":
                 // south
                 ret.first = tileSize / 2;
-                ret.second = tileSize - borderWidth;
+                ret.second = tileSize - tileBorderWidthScaled;
                 break;
             case "w":
                 // west
-                ret.first = borderWidth;
+                ret.first = tileBorderWidthScaled;
                 ret.second = tileSize / 2;
                 break;
             case "ne":
                 // north-east
-                ret.first = tileSize - borderWidth;
-                ret.second = borderWidth;
+                ret.first = tileSize - tileBorderWidthScaled;
+                ret.second = tileBorderWidthScaled;
                 break;
             case "se":
                 // south-east
-                ret.first = ret.second = tileSize - borderWidth;
+                ret.first = ret.second = tileSize - tileBorderWidthScaled;
                 break;
             case "nw":
                 // north-west
-                ret.first = ret.second = borderWidth;
+                ret.first = ret.second = tileBorderWidthScaled;
                 break;
             case "sw":
                 // south-west
-                ret.first = borderWidth;
-                ret.second = tileSize - borderWidth;
+                ret.first = tileBorderWidthScaled;
+                ret.second = tileSize - tileBorderWidthScaled;
                 break;
             default:
                 ret.first = ret.second = tileSize / 2;
@@ -526,7 +526,7 @@ public class MapPainterDefault implements MapPainter {
         FontMetrics fm = g.getFontMetrics();
         final int maxLines = (int) Math.round((double)(tileSize - 3 * (tileBorderWidthScaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
         final int maxLineLength = tileSize - 2 * (tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()));
-        final Boolean drawText = fm.stringWidth("WW") < (tileSize - 2 * (getRiskLevelStrokeWidth() + getTileBorderWidth()));
+        final Boolean drawText = fm.stringWidth("WW") < (tileSize - 2 * (getRiskLevelStrokeWidth() + tileBorderWidthScaled));
 
         // screen center in world coordinates
         final double screenCenterX = (graphicsWidth / tileSize) / 2.0; // note: wdtwd2
@@ -711,8 +711,8 @@ public class MapPainterDefault implements MapPainter {
                             // if both places of a path are on the same layer and at least one of the two places is on the screen
                             // usually the main place (path.getPlaces()[0]) draws the path. If it isn't on screen, the other place draws it
                             if(Objects.equals(otherPlace.getLayer().getId(), layer.getId()) && (path.getPlaces()[0] == curPlace || !isOnScreen(otherPlace))){
-                                Pair<Integer, Integer> exitOffset = getExitOffset(path.getExit(curPlace));
-                                Pair<Integer, Integer> exitOffsetOther = getExitOffset(path.getExit(otherPlace));
+                                Pair<Integer, Integer> exitOffset = getExitOffset(path.getExit(curPlace), tileBorderWidthScaled);
+                                Pair<Integer, Integer> exitOffsetOther = getExitOffset(path.getExit(otherPlace), tileBorderWidthScaled);
 
                                 boolean drawCurves = getPathsCurved();
 
@@ -768,7 +768,7 @@ public class MapPainterDefault implements MapPainter {
                                         exitDown = true;
                                         break;
                                     default:
-                                        Pair<Integer, Integer> exitOffset = getExitOffset(exit);
+                                        Pair<Integer, Integer> exitOffset = getExitOffset(exit, tileBorderWidthScaled);
                                         if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
                                             int exitCircleRadius2 = getExitCircleRadius();
                                             g.fillOval(placeXpx + exitOffset.first - exitCircleRadius2, placeYpx + exitOffset.second - exitCircleRadius2, 2 * exitCircleRadius2, 2 * exitCircleRadius2);
