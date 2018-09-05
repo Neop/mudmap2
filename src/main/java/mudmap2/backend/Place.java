@@ -23,7 +23,6 @@
 package mudmap2.backend;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.TreeMap;
 
 import mudmap2.backend.sssp.BreadthSearch;
@@ -45,12 +44,12 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     int recLevelMin = -1;
     int recLevelMax = -1;
     RiskLevel riskLevel = null;
+    String comments = "";
 
     HashSet<Place> children = new HashSet<>();
     HashSet<Place> parents = new HashSet<>();
     HashSet<Path> paths = new HashSet<>();
     TreeMap<String, Boolean> flags = new TreeMap<>();
-    LinkedList<String> comments = new LinkedList<>();
 
     BreadthSearchData breadthSearchData = null;
 
@@ -181,46 +180,19 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Adds a comment at the end of the list
-     * @param comment
+     * Gets the comments
+     * @return comments
      */
-    public void addComment(final String comment) {
-        comments.add(comment);
-    }
-
-    /**
-     * removes all comments
-     */
-    public void deleteComments() {
-        comments.clear();
-        callWorldChangeListeners();
-    }
-
-    /**
-     * Gets the comments list
-     * @return comments list
-     */
-    public LinkedList<String> getComments() {
+    public String getComments() {
         return comments;
     }
 
     /**
-     * Gets the comments as a single string
-     * @return
+     * Sets the comments
+     * @param comments
      */
-    public String getCommentsString() {
-        if (comments.isEmpty()) {
-            return "";
-        }
-        final String separator = "\n";
-        final StringBuilder ret = new StringBuilder();
-        for (final String c : comments) {
-            if (ret.length() > 0) {
-                ret.append(separator);
-            }
-            ret.append(c);
-        }
-        return ret.toString();
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     /**
@@ -473,12 +445,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
             return true;
         }
         // search in comments
-        for (final String comment : comments) {
-            if (comment.toLowerCase().contains(keyword)) {
-                return true;
-            }
-        }
-        return false;
+        return comments.toLowerCase().contains(keyword);
     }
 
     /**
@@ -513,7 +480,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         place.recLevelMin = recLevelMin;
         place.riskLevel = riskLevel;
         place.flags = (TreeMap<String, Boolean>) flags.clone();
-        place.comments = (LinkedList<String>) comments.clone();
+        place.comments = comments;
 
         return place;
     }

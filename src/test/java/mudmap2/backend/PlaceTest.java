@@ -379,51 +379,6 @@ public class PlaceTest {
     }
 
     /**
-     * Test of addComment method, of class Place.
-     */
-    @Test
-    public void testAddComment() {
-        System.out.println("addComment");
-
-        String comment1 = "My Comment";
-        Place instance = new Place("MyPlace", 0, 0, layer);
-        instance.addComment(comment1);
-        assertEquals(1, instance.getComments().size());
-        assertTrue(instance.getComments().contains(comment1));
-
-        String comment2 = "Another comment";
-        instance.addComment(comment2);
-        assertEquals(2, instance.getComments().size());
-        assertTrue(instance.getComments().contains(comment1));
-        assertTrue(instance.getComments().contains(comment2));
-    }
-
-    /**
-     * Test of deleteComments method, of class Place.
-     */
-    @Test
-    public void testDeleteComments() {
-        System.out.println("deleteComments");
-
-        Place instance = new Place("MyPlace", 0, 0, layer);
-
-        try {
-            instance.deleteComments();
-        } catch (Exception ex) {
-            fail(ex.getMessage());
-        }
-
-        String comment1 = "My Comment";
-        String comment2 = "Another comment";
-        instance.addComment(comment1);
-        instance.addComment(comment2);
-        assertEquals(2, instance.getComments().size());
-
-        instance.deleteComments();
-        assertEquals(0, instance.getComments().size());
-    }
-
-    /**
      * Test of getComments method, of class Place.
      */
     @Test
@@ -432,41 +387,15 @@ public class PlaceTest {
 
         Place instance = new Place("MyPlace", 0, 0, layer);
         assertNotNull(instance.getComments());
-        assertEquals(0, instance.getComments().size());
+        assertEquals("", instance.getComments());
 
         String comment1 = "My Comment";
-        instance.addComment(comment1);
-        assertEquals(1, instance.getComments().size());
-        assertTrue(instance.getComments().contains(comment1));
+        instance.setComments(comment1);
+        assertEquals(comment1, instance.getComments());
 
         String comment2 = "Another comment";
-        instance.addComment(comment2);
-        assertEquals(2, instance.getComments().size());
-        assertTrue(instance.getComments().contains(comment1));
-        assertTrue(instance.getComments().contains(comment2));
-    }
-
-    /**
-     * Test of getCommentsString method, of class Place.
-     */
-    @Test
-    public void testGetCommentsString() {
-        System.out.println("getCommentsString");
-
-        Place instance = new Place("MyPlace", 0, 0, layer);
-
-        assertNotNull(instance.getCommentsString());
-        assertEquals("", instance.getCommentsString());
-
-        String comment1 = "My Comment";
-        String comment2 = "Another comment";
-        instance.addComment(comment1);
-        instance.addComment(comment2);
-        assertEquals(2, instance.getComments().size());
-
-        String expResult = comment1 + "\n" + comment2;
-        String result = instance.getCommentsString();
-        assertEquals(expResult, result);
+        instance.setComments(comment2);
+        assertEquals(comment2, instance.getComments());
     }
 
     /**
@@ -950,8 +879,7 @@ public class PlaceTest {
         System.out.println("matchKeywords");
 
         Place instance = new Place("Sea near a forest", 1, 2, layer);
-        instance.addComment("This is a small place");
-        instance.addComment("Small house next the trees");
+        instance.setComments("This is a small place, Small house next the trees");
 
         String[] keywords = null;
         boolean result = instance.matchKeywords(keywords);
@@ -994,7 +922,7 @@ public class PlaceTest {
         assertEquals(instance.getRecLevelMin(), result.getRecLevelMin());
         assertEquals(instance.getRecLevelMax(), result.getRecLevelMax());
         assertEquals(instance.getPlaceGroup(), result.getPlaceGroup());
-        assertEquals(instance.getCommentsString(), result.getCommentsString());
+        assertEquals(instance.getComments(), result.getComments());
         assertEquals(instance.getFlags().entrySet().toString(), result.getFlags().entrySet().toString());
     }
 

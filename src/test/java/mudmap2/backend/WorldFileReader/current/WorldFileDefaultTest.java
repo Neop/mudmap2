@@ -107,6 +107,7 @@ public class WorldFileDefaultTest {
 
     /**
      * Test of readWorldName method, of class WorldFileDefault.
+     * @throws java.lang.Exception
      */
     @Test
     public void testReadWorldName() throws Exception {
@@ -189,11 +190,7 @@ public class WorldFileDefaultTest {
         pl0.setFlag(flag2, false);
 
         String comment0 = "This is a test comment";
-        String comment1 = "and a second comment line";
-        String comment2 = "and another one";
-        pl0.addComment(comment0);
-        pl0.addComment(comment1);
-        pl0.addComment(comment2);
+        pl0.setComments(comment0);
 
         String wfFile = folder.getRoot() + "/wfj";
         WorldFileDefault instanceWriter = new WorldFileDefault(wfFile);
@@ -272,12 +269,9 @@ public class WorldFileDefaultTest {
         assertTrue(pl0r.getFlag(flag1));
         assertFalse(pl0r.getFlag(flag2));
 
-        assertEquals(3, pl0r.getComments().size());
-        assertEquals(0, pl1r.getComments().size());
-        assertEquals(0, pl2r.getComments().size());
-        assertTrue(pl0r.getComments().contains(comment0));
-        assertTrue(pl0r.getComments().contains(comment1));
-        assertTrue(pl0r.getComments().contains(comment2));
+        assertEquals(comment0, pl0r.getComments());
+        assertTrue(pl1r.getComments().isEmpty());
+        assertTrue(pl2r.getComments().isEmpty());
     }
 
     /**

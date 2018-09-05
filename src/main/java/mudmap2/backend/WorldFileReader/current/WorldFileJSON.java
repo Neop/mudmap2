@@ -338,10 +338,21 @@ public class WorldFileJSON extends WorldFile {
                         // comments
                         if(jPlace.has("co")){
                             JSONArray comments = jPlace.getJSONArray("co");
-                            Integer lc = comments.length();
-                            for(Integer c = 0; c < lc; ++c){
-                                place.addComment(comments.getString(c));
+                            StringBuilder builder = new StringBuilder();
+
+                            String separator = System.getProperty("separator");
+                            if(separator == null || separator.isEmpty()){
+                                separator = "\r\n";
                             }
+
+                            for(int c = 0; c < comments.length(); ++c){
+                                if(c > 0) {
+                                    builder.append(separator);
+                                }
+                                builder.append(comments.getString(c));
+                            }
+
+                            place.setComments(builder.toString());
                         }
 
                         layer.put(place);
@@ -584,13 +595,10 @@ public class WorldFileJSON extends WorldFile {
                 }
 
                 // comments
-                if(!place.getComments().isEmpty()){
+                if(place.getComments() != null && !place.getComments().isEmpty()){
                     JSONArray comments = new JSONArray();
+                    comments.put(place.getComments());
                     placeObj.put("co", comments);
-                    int idx = 0;
-                    for(String comment: place.getComments()){
-                        comments.put(idx++, comment);
-                    }
                 }
 
                 places.put(placeObj);

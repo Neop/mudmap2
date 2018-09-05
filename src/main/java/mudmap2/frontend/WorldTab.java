@@ -26,9 +26,6 @@ package mudmap2.frontend;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -307,13 +304,25 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                         boolean has_place_group = pl.getPlaceGroup() != null;
                         boolean has_comments = !pl.getComments().isEmpty();
 
-                        String infotext = pl.getName();
-                        if(has_place_group || has_comments) infotext += " (";
-                        if(has_place_group) infotext += pl.getPlaceGroup().getName();
-                        if(has_comments) infotext += (has_place_group ? ", " : "") + pl.getCommentsString().replace('\n', ' ');
-                        if(has_place_group || has_comments) infotext += ")";
+                        StringBuilder infoText = new StringBuilder(pl.getName());
 
-                        labelInfobar.setText(infotext);
+                        if(has_place_group || has_comments){
+                            infoText.append(" (");
+                        }
+                        if(has_place_group){
+                            infoText.append(pl.getPlaceGroup().getName());
+                        }
+                        if(has_comments){
+                            if(has_place_group){
+                                infoText.append(", ");
+                            }
+                            infoText.append(pl.getComments().replace('\n', ' ').replace("\r", ""));
+                        }
+                        if(has_place_group || has_comments){
+                            infoText.append(")");
+                        }
+
+                        labelInfobar.setText(infoText.toString());
                 } else {
                     labelInfobar.setText("");
                 }
