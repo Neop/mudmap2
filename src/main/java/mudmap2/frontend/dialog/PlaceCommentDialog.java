@@ -21,6 +21,7 @@
  */
 package mudmap2.frontend.dialog;
 
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -53,6 +54,8 @@ public class PlaceCommentDialog extends ActionDialog {
 
     @Override
     protected void create() {
+        setMinimumSize(new Dimension(300, 200));
+
         optionPane = new JOptionPane();
         optionPane.setOptionType(JOptionPane.YES_NO_OPTION);
 
