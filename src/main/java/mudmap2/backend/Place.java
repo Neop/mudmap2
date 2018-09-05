@@ -41,16 +41,18 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
 
     int id;
     String name;
-    PlaceGroup placeGroup;
-    int recLevelMin, recLevelMax;
-    RiskLevel riskLevel;
+    PlaceGroup placeGroup = null;
+    int recLevelMin = -1;
+    int recLevelMax = -1;
+    RiskLevel riskLevel = null;
 
-    HashSet<Place> children, parents;
-    HashSet<Path> paths;
-    TreeMap<String, Boolean> flags;
-    LinkedList<String> comments;
+    HashSet<Place> children = new HashSet<>();
+    HashSet<Place> parents = new HashSet<>();
+    HashSet<Path> paths = new HashSet<>();
+    TreeMap<String, Boolean> flags = new TreeMap<>();
+    LinkedList<String> comments = new LinkedList<>();
 
-    BreadthSearchData breadthSearchData;
+    BreadthSearchData breadthSearchData = null;
 
     public Place(final int id, final String name, final int posX, final int posY, final Layer l) {
         super(posX, posY, l);
@@ -59,8 +61,6 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         if (id >= nextID) {
             nextID = id + 1;
         }
-
-        initialize();
     }
 
     /**
@@ -74,25 +74,6 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         super(posX, posY, l);
         this.name = name;
         id = nextID++;
-
-        initialize();
-    }
-
-    /**
-     * Initializes the place
-     */
-    private void initialize() {
-        placeGroup = null;
-        riskLevel = null;
-        recLevelMin = recLevelMax = -1;
-
-        children = new HashSet<>();
-        parents = new HashSet<>();
-        paths = new HashSet<>();
-        flags = new TreeMap<>();
-        comments = new LinkedList<>();
-
-        breadthSearchData = null;
     }
 
     /**
@@ -228,7 +209,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @return
      */
     public String getCommentsString() {
-        if (comments.size() == 0) {
+        if (comments.isEmpty()) {
             return "";
         }
         final String separator = "\n";
