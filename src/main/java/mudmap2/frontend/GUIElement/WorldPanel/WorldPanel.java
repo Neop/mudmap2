@@ -369,6 +369,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         WorldCoordinate ret;
         if(positionsTail.isEmpty()){
             ret = new WorldCoordinate(world.getHome());
+            positionsTail.push(ret);
         } else {
             ret = positionsTail.peek();
         }
