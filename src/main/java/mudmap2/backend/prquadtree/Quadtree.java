@@ -32,7 +32,7 @@ import java.util.HashSet;
 public class Quadtree<T> {
 
     /// NOTE: increase the last parameter to support larger maps (is already max for int)
-    final int default_length = 1 << 30;
+    private static final int DEFAULT_LENGTH = 1 << 30;
 
     private QuadtreeNode root;
 
@@ -43,11 +43,11 @@ public class Quadtree<T> {
 
     /**
      * Constructs a quadtree, manually balanced
-     * @param center_x center x coordinate
-     * @param center_y center y coordinate
+     * @param centerX center x coordinate
+     * @param centerY center y coordinate
      */
-    public Quadtree(int center_x, int center_y){
-        root = new QuadtreeNode(null, center_x, center_y, default_length);
+    public Quadtree(int centerX, int centerY){
+        root = new QuadtreeNode(null, centerX, centerY, DEFAULT_LENGTH);
     }
 
     /**
@@ -57,10 +57,16 @@ public class Quadtree<T> {
      * @return element data or null
      */
     public T get(int x, int y){
-        if(root == null) return null;
+        if(root == null){
+            return null;
+        }
+
         QuadtreeElement ret = root.get(x, y);
-        if(ret == null) return null;
-        else return ((QuadtreeLeaf<T>) ret).getData();
+        if(ret == null){
+            return null;
+        } else {
+            return ((QuadtreeLeaf<T>) ret).getData();
+        }
     }
 
     /**
@@ -70,13 +76,18 @@ public class Quadtree<T> {
      * @return
      */
     public boolean exist(int x, int y){
-        if(root == null) return false;
+        if(root == null){
+            return false;
+        }
         return root.get(x, y) != null;
     }
 
     public boolean isEmpty(){
-        if(root == null) return true;
-        else return root.isEmpty();
+        if(root == null){
+            return true;
+        } else {
+            return root.isEmpty();
+        }
     }
 
     /**
@@ -87,7 +98,9 @@ public class Quadtree<T> {
      * @throws Exception throws an exception, if the element couldn't be inserted
      */
     public void insert(T obj, int x, int y) throws Exception{
-        if(root == null) root = new QuadtreeNode(null, x, y, default_length);
+        if(root == null){
+            root = new QuadtreeNode(null, x, y, DEFAULT_LENGTH);
+        }
         root.insert(new QuadtreeLeaf(obj, x, y));
     }
 
@@ -96,7 +109,7 @@ public class Quadtree<T> {
      * @param el
      * @throws Exception throws an exception, if e couldn't be removed
      */
-    private void remove(QuadtreeElement el) throws Exception{
+    private void remove(QuadtreeElement el) throws Exception {
         el.remove();
     }
 
@@ -106,22 +119,36 @@ public class Quadtree<T> {
      * @param y
      */
     public void remove(int x, int y){
-        if(root != null) root.remove(x, y);
+        if(root != null) {
+            root.remove(x, y);
+        }
+    }
+
+    /**
+     * Removes all elements that contain object
+     * @param object
+     */
+    public void remove(T object){
+        if(root != null) {
+            root.remove(object);
+        }
     }
 
     /**
      * Moves an element
-     * @param x_bef previous x coordinate
-     * @param y_bef previous y coordinate
-     * @param x_aft new x coordinate
-     * @param y_aft new y coordinate
+     * @param xOld previous x coordinate
+     * @param yOld previous y coordinate
+     * @param xNew new x coordinate
+     * @param yNew new y coordinate
      * @throws Exception Throws an exception, if the element couldn'T be moved
      */
-    public void move(int x_bef, int y_bef, int x_aft, int y_aft) throws Exception{
-        if(root == null) throw new Exception("Couldn't move element, quadtree is empty");
-        T obj = get(x_bef, y_bef);
-        remove(x_bef, y_bef);
-        insert(obj, x_aft, y_aft);
+    public void move(int xOld, int yOld, int xNew, int yNew) throws Exception {
+        if(root == null){
+            throw new Exception("Couldn't move element, quadtree is empty");
+        }
+        T obj = get(xOld, yOld);
+        remove(xOld, yOld);
+        insert(obj, xNew, yNew);
     }
 
     /**
@@ -129,8 +156,10 @@ public class Quadtree<T> {
      * @return
      */
     public HashSet<T> values(){
-        HashSet<T> ret = new HashSet<T>();
-        if(root != null) root.values(ret);
+        HashSet<T> ret = new HashSet<>();
+        if(root != null){
+            root.values(ret);
+        }
         return ret;
     }
 
@@ -140,8 +169,11 @@ public class Quadtree<T> {
      */
     @Override
     public String toString(){
-        if(root == null) return "root: {null}";
-        else return "root: " + root.toString();
+        if(root == null){
+            return "root: {null}";
+        } else {
+            return "root: " + root.toString();
+        }
     }
 
     /**
@@ -179,6 +211,8 @@ public class Quadtree<T> {
         /** removes the node from the quadtree */
         public void remove();
 
+        public void remove(T object);
+
         /**
          * Gets the element data of each child
          * @param set element data will be inserted in this set
@@ -201,8 +235,8 @@ public class Quadtree<T> {
         QuadtreeElement<T> parent;
         int length; // size in each direction
         // max amount of children below this node: (2 * length)^2
-        int x, y;
-        private QuadtreeElement<T> elements[];
+        final int x, y;
+        private final QuadtreeElement<T> elements[] = new QuadtreeElement[4];
 
         // fake enum (no not-static enums in Java?)
         private static final int NW = 0, NE = 1, SW = 2, SE = 3;
@@ -214,13 +248,14 @@ public class Quadtree<T> {
          * @param _y coordinate next to the center (-0.5, -0.5)
          * @param _length size in each direction
          */
-        public QuadtreeNode(QuadtreeNode<T> _parent, int _x, int _y, int _length) {
-            parent = _parent;
-            x = _x;
-            y = _y;
-            length = _length;
-            elements = new QuadtreeElement[4];
-            for(int i = 0; i < 4; ++i) elements[i] = null;
+        public QuadtreeNode(QuadtreeNode<T> parent, int x, int y, int length) {
+            this.parent = parent;
+            this.x = x;
+            this.y = y;
+            this.length = length;
+            for(int i = 0; i < 4; ++i){
+                elements[i] = null;
+            }
         }
 
         /**
@@ -232,12 +267,17 @@ public class Quadtree<T> {
         private int getChildNum(int x, int y){
             // check whether the child is in this node's range
             if(x < (this.x - length + 1) || y < (this.y - length + 1) ||
-                x > (this.x + length) || y > (this.y + length))
+                x > (this.x + length) || y > (this.y + length)){
                 return -1;
+            }
             // calculate child num
             int id = 0;
-            if(x > this.x) id = 1;
-            if(y > this.y) id |= 2;
+            if(x > this.x){
+                id = 1;
+            }
+            if(y > this.y){
+                id |= 2;
+            }
             return id;
         }
 
@@ -248,14 +288,19 @@ public class Quadtree<T> {
          * @param y
          * @return index or -1
          */
-        private int getChildNum(int x, int y, int center_x, int center_y, int length){
+        private int getChildNum(int x, int y, int centerX, int centerY, int length){
             // check whether the child is in this node's range
-            if(Math.abs(center_x - x) > length || Math.abs(center_y - y) > length)
+            if(Math.abs(centerX - x) > length || Math.abs(centerY - y) > length){
                 return -1;
+            }
             // calculate child num
             int id = 0;
-            if(x > center_x) id = 1;
-            if(y > center_y) id |= 2;
+            if(x > centerX){
+                id = 1;
+            }
+            if(y > centerY){
+                id |= 2;
+            }
             return id;
         }
 
@@ -291,7 +336,9 @@ public class Quadtree<T> {
                     ((QuadtreeNode) predecessor).insert(newelement);
 
                 else { // child node is a leaf -> create split node
-                    if(length < 2) throw new Exception("Can't split quadtree node"); // shouldn't occur
+                    if(length < 2){
+                        throw new Exception("Can't split quadtree node");
+                    } // shouldn't occur
 
                     int newx = x, newy = y, newlength = length;
                     final int compx = Math.min(newelement.getX(), predecessor.getX());
@@ -299,10 +346,16 @@ public class Quadtree<T> {
                     // calculate new center and length
                     do {
                         newlength /= 2;
-                        if(compx > newx) newx += newlength;
-                        else newx -= newlength;
-                        if(compy > newy) newy += newlength;
-                        else newy -= newlength;
+                        if(compx > newx){
+                            newx += newlength;
+                        } else {
+                            newx -= newlength;
+                        }
+                        if(compy > newy){
+                            newy += newlength;
+                        } else {
+                            newy -= newlength;
+                        }
                     } while(newlength > 1 && getChildNum(newelement.getX(), newelement.getY(), newx, newy, newlength) == getChildNum(predecessor.getX(), predecessor.getY(), newx, newy, newlength));
 
                     // insert new node
@@ -327,10 +380,28 @@ public class Quadtree<T> {
         public void remove(QuadtreeElement element){
             // remove node
             int id = getChildNum(element.getX(), element.getY());
-            if(elements[id] instanceof QuadtreeLeaf || elements[id] == element) elements[id] = null;
-            else ((QuadtreeNode) elements[id]).remove(element);
+            if(elements[id] instanceof QuadtreeLeaf || elements[id] == element){
+                elements[id] = null;
+            } else {
+                ((QuadtreeNode) elements[id]).remove(element);
+            }
 
-            if(isEmpty()) remove();
+            if(isEmpty()){
+                remove();
+            }
+        }
+
+        /**
+         * Remove elements by reference of wrapped object
+         * @param object wrapped object
+         */
+        @Override
+        public void remove(T object){
+            for(int i = 0; i < 4; ++i){
+                if(elements[i] != null){
+                    elements[i].remove(object);
+                }
+            }
         }
 
         /**
@@ -349,7 +420,9 @@ public class Quadtree<T> {
         @Override
         public void remove() {
             if(parent != null){
-                if(!(parent instanceof QuadtreeNode)) throw new Error("wrong parent class in quadtree (this shouldn't occur)");
+                if(!(parent instanceof QuadtreeNode)){
+                    throw new Error("wrong parent class in quadtree (this shouldn't occur)");
+                }
                 ((QuadtreeNode<T>) parent).remove(this);
             }
         }
@@ -377,8 +450,8 @@ public class Quadtree<T> {
          * @param _parent
          */
         @Override
-        public void setParent(QuadtreeElement<T> _parent) {
-            parent = _parent;
+        public void setParent(QuadtreeElement<T> parent) {
+            this.parent = parent;
         }
 
         /**
@@ -396,9 +469,11 @@ public class Quadtree<T> {
          */
         @Override
         public boolean isEmpty() {
-            for(int i = 0; i < 4; ++i)
-                if(elements[i] != null && !elements[i].isEmpty())
+            for(int i = 0; i < 4; ++i){
+                if(elements[i] != null && !elements[i].isEmpty()){
                     return false;
+                }
+            }
             return true;
         }
 
@@ -420,7 +495,11 @@ public class Quadtree<T> {
          */
         @Override
         public void values(HashSet<T> set) {
-            for(int i = 0; i < 4; ++i) if(elements[i] != null) elements[i].values(set);
+            for(int i = 0; i < 4; ++i){
+                if(elements[i] != null){
+                    elements[i].values(set);
+                }
+            }
         }
 
         /**
@@ -444,9 +523,9 @@ public class Quadtree<T> {
      */
     private class QuadtreeLeaf<T> implements QuadtreeElement<T>{
 
-        private QuadtreeElement<T> parent;
-        private T data;
-        private int x, y;
+        private QuadtreeElement<T> parent = null;
+        private final T data;
+        private final int x, y;
 
         /**
          * Constructs a new quadtree leaf
@@ -454,11 +533,10 @@ public class Quadtree<T> {
          * @param _x element x coordinate
          * @param _y element y coordinate
          */
-        public QuadtreeLeaf(T object, int _x, int _y){
-            parent = null;
-            data = object;
-            x = _x;
-            y = _y;
+        public QuadtreeLeaf(T data, int x, int y){
+            this.data = data;
+            this.x = x;
+            this.y = y;
         }
 
         /**
@@ -492,8 +570,21 @@ public class Quadtree<T> {
          */
         @Override
         public void remove(){
-            if(!(parent instanceof QuadtreeNode)) throw new Error("wrong parent class in quadtree (this shouldn't occur)");
+            if(!(parent instanceof QuadtreeNode)){
+                throw new Error("wrong parent class in quadtree (this shouldn't occur)");
+            }
             ((QuadtreeNode<T>) parent).remove(this);
+        }
+
+        /**
+         * Removes the element if it wraps object
+         * @param object object to check for
+         */
+        @Override
+        public void remove(T object){
+            if(data == object){
+                remove();
+            }
         }
 
         /**
@@ -510,8 +601,8 @@ public class Quadtree<T> {
          * @param _parent
          */
         @Override
-        public void setParent(QuadtreeElement<T> _parent){
-            parent = _parent;
+        public void setParent(QuadtreeElement<T> parent){
+            this.parent = parent;
         }
 
         /**
@@ -540,7 +631,9 @@ public class Quadtree<T> {
          */
         @Override
         public QuadtreeElement<T> get(int x, int y) {
-            if(this.x == x && this.y == y) return this;
+            if(this.x == x && this.y == y){
+                return this;
+            }
             return null;
         }
 
@@ -550,7 +643,9 @@ public class Quadtree<T> {
          */
         @Override
         public void values(HashSet<T> set) {
-            if(data != null) set.add(data);
+            if(data != null){
+                set.add(data);
+            }
         }
 
         /**

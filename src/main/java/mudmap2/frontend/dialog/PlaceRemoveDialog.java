@@ -28,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 
@@ -77,8 +76,6 @@ public class PlaceRemoveDialog implements ActionListener {
                 }
                 parent.repaint();
             } catch (RuntimeException ex) {
-                Logger.getLogger(PlaceRemoveDialog.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (PlaceNotFoundException ex) {
                 Logger.getLogger(PlaceRemoveDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

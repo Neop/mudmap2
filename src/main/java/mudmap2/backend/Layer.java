@@ -40,7 +40,7 @@ public class Layer implements WorldChangeListener {
     World world;
     Integer id;
     String name;
-    Quadtree<Place> elements = new Quadtree<>();
+    Quadtree<LayerElement> elements = new Quadtree<>();
 
     // for quadtree optimization
     int maxX = 0;
@@ -50,7 +50,8 @@ public class Layer implements WorldChangeListener {
 
     // place name cache for unique check
     HashMap<String, Integer> placeNameCache = new HashMap<>();
-    boolean cacheNeedsUpdate = true;
+    boolean placeNameCacheNeedsUpdate = true;
+    boolean sizeCacheNeedsUpdated = true;
 
     /**
      * Constructor, sets layer id
@@ -118,6 +119,7 @@ public class Layer implements WorldChangeListener {
      * @return
      */
     public int getCenterX(){
+        updateSizeCache();
         return (maxX + minX) / 2;
     }
 
@@ -126,6 +128,7 @@ public class Layer implements WorldChangeListener {
      * @return
      */
     public int getCenterY(){
+        updateSizeCache();
         return (maxY + minY) / 2;
     }
 
@@ -134,118 +137,75 @@ public class Layer implements WorldChangeListener {
      * @return
      */
     public Pair<Double, Double> getExactCenter(){
-        Pair<Double, Double> center = new Pair<>(0.0, 0.0);
-
-        int layerXMin, layerXMax, layerYMin, layerYMax;
-
-        HashSet<Place> places = getPlaces();
-        if(!places.isEmpty()){
-            layerXMax = layerXMin = places.iterator().next().getX();
-            layerYMax = layerYMin = places.iterator().next().getY();
-
-            for(Place place: places){
-                layerXMax = Math.max(layerXMax, place.getX());
-                layerXMin = Math.min(layerXMin, place.getX());
-                layerYMax = Math.max(layerYMax, place.getY());
-                layerYMin = Math.min(layerYMin, place.getY());
-            }
-
-            int centerX = layerXMax - layerXMin + 1;
-            int centerY = layerYMax - layerYMin + 1;
-
-            center.first = 0.5 * (double) centerX + (double) layerXMin;
-            center.second = 0.5 * (double) centerY + (double) layerYMin - 1;
-        }
-
-        return center;
+        updateSizeCache();
+        double centerX = (double) (maxX + minX) / 2.0;
+        double centerY = (double) (maxY + minY) / 2.0;
+        return new Pair<>(centerX, centerY);
     }
 
     /**
      * Gets the max x coordinate
      * @return
      */
-    public int getXMin(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().getX();
-        for(Place place: places)
-            ret = Math.min(ret, place.getX());
-        return ret;
+    public int getXMax(){
+        updateSizeCache();
+        return maxX;
     }
 
     /**
      * Gets the min x coordinate
      * @return
      */
-    public int getXMax(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().getX();
-        for(Place place: places)
-            ret = Math.max(ret, place.getX());
-        return ret;
+    public int getXMin() {
+        updateSizeCache();
+        return minX;
     }
 
     /**
      * Gets the max y coordinate
      * @return
      */
-    public int getYMin(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().getY();
-        for(Place place: places)
-            ret = Math.min(ret, place.getY());
-        return ret;
+    public int getYMax() {
+        updateSizeCache();
+        return maxY;
     }
 
     /**
      * Gets the min y coordinate
      * @return
      */
-    public int getYMax(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
-        int ret = places.iterator().next().getY();
-        for(Place place: places)
-            ret = Math.max(ret, place.getY());
-        return ret;
+    public int getYMin() {
+        updateSizeCache();
+        return minY;
     }
 
     /**
-     * Puts the element at a position but doesn't add it to the world
+     * Adds an element to the layer at the given position, removes it from it's old layer
      * @param x x coordinate
      * @param y y coordinate
      * @param element new element
      * @throws java.lang.Exception
      */
-    public void put(Place element, int x, int y) throws Exception{
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
-
-        // removePlace element from layer, if it's already on the layer
-        if(elements.contains(element)) elements.remove(element.getX(), element.getY());
-        //element.getLayer().removePlace(element);
+    public void put(LayerElement element, int x, int y) throws Exception {
         element.setPosition(x, y, this);
         put(element);
     }
 
     /**
-     * Adds an element to the layer (but not to the world!), uses the position
+     * Adds an element to the layer, removes it from it's old layer
      * of the element
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
-    public void put(Place element) throws PlaceNotInsertedException {
+    public void put(LayerElement element) throws PlaceNotInsertedException {
         try {
-            minX = Math.min(minX, element.getX());
-            maxX = Math.max(maxX, element.getX());
-            minY = Math.min(minY, element.getY());
-            maxY = Math.max(maxY, element.getY());
+            // remove element from other layer if one is set
+            if(element.getLayer() != null){
+                element.getLayer().remove(element);
+            }
 
             elements.insert(element, element.getX(), element.getY());
+            sizeCacheNeedsUpdated = true;
             world.callListeners(element);
         } catch (Exception ex) {
             throw new PlaceNotInsertedException(element.getX(), element.getY());
@@ -259,7 +219,11 @@ public class Layer implements WorldChangeListener {
      * @return element at that position or null
      */
     public Place get(int x, int y){
-        return elements.get(x, y);
+        LayerElement layerElement = elements.get(x, y);
+        if(layerElement != null && layerElement instanceof Place){
+            return (Place) layerElement;
+        }
+        return null;
     }
 
     /**
@@ -275,8 +239,10 @@ public class Layer implements WorldChangeListener {
         for(int x = -distance; x <= distance; ++x){
             for(int y = -distance; y <= distance; ++y){
                 if(!(x == 0 && y == 0)){ // if not center place
-                    Place el = get(_x + x, _y + y);
-                    if(el != null) ret.add(el);
+                    LayerElement el = get(_x + x, _y + y);
+                    if(el != null && el instanceof Place){
+                        ret.add((Place) el);
+                    }
                 }
             }
         }
@@ -302,16 +268,9 @@ public class Layer implements WorldChangeListener {
     /**
      * Removes an element from the layer but not from the world
      * @param element
-     * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
-    public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException {
-        // check if position is available
-        LayerElement el_bef = get(element.getX(), element.getY());
-        if(el_bef != element){
-            if(el_bef != null) throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
-            else throw new PlaceNotFoundException(element.getX(), element.getY());
-        }
-        elements.remove(element.getX(), element.getY());
+    public void remove(LayerElement element) {
+        elements.remove(element);
         world.callListeners(this);
     }
 
@@ -334,10 +293,18 @@ public class Layer implements WorldChangeListener {
     }
 
     /**
-     * Gets a collection of all elements
+     * Gets a collection of all places
      * @return set of all elements or empty set
      */
     public HashSet<Place> getPlaces(){
+        return new HashSet(elements.values());
+    }
+
+    /**
+     * Gets a collection of all layer elements
+     * @return
+     */
+    public HashSet<LayerElement> getLayerElements(){
         return elements.values();
     }
 
@@ -356,7 +323,7 @@ public class Layer implements WorldChangeListener {
      * @return true if name is unique on this layer
      */
     public boolean isPlaceNameUnique(String name){
-        if(cacheNeedsUpdate){
+        if(placeNameCacheNeedsUpdate){
             updatePlaceNameCache();
         }
 
@@ -368,16 +335,54 @@ public class Layer implements WorldChangeListener {
      * Recreates place name chache
      */
     private void updatePlaceNameCache(){
-        placeNameCache.clear();
+        if(placeNameCacheNeedsUpdate){
+            placeNameCache.clear();
 
-        for(Place place: getPlaces()){
-            Integer value = placeNameCache.get(place.getName());
-            if(value == null){
-                value = 1;
-            } else {
-                value += 1;
+            for(LayerElement element: getPlaces()){
+                if(element instanceof Place){
+                    Place place = (Place) element;
+                    Integer value = placeNameCache.get(place.getName());
+                    if(value == null){
+                        value = 1;
+                    } else {
+                        value += 1;
+                    }
+                    placeNameCache.put(place.getName(), value);
+                }
             }
-            placeNameCache.put(place.getName(), value);
+
+            placeNameCacheNeedsUpdate = false;
+        }
+    }
+
+    private void updateSizeCache(){
+        if(sizeCacheNeedsUpdated){
+            maxX = Integer.MIN_VALUE;
+            minX = Integer.MAX_VALUE;
+            maxY = Integer.MIN_VALUE;
+            minY = Integer.MAX_VALUE;
+
+            for(LayerElement element: getLayerElements()){
+                maxX = Math.max(maxX, element.getX());
+                minX = Math.min(minX, element.getX());
+                maxY = Math.max(maxY, element.getY());
+                minY = Math.min(minY, element.getY());
+            }
+
+            if(maxX == Integer.MIN_VALUE){
+                maxX = 0;
+            }
+            if(minX == Integer.MAX_VALUE){
+                minX = 0;
+            }
+            if(maxY == Integer.MIN_VALUE){
+                maxY = 0;
+            }
+            if(minY == Integer.MAX_VALUE){
+                minY = 0;
+            }
+
+            sizeCacheNeedsUpdated = false;
         }
     }
 
@@ -386,7 +391,7 @@ public class Layer implements WorldChangeListener {
         // if source is a place on this layer
         if((source instanceof Place && elements.contains((Place) source)) ||
                 (source instanceof Layer && source == this)){
-            cacheNeedsUpdate = true;
+            placeNameCacheNeedsUpdate = true;
         }
     }
 

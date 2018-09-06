@@ -69,23 +69,15 @@ public class LayerElement {
     }
     
     /**
-     * Sets the layer
-     * @param layer layer
-     */
-    public void setLayer(Layer layer){
-        this.layer = layer;
-    }
-    
-    /**
      * Sets the position
      * @param x x position
      * @param y y position
-     * @param l layer
+     * @param layer layer
      */
-    public void setPosition(int x, int y, Layer l){
+    protected void setPosition(int x, int y, Layer layer){
         this.x = x;
         this.y = y;
-        layer = l;
+        this.layer = layer;
     }
     
 }

@@ -47,7 +47,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import mudmap2.backend.Layer;
-import mudmap2.backend.Layer.PlaceNotFoundException;
 import mudmap2.backend.LayerElement;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
@@ -1243,9 +1242,6 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                                 } catch (RuntimeException ex) {
                                     Logger.getLogger(TabKeyListener.class.getName()).log(Level.SEVERE, null, ex);
                                     JOptionPane.showMessageDialog(parent, "Could not remove place: " + ex.getMessage());
-                                } catch (PlaceNotFoundException ex) {
-                                    Logger.getLogger(TabKeyListener.class.getName()).log(Level.SEVERE, null, ex);
-                                    JOptionPane.showMessageDialog(parent, "Could not remove place: Place not found.");
                                 }
                             }
                         }

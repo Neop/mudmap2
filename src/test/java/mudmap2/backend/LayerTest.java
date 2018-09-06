@@ -246,14 +246,14 @@ public class LayerTest {
 
         // two places in layer
         int x1 = 3, x2 = -6;
-        int y1 = 5, y2 = -8;
+        int y1 = 5, y2 = -1;
 
         try {
             instance.put(new Place("MyPlace", x1, y1, instance));
             instance.put(new Place("MyPlace", x2, y2, instance));
 
-            Double expResultX = (x1 + x2 + 1) / 2.0;
-            Double expResultY = (y1 + y2 + 1) / 2.0 - 1;
+            Double expResultX = -1.5;
+            Double expResultY = 2.0;
 
             Pair<Double, Double> center2 = instance.getExactCenter();
             assertNotNull(center2);
@@ -646,7 +646,7 @@ public class LayerTest {
 
             instance.remove(element);
             assertFalse(instance.exist(0, 0));
-        } catch (RuntimeException | Layer.PlaceNotFoundException | Layer.PlaceNotInsertedException ex) {
+        } catch (RuntimeException | Layer.PlaceNotInsertedException ex) {
             fail(ex.getMessage());
         }
     }
@@ -736,7 +736,7 @@ public class LayerTest {
             instance.remove(element);
             // empty layer
             assertTrue(instance.isEmpty());
-        } catch (RuntimeException | Layer.PlaceNotFoundException | Layer.PlaceNotInsertedException ex) {
+        } catch (RuntimeException | Layer.PlaceNotInsertedException ex) {
             fail(ex.getMessage());
         }
 
@@ -814,7 +814,7 @@ public class LayerTest {
             instance.remove(place3);
             instance.remove(place2);
             assertTrue(instance.isPlaceNameUnique("PlaceName"));
-        } catch (Layer.PlaceNotInsertedException | RuntimeException | Layer.PlaceNotFoundException ex) {
+        } catch (Layer.PlaceNotInsertedException | RuntimeException ex) {
             Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
 

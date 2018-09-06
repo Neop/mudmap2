@@ -168,12 +168,7 @@ public final class CopyPaste {
                         place_to_new_place.put(place, new_place);
                         layer.put(new_place, place.getX() - copydx + x, place.getY() - copydy + y);
                     } else {
-                        // remove place from old layer
-                        Layer layerOld = place.getLayer();
-                        layerOld.remove(place);
-
-                        // add place to new layer
-                        place.setLayer(layer);
+                        // remove place from old layer and add it to new one
                         layer.put(place, place.getX() - copydx + x, place.getY() - copydy + y);
                     }
                 } catch (Exception ex) {

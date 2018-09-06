@@ -118,24 +118,6 @@ public class LayerElementTest {
     }
 
     /**
-     * Test of addLayer method, of class LayerElement.
-     */
-    @Test
-    public void testSetLayer() {
-        System.out.println("setLayer");
-
-        Layer layer1 = new Layer(world);
-        LayerElement instance = new LayerElement(0, 1, layer);
-        assertEquals(layer, instance.getLayer());
-
-        instance.setLayer(layer1);
-        assertEquals(layer1, instance.getLayer());
-
-        instance.setLayer(null);
-        assertNull(instance.getLayer());
-    }
-
-    /**
      * Test of setPosition method, of class LayerElement.
      */
     @Test
