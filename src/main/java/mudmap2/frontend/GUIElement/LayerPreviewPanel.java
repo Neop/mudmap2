@@ -42,6 +42,8 @@ public class LayerPreviewPanel extends JPanel {
         mappainter = new MapPainterDefault();
         ((MapPainterDefault) mappainter).setShowPaths(false);
         ((MapPainterDefault) mappainter).setGridEnabled(false);
+        ((MapPainterDefault) mappainter).setCursorVisible(false);
+        ((MapPainterDefault) mappainter).setPlaceSelectionVisible(false);
         marked = false;
     }
 

@@ -55,35 +55,27 @@ public class MapPainterDefault implements MapPainter {
     static final int TILE_BORDER_WIDTH = 10;
     static final int EXIT_RADIUS = 5;
 
-    HashSet<Place> selectePlaces;
-    WorldCoordinate placeSelectionBoxStart, placeSelectionBoxEnd;
-    int placeSelectedX, placeSelectedY;
-    boolean placeSelectionEnabled;
+    HashSet<Place> selectePlaces = null;
+    WorldCoordinate placeSelectionBoxStart = null;
+    WorldCoordinate placeSelectionBoxEnd = null;
+    int placeSelectedX = 0;
+    int placeSelectedY = 0;
 
     double graphicsWidth, graphicsHeight;
     int tileSize;
-    WorldCoordinate curPos;
+    WorldCoordinate curPos = null;
 
-    Color backgroundColor;
+    Color backgroundColor = null;
 
-    Font tileFont;
+    Font tileFont = null;
 
-    Boolean showPaths;
-    Boolean showPathsCurved;
-    Boolean showGrid;
+    Boolean showPaths = true;
+    Boolean showPathsCurved = true;
+    Boolean showGrid = true;
+    Boolean showPlaceCursor = true;
+    Boolean showPlaceSelection = true;
 
-    public MapPainterDefault() {
-        selectePlaces = null;
-        placeSelectedX = placeSelectedY = 0;
-        placeSelectionEnabled = false;
-        tileFont = null;
-
-        showPaths = true;
-        showPathsCurved = true;
-        showGrid = true;
-
-        backgroundColor = null;
-    }
+    public MapPainterDefault() {}
 
     @Override
     public void setSelectedPlaces(HashSet<Place> group, WorldCoordinate boxStart, WorldCoordinate boxEnd) {
@@ -99,8 +91,12 @@ public class MapPainterDefault implements MapPainter {
     }
 
     @Override
-    public void setSelectionVisible(boolean b) {
-        placeSelectionEnabled = b;
+    public void setCursorVisible(boolean b) {
+        showPlaceCursor = b;
+    }
+
+    public void setPlaceSelectionVisible(boolean placeSelectionVisible) {
+        this.showPlaceSelection = placeSelectionVisible;
     }
 
     /**
@@ -549,7 +545,10 @@ public class MapPainterDefault implements MapPainter {
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // getPlace the locations of copied places
-        HashSet<Pair<Integer, Integer>> copiedPlaceLocations = mudmap2.CopyPaste.getCopyPlaceLocations();
+        HashSet<Pair<Integer, Integer>> copiedPlaceLocations = null;
+        if(showPlaceSelection){
+            copiedPlaceLocations = mudmap2.CopyPaste.getCopyPlaceLocations();
+        }
 
         // clear screen
         if(backgroundColor == null){
@@ -689,7 +688,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // mark place group selection
-                    if(isSelected(curPlace) || (mudmap2.CopyPaste.isCut() && mudmap2.CopyPaste.isMarked(curPlace))){
+                    if(showPlaceSelection && (isSelected(curPlace) || (mudmap2.CopyPaste.isCut() && mudmap2.CopyPaste.isMarked(curPlace)))){
                         g.setColor(new Color(255, 255, 255, 128));
                         g.fillRect(placeXpx, placeYpx, tileSize, tileSize);
                     }
@@ -793,7 +792,7 @@ public class MapPainterDefault implements MapPainter {
                 }
 
                 //TODO: extract from parent loop
-                if(copiedPlaceLocations != null){
+                if(showPlaceSelection && copiedPlaceLocations != null){
                     boolean locationFound = false;
                     for(Pair<Integer, Integer> location: copiedPlaceLocations){
 
@@ -812,7 +811,7 @@ public class MapPainterDefault implements MapPainter {
                 }
 
                 // draw cursor / place selection
-                if(placeSelectionEnabled && placeX == placeSelectedX && placeY == placeSelectedY){
+                if(showPlaceCursor && placeX == placeSelectedX && placeY == placeSelectedY){
                     int placeXpx = (int)((tileX + placeXpxConst) * tileSize);
                     int placeYpx = (int)((tileY + placeYpxConst) * tileSize);
 

@@ -36,7 +36,7 @@ public interface MapPainter {
      * Sets whether the place selection is enabled
      * @param b 
      */
-    public void setSelectionVisible(boolean b);
+    public void setCursorVisible(boolean b);
 
     /**
      * Paints layer to the graphic g

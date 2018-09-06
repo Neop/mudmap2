@@ -610,7 +610,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     public void paintComponent(Graphics g){
         mappainter.setSelectedPlaces(placeGroup, placeGroupBoxStart, placeGroupBoxEnd);
         mappainter.selectPlaceAt(getCursorX(), getCursorY());
-        mappainter.setSelectionVisible(isCursorEnabled());
+        mappainter.setCursorVisible(isCursorEnabled());
 
         Layer layer = getWorld().getLayer(getPosition().getLayer());
 
