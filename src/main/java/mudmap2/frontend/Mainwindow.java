@@ -108,13 +108,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
     JTabbedPane tabbedPane = null;
     JPanel infoPanel = null;
 
-    // for experimental html export message
-    Boolean firstHtmlExport;
-
     public Mainwindow() {
         super(StringHelper.join("MUD Map ", Mainwindow.class.getPackage().getImplementationVersion()));
-
-        firstHtmlExport = true;
 
         setMinimumSize(new Dimension(400, 300));
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
