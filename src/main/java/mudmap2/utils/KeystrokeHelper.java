@@ -17,6 +17,16 @@ public class KeystrokeHelper {
     }
 
     /**
+     * Returns a KeyStroke for the given keyCode using the ALT key modifier
+     *
+     * @param keyCode an int specifying the numeric code for a keyboard key
+     * @return
+     */
+    public static KeyStroke alt(final int keyCode) {
+        return KeyStroke.getKeyStroke(keyCode, ActionEvent.ALT_MASK);
+    }
+
+    /**
      * Returns a KeyStroke for the given keyCode using the CTRL ALT key modifier
      *
      * @param keyCode an int specifying the numeric code for a keyboard key
