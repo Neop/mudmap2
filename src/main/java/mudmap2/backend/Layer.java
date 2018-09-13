@@ -23,10 +23,13 @@
 
 package mudmap2.backend;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -379,6 +382,28 @@ public class Layer implements WorldChangeListener {
         final SortedSet<Place> set = new TreeSet<>(comparator);
         set.addAll(getPlaces());
         return set;
+    }
+
+    /**
+     * Gets a List of all elements
+     * @return
+     */
+    public List<Place> getPlacesList() {
+        final Set<Place> set = getPlaces();
+        final List<Place> list = new ArrayList<>(set.size());
+        list.addAll(set);
+        return list;
+    }
+
+    /**
+     * Gets a sorted set of all elements
+     * @param comparator The comparator to use
+     * @return
+     */
+    public List<Place> getPlacesList(final Comparator<Place> comparator) {
+        final List<Place> list = getPlacesList();
+        list.sort(comparator);
+        return list;
     }
 
     /**
