@@ -23,9 +23,13 @@
 
 package mudmap2.backend;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import mudmap2.backend.prquadtree.Quadtree;
 import mudmap2.utils.Pair;
 
@@ -57,13 +61,15 @@ public class Layer implements WorldChangeListener {
      * @param id layer id
      * @param world world
      */
-    public Layer(int id, World world){
-        if(world == null) throw new NullPointerException();
+    public Layer(final int id, final World world) {
+        if (world == null) {
+            throw new NullPointerException();
+        }
 
         this.id = id;
         this.world = world;
 
-        if(id > world.getNextLayerID()+1){
+        if (id > world.getNextLayerID() + 1) {
             world.setNextLayerID(id + 1);
         }
     }
@@ -72,8 +78,10 @@ public class Layer implements WorldChangeListener {
      * Constructor, generates unique layer id
      * @param world world
      */
-    public Layer(World world){
-        if(world == null) throw new NullPointerException();
+    public Layer(final World world) {
+        if (world == null) {
+            throw new NullPointerException();
+        }
 
         id = world.getNextLayerID();
         this.world = world;
@@ -84,7 +92,9 @@ public class Layer implements WorldChangeListener {
      * @return layer name or name generated from layer id
      */
     public String getName() {
-        if(name == null) return "Map " + getId();
+        if (name == null) {
+            return "Map " + getId();
+        }
         return name;
     }
 
@@ -92,7 +102,7 @@ public class Layer implements WorldChangeListener {
      * Set layer name
      * @param name
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -100,7 +110,7 @@ public class Layer implements WorldChangeListener {
      * Check whether the layer has an explicitly set name
      * @return
      */
-    public Boolean hasName(){
+    public Boolean hasName() {
         return name != null;
     }
 
@@ -109,7 +119,7 @@ public class Layer implements WorldChangeListener {
      * @param center_x
      * @param center_y
      */
-    public void setQuadtree(int center_x, int center_y){
+    public void setQuadtree(final int center_x, final int center_y) {
         elements = new Quadtree<>(center_x, center_y);
     }
 
@@ -117,7 +127,7 @@ public class Layer implements WorldChangeListener {
      * Gets the center x coordinate (estimation)
      * @return
      */
-    public int getCenterX(){
+    public int getCenterX() {
         return (maxX + minX) / 2;
     }
 
@@ -125,7 +135,7 @@ public class Layer implements WorldChangeListener {
      * Gets the center y coordinate (estimation)
      * @return
      */
-    public int getCenterY(){
+    public int getCenterY() {
         return (maxY + minY) / 2;
     }
 
@@ -133,28 +143,28 @@ public class Layer implements WorldChangeListener {
      * Gets the exact center
      * @return
      */
-    public Pair<Double, Double> getExactCenter(){
-        Pair<Double, Double> center = new Pair<>(0.0, 0.0);
+    public Pair<Double, Double> getExactCenter() {
+        final Pair<Double, Double> center = new Pair<>(0.0, 0.0);
 
         int layerXMin, layerXMax, layerYMin, layerYMax;
 
-        HashSet<Place> places = getPlaces();
-        if(!places.isEmpty()){
+        final HashSet<Place> places = getPlaces();
+        if (!places.isEmpty()) {
             layerXMax = layerXMin = places.iterator().next().getX();
             layerYMax = layerYMin = places.iterator().next().getY();
 
-            for(Place place: places){
+            for (final Place place : places) {
                 layerXMax = Math.max(layerXMax, place.getX());
                 layerXMin = Math.min(layerXMin, place.getX());
                 layerYMax = Math.max(layerYMax, place.getY());
                 layerYMin = Math.min(layerYMin, place.getY());
             }
 
-            int centerX = layerXMax - layerXMin + 1;
-            int centerY = layerYMax - layerYMin + 1;
+            final int centerX = layerXMax - layerXMin + 1;
+            final int centerY = layerYMax - layerYMin + 1;
 
-            center.first = 0.5 * (double) centerX + (double) layerXMin;
-            center.second = 0.5 * (double) centerY + (double) layerYMin - 1;
+            center.first = 0.5 * centerX + layerXMin;
+            center.second = 0.5 * centerY + layerYMin - 1;
         }
 
         return center;
@@ -164,12 +174,15 @@ public class Layer implements WorldChangeListener {
      * Gets the max x coordinate
      * @return
      */
-    public int getXMin(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
+    public int getXMin() {
+        final HashSet<Place> places = getPlaces();
+        if (places.isEmpty()) {
+            return 0;
+        }
         int ret = places.iterator().next().getX();
-        for(Place place: places)
+        for (final Place place : places) {
             ret = Math.min(ret, place.getX());
+        }
         return ret;
     }
 
@@ -177,12 +190,15 @@ public class Layer implements WorldChangeListener {
      * Gets the min x coordinate
      * @return
      */
-    public int getXMax(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
+    public int getXMax() {
+        final HashSet<Place> places = getPlaces();
+        if (places.isEmpty()) {
+            return 0;
+        }
         int ret = places.iterator().next().getX();
-        for(Place place: places)
+        for (final Place place : places) {
             ret = Math.max(ret, place.getX());
+        }
         return ret;
     }
 
@@ -190,12 +206,15 @@ public class Layer implements WorldChangeListener {
      * Gets the max y coordinate
      * @return
      */
-    public int getYMin(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
+    public int getYMin() {
+        final HashSet<Place> places = getPlaces();
+        if (places.isEmpty()) {
+            return 0;
+        }
         int ret = places.iterator().next().getY();
-        for(Place place: places)
+        for (final Place place : places) {
             ret = Math.min(ret, place.getY());
+        }
         return ret;
     }
 
@@ -203,12 +222,15 @@ public class Layer implements WorldChangeListener {
      * Gets the min y coordinate
      * @return
      */
-    public int getYMax(){
-        HashSet<Place> places = getPlaces();
-        if(places.isEmpty()) return 0;
+    public int getYMax() {
+        final HashSet<Place> places = getPlaces();
+        if (places.isEmpty()) {
+            return 0;
+        }
         int ret = places.iterator().next().getY();
-        for(Place place: places)
+        for (final Place place : places) {
             ret = Math.max(ret, place.getY());
+        }
         return ret;
     }
 
@@ -219,14 +241,16 @@ public class Layer implements WorldChangeListener {
      * @param element new element
      * @throws java.lang.Exception
      */
-    public void put(Place element, int x, int y) throws Exception{
+    public void put(final Place element, final int x, final int y) throws Exception {
         minX = Math.min(minX, x);
         maxX = Math.max(maxX, x);
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);
 
         // removePlace element from layer, if it's already on the layer
-        if(elements.contains(element)) elements.remove(element.getX(), element.getY());
+        if (elements.contains(element)) {
+            elements.remove(element.getX(), element.getY());
+        }
         //element.getLayer().removePlace(element);
         element.setPosition(x, y, this);
         put(element);
@@ -238,7 +262,7 @@ public class Layer implements WorldChangeListener {
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
-    public void put(Place element) throws PlaceNotInsertedException {
+    public void put(final Place element) throws PlaceNotInsertedException {
         try {
             minX = Math.min(minX, element.getX());
             maxX = Math.max(maxX, element.getX());
@@ -247,7 +271,7 @@ public class Layer implements WorldChangeListener {
 
             elements.insert(element, element.getX(), element.getY());
             world.callListeners(element);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             throw new PlaceNotInsertedException(element.getX(), element.getY());
         }
     }
@@ -258,7 +282,7 @@ public class Layer implements WorldChangeListener {
      * @param y y coordinate
      * @return element at that position or null
      */
-    public Place get(int x, int y){
+    public Place get(final int x, final int y) {
         return elements.get(x, y);
     }
 
@@ -269,14 +293,16 @@ public class Layer implements WorldChangeListener {
      * @param distance maximum distance in each drection
      * @return
      */
-    public LinkedList<Place> getNeighbors(int _x, int _y, int distance){
-        LinkedList<Place> ret = new LinkedList<>();
+    public LinkedList<Place> getNeighbors(final int _x, final int _y, int distance) {
+        final LinkedList<Place> ret = new LinkedList<>();
         distance = Math.abs(distance);
-        for(int x = -distance; x <= distance; ++x){
-            for(int y = -distance; y <= distance; ++y){
-                if(!(x == 0 && y == 0)){ // if not center place
-                    Place el = get(_x + x, _y + y);
-                    if(el != null) ret.add(el);
+        for (int x = -distance; x <= distance; ++x) {
+            for (int y = -distance; y <= distance; ++y) {
+                if (!(x == 0 && y == 0)) { // if not center place
+                    final Place el = get(_x + x, _y + y);
+                    if (el != null) {
+                        ret.add(el);
+                    }
                 }
             }
         }
@@ -287,7 +313,7 @@ public class Layer implements WorldChangeListener {
      * Gets the id of the layer
      * @return layer id
      */
-    public Integer getId(){
+    public Integer getId() {
         return id;
     }
 
@@ -295,7 +321,7 @@ public class Layer implements WorldChangeListener {
      * Gets the world
      * @return world
      */
-    public World getWorld(){
+    public World getWorld() {
         return world;
     }
 
@@ -304,12 +330,15 @@ public class Layer implements WorldChangeListener {
      * @param element
      * @throws mudmap2.backend.Layer.PlaceNotFoundException
      */
-    public void remove(LayerElement element) throws RuntimeException, PlaceNotFoundException {
+    public void remove(final LayerElement element) throws RuntimeException, PlaceNotFoundException {
         // check if position is available
-        LayerElement el_bef = get(element.getX(), element.getY());
-        if(el_bef != element){
-            if(el_bef != null) throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
-            else throw new PlaceNotFoundException(element.getX(), element.getY());
+        final LayerElement el_bef = get(element.getX(), element.getY());
+        if (el_bef != element) {
+            if (el_bef != null) {
+                throw new RuntimeException("Element location mismatch (" + element.getX() + ", " + element.getY() + ")");
+            } else {
+                throw new PlaceNotFoundException(element.getX(), element.getY());
+            }
         }
         elements.remove(element.getX(), element.getY());
         world.callListeners(this);
@@ -321,7 +350,7 @@ public class Layer implements WorldChangeListener {
      * @param y y position
      * @return true, if an element exists
      */
-    public boolean exist(int x, int y){
+    public boolean exist(final int x, final int y) {
         return elements.exist(x, y);
     }
 
@@ -329,7 +358,7 @@ public class Layer implements WorldChangeListener {
      * Check whether the layer is empty
      * @return true if empty
      */
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return elements.isEmpty();
     }
 
@@ -337,8 +366,19 @@ public class Layer implements WorldChangeListener {
      * Gets a collection of all elements
      * @return set of all elements or empty set
      */
-    public HashSet<Place> getPlaces(){
+    public HashSet<Place> getPlaces() {
         return elements.values();
+    }
+
+    /**
+     * Gets a sorted set of all elements
+     * @param comparator The comparator to use
+     * @return
+     */
+    public SortedSet<Place> getPlaces(final Comparator<Place> comparator) {
+        final SortedSet<Place> set = new TreeSet<>(comparator);
+        set.addAll(getPlaces());
+        return set;
     }
 
     /**
@@ -346,7 +386,7 @@ public class Layer implements WorldChangeListener {
      * @return layer id
      */
     @Override
-    public String toString(){
+    public String toString() {
         return getName();
     }
 
@@ -355,24 +395,24 @@ public class Layer implements WorldChangeListener {
      * @param name place name to check
      * @return true if name is unique on this layer
      */
-    public boolean isPlaceNameUnique(String name){
-        if(cacheNeedsUpdate){
+    public boolean isPlaceNameUnique(final String name) {
+        if (cacheNeedsUpdate) {
             updatePlaceNameCache();
         }
 
-        Integer num = placeNameCache.get(name);
+        final Integer num = placeNameCache.get(name);
         return num == null || num <= 1;
     }
 
     /**
      * Recreates place name chache
      */
-    private void updatePlaceNameCache(){
+    private void updatePlaceNameCache() {
         placeNameCache.clear();
 
-        for(Place place: getPlaces()){
+        for (final Place place : getPlaces()) {
             Integer value = placeNameCache.get(place.getName());
-            if(value == null){
+            if (value == null) {
                 value = 1;
             } else {
                 value += 1;
@@ -382,10 +422,9 @@ public class Layer implements WorldChangeListener {
     }
 
     @Override
-    public void worldChanged(Object source) {
+    public void worldChanged(final Object source) {
         // if source is a place on this layer
-        if((source instanceof Place && elements.contains((Place) source)) ||
-                (source instanceof Layer && source == this)){
+        if (source instanceof Place && elements.contains((Place) source) || source instanceof Layer && source == this) {
             cacheNeedsUpdate = true;
         }
     }
@@ -403,12 +442,13 @@ public class Layer implements WorldChangeListener {
          * @param _x x coordinate of the place
          * @param _y y coordinate of the place
          */
-        public PlaceNotFoundException(int _x, int _y) {
-            x = _x; y = _y;
+        public PlaceNotFoundException(final int _x, final int _y) {
+            x = _x;
+            y = _y;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return "Element at position " + x + ", " + y + " doesn't exist";
         }
     }
@@ -423,12 +463,13 @@ public class Layer implements WorldChangeListener {
          * @param _x x coordinate of the place
          * @param _y y coordinate of the place
          */
-        public PlaceNotInsertedException(int _x, int _y) {
-            x = _x; y = _y;
+        public PlaceNotInsertedException(final int _x, final int _y) {
+            x = _x;
+            y = _y;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return "Couldn't insert place at position " + x + ", " + y;
         }
     }
