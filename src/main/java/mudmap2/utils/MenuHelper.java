@@ -90,6 +90,21 @@ public class MenuHelper {
     }
 
     /**
+     * Build a JMenu and add it to the given JPopupMenu
+     *
+     * @param parent the parent container
+     * @param label the String used to set the text
+     * @param tooltip the string to display; if the text is null, the tool tip is turned off for this component
+     * @return
+     */
+    public static JMenu addMenu(final JPopupMenu parent, final String label, final String tooltip) {
+        final JMenu menu = new JMenu(label);
+        menu.setToolTipText(tooltip);
+        parent.add(menu);
+        return menu;
+    }
+
+    /**
      * Build a JMenuItem and add it to the given JMenu
      *
      * @param parent the parent container
@@ -291,25 +306,6 @@ public class MenuHelper {
      *
      * @param parent the parent container
      * @param label the String used to set the text
-     * @param actionCommand the action command for the menu item
-     * @param keystroke the KeyStroke which will serve as an accelerator
-     * @param actionListener the ActionListener to be added
-     * @return
-     */
-    public static JMenuItem addMenuItem(final JPopupMenu parent, final String label, final String actionCommand, final KeyStroke keystroke, final ActionListener actionListener) {
-        final JMenuItem item = new JMenuItem(label);
-        item.addActionListener(actionListener);
-        item.setAccelerator(keystroke);
-        item.setActionCommand(actionCommand);
-        parent.add(item);
-        return item;
-    }
-
-    /**
-     * Build a JMenuItem and add it to the given JPopupMenu
-     *
-     * @param parent the parent container
-     * @param label the String used to set the text
      * @param keystroke the KeyStroke which will serve as an accelerator
      * @param actionListener the ActionListener to be added
      * @param tooltip the string to display; if the text is null, the tool tip is turned off for this component
@@ -320,6 +316,25 @@ public class MenuHelper {
         item.setToolTipText(tooltip);
         item.addActionListener(actionListener);
         item.setAccelerator(keystroke);
+        parent.add(item);
+        return item;
+    }
+
+    /**
+     * Build a JMenuItem and add it to the given JPopupMenu
+     *
+     * @param parent the parent container
+     * @param label the String used to set the text
+     * @param actionCommand the action command for the menu item
+     * @param keystroke the KeyStroke which will serve as an accelerator
+     * @param actionListener the ActionListener to be added
+     * @return
+     */
+    public static JMenuItem addMenuItem(final JPopupMenu parent, final String label, final String actionCommand, final KeyStroke keystroke, final ActionListener actionListener) {
+        final JMenuItem item = new JMenuItem(label);
+        item.addActionListener(actionListener);
+        item.setAccelerator(keystroke);
+        item.setActionCommand(actionCommand);
         parent.add(item);
         return item;
     }
