@@ -16,59 +16,23 @@
  */
 package mudmap2.frontend.GUIElement.WorldPanel;
 
-import java.awt.Component;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
-import mudmap2.CopyPaste;
 import mudmap2.backend.Layer;
-import mudmap2.backend.Layer.PlaceNotFoundException;
-import mudmap2.backend.LayerElement;
-import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldChangeListener;
 import mudmap2.backend.WorldCoordinate;
-import mudmap2.frontend.dialog.PathConnectDialog;
-import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
-import mudmap2.frontend.dialog.PlaceCommentDialog;
-import mudmap2.frontend.dialog.PlaceDialog;
-import mudmap2.frontend.dialog.PlaceRemoveDialog;
-import mudmap2.frontend.dialog.PlaceSelectionDialog;
-import mudmap2.frontend.dialog.placeGroup.PlaceGroupDialog;
-import mudmap2.utils.KeystrokeHelper;
-import mudmap2.utils.MenuHelper;
-import mudmap2.utils.PlaceXComparator;
-import mudmap2.utils.PlaceYComparator;
-import mudmap2.utils.StringHelper;
 
 /**
  *
@@ -81,25 +45,27 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     public static final int TILE_SIZE_MIN = 10;
     public static final int TILE_SIZE_MAX = 200;
 
-    JFrame parentFrame;
+    private final JFrame parentFrame;
 
-    MapPainter mappainter;
+    private final MapPainter mappainter;
 
     // passive worldpanels don't modify the world
-    final boolean passive;
+    private final boolean passive;
 
-    World world;
+    private final World world;
 
     // tile size in pixel
-    double tileSize;
+    private double tileSize;
 
-    int cursorX, cursorY;
-    boolean cursorEnabled, cursorForced;
+    private int cursorX;
+    private int cursorY;
+    private boolean cursorEnabled;
+    private boolean cursorForced;
 
-    HashSet<PlaceSelectionListener> placeSelectionListeners;
-    HashSet<MapCursorListener> mapCursorListeners;
-    HashSet<StatusListener> statusListeners;
-    HashSet<WorldPanelListener> tileSizeListeners;
+    private final HashSet<PlaceSelectionListener> placeSelectionListeners;
+    private final HashSet<MapCursorListener> mapCursorListeners;
+    private final HashSet<StatusListener> statusListeners;
+    private final HashSet<WorldPanelListener> tileSizeListeners;
 
     /**
      * positionsTail contains all previously visited positions up to the current
@@ -108,20 +74,23 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * gets popped and pushed to tail. At least one position needs to remain in
      * tail.
      */
-    LinkedList<WorldCoordinate> positionsHead, positionsTail;
+    private final LinkedList<WorldCoordinate> positionsHead;
+    private final LinkedList<WorldCoordinate> positionsTail;
 
     // true, if the mouse is in the panel, for relative motion calculation
-    boolean mouseInPanel;
+    private boolean mouseInPanel;
     // previous position of the mouse
-    int mouseXPrevious, mouseYPrevious;
+    private int mouseXPrevious;
+    private int mouseYPrevious;
 
     // place (group) selection
-    WorldCoordinate placeGroupBoxStart, placeGroupBoxEnd;
-    HashSet<Place> placeGroup;
+    private WorldCoordinate placeGroupBoxStart;
+    private WorldCoordinate placeGroupBoxEnd;
+    private HashSet<Place> placeGroup;
 
     // true, if a context menu is shown (to disable forced focus)
-    boolean isContextMenuShown;
-    boolean forcedFocus;
+    private boolean isContextMenuShown;
+    private boolean forcedFocus;
 
     /**
      * Constructs a world panel
@@ -170,10 +139,10 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         });
 
         addKeyListener(new TabKeyPassiveListener(this));
-        addMouseListener(new TabMousePassiveListener());
+        addMouseListener(new TabMousePassiveListener(this));
         if (!passive) {
             addKeyListener(new TabKeyListener(this));
-            addMouseListener(new TabMouseListener());
+            addMouseListener(new TabMouseListener(this));
         }
         addMouseWheelListener(new MouseWheelListener() {
             @Override
@@ -190,7 +159,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                 setTileSize(ts);
             }
         });
-        addMouseMotionListener(new TabMouseMotionListener());
+        addMouseMotionListener(new TabMouseMotionListener(this));
 
         if (!passive) {
             world.addChangeListener(this);
@@ -268,7 +237,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * Set whether a context menu is shown, to disable forced focus
      * @param b
      */
-    private void setContextMenu(final boolean b) {
+    void setContextMenu(final boolean b) {
         isContextMenuShown = b;
     }
 
@@ -452,6 +421,10 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         moveScreenToCursor();
     }
 
+    public JFrame getParentFrame() {
+        return parentFrame;
+    }
+
     /**
      * moves the shown places so the selection is on the screen
      */
@@ -488,7 +461,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param screen_x a screen coordinate (x-axis)
      * @return world coordinate x
      */
-    private int getPlacePosX(final int screen_x) {
+    int getPlacePosX(final int screen_x) {
         return (int) Math.ceil((screen_x - getWidth() / 2) / getTileSize() + getPosition().getX()) - 1;
     }
 
@@ -497,7 +470,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param mouse_y a screen coordinate (y-axis)
      * @return world coordinate y
      */
-    private int getPlacePosY(final int screen_y) {
+    int getPlacePosY(final int screen_y) {
         return (int) -Math.ceil((screen_y - getHeight() / 2) / getTileSize() - getPosition().getY()) + 1;
     }
 
@@ -506,7 +479,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param placeX a world (place) coordinate (x axis)
      * @return a screen coordinate x
      */
-    private int getScreenPosX(final int placeX) {
+    int getScreenPosX(final int placeX) {
         final double ts = getTileSize();
         final double screenCenterX = getWidth() / ts / 2; // note: wdtwd2
         final int placeXOffset = (int) (Math.round(getPosition().getX()) - Math.round(screenCenterX));
@@ -518,7 +491,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param placeY a world (place) coordinate (y axis)
      * @return a screen coordinate y
      */
-    private int getScreenPosY(final int placeY) {
+    int getScreenPosY(final int placeY) {
         final double ts = getTileSize();
         final double screenCenterY = getHeight() / ts / 2;
         final int placeYOffset = (int) (Math.round(getPosition().getY()) - Math.round(screenCenterY));
@@ -538,7 +511,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * @param x new coordinate
      * @param y new coordinate
      */
-    private void placeGroupBoxModifySelection(final int x, final int y) {
+    void placeGroupBoxModifySelection(final int x, final int y) {
         placeGroup.clear();
         placeGroupBoxEnd = new WorldCoordinate(getPosition().getLayer(), x, y);
         // reset if layer changed
@@ -554,7 +527,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     /**
      * Moves the box/shift selection to the selected places list
      */
-    private void placeGroupBoxSelectionToList() {
+    void placeGroupBoxSelectionToList() {
         if (placeGroupBoxEnd != null && placeGroupBoxStart != null) {
             final int x1 = (int) Math.round(placeGroupBoxEnd.getX());
             final int x2 = (int) Math.round(placeGroupBoxStart.getX());
@@ -584,7 +557,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * adds a place to the place selection list (eg on ctrl + click)
      * @param pl
      */
-    private void placeGroupAdd(final Place pl) {
+    void placeGroupAdd(final Place pl) {
         placeGroupBoxSelectionToList();
         // clear list, if new place is on a different layer
         if (!placeGroup.isEmpty() && placeGroup.iterator().next().getLayer() != pl.getLayer()) {
@@ -603,7 +576,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
      * Sets the selection to a new set
      * @param set
      */
-    private void placeGroupSet(final HashSet<Place> set) {
+    void placeGroupSet(final HashSet<Place> set) {
         placeGroup.clear();
         placeGroup = set;
     }
@@ -611,7 +584,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     /**
      * Clears the selected places list and the shift selection
      */
-    private void placeGroupReset() {
+    void placeGroupReset() {
         placeGroup.clear();
         placeGroupBoxResetSelection();
     }
@@ -795,1165 +768,36 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
         repaint();
     }
 
-    /**
-     * This listener only contains actions, that don't modify the world
-     */
-    private class TabMousePassiveListener extends TabMouseListener implements MouseListener {
-        @Override
-        public void mouseClicked(final MouseEvent e) {
-            if (e.getButton() == MouseEvent.BUTTON3) { // right click
-                // show context menu
-                final ContextMenu context_menu = new ContextMenu(WorldPanel.this, getPlacePosX(e.getX()), getPlacePosY(e.getY()));
-                context_menu.show(e.getComponent(), e.getX(), e.getY());
-            } else if (e.getButton() == MouseEvent.BUTTON1) { // left click
-                if (!e.isShiftDown()) { // left click + hift gets handled in active listener
-                    // set place selection to coordinates if keyboard selection is enabled
-                    setCursor(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
-                }
-            }
-        }
+    public WorldCoordinate getPlaceGroupBoxStart() {
+        return placeGroupBoxStart;
     }
 
-    /**
-     * This listener contains actions that modify the world
-     */
-    private class TabMouseListener implements MouseListener {
-
-        @Override
-        public void mouseClicked(final MouseEvent e) {
-            final JFrame rootFrame = (JFrame) SwingUtilities.getRoot(e.getComponent());
-
-            if (e.getButton() == MouseEvent.BUTTON1) { // left click
-                final Place place = getWorld().getLayer(getPosition().getLayer()).get(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
-                if (e.isControlDown()) { // left click + ctrl
-                    if (place != null) {
-                        placeGroupAdd(place);
-                    }
-                } else if (!e.isShiftDown()) { // left click and not shift
-                    placeGroupReset();
-                    if (e.getClickCount() > 1) { // double click
-                        if (place != null) {
-                            new PlaceDialog(rootFrame, getWorld(), place).setVisible(true);
-                        } else {
-                            new PlaceDialog(rootFrame, getWorld(), getWorld().getLayer(getPosition().getLayer()), getPlacePosX(e.getX()), getPlacePosY(e.getY())).setVisible(true);
-                        }
-                    }
-                } else {
-                    if (!placeGroupHasSelection()) {
-                        placeGroupBoxModifySelection(getCursorX(), getCursorY());
-                    }
-                    placeGroupBoxModifySelection(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
-                    // cursor has to be set after the selection -> not handled by passive listener
-                    setCursor(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
-                }
-            }
-            repaint();
-        }
-
-        @Override
-        public void mousePressed(final MouseEvent e) {
-            requestFocusInWindow();
-        }
-
-        @Override
-        public void mouseReleased(final MouseEvent e) {
-        }
-
-        @Override
-        public void mouseEntered(final MouseEvent e) {
-            mouseInPanel = true;
-            mouseXPrevious = e.getX();
-            mouseYPrevious = e.getY();
-        }
-
-        @Override
-        public void mouseExited(final MouseEvent e) {
-            mouseInPanel = false;
-        }
+    public HashSet<Place> getPlaceGroup() {
+        return placeGroup;
     }
 
-    private class TabMouseMotionListener implements MouseMotionListener {
-
-        @Override
-        public void mouseDragged(final MouseEvent e) {
-            if (mouseInPanel) {
-                final double dx = (e.getX() - mouseXPrevious) / getTileSize();
-                final double dy = (e.getY() - mouseYPrevious) / getTileSize();
-                if (!e.isShiftDown()) {
-                    getPosition().move(-dx, dy);
-                } else { // shift pressed: box selection
-                    placeGroupBoxModifySelection(getPlacePosX(e.getX()), getPlacePosY(e.getY()));
-                }
-                repaint();
-            }
-            mouseXPrevious = e.getX();
-            mouseYPrevious = e.getY();
-        }
-
-        @Override
-        public void mouseMoved(final MouseEvent e) {
-            mouseXPrevious = e.getX();
-            mouseYPrevious = e.getY();
-        }
+    public boolean isMouseInPanel() {
+        return mouseInPanel;
     }
 
-    /**
-     * This listener only contains actions that don't modify the world
-     */
-    private class TabKeyPassiveListener extends TabKeyListener {
-        public TabKeyPassiveListener(final WorldPanel parent) {
-            super(parent);
-        }
-
-        @Override
-        public void keyPressed(final KeyEvent e) {
-            if (!e.isShiftDown() && !e.isControlDown() && !e.isAltDown() && !e.isAltGraphDown()) { // ctrl, shift and alt not pressed
-                final int xBef = getCursorX();
-                final int yBef = getCursorY();
-
-                switch (e.getKeyCode()) {
-                    // zoom the map
-                    case KeyEvent.VK_PLUS:
-                    case KeyEvent.VK_ADD:
-                    case KeyEvent.VK_PAGE_UP:
-                        tileSizeIncrement();
-                        break;
-                    case KeyEvent.VK_MINUS:
-                    case KeyEvent.VK_SUBTRACT:
-                    case KeyEvent.VK_PAGE_DOWN:
-                        tileSizeDecrement();
-                        break;
-
-                    // enable / disable cursor
-                    case KeyEvent.VK_P:
-                        setCursorEnabled(!isCursorEnabled());
-                        break;
-
-                    // shift place selection - wasd
-                    case KeyEvent.VK_NUMPAD8:
-                    case KeyEvent.VK_UP:
-                    case KeyEvent.VK_W:
-                        if (isCursorEnabled()) {
-                            moveCursor(0, +1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD4:
-                    case KeyEvent.VK_LEFT:
-                    case KeyEvent.VK_A:
-                        if (isCursorEnabled()) {
-                            moveCursor(-1, 0);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD2:
-                    case KeyEvent.VK_DOWN:
-                    case KeyEvent.VK_S:
-                        if (isCursorEnabled()) {
-                            moveCursor(0, -1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD6:
-                    case KeyEvent.VK_RIGHT:
-                    case KeyEvent.VK_D:
-                        if (isCursorEnabled()) {
-                            moveCursor(+1, 0);
-                        }
-                        break;
-
-                    // diagonal movement
-                    case KeyEvent.VK_NUMPAD1:
-                        if (isCursorEnabled()) {
-                            moveCursor(-1, -1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD3:
-                        if (isCursorEnabled()) {
-                            moveCursor(+1, -1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD7:
-                        if (isCursorEnabled()) {
-                            moveCursor(-1, +1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD9:
-                        if (isCursorEnabled()) {
-                            moveCursor(+1, +1);
-                        }
-                        break;
-
-                    // goto home
-                    case KeyEvent.VK_NUMPAD5:
-                    case KeyEvent.VK_H:
-                    case KeyEvent.VK_HOME:
-                        parent.gotoHome();
-                        break;
-
-                    // reset place group selection
-                    case KeyEvent.VK_ESCAPE:
-                        parent.placeGroupReset();
-                        break;
-                }
-
-                final int xSel = getCursorX();
-                final int ySel = getCursorY();
-
-                // change group selection, if place selection changed
-                if (xSel != xBef || ySel != yBef) {
-                    if (parent.placeGroupBoxStart != null) {
-                        parent.placeGroupBoxSelectionToList();
-                    }
-                }
-            }
-        }
+    public void setMouseInPanel(final boolean mouseInPanel) {
+        this.mouseInPanel = mouseInPanel;
     }
 
-    /**
-     * This listener contains actions, that modify the world
-     */
-    private class TabKeyListener implements KeyListener {
-
-        WorldPanel parent;
-
-        public TabKeyListener(final WorldPanel parent) {
-            this.parent = parent;
-        }
-
-        @Override
-        public void keyTyped(final KeyEvent e) {
-        }
-
-        @Override
-        public void keyPressed(final KeyEvent e) {
-            final JFrame rootFrame = (JFrame) SwingUtilities.getRoot(parent);
-            if (e.isControlDown()) { // ctrl key pressed
-                Place place, other;
-
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_A: // select all places
-                        parent.placeGroupSet(getWorld().getLayer(getPosition().getLayer()).getPlaces());
-                        break;
-                    case KeyEvent.VK_X: // cut selected places
-                        if (!parent.placeGroupGetSelection().isEmpty()) { // cut group selection
-                            mudmap2.CopyPaste.cut(parent.placeGroup, getCursorX(), getCursorY());
-                            callMessageListeners(StringHelper.join(parent.placeGroup.size(), " places cut"));
-                            parent.placeGroupReset();
-                        } else if (parent.getSelectedPlace() != null) { // cut cursor selection
-                            final HashSet<Place> tmp_selection = new HashSet<>();
-                            tmp_selection.add(parent.getSelectedPlace());
-                            mudmap2.CopyPaste.cut(tmp_selection, getCursorX(), getCursorY());
-                            callMessageListeners("1 place cut");
-                        } else {
-                            callMessageListeners("No places cut: selection empty");
-                        }
-                        break;
-                    case KeyEvent.VK_C: // copy selected places
-                        if (!parent.placeGroupGetSelection().isEmpty()) { // copy group selection
-                            mudmap2.CopyPaste.copy(parent.placeGroup, getCursorX(), getCursorY());
-                            callMessageListeners(StringHelper.join(parent.placeGroup.size(), " places copied"));
-                            parent.placeGroupReset();
-                        } else if (parent.getSelectedPlace() != null) { // copy cursor selection
-                            final HashSet<Place> tmp_selection = new HashSet<>();
-                            tmp_selection.add(parent.getSelectedPlace());
-                            mudmap2.CopyPaste.copy(tmp_selection, getCursorX(), getCursorY());
-                            callMessageListeners("1 place copied");
-                        } else {
-                            mudmap2.CopyPaste.resetCopy();
-                            callMessageListeners("No places copied: selection empty");
-                        }
-                        break;
-                    case KeyEvent.VK_V: // paste copied / cut places
-                        if (mudmap2.CopyPaste.hasCopyPlaces()) {
-                            if (mudmap2.CopyPaste.canPaste(getCursorX(), getCursorY(), getWorld().getLayer(getPosition().getLayer()))) {
-                                final int paste_num = mudmap2.CopyPaste.getCopyPlaces().size();
-                                if (mudmap2.CopyPaste.paste(getCursorX(), getCursorY(), getWorld().getLayer(getPosition().getLayer()))) {
-                                    callMessageListeners(StringHelper.join(paste_num, " places pasted"));
-                                } else {
-                                    callMessageListeners("No places pasted");
-                                }
-                            } else {
-                                callMessageListeners("Can't paste: not enough free space on map");
-                            }
-                        } else {
-                            mudmap2.CopyPaste.resetCopy();
-                            callMessageListeners("Can't paste: no places cut or copied");
-                        }
-                        break;
-
-                    case KeyEvent.VK_NUMPAD8:
-                    case KeyEvent.VK_UP:
-                        //case KeyEvent.VK_W: // add path to direction 'n'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX(), getCursorY() + 1);
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("n") == null && other.getExit("s") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "n", other, "s"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD9: // add path to direction 'ne'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() + 1, getCursorY() + 1);
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("ne") == null && other.getExit("sw") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "ne", other, "sw"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD6:
-                    case KeyEvent.VK_RIGHT:
-                        //case KeyEvent.VK_D: // add path to direction 'e'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() + 1, getCursorY());
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("e") == null && other.getExit("w") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "e", other, "w"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() + 1, getCursorY() - 1);
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("se") == null && other.getExit("nw") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "se", other, "nw"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD2:
-                    case KeyEvent.VK_DOWN:
-                        //case KeyEvent.VK_S: // add path to direction 's'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX(), getCursorY() - 1);
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("s") == null && other.getExit("n") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "s", other, "n"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD1: // add path to direction 'sw'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() - 1, getCursorY() - 1);
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("sw") == null && other.getExit("ne") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "sw", other, "ne"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD4:
-                    case KeyEvent.VK_LEFT:
-                        //case KeyEvent.VK_A: // add path to direction 'w'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() - 1, getCursorY());
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("w") == null && other.getExit("e") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "w", other, "e"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD7: // add path to direction 'nw'
-                        place = getSelectedPlace();
-                        other = getWorld().getLayer(getPosition().getLayer()).get(getCursorX() - 1, getCursorY() + 1);
-                        if (place != null && other != null) { // if places exist
-                            if (place.getExit("nw") == null && other.getExit("se") == null) { // if exits aren't occupied
-                                place.connectPath(new Path(place, "nw", other, "se"));
-                            }
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD5: // open add path dialog
-                        new PathConnectDialog(parentFrame, getSelectedPlace()).setVisible(true);
-                        break;
-                }
-            } else if (e.isShiftDown()) { // shift key pressed -> modify selection
-                final int x_bef = getCursorX();
-                final int y_bef = getCursorY();
-
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_NUMPAD8:
-                    case KeyEvent.VK_UP:
-                    case KeyEvent.VK_W:
-                        if (isCursorEnabled()) {
-                            moveCursor(0, +1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD4:
-                    case KeyEvent.VK_LEFT:
-                    case KeyEvent.VK_A:
-                        if (isCursorEnabled()) {
-                            moveCursor(-1, 0);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD2:
-                    case KeyEvent.VK_DOWN:
-                    case KeyEvent.VK_S:
-                        if (isCursorEnabled()) {
-                            moveCursor(0, -1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD6:
-                    case KeyEvent.VK_RIGHT:
-                    case KeyEvent.VK_D:
-                        if (isCursorEnabled()) {
-                            moveCursor(+1, 0);
-                        }
-                        break;
-
-                    // diagonal movement
-                    case KeyEvent.VK_NUMPAD1:
-                        if (isCursorEnabled()) {
-                            moveCursor(-1, -1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD3:
-                        if (isCursorEnabled()) {
-                            moveCursor(+1, -1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD7:
-                        if (isCursorEnabled()) {
-                            moveCursor(-1, +1);
-                        }
-                        break;
-                    case KeyEvent.VK_NUMPAD9:
-                        if (isCursorEnabled()) {
-                            moveCursor(+1, +1);
-                        }
-                        break;
-
-                    case KeyEvent.VK_SPACE: // add or removePlace single place to place group selection
-                        final Place place = getSelectedPlace();
-                        if (place != null) {
-                            parent.placeGroupAdd(place);
-                        }
-                        break;
-                }
-                final int x_sel = getCursorX();
-                final int y_sel = getCursorY();
-
-                // change group selection, if place selection changed
-                if (x_sel != x_bef || y_sel != y_bef) {
-                    if (parent.placeGroupBoxStart == null) {
-                        parent.placeGroupBoxModifySelection(x_bef, y_bef);
-                    }
-                    parent.placeGroupBoxModifySelection(x_sel, y_sel);
-                }
-            } else if (e.isAltDown() || e.isAltGraphDown()) { // alt or altgr key pressed
-                final Place place = getSelectedPlace();
-                Path path;
-
-                if (place != null) {
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_NUMPAD8:
-                        case KeyEvent.VK_UP:
-                        case KeyEvent.VK_W: // removePlace path to direction 'n'
-                            path = place.getPathTo("n");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD9: // removePlace path to direction 'ne'
-                            path = place.getPathTo("ne");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD6:
-                        case KeyEvent.VK_RIGHT:
-                        case KeyEvent.VK_D: // removePlace path to direction 'e'
-                            path = place.getPathTo("e");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD3: // removePlace path to direction 'se'
-                            path = place.getPathTo("se");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD2:
-                        case KeyEvent.VK_DOWN:
-                        case KeyEvent.VK_S: // removePlace path to direction 's'
-                            path = place.getPathTo("s");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD1: // removePlace path to direction 'sw'
-                            path = place.getPathTo("sw");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD4:
-                        case KeyEvent.VK_LEFT:
-                        case KeyEvent.VK_A: // removePlace path to direction 'w'
-                            path = place.getPathTo("w");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                        case KeyEvent.VK_NUMPAD7: // removePlace path to direction 'nw'
-                            path = place.getPathTo("nw");
-                            if (path != null) {
-                                place.removePath(path);
-                            }
-                            break;
-                    }
-                }
-            } else { // ctrl, shift and alt not pressed
-                switch (e.getKeyCode()) {
-                    // show context menu
-                    case KeyEvent.VK_CONTEXT_MENU:
-                        if (isCursorEnabled()) {
-                            final ContextMenu context_menu = new ContextMenu(parent, getCursorX(), getCursorY());
-                            context_menu.show(e.getComponent(), getScreenPosX(getCursorX()) + (int) getTileSize() / 2, getScreenPosY(getCursorY()) + (int) getTileSize() / 2);
-                        }
-                        break;
-
-                    // edit / add place
-                    case KeyEvent.VK_INSERT:
-                    case KeyEvent.VK_ENTER:
-                    case KeyEvent.VK_E:
-                        if (isCursorEnabled()) {
-                            final Place place = getSelectedPlace();
-                            PlaceDialog dlg;
-
-                            Layer layer = null;
-                            if (getPosition() != null) {
-                                layer = getWorld().getLayer(getPosition().getLayer());
-                            }
-
-                            if (place != null) {
-                                dlg = new PlaceDialog(rootFrame, getWorld(), place);
-                            } else {
-                                dlg = new PlaceDialog(rootFrame, getWorld(), getWorld().getLayer(getPosition().getLayer()), parent.getCursorX(), parent.getCursorY());
-                            }
-                            dlg.setVisible(true);
-
-                            if (layer == null) {
-                                pushPosition(dlg.getPlace().getCoordinate());
-                            }
-                        }
-                        break;
-                    // create placeholder
-                    case KeyEvent.VK_F:
-                        if (isCursorEnabled()) {
-                            final Place place = getSelectedPlace();
-                            // create placeholder or removePlace one
-                            if (place == null) {
-                                getWorld().putPlaceholder(getPosition().getLayer(), parent.getCursorX(), parent.getCursorY());
-                            } else if (place.getName().equals(Place.PLACEHOLDER_NAME)) {
-                                try {
-                                    place.getLayer().remove(place);
-                                } catch (final RuntimeException ex) {
-                                    Logger.getLogger(TabKeyListener.class.getName()).log(Level.SEVERE, null, ex);
-                                    JOptionPane.showMessageDialog(parent, StringHelper.join("Could not remove place: ", ex.getMessage()));
-                                } catch (final PlaceNotFoundException ex) {
-                                    Logger.getLogger(TabKeyListener.class.getName()).log(Level.SEVERE, null, ex);
-                                    JOptionPane.showMessageDialog(parent, "Could not remove place: Place not found.");
-                                }
-                            }
-                        }
-                        repaint();
-                        break;
-                    // removePlace place
-                    case KeyEvent.VK_DELETE:
-                    case KeyEvent.VK_R:
-                        if (!parent.placeGroupHasSelection()) { // no places selected
-                            if (isCursorEnabled()) {
-                                final Place place = getSelectedPlace();
-                                if (place != null) {
-                                    new PlaceRemoveDialog(rootFrame, getWorld(), place).show();
-                                }
-                            }
-                        } else { // places selected
-                            final HashSet<Place> place_group = parent.placeGroupGetSelection();
-                            if (place_group != null) {
-                                final PlaceRemoveDialog dlg = new PlaceRemoveDialog(rootFrame, getWorld(), place_group);
-                                dlg.show();
-                                // reset selection, if places were removed
-                                if (dlg.getPlacesRemoved()) {
-                                    parent.placeGroupReset();
-                                }
-                            }
-                        }
-                        break;
-                    // edit place comments
-                    case KeyEvent.VK_C:
-                        if (isCursorEnabled()) {
-                            final Place place = getSelectedPlace();
-                            if (place != null) {
-                                new PlaceCommentDialog(rootFrame, place).setVisible(true);
-                                callStatusUpdateListeners();
-                            }
-                        }
-                        break;
-                    // modify place group
-                    case KeyEvent.VK_Q:
-                        Place place = getSelectedPlace();
-
-                        if (!parent.placeGroupHasSelection()) {
-                            // no place selected
-                            if (place == null) {
-                                new PlaceGroupDialog(rootFrame, getWorld()).setVisible(true);
-                            } else {
-                                new PlaceGroupDialog(rootFrame, getWorld(), place).setVisible(true);
-                            }
-                        }
-                        break;
-
-                    case KeyEvent.VK_SPACE: // add or removePlace single place to place group selection
-                        place = getSelectedPlace();
-                        if (place != null) {
-                            parent.placeGroupAdd(place);
-                        }
-                        break;
-                }
-            }
-            repaint();
-        }
-
-        @Override
-        public void keyReleased(final KeyEvent arg0) {
-        }
+    public int getMouseXPrevious() {
+        return mouseXPrevious;
     }
 
-    // constructs the context menu (on right click)
-    private class ContextMenu extends JPopupMenu implements ActionListener {
-
-        private static final long serialVersionUID = 1L;
-        private static final String ACTION_FIND_PATH = "find_path";
-        private static final String ACTION_PASTE = "paste";
-        private static final String ACTION_CUT = "cut";
-        private static final String ACTION_COPY = "copy";
-        private static final String ACTION_CONNECT_CHILD = "connect_child";
-        private static final String ACTION_CREATE_CHILD_NEW_LAYER = "create_child_new_layer";
-        private static final String ACTION_CREATE_PLACEHOLDER = "create_placeholder";
-        private static final String ACTION_EXPAND_ALL = "expand_all";
-        private static final String ACTION_EXPAND_NORTH = "expand_north";
-        private static final String ACTION_EXPAND_NORTHEAST = "expand_northeast";
-        private static final String ACTION_EXPAND_EAST = "expand_east";
-        private static final String ACTION_EXPAND_SOUTHEAST = "expand_southeast";
-        private static final String ACTION_EXPAND_SOUTH = "expand_south";
-        private static final String ACTION_EXPAND_SOUTHWEST = "expand_southwest";
-        private static final String ACTION_EXPAND_WEST = "expand_west";
-        private static final String ACTION_EXPAND_NORTHWEST = "expand_northwest";
-
-        final Layer layer; //map
-        final Place place;
-        final Integer posX;
-        final Integer posY;
-
-        /**
-         * Constructs a context menu at position (x,y)
-         * @param px screen / panel coordinate x
-         * @param py screen / panel coordinate y
-         */
-        public ContextMenu(final WorldPanel parent, final Integer px, final Integer py) {
-            addPopupMenuListener(new TabContextPopMenuListener());
-            final JFrame rootFrame = (JFrame) SwingUtilities.getRoot(parent);
-
-            this.posX = px;
-            this.posY = py;
-            layer = getWorld().getLayer(getPosition().getLayer());
-            place = layer != null ? layer.get(posX, posY) : null;
-
-            parent.setCursor(posX, posY);
-
-            //mdk.debug
-            System.out.println(new Date() + "\tlayer: " + layer);
-            System.out.println(new Date() + "\tplace: " + place);
-            System.out.println(new Date() + "\tx: " + posX + "\ty: " + posY);
-
-            if (layer != null && place != null) { // if place exists
-                if (!passive) {
-                    MenuHelper.addMenuItem(this, "Edit place", KeyStroke.getKeyStroke(KeyEvent.VK_E, 0), new PlaceDialog(rootFrame, getWorld(), place));
-
-                    final HashSet<Place> placeGroup = placeGroupGetSelection();
-
-                    if (placeGroup.isEmpty()) {
-                        MenuHelper.addMenuItem(this, "Remove place", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new PlaceRemoveDialog(rootFrame, getWorld(), place), "Remove this place");
-                    } else {
-                        MenuHelper.addMenuItem(this, "*Remove places", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new PlaceRemoveDialog(rootFrame, getWorld(), placeGroup), "Remove all selected places");
-                    }
-
-                    MenuHelper.addMenuItem(this, "Edit comments", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), new PlaceCommentDialog(rootFrame, place));
-
-                    if (placeGroup.isEmpty()) {
-                        MenuHelper.addMenuItem(this, "Edit place group", new PlaceGroupDialog(rootFrame, getWorld(), place), "Edit the place group of this place");
-                    }
-                }
-
-                // ------------- Paths ------------------
-                final JMenu mPaths = new JMenu("Paths / Exits");
-                if (!passive || !place.getPaths().isEmpty()) {
-                    add(mPaths);
-                }
-
-                if (!passive) {
-                    final JMenu mPathConnect = MenuHelper.addMenu(mPaths, "Connect", "Connect a path from this place to another one");
-                    MenuHelper.addMenuItem(mPathConnect, "Select", KeystrokeHelper.ctrl(KeyEvent.VK_NUMPAD5), new PathConnectDialog(parentFrame, place), "Select any place from the map");
-                    MenuHelper.addMenuItem(mPathConnect, "Neighbors", new PathConnectNeighborsDialog(rootFrame, place), "Choose from surrounding places");
-
-                    final LinkedList<Place> places = layer.getNeighbors(posX, posY, 1);
-                    if (!places.isEmpty()) {
-                        mPathConnect.addSeparator();
-
-                        for (final LayerElement neighbor : places) {
-                            // only show, if no connection exists, yet
-                            if (place.getPaths((Place) neighbor).isEmpty()) {
-                                String dir1 = "", dir2 = "";
-
-                                if (neighbor.getY() > place.getY()) {
-                                    dir1 = "n";
-                                    dir2 = "s";
-                                } else if (neighbor.getY() < place.getY()) {
-                                    dir1 = "s";
-                                    dir2 = "n";
-                                }
-                                if (neighbor.getX() > place.getX()) {
-                                    dir1 = StringHelper.join(dir1, "e");
-                                    dir2 = StringHelper.join(dir2, "w");
-                                } else if (neighbor.getX() < place.getX()) {
-                                    dir1 = StringHelper.join(dir1, "w");
-                                    dir2 = StringHelper.join(dir2, "e");
-                                }
-
-                                // if exits aren't occupied yet -> add menu item
-                                if (place.getPathTo(dir1) == null && ((Place) neighbor).getPathTo(dir2) == null) {
-                                    final JMenuItem mi_path_connect = MenuHelper.addMenuItem(mPathConnect, StringHelper.join("[", dir1, "] ", ((Place) neighbor).getName()), new ConnectPathActionListener(place, (Place) neighbor, dir1, dir2));
-
-                                    // add accelerator
-                                    final int dirnum = Path.getDirNum(dir1);
-                                    if (dirnum > 0 & dirnum <= 9) {
-                                        mi_path_connect.setAccelerator(KeystrokeHelper.ctrl(KeyEvent.VK_NUMPAD0 + dirnum));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // getPlace all connected places
-                final HashSet<Path> paths = place.getPaths();
-
-                if (!paths.isEmpty()) {
-                    JMenu mPathRemove = null;
-                    if (!parent.passive) {
-                        mPathRemove = MenuHelper.addMenu(mPaths, "Remove", "Remove a path");
-                        mPaths.addSeparator();
-                    }
-
-                    for (final Path path : paths) {
-                        final Place otherPlace = path.getOtherPlace(place);
-                        MenuHelper.addMenuItem(mPaths, StringHelper.join("Go to [", path.getExit(place), "] ", otherPlace.getName()), new GotoPlaceActionListener(parent, otherPlace));
-
-                        if (!parent.passive) {
-                            final String dir = path.getExit(place);
-                            final JMenuItem miPathRemove = MenuHelper.addMenuItem(mPathRemove, StringHelper.join("Remove [", dir, "] ", otherPlace.getName()), new RemovePathActionListener(path));
-
-                            // add accelerator
-                            final int dirnum = Path.getDirNum(dir);
-                            if (dirnum > 0 & dirnum <= 9) {
-                                miPathRemove.setAccelerator(KeystrokeHelper.alt(KeyEvent.VK_NUMPAD0 + dirnum));
-                            }
-                        }
-                    }
-
-                    if (!parent.passive) {
-                        mPaths.addSeparator();
-                        MenuHelper.addMenuItem(mPaths, "Find shortest path", ContextMenu.ACTION_FIND_PATH, this);
-                    }
-                }
-
-                // ------------- layers / maps ------------------
-                final JMenu mChildren = new JMenu("Maps");
-                mChildren.setToolTipText("Related places, eg. for maps within maps");
-                if (!parent.passive || !place.getChildren().isEmpty()) {
-                    add(mChildren);
-                }
-
-                if (!parent.passive) {
-                    MenuHelper.addMenuItem(mChildren, "Connect with existing place", ContextMenu.ACTION_CONNECT_CHILD, this, StringHelper.join("Connect another place with \"", place.getName(), "\""));
-                    MenuHelper.addMenuItem(mChildren, "New place on new map", ContextMenu.ACTION_CREATE_CHILD_NEW_LAYER, this, StringHelper.join("Creates a new place on a new map layer and connects it with \"", place.getName(), "\""));
-                }
-
-                final HashSet<Place> children = place.getChildren();
-                if (!children.isEmpty()) {
-                    if (!parent.passive) {
-                        final JMenu m_sa_remove = new JMenu("Remove");
-                        mChildren.add(m_sa_remove);
-
-                        for (final Place child : children) {
-                            MenuHelper.addMenuItem(m_sa_remove, StringHelper.join("Remove ", child.getName(), " (", child.getLayer().getName(), ")"), new RemoveChildrenActionListener(place, child));
-                        }
-                    }
-
-                    mChildren.addSeparator();
-
-                    for (final Place child : children) {
-                        MenuHelper.addMenuItem(mChildren, StringHelper.join("Go to ", child.getName(), " (", child.getLayer().getName(), ")"), new GotoPlaceActionListener(parent, child));
-                    }
-                }
-
-                final HashSet<Place> parents = place.getParents();
-                if (!parents.isEmpty()) {
-                    mChildren.addSeparator();
-
-                    for (final Place child : parents) {
-                        MenuHelper.addMenuItem(mChildren, StringHelper.join("Go to ", child.getName(), " (", child.getLayer().getName(), ")"), new GotoPlaceActionListener(parent, child));
-                    }
-                }
-
-            } else { // if layer doesn't exist or no place exists at position x,y
-                MenuHelper.addMenuItem(this, "New place", KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), new PlaceDialog(rootFrame, parent.getWorld(), layer, posX, posY));
-                MenuHelper.addMenuItem(this, "New placeholder", ContextMenu.ACTION_CREATE_PLACEHOLDER, KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), this);
-            }
-
-            //"Expand" menu
-            addExpansionMenu();
-
-            // cut / copy / paste for selected places
-            final boolean can_paste = layer != null && mudmap2.CopyPaste.canPaste(posX, posY, layer);
-            final boolean has_paste_places = layer != null && mudmap2.CopyPaste.hasCopyPlaces();
-            final boolean has_selection = parent.placeGroupHasSelection();
-
-            if (layer != null && place != null || has_selection || has_paste_places) {
-                addSeparator();
-            }
-
-            if (layer != null && place != null || has_selection) {
-                MenuHelper.addMenuItem(this, StringHelper.join("Cut", has_selection ? " selection" : " place"), ContextMenu.ACTION_CUT, KeystrokeHelper.ctrl(KeyEvent.VK_X), this);
-                MenuHelper.addMenuItem(this, StringHelper.join("Copy", has_selection ? " selection" : " place"), ContextMenu.ACTION_COPY, KeystrokeHelper.ctrl(KeyEvent.VK_C), this);
-            }
-
-            if (has_paste_places) {
-                final JMenuItem miPastePlace = MenuHelper.addMenuItem(this, "Paste", ContextMenu.ACTION_PASTE, KeystrokeHelper.ctrl(KeyEvent.VK_V), this);
-                if (!can_paste) {
-                    miPastePlace.setEnabled(false);
-                }
-            }
-
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            final JFrame rootFrame = (JFrame) SwingUtilities.getRoot((Component) e.getSource());
-
-            switch (e.getActionCommand()) {
-                case ContextMenu.ACTION_CREATE_PLACEHOLDER:
-                    getWorld().putPlaceholder(getPosition().getLayer(), posX, posY);
-                    repaint();
-                    break;
-                case ContextMenu.ACTION_CREATE_CHILD_NEW_LAYER:
-                    // create new place
-                    final PlaceDialog dlg = new PlaceDialog(rootFrame, getWorld(), null, 0, 0);
-                    dlg.setVisible(true);
-
-                    final Place place_new = dlg.getPlace();
-                    if (place_new != null) {
-                        // connect new place with place as a child
-                        place.connectChild(place_new);
-                        // go to new place
-                        pushPosition(place_new.getCoordinate());
-                    }
-                    break;
-                case ContextMenu.ACTION_CONNECT_CHILD:
-                    final PlaceSelectionDialog psdlg1 = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
-                    psdlg1.setVisible(true);
-                    final Place child = psdlg1.getSelection();
-                    if (psdlg1.getSelected() && child != null && child != place) {
-                        final int ret = JOptionPane.showConfirmDialog(rootFrame, StringHelper.join("Connect \"", child.getName(), "\" to \"", place.getName(), "\"?"), "Connect child place", JOptionPane.YES_NO_OPTION);
-                        if (ret == JOptionPane.YES_OPTION) {
-                            place.connectChild(child);
-                            repaint();
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_COPY:
-                    if (placeGroupHasSelection()) {
-                        mudmap2.CopyPaste.copy(placeGroupGetSelection(), posX, posY);
-                    } else {
-                        final HashSet<Place> set = new HashSet<>();
-                        set.add(place);
-                        mudmap2.CopyPaste.copy(set, posX, posY);
-                    }
-                    repaint();
-                    break;
-                case ContextMenu.ACTION_CUT:
-                    if (placeGroupHasSelection()) {
-                        mudmap2.CopyPaste.cut(placeGroupGetSelection(), posX, posY);
-                    } else {
-                        final HashSet<Place> set = new HashSet<>();
-                        set.add(place);
-                        mudmap2.CopyPaste.cut(set, posX, posY);
-                    }
-                    repaint();
-                    break;
-                case ContextMenu.ACTION_PASTE:
-                    mudmap2.CopyPaste.paste(posX, posY, layer);
-                    repaint();
-                    break;
-                case ContextMenu.ACTION_FIND_PATH:
-                    final PlaceSelectionDialog psdlg2 = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
-                    psdlg2.setVisible(true);
-                    final Place end = psdlg2.getSelection();
-                    if (end != null) {
-                        placeGroupReset();
-                        Place place_it = getWorld().breadthSearch(place, end);
-                        if (place_it == null) {
-                            callMessageListeners("No Path found");
-                            JOptionPane.showMessageDialog(this, StringHelper.join("Could not find path to ", end.getName()));
-                        } else {
-                            int path_length = 0;
-                            while (place_it != null) {
-                                placeGroup.add(place_it);
-                                place_it = place_it.getBreadthSearchData().predecessor;
-                                ++path_length;
-                            }
-                            //repaint();
-                            worldChanged(place); // workaround: why doesn't repaint work?
-                            callMessageListeners(StringHelper.join("Path found, length: ", path_length - 1));
-                        }
-
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_ALL:
-                    //north
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.BACKWARD)) {
-                        if (place.getY() > posY) {
-                            CopyPaste.move(place, place.getX(), place.getY() + 1);
-                        }
-                    }
-                    //east
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.BACKWARD)) {
-                        if (place.getX() > posX) {
-                            CopyPaste.move(place, place.getX() + 1, place.getY());
-                        }
-                    }
-                    //south
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.FORWARD)) {
-                        if (place.getY() < posY) {
-                            CopyPaste.move(place, place.getX(), place.getY() - 1);
-                        }
-                    }
-                    //west
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.FORWARD)) {
-                        if (place.getX() < posX) {
-                            CopyPaste.move(place, place.getX() - 1, place.getY());
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_NORTH:
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.BACKWARD)) {
-                        if (place.getY() > posY) {
-                            CopyPaste.move(place, place.getX(), place.getY() + 1);
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_NORTHEAST:
-                    //if match north AND east, move north
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.BACKWARD)) {
-                        if (place.getY() > posY && place.getX() > posX) {
-                            CopyPaste.move(place, place.getX(), place.getY() + 1);
-                        }
-                    }
-                    //if match north AND east, move east
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.BACKWARD)) {
-                        if (place.getY() > posY && place.getX() > posX) {
-                            CopyPaste.move(place, place.getX() + 1, place.getY());
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_EAST:
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.BACKWARD)) {
-                        if (place.getX() > posX) {
-                            CopyPaste.move(place, place.getX() + 1, place.getY());
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_SOUTHEAST:
-                    //if match south AND east, move east
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.BACKWARD)) {
-                        if (place.getX() > posX && place.getY() < posY) {
-                            CopyPaste.move(place, place.getX() + 1, place.getY());
-                        }
-                    }
-                    //if match south AND east, move south
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.FORWARD)) {
-                        if (place.getX() > posX && place.getY() < posY) {
-                            CopyPaste.move(place, place.getX(), place.getY() - 1);
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_SOUTH:
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.FORWARD)) {
-                        if (place.getY() < posY) {
-                            CopyPaste.move(place, place.getX(), place.getY() - 1);
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_SOUTHWEST:
-                    //if match south AND west, move south
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.FORWARD)) {
-                        if (place.getY() < posY && place.getX() < posX) {
-                            CopyPaste.move(place, place.getX(), place.getY() - 1);
-                        }
-                    }
-                    //if match south AND west, move west
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.FORWARD)) {
-                        if (place.getY() < posY && place.getX() < posX) {
-                            CopyPaste.move(place, place.getX() - 1, place.getY());
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_WEST:
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.FORWARD)) {
-                        if (place.getX() < posX) {
-                            CopyPaste.move(place, place.getX() - 1, place.getY());
-                        }
-                    }
-                    break;
-                case ContextMenu.ACTION_EXPAND_NORTHWEST:
-                    //if match north AND west, move north
-                    for (final Place place : layer.getPlacesList(PlaceYComparator.BACKWARD)) {
-                        if (place.getY() > posY && place.getX() < posX) {
-                            CopyPaste.move(place, place.getX(), place.getY() + 1);
-                        }
-                    }
-                    //if match north AND west, move west
-                    for (final Place place : layer.getPlacesList(PlaceXComparator.FORWARD)) {
-                        if (place.getY() > posY && place.getX() < posX) {
-                            CopyPaste.move(place, place.getX() - 1, place.getY());
-                        }
-                    }
-                    break;
-                default:
-                    System.out.println(StringHelper.join("Invalid action command ", e.getActionCommand()));
-                    JOptionPane.showMessageDialog(this, StringHelper.join("Runtime Error: Invalid action command ", e.getActionCommand()));
-            }
-        }
-
-        /**
-         * redraws the world tab after the popup is closed
-         */
-        private class TabContextPopMenuListener implements PopupMenuListener {
-
-            @Override
-            public void popupMenuWillBecomeVisible(final PopupMenuEvent arg0) {
-                setContextMenu(true);
-            }
-
-            @Override
-            public void popupMenuWillBecomeInvisible(final PopupMenuEvent arg0) {
-                setContextMenu(false);
-                repaint();
-            }
-
-            @Override
-            public void popupMenuCanceled(final PopupMenuEvent arg0) {
-                setContextMenu(false);
-                repaint();
-            }
-        }
-
-        /**
-         * Moves the map to the place, if action is performed
-         */
-        private class GotoPlaceActionListener implements ActionListener {
-            WorldPanel parent;
-            Place place;
-
-            public GotoPlaceActionListener(final WorldPanel worldpanel, final Place place) {
-                this.parent = worldpanel;
-                this.place = place;
-            }
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                if (place != null) {
-                    parent.pushPosition(place.getCoordinate());
-                }
-            }
-        }
-
-        /**
-         * Removes a child from a place, if action performed
-         */
-        private class RemoveChildrenActionListener implements ActionListener {
-
-            Place place, child;
-
-            public RemoveChildrenActionListener(final Place place, final Place child) {
-                this.place = place;
-                this.child = child;
-            }
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                if (place != null && child != null) {
-                    place.removeChild(child);
-                }
-            }
-        }
-
-        /**
-         * Connects a new path, if called
-         */
-        private class ConnectPathActionListener implements ActionListener {
-
-            Place pl1, pl2;
-            String dir1, dir2;
-
-            public ConnectPathActionListener(final Place pl1, final Place pl2, final String dir1, final String dir2) {
-                this.pl1 = pl1;
-                this.pl2 = pl2;
-                this.dir1 = dir1;
-                this.dir2 = dir2;
-            }
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                pl1.connectPath(new Path(pl1, dir1, pl2, dir2));
-            }
-        }
-
-        /**
-         * removes a path, if called
-         */
-        private class RemovePathActionListener implements ActionListener {
-
-            Path path;
-
-            private RemovePathActionListener(final Path path) {
-                this.path = path;
-            }
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                path.remove();
-            }
-        }
-
-        private void addExpansionMenu() {
-            //            final Layer layer = contextMenu.getLayer();
-            if (layer != null && layer.getPlaces().size() > 0) {
-                final int componentCount = getComponentCount();
-                if (componentCount > 0 && getComponent(componentCount - 1) instanceof JSeparator == false) {
-                    addSeparator();
-                }
-                final JMenu expand = MenuHelper.addMenu(this, "Expand", "Make room around this Place in all directions");
-                MenuHelper.addMenuItem(expand, "Expand All Directions", ContextMenu.ACTION_EXPAND_ALL, this, "Make room in all directions");
-                MenuHelper.addMenuItem(expand, "Expand North", ContextMenu.ACTION_EXPAND_NORTH, this, "Make room to the north");
-                MenuHelper.addMenuItem(expand, "Expand Northeast", ContextMenu.ACTION_EXPAND_NORTHEAST, this, "Make room to the northeast");
-                MenuHelper.addMenuItem(expand, "Expand East", ContextMenu.ACTION_EXPAND_EAST, this, "Make room east");
-                MenuHelper.addMenuItem(expand, "Expand Southeast", ContextMenu.ACTION_EXPAND_SOUTHEAST, this, "Make room southeast");
-                MenuHelper.addMenuItem(expand, "Expand South", ContextMenu.ACTION_EXPAND_SOUTH, this, "Make room south");
-                MenuHelper.addMenuItem(expand, "Expand Southwest", ContextMenu.ACTION_EXPAND_SOUTHWEST, this, "Make room southwest");
-                MenuHelper.addMenuItem(expand, "Expand West", ContextMenu.ACTION_EXPAND_WEST, this, "Make room west");
-                MenuHelper.addMenuItem(expand, "Expand Northwest", ContextMenu.ACTION_EXPAND_NORTHWEST, this, "Make room northwest");
-            }
-        }
-
+    public void setMouseXPrevious(final int mouseXPrevious) {
+        this.mouseXPrevious = mouseXPrevious;
     }
+
+    public int getMouseYPrevious() {
+        return mouseYPrevious;
+    }
+
+    public void setMouseYPrevious(final int mouseYPrevious) {
+        this.mouseYPrevious = mouseYPrevious;
+    }
+
 }
