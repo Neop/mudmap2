@@ -30,6 +30,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -1418,8 +1419,24 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
     private class ContextMenu extends JPopupMenu implements ActionListener {
 
         private static final long serialVersionUID = 1L;
+        private static final String ACTION_FIND_PATH = "find_path";
+        private static final String ACTION_PASTE = "paste";
+        private static final String ACTION_CUT = "cut";
+        private static final String ACTION_COPY = "copy";
+        private static final String ACTION_CONNECT_CHILD = "connect_child";
+        private static final String ACTION_CREATE_CHILD_NEW_LAYER = "create_child_new_layer";
+        private static final String ACTION_CREATE_PLACEHOLDER = "create_placeholder";
+        private static final String ACTION_EXPAND_ALL = "expand_all";
+        private static final String ACTION_EXPAND_NORTH = "expand_north";
+        private static final String ACTION_EXPAND_NORTHEAST = "expand_northeast";
+        private static final String ACTION_EXPAND_EAST = "expand_east";
+        private static final String ACTION_EXPAND_SOUTHEAST = "expand_southeast";
+        private static final String ACTION_EXPAND_SOUTH = "expand_south";
+        private static final String ACTION_EXPAND_SOUTHWEST = "expand_southwest";
+        private static final String ACTION_EXPAND_WEST = "expand_west";
+        private static final String ACTION_EXPAND_NORTHWEST = "expand_northwest";
 
-        final Layer layer;
+        final Layer layer; //map
         final Place place;
         final Integer posX;
         final Integer posY;
@@ -1439,6 +1456,10 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             place = layer != null ? layer.get(posX, posY) : null;
 
             parent.setCursor(posX, posY);
+
+            //mdk.debug
+            System.out.println(new Date() + "\tlayer: " + layer);
+            System.out.println(new Date() + "\tplace: " + place);
 
             if (layer != null && place != null) { // if place exists
                 if (!passive) {
@@ -1537,7 +1558,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
                     if (!parent.passive) {
                         mPaths.addSeparator();
-                        MenuHelper.addMenuItem(mPaths, "Find shortest path", "find_path", this);
+                        MenuHelper.addMenuItem(mPaths, "Find shortest path", ContextMenu.ACTION_FIND_PATH, this);
                     }
                 }
 
@@ -1549,8 +1570,8 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                 }
 
                 if (!parent.passive) {
-                    MenuHelper.addMenuItem(mChildren, "Connect with existing place", "connect_child", this, StringHelper.join("Connect another place with \"", place.getName(), "\""));
-                    MenuHelper.addMenuItem(mChildren, "New place on new map", "create_child_new_layer", this, StringHelper.join("Creates a new place on a new map layer and connects it with \"", place.getName(), "\""));
+                    MenuHelper.addMenuItem(mChildren, "Connect with existing place", ContextMenu.ACTION_CONNECT_CHILD, this, StringHelper.join("Connect another place with \"", place.getName(), "\""));
+                    MenuHelper.addMenuItem(mChildren, "New place on new map", ContextMenu.ACTION_CREATE_CHILD_NEW_LAYER, this, StringHelper.join("Creates a new place on a new map layer and connects it with \"", place.getName(), "\""));
                 }
 
                 final HashSet<Place> children = place.getChildren();
@@ -1582,8 +1603,11 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
             } else { // if layer doesn't exist or no place exists at position x,y
                 MenuHelper.addMenuItem(this, "New place", KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), new PlaceDialog(rootFrame, parent.getWorld(), layer, posX, posY));
-                MenuHelper.addMenuItem(this, "New placeholder", "create_placeholder", KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), this);
+                MenuHelper.addMenuItem(this, "New placeholder", ContextMenu.ACTION_CREATE_PLACEHOLDER, KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), this);
             }
+
+            //"Expand" menu
+            addExpansionMenu();
 
             // cut / copy / paste for selected places
             final boolean can_paste = layer != null && mudmap2.CopyPaste.canPaste(posX, posY, layer);
@@ -1591,16 +1615,16 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             final boolean has_selection = parent.placeGroupHasSelection();
 
             if (layer != null && place != null || has_selection || has_paste_places) {
-                add(new JSeparator());
+                addSeparator();
             }
 
             if (layer != null && place != null || has_selection) {
-                MenuHelper.addMenuItem(this, StringHelper.join("Cut", has_selection ? " selection" : " place"), "cut", KeystrokeHelper.ctrl(KeyEvent.VK_X), this);
-                MenuHelper.addMenuItem(this, StringHelper.join("Copy", has_selection ? " selection" : " place"), "copy", KeystrokeHelper.ctrl(KeyEvent.VK_C), this);
+                MenuHelper.addMenuItem(this, StringHelper.join("Cut", has_selection ? " selection" : " place"), ContextMenu.ACTION_CUT, KeystrokeHelper.ctrl(KeyEvent.VK_X), this);
+                MenuHelper.addMenuItem(this, StringHelper.join("Copy", has_selection ? " selection" : " place"), ContextMenu.ACTION_COPY, KeystrokeHelper.ctrl(KeyEvent.VK_C), this);
             }
 
             if (has_paste_places) {
-                final JMenuItem miPastePlace = MenuHelper.addMenuItem(this, "Paste", "paste", KeystrokeHelper.ctrl(KeyEvent.VK_V), this);
+                final JMenuItem miPastePlace = MenuHelper.addMenuItem(this, "Paste", ContextMenu.ACTION_PASTE, KeystrokeHelper.ctrl(KeyEvent.VK_V), this);
                 if (!can_paste) {
                     miPastePlace.setEnabled(false);
                 }
@@ -1613,11 +1637,11 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             final JFrame rootFrame = (JFrame) SwingUtilities.getRoot((Component) e.getSource());
 
             switch (e.getActionCommand()) {
-            case "create_placeholder":
+            case ContextMenu.ACTION_CREATE_PLACEHOLDER:
                 getWorld().putPlaceholder(getPosition().getLayer(), posX, posY);
                 repaint();
                 break;
-            case "create_child_new_layer":
+            case ContextMenu.ACTION_CREATE_CHILD_NEW_LAYER:
                 // create new place
                 final PlaceDialog dlg = new PlaceDialog(rootFrame, getWorld(), null, 0, 0);
                 dlg.setVisible(true);
@@ -1630,20 +1654,19 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     pushPosition(place_new.getCoordinate());
                 }
                 break;
-            case "connect_child": {
-                final PlaceSelectionDialog psdlg = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
-                psdlg.setVisible(true);
-                final Place child = psdlg.getSelection();
-                if (psdlg.getSelected() && child != null && child != place) {
+            case ContextMenu.ACTION_CONNECT_CHILD:
+                final PlaceSelectionDialog psdlg1 = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
+                psdlg1.setVisible(true);
+                final Place child = psdlg1.getSelection();
+                if (psdlg1.getSelected() && child != null && child != place) {
                     final int ret = JOptionPane.showConfirmDialog(rootFrame, StringHelper.join("Connect \"", child.getName(), "\" to \"", place.getName(), "\"?"), "Connect child place", JOptionPane.YES_NO_OPTION);
                     if (ret == JOptionPane.YES_OPTION) {
                         place.connectChild(child);
                         repaint();
                     }
                 }
-            }
                 break;
-            case "copy":
+            case ContextMenu.ACTION_COPY:
                 if (placeGroupHasSelection()) {
                     mudmap2.CopyPaste.copy(placeGroupGetSelection(), posX, posY);
                 } else {
@@ -1653,7 +1676,7 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                 }
                 repaint();
                 break;
-            case "cut":
+            case ContextMenu.ACTION_CUT:
                 if (placeGroupHasSelection()) {
                     mudmap2.CopyPaste.cut(placeGroupGetSelection(), posX, posY);
                 } else {
@@ -1663,14 +1686,14 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                 }
                 repaint();
                 break;
-            case "paste":
+            case ContextMenu.ACTION_PASTE:
                 mudmap2.CopyPaste.paste(posX, posY, layer);
                 repaint();
                 break;
-            case "find_path": {
-                final PlaceSelectionDialog psdlg = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
-                psdlg.setVisible(true);
-                final Place end = psdlg.getSelection();
+            case ContextMenu.ACTION_FIND_PATH:
+                final PlaceSelectionDialog psdlg2 = new PlaceSelectionDialog(rootFrame, getWorld(), getPosition(), true);
+                psdlg2.setVisible(true);
+                final Place end = psdlg2.getSelection();
                 if (end != null) {
                     placeGroupReset();
                     Place place_it = getWorld().breadthSearch(place, end);
@@ -1690,7 +1713,24 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
                     }
 
                 }
-            }
+                break;
+            case ContextMenu.ACTION_EXPAND_ALL:
+                break;
+            case ContextMenu.ACTION_EXPAND_NORTH:
+                break;
+            case ContextMenu.ACTION_EXPAND_NORTHEAST:
+                break;
+            case ContextMenu.ACTION_EXPAND_EAST:
+                break;
+            case ContextMenu.ACTION_EXPAND_SOUTHEAST:
+                break;
+            case ContextMenu.ACTION_EXPAND_SOUTH:
+                break;
+            case ContextMenu.ACTION_EXPAND_SOUTHWEST:
+                break;
+            case ContextMenu.ACTION_EXPAND_WEST:
+                break;
+            case ContextMenu.ACTION_EXPAND_NORTHWEST:
                 break;
             default:
                 System.out.println(StringHelper.join("Invalid action command ", e.getActionCommand()));
@@ -1796,6 +1836,26 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
             @Override
             public void actionPerformed(final ActionEvent e) {
                 path.remove();
+            }
+        }
+
+        private void addExpansionMenu() {
+            //            final Layer layer = contextMenu.getLayer();
+            if (layer != null && layer.getPlaces().size() > 0) {
+                final int componentCount = getComponentCount();
+                if (componentCount > 0 && getComponent(componentCount - 1) instanceof JSeparator == false) {
+                    addSeparator();
+                }
+                final JMenu expand = MenuHelper.addMenu(this, "Expand", "Make room around this Place in all directions");
+                MenuHelper.addMenuItem(expand, "Expand All Directions", ContextMenu.ACTION_EXPAND_ALL, this, "Make room in all directions");
+                MenuHelper.addMenuItem(expand, "Expand North", ContextMenu.ACTION_EXPAND_NORTH, this, "Make room to the north");
+                MenuHelper.addMenuItem(expand, "Expand Northeast", ContextMenu.ACTION_EXPAND_NORTHEAST, this, "Make room to the northeast");
+                MenuHelper.addMenuItem(expand, "Expand East", ContextMenu.ACTION_EXPAND_EAST, this, "Make room east");
+                MenuHelper.addMenuItem(expand, "Expand Southeast", ContextMenu.ACTION_EXPAND_SOUTHEAST, this, "Make room southeast");
+                MenuHelper.addMenuItem(expand, "Expand South", ContextMenu.ACTION_EXPAND_SOUTH, this, "Make room south");
+                MenuHelper.addMenuItem(expand, "Expand Southwest", ContextMenu.ACTION_EXPAND_SOUTHWEST, this, "Make room southwest");
+                MenuHelper.addMenuItem(expand, "Expand West", ContextMenu.ACTION_EXPAND_WEST, this, "Make room west");
+                MenuHelper.addMenuItem(expand, "Expand Northwest", ContextMenu.ACTION_EXPAND_NORTHWEST, this, "Make room northwest");
             }
         }
 
