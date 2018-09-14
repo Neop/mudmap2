@@ -310,43 +310,47 @@ public class WorldPanelTest {
         // empty history, get home position
         assertTrue(home.compareTo(instance.getPosition()) == 0);
 
-        // empty history, pop has no effect
+        // empty history (home only), pop has no effect
         instance.popPosition();
         assertTrue(home.compareTo(instance.getPosition()) == 0);
 
-        // 1 pos in history
+        // home + 1 pos in history
         instance.pushPosition(pos1);
         assertTrue(pos1.compareTo(instance.getPosition()) == 0);
 
-        // 2 pos in history
+        // home + 2 pos in history
         instance.pushPosition(pos2);
         assertTrue(pos2.compareTo(instance.getPosition()) == 0);
 
-        // 3 pos in history
+        // home + 3 pos in history
         instance.pushPosition(pos3);
         assertTrue(pos3.compareTo(instance.getPosition()) == 0);
 
-        // 2 pos in history, 1 ahead
+        // home + 2 pos in history, 1 ahead
         instance.popPosition();
         assertTrue(pos2.compareTo(instance.getPosition()) == 0);
 
-        // 1 pos in history, 2 ahead
+        // home + 1 pos in history, 2 ahead
         instance.popPosition();
         assertTrue(pos1.compareTo(instance.getPosition()) == 0);
 
-        // 1 pos in history, 2 ahead, pop has no effect
+        // home + 0 pos in history, 3 ahead
         instance.popPosition();
+        assertTrue(home.compareTo(instance.getPosition()) == 0);
+
+        // home + 1 pos in history, 2 ahead
+        instance.restorePosition();
         assertTrue(pos1.compareTo(instance.getPosition()) == 0);
 
-        // 2 pos in history, 1 ahead
+        // home + 2 pos in history, 1 ahead
         instance.restorePosition();
         assertTrue(pos2.compareTo(instance.getPosition()) == 0);
 
-        // 3 pos in history, 0 ahead
+        // home + 3 pos in history, 0 ahead
         instance.restorePosition();
         assertTrue(pos3.compareTo(instance.getPosition()) == 0);
 
-        // 3 pos in history, 0 ahead, restore has no effect
+        // home + 3 pos in history, 0 ahead, restore has no effect
         instance.restorePosition();
         assertTrue(pos3.compareTo(instance.getPosition()) == 0);
 

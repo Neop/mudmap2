@@ -47,30 +47,33 @@ public class World implements BreadthSearchGraph {
     // worldname and file of the world
     String worldname;
     WorldFile worldFile;
+
     // color of path lines and self-defined path colors
-    Color pathColorCardinal, pathColorNonCardinal;
-    HashMap<String, Color> pathColors;
-    Color tileCenterColor;
+    Color pathColorCardinal = new Color(0, 255, 0);
+    Color pathColorNonCardinal = new Color(0, 255, 0);
+    Color tileCenterColor = new Color(207, 190, 134);
+    final HashMap<String, Color> pathColors = new HashMap<>();
+
     // Coordinates of the home position
-    WorldCoordinate home;
+    WorldCoordinate home = new WorldCoordinate(0, 0, 0);
 
     // ID and object
-    TreeMap<Integer, RiskLevel> riskLevels;
-    HashSet<PlaceGroup> placeGroups;
-    TreeMap<Integer, Layer> layers;
+    final TreeMap<Integer, RiskLevel> riskLevels = new TreeMap<>();
+    final HashSet<PlaceGroup> placeGroups = new HashSet<>();
+    final TreeMap<Integer, Layer> layers = new TreeMap<>();
 
     // For creating world-unique layer ids
     Integer nextLayerID = 1;
 
     // Preferences
-    ShowPlaceID showPlaceID;
+    ShowPlaceID showPlaceID = ShowPlaceID.UNIQUE;
 
     // World-related preferences for dialogs etc.
-    JSONObject preferences;
+    JSONObject preferences = new JSONObject();
     public final static String PREFERENCES_KEY_DIALOG = "dialog";
 
     // Listeners
-    LinkedList<WorldChangeListener> changeListeners;
+    final LinkedList<WorldChangeListener> changeListeners = new LinkedList<>();
 
     /**
      * Creates an empty world
@@ -92,28 +95,12 @@ public class World implements BreadthSearchGraph {
      * Initializes the world
      */
     private void initialize(){
-        preferences = new JSONObject();
-
-        changeListeners = new LinkedList<>();
-
-        placeGroups = new HashSet<>();
-        layers = new TreeMap<>();
-        pathColors = new HashMap<>();
-
-        home = new WorldCoordinate(0, 0, 0);
-        // path line colors
-        pathColorNonCardinal = pathColorCardinal = new Color(0, 255, 0);
-        tileCenterColor = new Color(207, 190, 134);
-
         // risk levels
-        riskLevels = new TreeMap<>();
         riskLevels.put(0, new RiskLevel(0, "not evaluated", new Color(188, 188, 188)));
         riskLevels.put(1, new RiskLevel(1, "safe", new Color(0, 255, 0)));
         riskLevels.put(2, new RiskLevel(2, "mobs don't attack", new Color(255, 255, 0)));
         riskLevels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
         riskLevels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
-
-        showPlaceID = ShowPlaceID.UNIQUE;
     }
 
     // --------- WorldFile -----------------------------------------------------
