@@ -200,6 +200,10 @@ public class Layer implements WorldChangeListener {
      * @throws java.lang.Exception
      */
     public void put(final LayerElement element, final int x, final int y) throws Exception {
+        // remove element from other layer if one is set
+        if(element.getLayer() != null){
+            element.getLayer().remove(element);
+        }
         element.setPosition(x, y, this);
         put(element);
     }

@@ -379,6 +379,7 @@ public class LayerTest {
         System.out.println("put");
 
         Layer instance = new Layer(world);
+        Layer other = world.getNewLayer();
 
         try {
             int x = 0;
@@ -422,6 +423,26 @@ public class LayerTest {
             fail();
         } catch (Exception ex) {
             // expected
+        }
+        
+        // move place to a different layer
+        try {
+            // put on other layer
+            int x1 = 3;
+            int y1 = 7;
+            Place element = new Place("MyPlace", x1, y1, instance);
+            other.put(element, x1, y1);
+            assertEquals(element, other.get(x1, y1));
+            
+            // move to instance layer
+            int x2 = 5;
+            int y2 = -4;
+            instance.put(element, x2, y2);
+            assertNull(other.get(x1, y1));
+            assertEquals(element, instance.get(x2, y2));
+        } catch (Exception ex) {
+            Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail(ex.getMessage());
         }
     }
 
@@ -434,6 +455,7 @@ public class LayerTest {
         System.out.println("put");
 
         Layer instance = new Layer(world);
+        Layer other = world.getNewLayer();
 
         try {
             int x = 0;
@@ -477,6 +499,24 @@ public class LayerTest {
             fail();
         } catch (Layer.PlaceNotInsertedException ex) {
             // expected
+        }
+
+        // move place to a different layer
+        try {
+            // put on other layer
+            int x = 3;
+            int y = 7;
+            Place element = new Place("MyPlace", x, y, instance);
+            other.put(element, x, y);
+            assertEquals(element, other.get(x, y));
+            
+            // move to instance layer
+            instance.put(element);
+            assertNull(other.get(x, y));
+            assertEquals(element, instance.get(x, y));
+        } catch (Exception ex) {
+            Logger.getLogger(LayerTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail(ex.getMessage());
         }
     }
 
