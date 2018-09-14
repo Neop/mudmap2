@@ -16,7 +16,6 @@
  */
 package mudmap2;
 
-import mudmap2.utils.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,11 +23,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JOptionPane;
+
 import mudmap2.backend.Layer;
 import mudmap2.backend.LayerElement;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
+import mudmap2.utils.Pair;
 
 /**
  *
@@ -44,7 +46,8 @@ public final class CopyPaste {
     // locations of copied places relative to cursor (places will be inserted here)
     static HashSet<Pair<Integer, Integer>> copyPlaceLocations;
 
-    private CopyPaste(){};
+    private CopyPaste() {
+    };
 
     /**
      * Cuts the places relatively to x, y
@@ -52,7 +55,7 @@ public final class CopyPaste {
      * @param x
      * @param y
      */
-    public static void copy(HashSet<Place> places, int x, int y){
+    public static void copy(final HashSet<Place> places, final int x, final int y) {
         resetCopy();
 
         copyPlaces = (HashSet<Place>) places.clone();
@@ -68,7 +71,7 @@ public final class CopyPaste {
      * @param x
      * @param y
      */
-    public static void cut(HashSet<Place> places, int x, int y){
+    public static void cut(final HashSet<Place> places, final int x, final int y) {
         resetCopy();
 
         copyPlaces = (HashSet<Place>) places.clone();
@@ -81,9 +84,11 @@ public final class CopyPaste {
     /**
      * Calculates copyPlaceLocations relatively to x, y
      */
-    private static void generateLocations(int x, int y){
+    private static void generateLocations(final int x, final int y) {
         copyPlaceLocations = new HashSet<>();
-        for(Place place: copyPlaces) copyPlaceLocations.add(new Pair<>(place.getX() - x, place.getY() - y));
+        for (final Place place : copyPlaces) {
+            copyPlaceLocations.add(new Pair<>(place.getX() - x, place.getY() - y));
+        }
     }
 
     /**
@@ -93,15 +98,20 @@ public final class CopyPaste {
      * @param layer
      * @return
      */
-    public static boolean canPaste(int x, int y, Layer layer){
-        if(copyPlaces == null || copyPlaces.isEmpty()) return false;
-        if(copyPlaceLocations != null && layer != null){
-            for(Pair<Integer, Integer> coordinate: copyPlaceLocations){
-                LayerElement collision = layer.get(x + coordinate.first, y + coordinate.second);
-                if(collision != null){
-                    if(copyMode) return false;
-                    else { // if places are moved: checkif the colliding place is in the movied group, too
-                        if(!copyPlaces.contains((Place) collision)) return false;
+    public static boolean canPaste(final int x, final int y, final Layer layer) {
+        if (copyPlaces == null || copyPlaces.isEmpty()) {
+            return false;
+        }
+        if (copyPlaceLocations != null && layer != null) {
+            for (final Pair<Integer, Integer> coordinate : copyPlaceLocations) {
+                final LayerElement collision = layer.get(x + coordinate.first, y + coordinate.second);
+                if (collision != null) {
+                    if (copyMode) {
+                        return false;
+                    } else { // if places are moved: checkif the colliding place is in the movied group, too
+                        if (!copyPlaces.contains(collision)) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -116,39 +126,44 @@ public final class CopyPaste {
      * @param layer
      * @return false on error or user abort
      */
-    public static boolean paste(int x, int y, Layer layer){
-        if(!canPaste(x, y, layer)) return false;
+    public static boolean paste(final int x, final int y, final Layer layer) {
+        if (!canPaste(x, y, layer)) {
+            return false;
+        }
 
         // ask user
-        String title = (copyMode ? "Copy " : "Paste ") + "place(s)";
-        String message = title + "? This can not be undone!"
-                + (copyPlaces.iterator().next().getLayer().getWorld() != layer.getWorld() ? " Pasting to another world might cause problems!" : "");
-        int ret = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
-        if(ret == JOptionPane.YES_OPTION){
+        final String title = (copyMode ? "Copy " : "Paste ") + "place(s)";
+        final String message = title + "? This can not be undone!" + (copyPlaces.iterator().next().getLayer().getWorld() != layer.getWorld() ? " Pasting to another world might cause problems!" : "");
+        final int ret = JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
+        if (ret == JOptionPane.YES_OPTION) {
             // map to translate from old to new place
-            HashMap<Place, Place> place_to_new_place = new HashMap<Place, Place>();
+            final HashMap<Place, Place> place_to_new_place = new HashMap<Place, Place>();
 
             Place[] places;
 
-            if(copyMode){
+            if (copyMode) {
                 places = copyPlaces.toArray(new Place[copyPlaces.size()]);
             } else {
                 // getPlace movement direction
-                final int fact_x = (x <= copydx ? 1 : -1);
-                final int fact_y = (y <= copydy ? 1 : -1);
+                final int fact_x = x <= copydx ? 1 : -1;
+                final int fact_y = y <= copydy ? 1 : -1;
 
                 // sort places
-                ArrayList<Place> ordered_places = new ArrayList<>(copyPlaces);
-                Collections.sort(ordered_places, new Comparator<Place>(){
+                final ArrayList<Place> ordered_places = new ArrayList<>(copyPlaces);
+                Collections.sort(ordered_places, new Comparator<Place>() {
                     @Override
-                    public int compare(Place t, Place t1) {
+                    public int compare(final Place t, final Place t1) {
                         // order by movement direction:
                         // places that might collide with other places in the
                         // list will be moved first
-                        if(fact_x * t.getX() > fact_x * t1.getX()) return 1;
-                        else if(t.getX() == t1.getX()){
-                            if(fact_y * t.getY() > fact_y * t1.getY()) return 1;
-                            else if(t.getY() == t1.getY()) return 0;
+                        if (fact_x * t.getX() > fact_x * t1.getX()) {
+                            return 1;
+                        } else if (t.getX() == t1.getX()) {
+                            if (fact_y * t.getY() > fact_y * t1.getY()) {
+                                return 1;
+                            } else if (t.getY() == t1.getY()) {
+                                return 0;
+                            }
                         }
                         return -1;
                     }
@@ -158,51 +173,55 @@ public final class CopyPaste {
             }
 
             // copy places
-            for(Place place: places){
+            for (final Place place : places) {
                 try {
-                    if(place.getLayer().getWorld() != layer.getWorld()){
-                        if(place.getPlaceGroup() != null && !layer.getWorld().getPlaceGroups().contains(place.getPlaceGroup())) layer.getWorld().addPlaceGroup(place.getPlaceGroup());
+                    if (place.getLayer().getWorld() != layer.getWorld()) {
+                        if (place.getPlaceGroup() != null && !layer.getWorld().getPlaceGroups().contains(place.getPlaceGroup())) {
+                            layer.getWorld().addPlaceGroup(place.getPlaceGroup());
+                        }
                     }
-                    if(copyMode){ // copy places -> duplicate on new layer
-                        Place new_place = place.duplicate();
+                    if (copyMode) { // copy places -> duplicate on new layer
+                        final Place new_place = place.duplicate();
                         place_to_new_place.put(place, new_place);
                         layer.put(new_place, place.getX() - copydx + x, place.getY() - copydy + y);
                     } else {
                         // remove place from old layer and add it to new one
                         layer.put(place, place.getX() - copydx + x, place.getY() - copydy + y);
                     }
-                } catch (Exception ex) {
+                } catch (final Exception ex) {
                     Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, ex);
                     return false;
                 }
             }
 
             // recreate paths and child connections after copy-paste
-            if(copyMode){
-                for(Place place: copyPlaces){
-                    Place new_place = place_to_new_place.get(place);
+            if (copyMode) {
+                for (final Place place : copyPlaces) {
+                    final Place new_place = place_to_new_place.get(place);
                     // connect paths
-                    for(Path path: place.getPaths()){
+                    for (final Path path : place.getPaths()) {
                         // only check first place, because the other side will
                         // check itself
-                        Place path_end_place = path.getPlaces()[0];
+                        final Place path_end_place = path.getPlaces()[0];
                         // if end place is not this place and is also copied
-                        if(path_end_place != place && copyPlaces.contains(path_end_place)){
-                            Place other_new_place = place_to_new_place.get(path_end_place);
+                        if (path_end_place != place && copyPlaces.contains(path_end_place)) {
+                            final Place other_new_place = place_to_new_place.get(path_end_place);
                             new_place.connectPath(new Path(other_new_place, path.getExitDirections()[0], new_place, path.getExitDirections()[1]));
                         }
                     }
                     // connect children
-                    for(Place child: place.getChildren()){
+                    for (final Place child : place.getChildren()) {
                         // if child is copied, too
-                        if(copyPlaces.contains(child)){
-                            Place new_child = place_to_new_place.get(child);
+                        if (copyPlaces.contains(child)) {
+                            final Place new_child = place_to_new_place.get(child);
                             new_place.connectChild(new_child);
                         }
                     }
                 }
-            // moving places modifies their coordinates so that they cant be pasted again
-            } else resetCopy();
+                // moving places modifies their coordinates so that they cant be pasted again
+            } else {
+                resetCopy();
+            }
         }
 
         // cleanup
@@ -213,10 +232,32 @@ public final class CopyPaste {
     }
 
     /**
+     * Moves the given place to the new x/y coordinates on the place's layer.
+     * @param place
+     * @param x
+     * @param y
+     * @return True if the place was moved
+     */
+    public static boolean move(final Place place, final int x, final int y) {
+        try {
+            final Layer layer = place.getLayer();
+            if (layer.get(x, y) != null) {
+                return false;
+            }
+            layer.remove(place);
+            layer.put(place, x, y);
+            return true;
+        } catch (final Exception e) {
+            Logger.getLogger(Mudmap2.class.getName()).log(Level.SEVERE, null, e);
+            return false;
+        }
+    }
+
+    /**
      * Returns true, if there are places to paste
      * @return
      */
-    public static boolean hasCopyPlaces(){
+    public static boolean hasCopyPlaces() {
         return copyPlaces != null;
     }
 
@@ -224,7 +265,7 @@ public final class CopyPaste {
      * Gets the places to cut / copy
      * @return places or null
      */
-    public static HashSet<Place> getCopyPlaces(){
+    public static HashSet<Place> getCopyPlaces() {
         return copyPlaces;
     }
 
@@ -232,7 +273,7 @@ public final class CopyPaste {
      * Gets the locations of the copied places relatively to the cursor
      * @return locations or null
      */
-    public static HashSet<Pair<Integer, Integer>> getCopyPlaceLocations(){
+    public static HashSet<Pair<Integer, Integer>> getCopyPlaceLocations() {
         return copyPlaceLocations;
     }
 
@@ -240,15 +281,17 @@ public final class CopyPaste {
      * Gets the layer of the copied places
      * @return layer or null
      */
-    public static Layer getCopyPlaceLayer(){
-        if(copyPlaces.isEmpty()) return null;
+    public static Layer getCopyPlaceLayer() {
+        if (copyPlaces.isEmpty()) {
+            return null;
+        }
         return copyPlaces.iterator().next().getLayer();
     }
 
     /**
      * Removes all places from the copy/cut list
      */
-    public static void resetCopy(){
+    public static void resetCopy() {
         // cleanup
         copyPlaces = null;
         copyPlaceLocations = null;
@@ -258,11 +301,11 @@ public final class CopyPaste {
      * Has plac(es) for cut operation
      * @return
      */
-    public static Boolean isCut(){
+    public static Boolean isCut() {
         return hasCopyPlaces() && !copyMode;
     }
 
-    public static Boolean isMarked(Place place){
+    public static Boolean isMarked(final Place place) {
         return copyPlaces.contains(place);
     }
 }

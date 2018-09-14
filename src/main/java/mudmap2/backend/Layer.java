@@ -23,9 +23,16 @@
 
 package mudmap2.backend;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import mudmap2.backend.prquadtree.Quadtree;
 import mudmap2.utils.Pair;
 
@@ -58,13 +65,15 @@ public class Layer implements WorldChangeListener {
      * @param id layer id
      * @param world world
      */
-    public Layer(int id, World world){
-        if(world == null) throw new NullPointerException();
+    public Layer(final int id, final World world) {
+        if (world == null) {
+            throw new NullPointerException();
+        }
 
         this.id = id;
         this.world = world;
 
-        if(id > world.getNextLayerID()+1){
+        if (id > world.getNextLayerID() + 1) {
             world.setNextLayerID(id + 1);
         }
     }
@@ -73,8 +82,10 @@ public class Layer implements WorldChangeListener {
      * Constructor, generates unique layer id
      * @param world world
      */
-    public Layer(World world){
-        if(world == null) throw new NullPointerException();
+    public Layer(final World world) {
+        if (world == null) {
+            throw new NullPointerException();
+        }
 
         id = world.getNextLayerID();
         this.world = world;
@@ -85,7 +96,9 @@ public class Layer implements WorldChangeListener {
      * @return layer name or name generated from layer id
      */
     public String getName() {
-        if(name == null) return "Map " + getId();
+        if (name == null) {
+            return "Map " + getId();
+        }
         return name;
     }
 
@@ -93,7 +106,7 @@ public class Layer implements WorldChangeListener {
      * Set layer name
      * @param name
      */
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -101,7 +114,7 @@ public class Layer implements WorldChangeListener {
      * Check whether the layer has an explicitly set name
      * @return
      */
-    public Boolean hasName(){
+    public Boolean hasName() {
         return name != null;
     }
 
@@ -110,7 +123,7 @@ public class Layer implements WorldChangeListener {
      * @param center_x
      * @param center_y
      */
-    public void setQuadtree(int center_x, int center_y){
+    public void setQuadtree(final int center_x, final int center_y) {
         elements = new Quadtree<>(center_x, center_y);
     }
 
@@ -186,7 +199,7 @@ public class Layer implements WorldChangeListener {
      * @param element new element
      * @throws java.lang.Exception
      */
-    public void put(LayerElement element, int x, int y) throws Exception {
+    public void put(final LayerElement element, final int x, final int y) throws Exception {
         element.setPosition(x, y, this);
         put(element);
     }
@@ -197,7 +210,7 @@ public class Layer implements WorldChangeListener {
      * @param element element to be added
      * @throws mudmap2.backend.Layer.PlaceNotInsertedException
      */
-    public void put(LayerElement element) throws PlaceNotInsertedException {
+    public void put(final LayerElement element) throws PlaceNotInsertedException {
         try {
             // remove element from other layer if one is set
             if(element.getLayer() != null){
@@ -207,7 +220,7 @@ public class Layer implements WorldChangeListener {
             elements.insert(element, element.getX(), element.getY());
             sizeCacheNeedsUpdated = true;
             world.callListeners(element);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             throw new PlaceNotInsertedException(element.getX(), element.getY());
         }
     }
@@ -218,9 +231,9 @@ public class Layer implements WorldChangeListener {
      * @param y y coordinate
      * @return element at that position or null
      */
-    public Place get(int x, int y){
+    public Place get(final int x, final int y) {
         LayerElement layerElement = elements.get(x, y);
-        if(layerElement != null && layerElement instanceof Place){
+        if(layerElement != null && layerElement instanceof Place) {
             return (Place) layerElement;
         }
         return null;
@@ -228,20 +241,20 @@ public class Layer implements WorldChangeListener {
 
     /**
      * Gets the surrounding places, without the center place
-     * @param _x center coordinate
-     * @param _y center coordinate
+     * @param x center coordinate
+     * @param y center coordinate
      * @param distance maximum distance in each drection
      * @return
      */
-    public LinkedList<Place> getNeighbors(int _x, int _y, int distance){
-        LinkedList<Place> ret = new LinkedList<>();
+    public LinkedList<Place> getNeighbors(final int x, final int y, int distance) {
+        final LinkedList<Place> ret = new LinkedList<>();
         distance = Math.abs(distance);
-        for(int x = -distance; x <= distance; ++x){
-            for(int y = -distance; y <= distance; ++y){
-                if(!(x == 0 && y == 0)){ // if not center place
-                    LayerElement el = get(_x + x, _y + y);
-                    if(el != null && el instanceof Place){
-                        ret.add((Place) el);
+        for (int xi = -distance; xi <= distance; ++xi) {
+            for (int yi = -distance; yi <= distance; ++yi) {
+                if (!(xi == 0 && yi == 0)) { // if not center place
+                    final Place el = get(x + xi, y + yi);
+                    if (el != null) {
+                        ret.add(el);
                     }
                 }
             }
@@ -253,7 +266,7 @@ public class Layer implements WorldChangeListener {
      * Gets the id of the layer
      * @return layer id
      */
-    public Integer getId(){
+    public Integer getId() {
         return id;
     }
 
@@ -261,7 +274,7 @@ public class Layer implements WorldChangeListener {
      * Gets the world
      * @return world
      */
-    public World getWorld(){
+    public World getWorld() {
         return world;
     }
 
@@ -269,7 +282,7 @@ public class Layer implements WorldChangeListener {
      * Removes an element from the layer but not from the world
      * @param element
      */
-    public void remove(LayerElement element) {
+    public void remove(final LayerElement element) {
         elements.remove(element);
         world.callListeners(this);
     }
@@ -280,7 +293,7 @@ public class Layer implements WorldChangeListener {
      * @param y y position
      * @return true, if an element exists
      */
-    public boolean exist(int x, int y){
+    public boolean exist(final int x, final int y) {
         return elements.exist(x, y);
     }
 
@@ -288,7 +301,7 @@ public class Layer implements WorldChangeListener {
      * Check whether the layer is empty
      * @return true if empty
      */
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return elements.isEmpty();
     }
 
@@ -309,11 +322,44 @@ public class Layer implements WorldChangeListener {
     }
 
     /**
+     * Gets a sorted set of all elements
+     * @param comparator The comparator to use
+     * @return
+     */
+    public SortedSet<Place> getPlaces(final Comparator<Place> comparator) {
+        final SortedSet<Place> set = new TreeSet<>(comparator);
+        set.addAll(getPlaces());
+        return set;
+    }
+
+    /**
+     * Gets a List of all elements
+     * @return
+     */
+    public List<Place> getPlacesList() {
+        final Set<Place> set = getPlaces();
+        final List<Place> list = new ArrayList<>(set.size());
+        list.addAll(set);
+        return list;
+    }
+
+    /**
+     * Gets a sorted set of all elements
+     * @param comparator The comparator to use
+     * @return
+     */
+    public List<Place> getPlacesList(final Comparator<Place> comparator) {
+        final List<Place> list = getPlacesList();
+        list.sort(comparator);
+        return list;
+    }
+
+    /**
      * Gets the id
      * @return layer id
      */
     @Override
-    public String toString(){
+    public String toString() {
         return getName();
     }
 
@@ -322,27 +368,27 @@ public class Layer implements WorldChangeListener {
      * @param name place name to check
      * @return true if name is unique on this layer
      */
-    public boolean isPlaceNameUnique(String name){
-        if(placeNameCacheNeedsUpdate){
+    public boolean isPlaceNameUnique(final String name){
+        if(placeNameCacheNeedsUpdate) {
             updatePlaceNameCache();
         }
 
-        Integer num = placeNameCache.get(name);
+        final Integer num = placeNameCache.get(name);
         return num == null || num <= 1;
     }
 
     /**
      * Recreates place name chache
      */
-    private void updatePlaceNameCache(){
-        if(placeNameCacheNeedsUpdate){
+    private void updatePlaceNameCache() {
+        if(placeNameCacheNeedsUpdate) {
             placeNameCache.clear();
 
-            for(LayerElement element: getPlaces()){
-                if(element instanceof Place){
+            for(LayerElement element: getPlaces()) {
+                if(element instanceof Place) {
                     Place place = (Place) element;
                     Integer value = placeNameCache.get(place.getName());
-                    if(value == null){
+                    if(value == null) {
                         value = 1;
                     } else {
                         value += 1;
@@ -387,10 +433,9 @@ public class Layer implements WorldChangeListener {
     }
 
     @Override
-    public void worldChanged(Object source) {
+    public void worldChanged(final Object source) {
         // if source is a place on this layer
-        if((source instanceof Place && elements.contains((Place) source)) ||
-                (source instanceof Layer && source == this)){
+        if (source instanceof Place && elements.contains((Place) source) || source instanceof Layer && source == this) {
             placeNameCacheNeedsUpdate = true;
         }
     }
@@ -408,12 +453,13 @@ public class Layer implements WorldChangeListener {
          * @param _x x coordinate of the place
          * @param _y y coordinate of the place
          */
-        public PlaceNotFoundException(int _x, int _y) {
-            x = _x; y = _y;
+        public PlaceNotFoundException(final int _x, final int _y) {
+            x = _x;
+            y = _y;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return "Element at position " + x + ", " + y + " doesn't exist";
         }
     }
@@ -428,12 +474,13 @@ public class Layer implements WorldChangeListener {
          * @param _x x coordinate of the place
          * @param _y y coordinate of the place
          */
-        public PlaceNotInsertedException(int _x, int _y) {
-            x = _x; y = _y;
+        public PlaceNotInsertedException(final int _x, final int _y) {
+            x = _x;
+            y = _y;
         }
 
         @Override
-        public String toString(){
+        public String toString() {
             return "Couldn't insert place at position " + x + ", " + y;
         }
     }
