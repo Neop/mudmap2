@@ -68,8 +68,6 @@ public class PlaceCommentDialog extends ActionDialog {
         setContentPane(optionPane);
         optionPane.setMessage(scrollPane);
 
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(final PropertyChangeEvent arg0) {
