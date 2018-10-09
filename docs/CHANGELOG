@@ -1,3 +1,11 @@
+2.5.2
+- implemented expand map functionality in context menu
+- fixed: text field in place comment dialog had sizing issues
+- fixed: could not move map when the world has just been created
+- fixed: cut places appeared on map preview
+- improved menus
+- refactored code
+
 2.5.1
 - made side bar resizable
 - added keyboard shortcuts: ctrl+f and escape (in search box)

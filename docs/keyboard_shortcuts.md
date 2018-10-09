@@ -1,5 +1,5 @@
 # MUD Map v2 - Keyboard shortcuts
-You can use these keyboard shortcuts in speed up your work flow:
+You can use these keyboard shortcuts in speed up your work flow. 
 
 Be aware that there is no undo in MUD Map so remember to save your world file often!
 
@@ -7,8 +7,12 @@ Be aware that there is no undo in MUD Map so remember to save your world file of
 
 | Key combination         | Effect                                  |
 | ----------------------- | --------------------------------------- |
+| ctrl + n                | create new world                        |
 | ctrl + s                | save world                              |
+| ctrl + alt + s          | save world as...                        |
 | ctrl + o                | show open world dialog                  |
+| ctrl + e                | export map as image                     |
+| ctrl + f                | search for map or place (see side bar)  |
 
 ## General shortcuts
 Note: 'direction keys' are w/a/s/d, the arrow keys and the numberpad numbers (except 5).
