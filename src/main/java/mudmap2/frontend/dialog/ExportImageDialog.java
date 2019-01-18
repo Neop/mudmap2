@@ -521,8 +521,8 @@ public class ExportImageDialog extends ActionDialog {
             }
 
             // calculate selection center from bounds
-            selectionCenter.first = 0.5 * (double) (mapXMax - mapXMin + 1) + (double) mapXMin;
-            selectionCenter.second = 0.5 * (double) (mapYMax - mapYMin + 1) + (double) mapYMin - 1;
+            selectionCenter.first = (double) mapXMin + (double) (mapXMax - mapXMin) / 2.0;
+            selectionCenter.second = (double) mapYMin + (double) (mapYMax - mapYMin) / 2.0;
         }
         return selectionCenter;
     }
@@ -682,7 +682,8 @@ public class ExportImageDialog extends ActionDialog {
             height = selectionSize.second;
 
             Pair<Double, Double> selectionCenter = getSelectionCenter(places);
-            center = new WorldCoordinate(center.getLayer(), selectionCenter.first, selectionCenter.second);
+            // add / subtract 1/2 since tiles are positioned by center, not corner
+            center = new WorldCoordinate(center.getLayer(), selectionCenter.first + 0.5, selectionCenter.second - 0.5);
         } else if(rbCurrentView.isSelected()){
             Dimension size = worldTab.getWorldPanel().getSize();
             width = size.width;
@@ -694,7 +695,8 @@ public class ExportImageDialog extends ActionDialog {
 
             Layer layer = worldTab.getWorld().getLayer(center.getLayer());
             Pair<Double, Double> exactCenter = layer.getExactCenter();
-            center = new WorldCoordinate(layer.getId(), exactCenter.first, exactCenter.second);
+            // add / subtract 1/2 since tiles are positioned by center, not corner
+            center = new WorldCoordinate(layer.getId(), exactCenter.first + 0.5, exactCenter.second - 0.5);
         }
 
         if(width != 0 && height != 0){
