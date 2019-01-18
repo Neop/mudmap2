@@ -715,6 +715,8 @@ public class ExportImageDialog extends ActionDialog {
             mappainter.setGridEnabled(cbBackgroundGrid.isSelected());
             mappainter.setShowPaths(!rbPathNo.isSelected());
             mappainter.setPathsCurved(rbPathCurved.isSelected());
+            mappainter.setCursorVisible(false);
+            mappainter.setPlaceSelectionVisible(false);
             mappainter.paint(graphics, tileSize, width, height,
                     worldTab.getWorld().getLayer(center.getLayer()),
                     center);
