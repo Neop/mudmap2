@@ -1,3 +1,7 @@
+2.5.3
+- fixed: exported maps were shifted by 1/2 in both directions
+- fixed: the place cursor was shown on some exported maps
+
 2.5.2
 - implemented expand map functionality in context menu
 - fixed: text field in place comment dialog had sizing issues
