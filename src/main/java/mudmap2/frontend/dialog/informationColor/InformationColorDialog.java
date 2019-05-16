@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-package mudmap2.frontend.dialog.riskLevel;
+package mudmap2.frontend.dialog.informationColor;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -30,44 +30,44 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import mudmap2.backend.RiskLevel;
+import mudmap2.backend.InformationColor;
 import mudmap2.backend.World;
 import mudmap2.frontend.GUIElement.ColorChooserButton;
 import mudmap2.frontend.dialog.ActionDialog;
 
 /**
- * A dialog for creating and modifying RiskLevels
+ * A dialog for creating and modifying information color
  * @author neop
  */
-public class RiskLevelDialog extends ActionDialog {
+public class InformationColorDialog extends ActionDialog {
 
     World world;
-    RiskLevel riskLevel;
+    InformationColor informationColor;
 
     JTextField textFieldDescription;
     ColorChooserButton colorChooserButton;
 
     /**
-     * Creates a new RiskLevel
+     * Constructor to create a new information color
      * @param parent
      * @param world
      */
-    public RiskLevelDialog(JFrame parent, World world) {
-        super(parent, "Risk Level", true);
+    public InformationColorDialog(JFrame parent, World world) {
+        super(parent, "Colored information rings", true);
         this.world = world;
-        this.riskLevel = null;
+        this.informationColor = null;
     }
 
     /**
-     * Modifies an existing RiskLevel
+     * Constructor to modify an existing information color
      * @param parent
      * @param world
-     * @param rl
+     * @param ic
      */
-    public RiskLevelDialog(JFrame parent, World world, RiskLevel rl) {
-        super(parent, "Risk Level", true);
+    public InformationColorDialog(JFrame parent, World world, InformationColor ic) {
+        super(parent, "Colored information rings", true);
         this.world = world;
-        this.riskLevel = rl;
+        this.informationColor = ic;
     }
 
     @Override
@@ -89,8 +89,8 @@ public class RiskLevelDialog extends ActionDialog {
         constraints.gridwidth = 2;
 
         textFieldDescription = new JTextField();
-        if(riskLevel != null){
-            textFieldDescription.setText(riskLevel.getDescription());
+        if(informationColor != null){
+            textFieldDescription.setText(informationColor.getDescription());
         }
         contentPanel.add(textFieldDescription, constraints);
         textFieldDescription.setColumns(20);
@@ -107,8 +107,8 @@ public class RiskLevelDialog extends ActionDialog {
         constraints.gridwidth = 2;
 
         colorChooserButton = new ColorChooserButton(getParent());
-        if(riskLevel != null){
-            colorChooserButton.setColor(riskLevel.getColor());
+        if(informationColor != null){
+            colorChooserButton.setColor(informationColor.getColor());
         }
         contentPanel.add(colorChooserButton, constraints);
 
@@ -118,9 +118,9 @@ public class RiskLevelDialog extends ActionDialog {
         add(buttonPanel, BorderLayout.SOUTH);
 
         final JButton buttonAccept;
-        if(riskLevel == null){
+        if(informationColor == null){
             buttonAccept = new JButton("Add");
-            buttonAccept.setToolTipText("Create a new risk level");
+            buttonAccept.setToolTipText("Create a new colored information ring for places");
 
             buttonAccept.addActionListener(new ActionListener() {
                 @Override
@@ -132,7 +132,7 @@ public class RiskLevelDialog extends ActionDialog {
             });
         } else {
             buttonAccept = new JButton("Update");
-            buttonAccept.setToolTipText("Change risk level");
+            buttonAccept.setToolTipText("Change information");
 
             buttonAccept.addActionListener(new ActionListener() {
                 @Override
@@ -182,16 +182,16 @@ public class RiskLevelDialog extends ActionDialog {
     void createNew(){
         String description = textFieldDescription.getText();
         if(!description.isEmpty()){
-            riskLevel = new RiskLevel(description, colorChooserButton.getColor());
-            world.setRiskLevel(riskLevel);
+            informationColor = new InformationColor(description, colorChooserButton.getColor());
+            world.setInformationColor(informationColor);
         }
     }
 
     void modifyExisting(){
         String description = textFieldDescription.getText();
         if(!description.isEmpty()){
-            riskLevel.setDescription(description);
-            riskLevel.setColor(colorChooserButton.getColor());
+            informationColor.setDescription(description);
+            informationColor.setColor(colorChooserButton.getColor());
         }
     }
 

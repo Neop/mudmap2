@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
 import mudmap2.backend.PlaceGroup;
-import mudmap2.backend.RiskLevel;
+import mudmap2.backend.InformationColor;
 
 /**
  * This class generates and renders layer legends for image export
@@ -76,11 +76,11 @@ public class Legend {
      */
     int size; // TODO: remove?
 
-    boolean includePathColors       = false;
-    boolean includeRiskLevels       = false;
-    boolean includePlaceGroups      = false;
+    boolean includePathColors           = false;
+    boolean includeInformationColors    = false;
+    boolean includePlaceGroups          = false;
 
-    Color backgroundColor           = Color.LIGHT_GRAY;
+    Color backgroundColor               = Color.LIGHT_GRAY;
 
     LinkedList<LegendEntry> legendEntries = null;
 
@@ -98,12 +98,12 @@ public class Legend {
         this.includePathColors = includePathColors;
     }
 
-    public boolean isIncludeRiskLevels() {
-        return includeRiskLevels;
+    public boolean isIncludeInformationColors() {
+        return includeInformationColors;
     }
 
-    public void setIncludeRiskLevels(boolean includeRiskLevels) {
-        this.includeRiskLevels = includeRiskLevels;
+    public void setIncludeInformationColors(boolean includeInfoCols) {
+        this.includeInformationColors = includeInfoCols;
     }
 
     public boolean isIncludePlaceGroups() {
@@ -140,8 +140,8 @@ public class Legend {
         if(isIncludePlaceGroups()){
             prepareLegendEntriesPlaceGroups();
         }
-        if(isIncludeRiskLevels()){
-            prepareLegendEntriesRiskLevels();
+        if(isIncludeInformationColors()){
+            prepareLegendEntriesInformationColors();
         }
     }
 
@@ -168,23 +168,23 @@ public class Legend {
     }
 
     /**
-     * Collects risk level entries
+     * Collects information colors entries
      */
-    private void prepareLegendEntriesRiskLevels(){
-        legendEntries.add(new LegendEntryTitle("Risk Levels"));
+    private void prepareLegendEntriesInformationColors(){
+        legendEntries.add(new LegendEntryTitle("Information colors"));
 
-        for(RiskLevel riskLevel: layer.getWorld().getRiskLevels()){
-            // check if risk level is in use on this layer
+        for(InformationColor infoCol: layer.getWorld().getInformationColors()){
+            // check if information color is in use on this layer
             boolean isInUse = false;
             for(Place place: layer.getPlaces()){
-                if(place.getRiskLevel() == riskLevel){
+                if(place.getInfoRing() == infoCol){
                     isInUse = true;
                     break;
                 }
             }
 
             if(isInUse){
-                legendEntries.add(new LegendEntryColor(riskLevel.getDescription(), riskLevel.getColor()));
+                legendEntries.add(new LegendEntryColor(infoCol.getDescription(), infoCol.getColor()));
             }
         }
 

@@ -82,7 +82,7 @@ public class ExportImageDialog extends ActionDialog {
     ColorChooserButton ccbBackgroundColor;
     JCheckBox cbBackgroundGrid;
     // legend
-    JCheckBox cbLegendPathColors, cbLegendPlaceGroups, cbLegendRiskLevels;
+    JCheckBox cbLegendPathColors, cbLegendPlaceGroups, cbLegendInfomationColors;
     JRadioButton rbLegendPosTop, rbLegendPosBottom;
     JRadioButton rbLegendPosLeft, rbLegendPosRight;
     ColorChooserButton ccbLegendBackground;
@@ -306,18 +306,18 @@ public class ExportImageDialog extends ActionDialog {
 
         cbLegendPathColors = new JCheckBox("Path colors");
         cbLegendPlaceGroups = new JCheckBox("Place groups");
-        cbLegendRiskLevels = new JCheckBox("Risk levels");
+        cbLegendInfomationColors = new JCheckBox("Colored info rings");
 
         constraints1.gridx++;
         pRow1.add(cbLegendPathColors, constraints1);
         constraints1.gridx++;
         pRow1.add(cbLegendPlaceGroups, constraints1);
         constraints1.gridx++;
-        pRow1.add(cbLegendRiskLevels, constraints1);
+        pRow1.add(cbLegendInfomationColors, constraints1);
 
         cbLegendPathColors.addActionListener(new UpdateDialogListener());
         cbLegendPlaceGroups.addActionListener(new UpdateDialogListener());
-        cbLegendRiskLevels.addActionListener(new UpdateDialogListener());
+        cbLegendInfomationColors.addActionListener(new UpdateDialogListener());
 
         constraints1.gridy++;
         constraints1.gridx = 1;
@@ -441,7 +441,7 @@ public class ExportImageDialog extends ActionDialog {
     void updateDialogComponents(){
         boolean legendEnabled = cbLegendPathColors.isSelected() ||
                 cbLegendPlaceGroups.isSelected() ||
-                cbLegendRiskLevels.isSelected();
+                cbLegendInfomationColors.isSelected();
 
         rbLegendPosBottom.setEnabled(legendEnabled);
         rbLegendPosLeft.setEnabled(legendEnabled);
@@ -593,10 +593,10 @@ public class ExportImageDialog extends ActionDialog {
 
                 final boolean drawLegendPathColors = cbLegendPathColors.isSelected();
                 final boolean drawLegendPlaceGroups = cbLegendPlaceGroups.isSelected();
-                final boolean drawLegendRiskLevels = cbLegendRiskLevels.isSelected();
+                final boolean drawLegendInfoColors = cbLegendInfomationColors.isSelected();
                 final boolean legendEnabled = drawLegendPathColors
                         || drawLegendPlaceGroups
-                        || drawLegendRiskLevels;
+                        || drawLegendInfoColors;
 
                 if(legendEnabled){
                     imageLegend = drawLegend(
@@ -736,7 +736,7 @@ public class ExportImageDialog extends ActionDialog {
 
         final boolean drawLegendPathColors = cbLegendPathColors.isSelected();
         final boolean drawLegendPlaceGroups = cbLegendPlaceGroups.isSelected();
-        final boolean drawLegendRiskLevels = cbLegendRiskLevels.isSelected();
+        final boolean drawLegendInfoColors = cbLegendInfomationColors.isSelected();
 
         // TODO: make configurable: Orientation, entries
         Legend.Orientation orientation = Legend.Orientation.HORIZONTAL;
@@ -750,7 +750,7 @@ public class ExportImageDialog extends ActionDialog {
         legend.setBackgroundColor(ccbLegendBackground.getColor());
         legend.setIncludePathColors(drawLegendPathColors);
         legend.setIncludePlaceGroups(drawLegendPlaceGroups);
-        legend.setIncludeRiskLevels(drawLegendRiskLevels);
+        legend.setIncludeInformationColors(drawLegendInfoColors);
 
         try {
             image = legend.generate();
@@ -819,7 +819,7 @@ public class ExportImageDialog extends ActionDialog {
                 cbLegendPlaceGroups.setSelected(jDlgPrefs.getBoolean("legendPlaceGroups"));
             }
             if(jDlgPrefs.has("legendRiskLevels")){
-                cbLegendRiskLevels.setSelected(jDlgPrefs.getBoolean("legendRiskLevels"));
+                cbLegendInfomationColors.setSelected(jDlgPrefs.getBoolean("legendRiskLevels"));
             }
 
             if(jDlgPrefs.has("legendPos")){
@@ -875,10 +875,10 @@ public class ExportImageDialog extends ActionDialog {
 
         boolean legendPathCols = cbLegendPathColors.isSelected();
         boolean legendPlaceGroups = cbLegendPlaceGroups.isSelected();
-        boolean legendRiskLevels = cbLegendRiskLevels.isSelected();
+        boolean legendInformationColors = cbLegendInfomationColors.isSelected();
         jDlgPrefs.put("legendPathCols", legendPathCols);
         jDlgPrefs.put("legendPlaceGroups", legendPlaceGroups);
-        jDlgPrefs.put("legendRiskLevels", legendRiskLevels);
+        jDlgPrefs.put("legendRiskLevels", legendInformationColors);
 
         int legendPos = 1;
         if(rbLegendPosTop.isSelected())         legendPos = 0;

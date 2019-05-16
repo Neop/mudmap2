@@ -17,7 +17,6 @@
 package mudmap2.backend.legend;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import mudmap2.backend.Layer;
 import mudmap2.backend.World;
@@ -89,33 +88,33 @@ public class LegendTest {
     }
 
     /**
-     * Test of isIncludeRiskLevels method, of class Legend.
+     * Test of isIncludeInformationColors method, of class Legend.
      */
     @Test
-    public void testIsIncludeRiskLevels() {
-        System.out.println("isIncludeRiskLevels");
+    public void testIsIncludeInformationColors() {
+        System.out.println("isIncludeInformationColors");
 
         Legend instance = new Legend(layer, Legend.Orientation.HORIZONTAL, 500);
 
-        assertFalse(instance.isIncludeRiskLevels());
+        assertFalse(instance.isIncludeInformationColors());
     }
 
     /**
-     * Test of setIncludeRiskLevels method, of class Legend.
+     * Test of setIncludeInformationColors method, of class Legend.
      */
     @Test
-    public void testSetIncludeRiskLevels() {
-        System.out.println("setIncludeRiskLevels");
+    public void testSetIncludeInformationColors() {
+        System.out.println("setIncludeInformationColors");
 
         Legend instance = new Legend(layer, Legend.Orientation.HORIZONTAL, 500);
 
-        assertFalse(instance.isIncludeRiskLevels());
+        assertFalse(instance.isIncludeInformationColors());
 
-        instance.setIncludeRiskLevels(true);
-        assertTrue(instance.isIncludeRiskLevels());
+        instance.setIncludeInformationColors(true);
+        assertTrue(instance.isIncludeInformationColors());
 
-        instance.setIncludeRiskLevels(false);
-        assertFalse(instance.isIncludeRiskLevels());
+        instance.setIncludeInformationColors(false);
+        assertFalse(instance.isIncludeInformationColors());
     }
 
     /**

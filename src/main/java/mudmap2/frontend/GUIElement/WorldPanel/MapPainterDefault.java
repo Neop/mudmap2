@@ -51,7 +51,7 @@ public class MapPainterDefault implements MapPainter {
     static final float TILE_SELECTION_STROKE_WIDTH = 3;
     static final java.awt.Color TILE_SELECTION_COLOR = new java.awt.Color(255, 0, 0);
 
-    static final float TILE_RISK_LEVEL_STROKE_WIDTH = 2;
+    static final float TILE_INFOCOL_STROKE_WIDTH = 2;
     static final int TILE_BORDER_WIDTH = 10;
     static final int EXIT_RADIUS = 5;
 
@@ -160,11 +160,11 @@ public class MapPainterDefault implements MapPainter {
     }
 
     /**
-     * Gets the stroke width of the risk level border
+     * Gets the stroke width of the information color border
      * @return
      */
-    private float getRiskLevelStrokeWidth(){
-        return TILE_RISK_LEVEL_STROKE_WIDTH * (float) (1.0 + tileSize / 200.0);
+    private float getInformationColorStrokeWidth(){
+        return TILE_INFOCOL_STROKE_WIDTH * (float) (1.0 + tileSize / 200.0);
     }
 
     /**
@@ -520,9 +520,9 @@ public class MapPainterDefault implements MapPainter {
 
         // max number of text lines tht fit in a tile
         FontMetrics fm = g.getFontMetrics();
-        final int maxLines = (int) Math.round((double)(tileSize - 3 * (tileBorderWidthScaled + (int) Math.ceil(getRiskLevelStrokeWidth()))) / fm.getHeight());
-        final int maxLineLength = tileSize - 2 * (tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getRiskLevelStrokeWidth()));
-        final Boolean drawText = fm.stringWidth("WW") < (tileSize - 2 * (getRiskLevelStrokeWidth() + tileBorderWidthScaled));
+        final int maxLines = (int) Math.round((double)(tileSize - 3 * (tileBorderWidthScaled + (int) Math.ceil(getInformationColorStrokeWidth()))) / fm.getHeight());
+        final int maxLineLength = tileSize - 2 * (tileBorderWidthScaled + (int) selectionStrokeWidth + (int) Math.ceil(getInformationColorStrokeWidth()));
+        final Boolean drawText = fm.stringWidth("WW") < (tileSize - 2 * (getInformationColorStrokeWidth() + tileBorderWidthScaled));
 
         // screen center in world coordinates
         final double screenCenterX = (graphicsWidth / tileSize) / 2.0; // note: wdtwd2
@@ -604,13 +604,13 @@ public class MapPainterDefault implements MapPainter {
                                 tileSize - 2 * tileBorderWidthScaled, tileSize - 2 * tileBorderWidthScaled);
                     }
 
-                    // draw risk level border
-                    if(curPlace.getRiskLevel() != null){
-                        g.setColor(curPlace.getRiskLevel().getColor());
-                        ((Graphics2D)g).setStroke(new BasicStroke(getRiskLevelStrokeWidth()));
+                    // draw information color border
+                    if(curPlace.getInfoRing() != null){
+                        g.setColor(curPlace.getInfoRing().getColor());
+                        ((Graphics2D)g).setStroke(new BasicStroke(getInformationColorStrokeWidth()));
                         g.drawRect(placeXpx + tileBorderWidthScaled, placeYpx + tileBorderWidthScaled,
-                                tileSize - 2 * tileBorderWidthScaled - (int) (0.5 * getRiskLevelStrokeWidth()),
-                                tileSize - 2 * tileBorderWidthScaled - (int) (0.5 * getRiskLevelStrokeWidth()));
+                                tileSize - 2 * tileBorderWidthScaled - (int) (0.5 * getInformationColorStrokeWidth()),
+                                tileSize - 2 * tileBorderWidthScaled - (int) (0.5 * getInformationColorStrokeWidth()));
                     }
 
                     LinkedList<String> text = new LinkedList<>();
@@ -787,7 +787,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     g.setColor(Color.BLACK);
-                    final int border = (int) (tileBorderWidthScaled + getRiskLevelStrokeWidth());
+                    final int border = (int) (tileBorderWidthScaled + getInformationColorStrokeWidth());
                     drawText(g, placeXpx + border, placeYpx + border, tileSize - 2 * border, tileSize - 2 * border, text, flags, exits);
                 }
 

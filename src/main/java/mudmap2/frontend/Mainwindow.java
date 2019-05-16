@@ -71,7 +71,7 @@ import mudmap2.frontend.dialog.SaveWorldDialog;
 import mudmap2.frontend.dialog.UpdateDialog;
 import mudmap2.frontend.dialog.pathColor.PathColorListDialog;
 import mudmap2.frontend.dialog.placeGroup.PlaceGroupListDialog;
-import mudmap2.frontend.dialog.riskLevel.RiskLevelListDialog;
+import mudmap2.frontend.dialog.informationColor.InformationColorListDialog;
 import mudmap2.utils.KeystrokeHelper;
 import mudmap2.utils.MenuHelper;
 import mudmap2.utils.StringHelper;
@@ -382,7 +382,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
             break;
         case "risk_level_dialog":
             if (wt != null) {
-                new RiskLevelListDialog(Mainwindow.this, wt.getWorld()).setVisible(true);
+                new InformationColorListDialog(Mainwindow.this, wt.getWorld()).setVisible(true);
             }
             break;
         case "set_home": // set home position

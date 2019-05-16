@@ -17,9 +17,11 @@
 
 /*  File description
  *
- *  This class describes a risk level which describes how dangerous a place is
- *  The risk level is shown on the map as a colored border around the place
- *  (not to be confused with the PlaceGroup, which also is drawn as a colored border)
+ *  This class describes an information that is represented as a colored ring
+ *  around place tiles. This can be used to describe the danger of a place or
+ *  other information.
+ *  Not to be confused with the PlaceGroup, which also is drawn as a colored
+ *  border/ring.
  */
 
 package mudmap2.backend;
@@ -27,10 +29,10 @@ package mudmap2.backend;
 import java.awt.Color;
 
 /**
- * Describes a risk level (which are shown as the colored border of each place)
+ * Describes a information color / colored ring on place tiles
  * @author neop
  */
-public class RiskLevel {
+public class InformationColor {
     // next id to be assigned
     static int nextID = 0;
 
@@ -39,12 +41,12 @@ public class RiskLevel {
     public Color color;
 
     /**
-     * Constructs the risk level
+     * Constructor
      * @param id identification number, unique in a world
      * @param desc description
      * @param color color that represents the risk level
      */
-    public RiskLevel(int id, String desc, Color color){
+    public InformationColor(int id, String desc, Color color){
         this.id = id;
         if(id >= nextID) nextID = id + 1;
         description = desc;
@@ -52,18 +54,18 @@ public class RiskLevel {
     }
 
     /**
-     * Constructs the risk level
+     * Constructor
      * @param desc description
      * @param color color that represents the risk level
      */
-    public RiskLevel(String desc, Color color){
+    public InformationColor(String desc, Color color){
         id = nextID++;
         description = desc;
         this.color = color;
     }
 
     /**
-     * Gets the risk level id
+     * Get id
      * @return id
      */
     public int getId(){
@@ -87,7 +89,7 @@ public class RiskLevel {
     }
 
     /**
-     * Gets the description of the risk level
+     * Gets the description
      * @return description
      */
     public String getDescription(){
@@ -103,7 +105,7 @@ public class RiskLevel {
     }
 
     /**
-     * Gets the description of the risk level
+     * Gets the description
      * @return description
      */
     @Override

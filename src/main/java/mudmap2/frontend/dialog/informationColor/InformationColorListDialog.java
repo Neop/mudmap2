@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-package mudmap2.frontend.dialog.riskLevel;
+package mudmap2.frontend.dialog.informationColor;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -27,30 +27,30 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import mudmap2.backend.RiskLevel;
+import mudmap2.backend.InformationColor;
 import mudmap2.backend.World;
 import mudmap2.frontend.dialog.ListDialog;
 import mudmap2.utils.AlphanumComparator;
 
 /**
- * A dialog for creating, removing and mdifying RiskLevels
+ * A dialog for creating, removing and modifying information color
  * @author neop
  */
-public class RiskLevelListDialog extends ListDialog {
+public class InformationColorListDialog extends ListDialog {
 
     World world;
 
-    public RiskLevelListDialog(JFrame parent, World world) {
-        super(parent, "Risk Levels", false);
+    public InformationColorListDialog(JFrame parent, World world) {
+        super(parent, "Colored information rings", false);
         this.world = world;
-        setCellRenderer(new RiskLevelListCellRenderer());
+        setCellRenderer(new InformationColorListCellRenderer());
     }
 
     @Override
     protected void create(){
         super.create();
 
-        // only select one RiskLevel at once
+        // only select one information color at once
         getList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         setPreferredSize(new Dimension(250, 300));
@@ -62,9 +62,9 @@ public class RiskLevelListDialog extends ListDialog {
     protected void updateList(){
         List selectedValuesList = getList().getSelectedValuesList();
 
-        Collection<RiskLevel> riskLevels = world.getRiskLevels();
+        Collection<InformationColor> informationColor = world.getInformationColors();
         // sort by name
-        List<Object> sorted = riskLevels.stream().sorted(new AlphanumComparator<>()).collect(Collectors.toList());
+        List<Object> sorted = informationColor.stream().sorted(new AlphanumComparator<>()).collect(Collectors.toList());
         getList().setListData(sorted.toArray());
 
         // select previously selected value(s)
@@ -96,7 +96,7 @@ public class RiskLevelListDialog extends ListDialog {
 
     @Override
     protected void addEntry(){
-        (new RiskLevelDialog((JFrame) getParent(), world)).setVisible(true);
+        (new InformationColorDialog((JFrame) getParent(), world)).setVisible(true);
         updateList();
     }
 
@@ -107,11 +107,11 @@ public class RiskLevelListDialog extends ListDialog {
         if(response == JOptionPane.OK_OPTION){
             List selectedValuesList = getList().getSelectedValuesList();
             for(Object entry: selectedValuesList){
-                RiskLevel riskLevel = (RiskLevel) entry;
+                InformationColor informationColor = (InformationColor) entry;
                 try {
-                    world.removeRiskLevel(riskLevel);
+                    world.removeInformationColor(informationColor);
                 } catch (Exception ex) {
-                    Logger.getLogger(RiskLevelListDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(InformationColorListDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             updateList();
@@ -121,21 +121,21 @@ public class RiskLevelListDialog extends ListDialog {
     @Override
     protected void modifyEntry(){
         if(!getList().isSelectionEmpty()){
-            RiskLevel rl = (RiskLevel) getList().getSelectedValue();
-            (new RiskLevelDialog((JFrame) getParent(), world, rl)).setVisible(true);
+            InformationColor rl = (InformationColor) getList().getSelectedValue();
+            (new InformationColorDialog((JFrame) getParent(), world, rl)).setVisible(true);
             updateList();
         }
     }
 
-    private class RiskLevelListCellRenderer extends ColoredListCellRenderer<RiskLevel> {
+    private class InformationColorListCellRenderer extends ColoredListCellRenderer<InformationColor> {
 
         @Override
-        protected String getText(RiskLevel object) {
+        protected String getText(InformationColor object) {
             return object.getDescription();
         }
 
         @Override
-        protected Color getColor(RiskLevel object) {
+        protected Color getColor(InformationColor object) {
             return object.getColor();
         }
 

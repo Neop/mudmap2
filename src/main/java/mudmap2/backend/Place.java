@@ -43,7 +43,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     PlaceGroup placeGroup = null;
     int recLevelMin = -1;
     int recLevelMax = -1;
-    RiskLevel riskLevel = null;
+    InformationColor infoRing = null;
     String comments = "";
 
     HashSet<Place> children = new HashSet<>();
@@ -163,19 +163,19 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Gets the risk level
-     * @return risk level
+     * Gets the information ring (colored ring on place tile)
+     * @return InformationColor
      */
-    public RiskLevel getRiskLevel() {
-        return riskLevel;
+    public InformationColor getInfoRing() {
+        return infoRing;
     }
 
     /**
-     * sets the risk level
-     * @param riskLevel
+     * sets the information ring
+     * @param infoRing
      */
-    public void setRiskLevel(final RiskLevel riskLevel) {
-        this.riskLevel = riskLevel;
+    public void setInfoRing(final InformationColor infoRing) {
+        this.infoRing = infoRing;
         callWorldChangeListeners();
     }
 
@@ -478,7 +478,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         place.placeGroup = placeGroup;
         place.recLevelMax = recLevelMax;
         place.recLevelMin = recLevelMin;
-        place.riskLevel = riskLevel;
+        place.infoRing = infoRing;
         place.flags = (TreeMap<String, Boolean>) flags.clone();
         place.comments = comments;
 

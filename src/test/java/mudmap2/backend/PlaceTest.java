@@ -342,39 +342,39 @@ public class PlaceTest {
     }
 
     /**
-     * Test of getRiskLevel method, of class Place.
+     * Test of getInfoRing method, of class Place.
      */
     @Test
-    public void testGetRiskLevel() {
-        System.out.println("getRiskLevel");
+    public void testGetInfoRing() {
+        System.out.println("getInfoRing");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
         // default value
-        assertNull(instance.getRiskLevel());
+        assertNull(instance.getInfoRing());
 
-        RiskLevel expResult = new RiskLevel("description", Color.yellow);
-        instance.setRiskLevel(expResult);
-        RiskLevel result = instance.getRiskLevel();
+        InformationColor expResult = new InformationColor("description", Color.yellow);
+        instance.setInfoRing(expResult);
+        InformationColor result = instance.getInfoRing();
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of setRiskLevel method, of class Place.
+     * Test of setInfoRing method, of class Place.
      */
     @Test
-    public void testSetRiskLevel() {
-        System.out.println("setRiskLevel");
+    public void testSetInfoRing() {
+        System.out.println("setInfoRing");
 
         Place instance = new Place("MyPlace", 0, 0, layer);
 
-        RiskLevel risk_level = new RiskLevel("description", Color.yellow);
-        instance.setRiskLevel(risk_level);
-        RiskLevel result = instance.getRiskLevel();
-        assertEquals(risk_level, result);
+        InformationColor infoCol = new InformationColor("description", Color.yellow);
+        instance.setInfoRing(infoCol);
+        InformationColor result = instance.getInfoRing();
+        assertEquals(infoCol, result);
 
         // test null
-        instance.setRiskLevel(null);
-        result = instance.getRiskLevel();
+        instance.setInfoRing(null);
+        result = instance.getInfoRing();
         assertEquals(null, result);
     }
 
@@ -918,7 +918,7 @@ public class PlaceTest {
         Place result = instance.duplicate();
 
         assertEquals(instance.getName(), result.getName());
-        assertEquals(instance.getRiskLevel(), result.getRiskLevel());
+        assertEquals(instance.getInfoRing(), result.getInfoRing());
         assertEquals(instance.getRecLevelMin(), result.getRecLevelMin());
         assertEquals(instance.getRecLevelMax(), result.getRecLevelMax());
         assertEquals(instance.getPlaceGroup(), result.getPlaceGroup());

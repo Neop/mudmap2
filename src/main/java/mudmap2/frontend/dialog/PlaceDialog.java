@@ -40,7 +40,7 @@ import javax.swing.SpinnerNumberModel;
 import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Place;
-import mudmap2.backend.RiskLevel;
+import mudmap2.backend.InformationColor;
 import mudmap2.backend.World;
 
 /**
@@ -59,13 +59,13 @@ public class PlaceDialog extends ActionDialog {
     int px, py;
 
     // if this place_group is choosen, it will be replaced with null
-    PlaceGroup place_group_null;
+    PlaceGroup placeGroupNull;
 
-    JTextField textfield_name;
-    JCheckBox checkbox_lvl_min, checkbox_lvl_max;
-    JComboBox<PlaceGroup> combobox_place_group;
-    JComboBox<RiskLevel> combobox_risk;
-    JSpinner spinner_rec_lvl_min, spinner_rec_lvl_max;
+    JTextField textfieldName;
+    JCheckBox checkboxLvlMin, checkboxLvlMax;
+    JComboBox<PlaceGroup> comboboxPlaceGroup;
+    JComboBox<InformationColor> comboboxInfoColor;
+    JSpinner spinnerRecLvlMin, spinnerRecLvlMax;
 
     /**
      * Creates a dialog to modify a place
@@ -109,24 +109,24 @@ public class PlaceDialog extends ActionDialog {
         setLayout(new GridLayout(0, 2, 4, 4));
 
         add(new JLabel("Name"));
-        if(place != null) textfield_name = new JTextField(place.getName());
-        else textfield_name = new JTextField();
-        add(textfield_name);
+        if(place != null) textfieldName = new JTextField(place.getName());
+        else textfieldName = new JTextField();
+        add(textfieldName);
 
-        place_group_null = new PlaceGroup("none", null);
+        placeGroupNull = new PlaceGroup("none", null);
 
         add(new JLabel("Place group"));
-        combobox_place_group = new JComboBox<>();
-        combobox_place_group.addItem(place_group_null);
-        for(PlaceGroup a : world.getPlaceGroups()) combobox_place_group.addItem(a);
-        if(place != null && place.getPlaceGroup() != null) combobox_place_group.setSelectedItem(place.getPlaceGroup());
-        add(combobox_place_group);
+        comboboxPlaceGroup = new JComboBox<>();
+        comboboxPlaceGroup.addItem(placeGroupNull);
+        for(PlaceGroup a : world.getPlaceGroups()) comboboxPlaceGroup.addItem(a);
+        if(place != null && place.getPlaceGroup() != null) comboboxPlaceGroup.setSelectedItem(place.getPlaceGroup());
+        add(comboboxPlaceGroup);
 
-        add(new JLabel("Risk level"));
-        combobox_risk = new JComboBox<>();
-        for(RiskLevel rl : world.getRiskLevels()) combobox_risk.addItem(rl);
-        if(place != null && place.getRiskLevel() != null) combobox_risk.setSelectedItem(place.getRiskLevel());
-        add(combobox_risk);
+        add(new JLabel("Colored info ring"));
+        comboboxInfoColor = new JComboBox<>();
+        for(InformationColor rl : world.getInformationColors()) comboboxInfoColor.addItem(rl);
+        if(place != null && place.getInfoRing() != null) comboboxInfoColor.setSelectedItem(place.getInfoRing());
+        add(comboboxInfoColor);
         
         Integer min_lvl = -1, max_lvl = -1;
         if(place != null){
@@ -135,34 +135,34 @@ public class PlaceDialog extends ActionDialog {
         }
         
         add(new JLabel("Minimal level"));
-        spinner_rec_lvl_min = new JSpinner();
-        spinner_rec_lvl_min.setModel(new SpinnerNumberModel(max(min_lvl, 0), 0, 1000, 1));
-        add(spinner_rec_lvl_min);
-        if(min_lvl < 0) spinner_rec_lvl_min.setEnabled(false);
+        spinnerRecLvlMin = new JSpinner();
+        spinnerRecLvlMin.setModel(new SpinnerNumberModel(max(min_lvl, 0), 0, 1000, 1));
+        add(spinnerRecLvlMin);
+        if(min_lvl < 0) spinnerRecLvlMin.setEnabled(false);
 
         add(new JLabel());
-        add(checkbox_lvl_min = new JCheckBox("Show min level"));
-        checkbox_lvl_min.setSelected(min_lvl >= 0);
-        checkbox_lvl_min.addActionListener(new ActionListener() {
+        add(checkboxLvlMin = new JCheckBox("Show min level"));
+        checkboxLvlMin.setSelected(min_lvl >= 0);
+        checkboxLvlMin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                spinner_rec_lvl_min.setEnabled(((JCheckBox) ae.getSource()).isSelected());
+                spinnerRecLvlMin.setEnabled(((JCheckBox) ae.getSource()).isSelected());
             }
         });
 
         add(new JLabel("Maximum level"));
-        spinner_rec_lvl_max = new JSpinner();
-        spinner_rec_lvl_max.setModel(new SpinnerNumberModel(max(max_lvl, 0), 0, 1000, 1));
-        add(spinner_rec_lvl_max);
-        if(max_lvl < 0) spinner_rec_lvl_max.setEnabled(false);
+        spinnerRecLvlMax = new JSpinner();
+        spinnerRecLvlMax.setModel(new SpinnerNumberModel(max(max_lvl, 0), 0, 1000, 1));
+        add(spinnerRecLvlMax);
+        if(max_lvl < 0) spinnerRecLvlMax.setEnabled(false);
 
         add(new JLabel());
-        add(checkbox_lvl_max = new JCheckBox("Show max level"));
-        checkbox_lvl_max.setSelected(max_lvl >= 0);
-        checkbox_lvl_max.addActionListener(new ActionListener() {
+        add(checkboxLvlMax = new JCheckBox("Show max level"));
+        checkboxLvlMax.setSelected(max_lvl >= 0);
+        checkboxLvlMax.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                spinner_rec_lvl_max.setEnabled(((JCheckBox) ae.getSource()).isSelected());
+                spinnerRecLvlMax.setEnabled(((JCheckBox) ae.getSource()).isSelected());
             }
         });
         
@@ -213,20 +213,20 @@ public class PlaceDialog extends ActionDialog {
                 if(layer == null) layer = world.getNewLayer();
 
                 // create place if it doesn't exist else just set the name
-                if(place == null) layer.put(place = new Place(textfield_name.getText(), px, py, layer));
-                else place.setName(textfield_name.getText());
+                if(place == null) layer.put(place = new Place(textfieldName.getText(), px, py, layer));
+                else place.setName(textfieldName.getText());
 
-                PlaceGroup a = (PlaceGroup) combobox_place_group.getSelectedItem();
-                place.setPlaceGroup(a != place_group_null ? a : null); // replace null group with null
-                place.setRiskLevel((RiskLevel) combobox_risk.getSelectedItem());
+                PlaceGroup a = (PlaceGroup) comboboxPlaceGroup.getSelectedItem();
+                place.setPlaceGroup(a != placeGroupNull ? a : null); // replace null group with null
+                place.setInfoRing((InformationColor) comboboxInfoColor.getSelectedItem());
 
-                if(checkbox_lvl_min.isSelected()){
-                    place.setRecLevelMin((Integer) spinner_rec_lvl_min.getValue());
+                if(checkboxLvlMin.isSelected()){
+                    place.setRecLevelMin((Integer) spinnerRecLvlMin.getValue());
                 } else {
                     place.setRecLevelMin(-1);
                 }
-                if(checkbox_lvl_max.isSelected()){
-                    place.setRecLevelMax((Integer) spinner_rec_lvl_max.getValue());
+                if(checkboxLvlMax.isSelected()){
+                    place.setRecLevelMax((Integer) spinnerRecLvlMax.getValue());
                 } else {
                     place.setRecLevelMax(-1);
                 }

@@ -58,7 +58,7 @@ public class World implements BreadthSearchGraph {
     WorldCoordinate home = new WorldCoordinate(0, 0, 0);
 
     // ID and object
-    final TreeMap<Integer, RiskLevel> riskLevels = new TreeMap<>();
+    final TreeMap<Integer, InformationColor> informationColors = new TreeMap<>();
     final HashSet<PlaceGroup> placeGroups = new HashSet<>();
     final TreeMap<Integer, Layer> layers = new TreeMap<>();
 
@@ -95,12 +95,11 @@ public class World implements BreadthSearchGraph {
      * Initializes the world
      */
     private void initialize(){
-        // risk levels
-        riskLevels.put(0, new RiskLevel(0, "not evaluated", new Color(188, 188, 188)));
-        riskLevels.put(1, new RiskLevel(1, "safe", new Color(0, 255, 0)));
-        riskLevels.put(2, new RiskLevel(2, "mobs don't attack", new Color(255, 255, 0)));
-        riskLevels.put(3, new RiskLevel(3, "mobs might attack", new Color(255, 128, 0)));
-        riskLevels.put(4, new RiskLevel(4, "mobs will attack", new Color(255, 0, 0)));
+        informationColors.put(0, new InformationColor(0, "not evaluated", new Color(188, 188, 188)));
+        informationColors.put(1, new InformationColor(1, "safe", new Color(0, 255, 0)));
+        informationColors.put(2, new InformationColor(2, "mobs don't attack", new Color(255, 255, 0)));
+        informationColors.put(3, new InformationColor(3, "mobs might attack", new Color(255, 128, 0)));
+        informationColors.put(4, new InformationColor(4, "mobs will attack", new Color(255, 0, 0)));
     }
 
     // --------- WorldFile -----------------------------------------------------
@@ -181,7 +180,7 @@ public class World implements BreadthSearchGraph {
             if(placeGroup == null) addPlaceGroup(placeGroup = new PlaceGroup("placeholder", Color.GREEN));
 
             place.setPlaceGroup(placeGroup);
-            place.setRiskLevel(getRiskLevel(0));
+            place.setInfoRing(getInformationColor(0));
 
             Layer layer = getLayer(layerId);
             if(layer == null){
@@ -443,70 +442,70 @@ public class World implements BreadthSearchGraph {
         callListeners(placeGroup);
     }
 
-    // --------- risk levels ---------------------------------------------------
+    // --------- information colors --------------------------------------------
     /**
-     * Gets all risk levels (eg. for lists)
-     * @return all risk levels
+     * Gets all information colors (eg. for lists)
+     * @return all information colors
      */
-    public Collection<RiskLevel> getRiskLevels(){
-        return riskLevels.values();
+    public Collection<InformationColor> getInformationColors(){
+        return informationColors.values();
     }
 
     /**
-     * Gets a risk level
-     * @param id risk level id
-     * @return risk level
+     * Gets an information color
+     * @param id information color id
+     * @return information color
      */
-    public RiskLevel getRiskLevel(int id){
-        return riskLevels.get(id);
+    public InformationColor getInformationColor(int id){
+        return informationColors.get(id);
     }
 
     /**
-     * Adds a risk level, assignes a unique id
-     * @param rl new risk level
+     * Adds an information colors, assignes a unique id
+     * @param ic new information color
      */
-    public void addRiskLevel(RiskLevel rl){
-        if(rl == null){
+    public void addInformationColor(InformationColor ic){
+        if(ic == null){
             throw new NullPointerException();
         }
 
-        if(!riskLevels.containsValue(rl)){
+        if(!informationColors.containsValue(ic)){
             // ID-collision?
-            while(riskLevels.containsKey(rl.getId())){
-                ++rl.id;
+            while(informationColors.containsKey(ic.getId())){
+                ++ic.id;
             }
-            riskLevels.put(rl.getId(), rl);
+            informationColors.put(ic.getId(), ic);
         }
 
-        callListeners(rl);
+        callListeners(ic);
     }
 
     /**
-     * Adds or replaces a risk level by it's id
-     * @param rl risk level to add or replace
+     * Adds or replaces an information color by it's id
+     * @param ic information color to add or replace
      */
-    public void setRiskLevel(RiskLevel rl){
-        riskLevels.put(rl.getId(), rl);
+    public void setInformationColor(InformationColor ic){
+        informationColors.put(ic.getId(), ic);
     }
 
     /**
-     * Removes a risk level
-     * @param rl
+     * Removes an information color
+     * @param ic
      * @throws java.lang.Exception
      */
-    public void removeRiskLevel(RiskLevel rl) throws Exception {
-        if(rl != null){
-            if(!riskLevels.containsValue(rl)) throw new Exception("Tried to remove risk level that does not belong to this world");
-            // remode from risk level list
-            riskLevels.remove(rl.getId());
+    public void removeInformationColor(InformationColor ic) throws Exception {
+        if(ic != null){
+            if(!informationColors.containsValue(ic)) throw new Exception("Tried to remove information color that does not belong to this world");
+            // remode from information color list
+            informationColors.remove(ic.getId());
             // removePlace from places
             for(Layer layer: getLayers()){
                 for(Place place: layer.getPlaces()){
-                    if(place.getRiskLevel() == rl) place.setRiskLevel(null);
+                    if(place.getInfoRing() == ic) place.setInfoRing(null);
                 }
             }
 
-            callListeners(rl);
+            callListeners(ic);
         }
     }
 

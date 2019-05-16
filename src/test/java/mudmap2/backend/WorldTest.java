@@ -72,7 +72,7 @@ public class WorldTest {
         assertNotNull(instance1.getPathColors());
         assertNotNull(instance1.getPlaceGroups());
         assertNotNull(instance1.getPreferences());
-        assertNotNull(instance1.getRiskLevels());
+        assertNotNull(instance1.getInformationColors());
         assertNotNull(instance1.getTileCenterColor());
         assertNull(instance1.getWorldFile());
     }
@@ -96,7 +96,7 @@ public class WorldTest {
         assertNotNull(instance1.getPathColors());
         assertNotNull(instance1.getPlaceGroups());
         assertNotNull(instance1.getPreferences());
-        assertNotNull(instance1.getRiskLevels());
+        assertNotNull(instance1.getInformationColors());
         assertNotNull(instance1.getTileCenterColor());
         assertNull(instance1.getWorldFile());
 
@@ -110,7 +110,7 @@ public class WorldTest {
         assertNotNull(instance2.getPathColors());
         assertNotNull(instance2.getPlaceGroups());
         assertNotNull(instance2.getPreferences());
-        assertNotNull(instance2.getRiskLevels());
+        assertNotNull(instance2.getInformationColors());
         assertNotNull(instance2.getTileCenterColor());
         assertNull(instance2.getWorldFile());
     }
@@ -693,54 +693,54 @@ public class WorldTest {
     }
 
     /**
-     * Test of getRiskLevels method, of class World.
+     * Test of getInformationColors method, of class World.
      */
     @Test
-    public void testGetRiskLevels() {
-        System.out.println("getRiskLevels");
+    public void testGetInformationColors() {
+        System.out.println("getInformationColors");
 
         World instance = new World("MyWorld");
-        Collection<RiskLevel> result = instance.getRiskLevels();
+        Collection<InformationColor> result = instance.getInformationColors();
         assertEquals(5, result.size());
     }
 
     /**
-     * Test of getRiskLevel method, of class World.
+     * Test of getInformationColor method, of class World.
      */
     @Test
-    public void testGetRiskLevel() {
-        System.out.println("getRiskLevel");
+    public void testGetInformationColor() {
+        System.out.println("getInformationColor");
 
         int id = 1;
         World instance = new World("MyWorld");
-        RiskLevel result = instance.getRiskLevel(id);
+        InformationColor result = instance.getInformationColor(id);
         assertNotNull(result);
 
-        RiskLevel rl = new RiskLevel("MyRisklevel", Color.yellow);
-        instance.addRiskLevel(rl);
-        result = instance.getRiskLevel(rl.getId());
+        InformationColor rl = new InformationColor("MyRisklevel", Color.yellow);
+        instance.addInformationColor(rl);
+        result = instance.getInformationColor(rl.getId());
         assertEquals(rl, result);
     }
 
     /**
-     * Test of addRiskLevel method, of class World.
+     * Test of addInformationColor method, of class World.
      */
     @Test
-    public void testAddRiskLevel() {
-        System.out.println("addRiskLevel");
+    public void testAddInformationColor() {
+        System.out.println("addInformationColor");
 
         World instance = new World("MyWorld");
 
-        RiskLevel riskLevel1 = new RiskLevel(null, Color.yellow);
-        instance.addRiskLevel(riskLevel1);
-        Collection<RiskLevel> result1 = instance.getRiskLevels();
+        InformationColor riskLevel1 = new InformationColor(null, Color.yellow);
+        instance.addInformationColor(riskLevel1);
+        Collection<InformationColor> result1 = instance.getInformationColors();
         assertEquals(6, result1.size());
         assertTrue(result1.contains(riskLevel1));
 
         // same id as first risk level, id will be changed to a unique value
-        RiskLevel riskLevel2 = new RiskLevel(riskLevel1.getId(), "blub", Color.yellow);
-        instance.addRiskLevel(riskLevel2);
-        Collection<RiskLevel> result2 = instance.getRiskLevels();
+        InformationColor riskLevel2 = new InformationColor(riskLevel1.getId(), "blub", Color.yellow);
+        instance.addInformationColor(riskLevel2);
+        Collection<InformationColor> result2 = instance.getInformationColors();
         assertEquals(7, result2.size());
         assertTrue(result2.contains(riskLevel1));
         assertTrue(result2.contains(riskLevel2));
@@ -748,7 +748,7 @@ public class WorldTest {
 
         // test null
         try {
-            instance.addRiskLevel(null);
+            instance.addInformationColor(null);
             fail();
         } catch(Exception ex){
             // expected
@@ -756,45 +756,45 @@ public class WorldTest {
     }
 
     /**
-     * Test for setRiskLevel
+     * Test for setInformationColor
      */
     @Test
-    public void testSetRiskLevel(){
-        System.out.println("setRiskLevel");
+    public void testSetInformationColor(){
+        System.out.println("setInformationColor");
 
         World instance = new World();
 
-        RiskLevel riskLevel1 = new RiskLevel(17, "desc", Color.yellow);
-        RiskLevel riskLevel2 = new RiskLevel(17, "desc", Color.red);
+        InformationColor riskLevel1 = new InformationColor(17, "desc", Color.yellow);
+        InformationColor riskLevel2 = new InformationColor(17, "desc", Color.red);
 
-        instance.setRiskLevel(riskLevel1);
-        assertEquals(riskLevel1, instance.getRiskLevel(17));
+        instance.setInformationColor(riskLevel1);
+        assertEquals(riskLevel1, instance.getInformationColor(17));
 
-        instance.setRiskLevel(riskLevel2);
-        assertEquals(riskLevel2, instance.getRiskLevel(17));
+        instance.setInformationColor(riskLevel2);
+        assertEquals(riskLevel2, instance.getInformationColor(17));
     }
 
     /**
-     * Test of removeRiskLevel method, of class World.
+     * Test of removeInformationColor method, of class World.
      */
     @Test
-    public void testRemoveRiskLevel() {
-        System.out.println("removeRiskLevel");
+    public void testRemoveInformationColor() {
+        System.out.println("removeInformationColor");
 
-        RiskLevel rl = new RiskLevel(null, Color.yellow);
+        InformationColor rl = new InformationColor(null, Color.yellow);
         World instance = new World("MyWorld");
 
         try {
-            instance.removeRiskLevel(rl); // rl not yet added
+            instance.removeInformationColor(rl); // rl not yet added
             fail();
         } catch (Exception ex) {
             // expected
         }
 
         try {
-            instance.addRiskLevel(rl);
-            instance.removeRiskLevel(rl);
-            Collection<RiskLevel> result = instance.getRiskLevels();
+            instance.addInformationColor(rl);
+            instance.removeInformationColor(rl);
+            Collection<InformationColor> result = instance.getInformationColors();
             assertEquals(5, result.size());
             assertFalse(result.contains(rl));
         } catch (Exception ex) {
@@ -803,7 +803,7 @@ public class WorldTest {
 
         // test null
         try {
-            instance.removeRiskLevel(null); // rl not yet added
+            instance.removeInformationColor(null); // rl not yet added
         } catch (Exception ex) {
             fail();
         }

@@ -36,7 +36,7 @@ import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
-import mudmap2.backend.RiskLevel;
+import mudmap2.backend.InformationColor;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldFileReader.WorldFile;
@@ -193,22 +193,22 @@ public class WorldFileJSON extends WorldFile {
                 }
             }
 
-            // riskLevels
+            // information colors (formerly named 'risk levels')
             if(root.has("riskLevels")){
-                // remove existing risk levels
-                world.getRiskLevels().clear();
+                // remove existing information colors
+                world.getInformationColors().clear();
 
-                JSONArray riskLevels = root.getJSONArray("riskLevels");
-                Integer length = riskLevels.length();
+                JSONArray informationColors = root.getJSONArray("riskLevels");
+                Integer length = informationColors.length();
                 for(Integer i = 0; i < length; ++i){
-                    JSONObject riskLevel = riskLevels.getJSONObject(i);
-                    if(riskLevel.has("id")
-                            && riskLevel.has("desc")
-                            && riskLevel.has("col")){
-                        Integer id = riskLevel.getInt("id");
-                        String desc = riskLevel.getString("desc");
-                        Color col = hexToCol(riskLevel.getString("col"));
-                        world.setRiskLevel(new RiskLevel(id, desc, col));
+                    JSONObject informationColor = informationColors.getJSONObject(i);
+                    if(informationColor.has("id")
+                            && informationColor.has("desc")
+                            && informationColor.has("col")){
+                        Integer id = informationColor.getInt("id");
+                        String desc = informationColor.getString("desc");
+                        Color col = hexToCol(informationColor.getString("col"));
+                        world.setInformationColor(new InformationColor(id, desc, col));
                     }
                 }
             }
@@ -295,22 +295,18 @@ public class WorldFileJSON extends WorldFile {
 
                         // area
                         if(jPlace.has("a")){
-                            Integer area = jPlace.getInt("a");
-                            place.setPlaceGroup(areas.get(area));
+                            place.setPlaceGroup(areas.get(jPlace.getInt("a")));
                         }
-                        // risk level
+                        // information colors
                         if(jPlace.has("r")){
-                            Integer risk = jPlace.getInt("r");
-                            place.setRiskLevel(world.getRiskLevel(risk));
+                            place.setInfoRing(world.getInformationColor(jPlace.getInt("r")));
                         }
                         // rec level
                         if(jPlace.has("lvlMin")){
-                            Integer lvlMin = jPlace.getInt("lvlMin");
-                            place.setRecLevelMin(lvlMin);
+                            place.setRecLevelMin(jPlace.getInt("lvlMin"));
                         }
                         if(jPlace.has("lvlMax")){
-                            Integer lvlMax = jPlace.getInt("lvlMax");
-                            place.setRecLevelMin(lvlMax);
+                            place.setRecLevelMin(jPlace.getInt("lvlMax"));
                         }
 
                         // children
@@ -485,15 +481,15 @@ public class WorldFileJSON extends WorldFile {
             }
         }
 
-        // risk level colors
-        JSONArray riskLevelColors = new JSONArray();
-        root.put("riskLevels", riskLevelColors);
-        for(RiskLevel rlc: world.getRiskLevels()){
+        // information colors
+        JSONArray informationColors = new JSONArray();
+        root.put("riskLevels", informationColors);
+        for(InformationColor rlc: world.getInformationColors()){
             JSONObject rlo = new JSONObject();
             rlo.put("id", rlc.getId());
             rlo.put("desc", rlc.getDescription());
             rlo.put("col", colToHex(rlc.getColor()));
-            riskLevelColors.put(rlo);
+            informationColors.put(rlo);
         }
 
         // areaArray
@@ -563,7 +559,7 @@ public class WorldFileJSON extends WorldFile {
                 placeObj.put("y", place.getY());
 
                 if(place.getPlaceGroup() != null) placeObj.put("a", areaIDs.get(place.getPlaceGroup()));
-                if(place.getRiskLevel() != null) placeObj.put("r", place.getRiskLevel().getId());
+                if(place.getInfoRing() != null) placeObj.put("r", place.getInfoRing().getId());
                 if(place.getRecLevelMin() > -1) placeObj.put("lvlMin", place.getRecLevelMin());
                 if(place.getRecLevelMax() > -1) placeObj.put("lvlMax", place.getRecLevelMax());
 
