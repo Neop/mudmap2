@@ -33,7 +33,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
@@ -97,7 +96,7 @@ public class PathConnectDialog extends ActionDialog{
 
         LinkedList<String> directions1 = new LinkedList<>();
         for(String s: Path.directions)
-            if(place.getExit(s) == null) directions1.add(s);
+            if(place.getExit(s).isEmpty()) directions1.add(s);
 
         constraints.gridx = 1;
         constraints.weightx = 0.0;
@@ -147,11 +146,9 @@ public class PathConnectDialog extends ActionDialog{
         worldtab.getWorldPanel().addCursorListener(new MapCursorListener() {
             @Override
             public void placeSelected(Place p) {
-                if(p != place){
-                    other = p;
-                    labelOtherPlace.setText(other.toString());
-                    updateDirectionComboBox2();
-                }
+                other = p;
+                labelOtherPlace.setText(other.toString());
+                updateDirectionComboBox2();
             }
 
             @Override
@@ -162,19 +159,22 @@ public class PathConnectDialog extends ActionDialog{
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
 
-    private final static String ONE_WAY_PATH_STR =  "one way";
+    private final static String ONE_WAY_PATH_STR =  "one-way";
 
     /**
-     * Fills the combo box only with directions thar aren't occupied yet
+     * Fills the combo box with directions that aren't occupied yet
      */
     private void updateDirectionComboBox2() {
         directionComboBox2.removeAllItems();
-        if(other != null)
+        if(other != null){
             for(String s: Path.directions){
-                Path pa = other.getExit(s);
-                if(s.equals("-")) s = ONE_WAY_PATH_STR;
-                if(pa == null) directionComboBox2.addItem(s);
+                if(s.equals("-")) {
+                    directionComboBox2.addItem(ONE_WAY_PATH_STR);
+                } else if(other.getExit(s).isEmpty()) {
+                    directionComboBox2.addItem(s);
+                }
             }
+        }
     }
 
     /**
@@ -188,14 +188,7 @@ public class PathConnectDialog extends ActionDialog{
             if(dir1.equals(ONE_WAY_PATH_STR)) dir1 = "-";
             if(dir2.equals(ONE_WAY_PATH_STR)) dir2 = "-";
 
-            boolean exit_available_1 = place.getExit(dir1) == null;
-            boolean exit_available_2 = other.getExit(dir2) == null;
-
-            // if both exits are available
-            if(exit_available_1 && exit_available_2)
-                place.connectPath(new Path(place, dir1, other, dir2));
-            // else show message
-            else JOptionPane.showMessageDialog(this, "Couldn't connect path, an exit of a place is occupied");
+            place.connectPath(new Path(place, dir1, other, dir2));
         }
     }
 }

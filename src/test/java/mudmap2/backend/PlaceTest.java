@@ -408,14 +408,14 @@ public class PlaceTest {
         Place instance = new Place("MyPlace", 0, 0, layer);
         Place p2 = new Place("Other Place", 1, 0, layer);
 
-        assertNull(instance.getExit("n"));
+        assertTrue(instance.getExit("n").isEmpty());
 
         String dir1 = "n";
         String dir2 = "s";
         Path p = new Path(p2, dir1, instance, dir2);
         instance.connectPath(p);
-        Path result = instance.getExit(dir2);
-        assertEquals(p, result);
+        HashSet<Path> result = instance.getExit(dir2);
+        assertTrue(result.contains(p));
     }
 
     /**
@@ -604,16 +604,16 @@ public class PlaceTest {
         instance.connectPath(p1);
         instance.connectPath(p2);
 
-        Path result = instance.getPathTo("ne");
-        assertNull(result);
+        HashSet<Path> result = instance.getPathsTo("ne");
+        assertTrue(result.isEmpty());
 
-        result = instance.getPathTo("n");
-        assertNotNull(result);
-        assertEquals(p1, result);
+        result = instance.getPathsTo("n");
+        assertFalse(result.isEmpty());
+        assertTrue(result.contains(p1));
 
-        result = instance.getPathTo("w");
-        assertNotNull(result);
-        assertEquals(p2, result);
+        result = instance.getPathsTo("w");
+        assertFalse(result.isEmpty());
+        assertTrue(result.contains(p2));
     }
 
     /**

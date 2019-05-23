@@ -98,7 +98,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX(), parent.getCursorY() + 1);
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("n") == null && other.getExit("s") == null) { // if exits aren't occupied
+                        if (place.getExit("n").isEmpty() && other.getExit("s").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "n", other, "s"));
                         }
                     }
@@ -107,7 +107,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY() + 1);
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("ne") == null && other.getExit("sw") == null) { // if exits aren't occupied
+                        if (place.getExit("ne").isEmpty() && other.getExit("sw").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "ne", other, "sw"));
                         }
                     }
@@ -118,7 +118,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY());
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("e") == null && other.getExit("w") == null) { // if exits aren't occupied
+                        if (place.getExit("e").isEmpty() && other.getExit("w").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "e", other, "w"));
                         }
                     }
@@ -127,7 +127,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY() - 1);
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("se") == null && other.getExit("nw") == null) { // if exits aren't occupied
+                        if (place.getExit("se").isEmpty() && other.getExit("nw").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "se", other, "nw"));
                         }
                     }
@@ -138,7 +138,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX(), parent.getCursorY() - 1);
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("s") == null && other.getExit("n") == null) { // if exits aren't occupied
+                        if (place.getExit("s").isEmpty() && other.getExit("n").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "s", other, "n"));
                         }
                     }
@@ -147,7 +147,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY() - 1);
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("sw") == null && other.getExit("ne") == null) { // if exits aren't occupied
+                        if (place.getExit("sw").isEmpty() && other.getExit("ne").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "sw", other, "ne"));
                         }
                     }
@@ -158,7 +158,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY());
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("w") == null && other.getExit("e") == null) { // if exits aren't occupied
+                        if (place.getExit("w").isEmpty() && other.getExit("e").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "w", other, "e"));
                         }
                     }
@@ -167,7 +167,7 @@ public class TabKeyListener implements KeyListener {
                     place = parent.getSelectedPlace();
                     other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY() + 1);
                     if (place != null && other != null) { // if places exist
-                        if (place.getExit("nw") == null && other.getExit("se") == null) { // if exits aren't occupied
+                        if (place.getExit("nw").isEmpty() && other.getExit("se").isEmpty()) { // if exits aren't occupied
                             place.connectPath(new Path(place, "nw", other, "se"));
                         }
                     }
@@ -251,65 +251,41 @@ public class TabKeyListener implements KeyListener {
             }
         } else if (e.isAltDown() || e.isAltGraphDown()) { // alt or altgr key pressed
             final Place place = parent.getSelectedPlace();
-            Path path;
+            HashSet<Path> paths;
 
             if (place != null) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_NUMPAD8:
                     case KeyEvent.VK_UP:
                     case KeyEvent.VK_W: // removePlace path to direction 'n'
-                        path = place.getPathTo("n");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("n"));
                         break;
                     case KeyEvent.VK_NUMPAD9: // removePlace path to direction 'ne'
-                        path = place.getPathTo("ne");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("ne"));
                         break;
                     case KeyEvent.VK_NUMPAD6:
                     case KeyEvent.VK_RIGHT:
                     case KeyEvent.VK_D: // removePlace path to direction 'e'
-                        path = place.getPathTo("e");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("e"));
                         break;
                     case KeyEvent.VK_NUMPAD3: // removePlace path to direction 'se'
-                        path = place.getPathTo("se");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("se"));
                         break;
                     case KeyEvent.VK_NUMPAD2:
                     case KeyEvent.VK_DOWN:
                     case KeyEvent.VK_S: // removePlace path to direction 's'
-                        path = place.getPathTo("s");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("s"));
                         break;
                     case KeyEvent.VK_NUMPAD1: // removePlace path to direction 'sw'
-                        path = place.getPathTo("sw");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("sw"));
                         break;
                     case KeyEvent.VK_NUMPAD4:
                     case KeyEvent.VK_LEFT:
                     case KeyEvent.VK_A: // removePlace path to direction 'w'
-                        path = place.getPathTo("w");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("w"));
                         break;
                     case KeyEvent.VK_NUMPAD7: // removePlace path to direction 'nw'
-                        path = place.getPathTo("nw");
-                        if (path != null) {
-                            place.removePath(path);
-                        }
+                        place.removePaths(place.getPathsTo("nw"));
                         break;
                 }
             }

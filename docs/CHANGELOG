@@ -1,3 +1,6 @@
+2.5.4
+- exits of each place can now be connected more than once
+
 2.5.3
 - fixed: exported maps were shifted by 1/2 in both directions
 - fixed: the place cursor was shown on some exported maps

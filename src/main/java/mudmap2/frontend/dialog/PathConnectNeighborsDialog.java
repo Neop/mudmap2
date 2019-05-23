@@ -73,11 +73,11 @@ public class PathConnectNeighborsDialog extends ActionDialog{
                     String dir = Path.getDir(x, y);
 
                     // if exit of _place available
-                    if(place.getExit(dir) == null){
+                    if(place.getExit(dir).isEmpty()){
                         Place neighbor = layer.get(place.getX() + x, place.getY() + y);
 
                         // if exit of neighbor available
-                        if(neighbor != null && neighbor.getExit(Path.getOppositeDir(dir)) == null){
+                        if(neighbor != null && neighbor.getExit(Path.getOppositeDir(dir)).isEmpty()){
                             JCheckBox checkbox = new JCheckBox("[" + dir + "] " + neighbor);
                             constraints.gridy++;
                             add(checkbox, constraints);

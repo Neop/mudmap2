@@ -196,23 +196,24 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
-     * Gets the path connected to an exit
+     * Gets the paths connected to an exit
      * @param dir exit direction
-     * @return path connected to that exit or null
+     * @return set of paths connected to that exit
      */
-    public Path getExit(final String dir) {
+    public HashSet<Path> getExit(final String dir) {
+        HashSet<Path> ret = new HashSet<>();
         for (final Path path : paths) {
             if (path.getExit(this).equals(dir)) {
-                return path;
+                ret.add(path);
             }
         }
-        return null;
+        return ret;
     }
 
     /**
-     * Gets the path to a place, if available
+     * Gets the paths to a place
      * @param place a place that this place is connected to
-     * @return paths to place or empty set
+     * @return paths to place
      */
     public HashSet<Path> getPaths(final Place place) {
         final HashSet<Path> ret = new HashSet<>();
@@ -243,12 +244,23 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
     }
 
     /**
+     * Removes a set of paths
+     * @param paths set of paths
+     */
+    public void removePaths(final HashSet<Path> paths){
+        paths.removeAll(paths);
+        for(Path path: paths){
+            path.getOtherPlace(this).paths.remove(path);
+        }
+        callWorldChangeListeners();
+    }
+
+    /**
      * Connects a place to another one tht is specified in path
      * If 'this place' is not in path an exception will be thrown
      * @param path
-     * @return true, if successfully connected
      */
-    public boolean connectPath(final Path path) throws RuntimeException, NullPointerException {
+    public void connectPath(final Path path) throws RuntimeException, NullPointerException {
         final Place[] pp = path.getPlaces();
         Place other;
 
@@ -257,7 +269,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
         } else if (pp[1] == this) {
             other = pp[0];
         } else {
-            throw new RuntimeException("This place is not specified in given path");
+            throw new RuntimeException("Wrong place in given path");
         }
 
         // check whether other place is null
@@ -270,48 +282,25 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
             throw new RuntimeException("Can not connect path to the same exit of one place");
         }
 
-        boolean exitOccupied = false;
-        String exitThis = path.getExit(this);
-
-        // check if exit is already connected to a path
-        for (final Path p : paths) {
-            if (p.getExit(this).equals(exitThis)) {
-                exitOccupied = true;
-                break;
-            }
-        }
-        // check if exit of other place is already connected to a path
-        if (!exitOccupied) {
-            exitThis = path.getExit(other);
-            for (final Path p : other.paths) {
-                if (p.getExit(other).equals(exitThis)) {
-                    exitOccupied = true;
-                    break;
-                }
-            }
-
-            if (!exitOccupied) {
-                paths.add(path);
-                other.paths.add(path);
-            }
-        }
+        paths.add(path);
+        other.paths.add(path);
 
         callWorldChangeListeners();
-        return !exitOccupied;
     }
 
     /**
-     * Gets tha path that is connected to dir or null
-     * @param dir
-     * @return
+     * Get a set of paths connected to exit
+     * @param dir exit direction
+     * @return set of paths or empty set
      */
-    public Path getPathTo(final String dir) {
+    public HashSet<Path> getPathsTo(final String dir) {
+        HashSet<Path> ret = new HashSet<>();
         for (final Path pa : paths) {
             if (pa.getExit(this).equals(dir)) {
-                return pa;
+                ret.add(pa);
             }
         }
-        return null;
+        return ret;
     }
 
     /**

@@ -134,7 +134,7 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
                             }
 
                             // if exits aren't occupied yet -> add menu item
-                            if (place.getPathTo(dir1) == null && ((Place) neighbor).getPathTo(dir2) == null) {
+                            if (place.getPathsTo(dir1).isEmpty() && ((Place) neighbor).getPathsTo(dir2).isEmpty()) {
                                 final JMenuItem mi_path_connect = MenuHelper.addMenuItem(mPathConnect, StringHelper.join("[", dir1, "] ", ((Place) neighbor).getName()), new ConnectPathActionListener(place, (Place) neighbor, dir1, dir2));
 
                                 // add accelerator

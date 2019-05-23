@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mudmap2.backend.PlaceGroup;
@@ -244,8 +245,19 @@ public class WorldFileDefaultTest {
         assertTrue(path0r != path1r);
         assertTrue(path0r == path2r || path0r == path3r);
         assertTrue(path1r == path2r || path1r == path3r);
-        assertEquals(pl0r.getPathTo("n"), pl1r.getPathTo("s"));
-        assertEquals(pl0r.getPathTo("w"), pl1r.getPathTo("e"));
+
+        HashSet<Path> pl0rn = pl0r.getPathsTo("n");
+        HashSet<Path> pl0rw = pl0r.getPathsTo("w");
+        HashSet<Path> pl1rs = pl1r.getPathsTo("s");
+        HashSet<Path> pl1re = pl1r.getPathsTo("e");
+        assertEquals(1, pl0rn.size());
+        assertEquals(1, pl0rw.size());
+        assertEquals(1, pl1rs.size());
+        assertEquals(1, pl1re.size());
+        assertEquals(pl0rn.toArray(new Path[1])[0], pl1rs.toArray(new Path[1])[0]);
+        assertEquals(pl0rw.toArray(new Path[1])[0], pl1re.toArray(new Path[1])[0]);
+        //assertEquals(pl0r.getPathTo("n"), pl1r.getPathTo("s"));
+        //assertEquals(pl0r.getPathTo("w"), pl1r.getPathTo("e"));
 
         assertEquals(1, pl0r.getChildren().size());
         assertEquals(0, pl1r.getChildren().size());
