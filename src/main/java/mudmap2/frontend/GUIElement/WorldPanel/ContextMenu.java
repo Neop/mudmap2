@@ -23,7 +23,6 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
-import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 import mudmap2.frontend.dialog.PlaceSelectionDialog;
@@ -90,8 +89,6 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
                 } else {
                     MenuHelper.addMenuItem(this, "*Remove places", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new PlaceRemoveDialog(rootFrame, parent.getWorld(), placeGroup), "Remove all selected places");
                 }
-
-                MenuHelper.addMenuItem(this, "Edit comments", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), new PlaceCommentDialog(rootFrame, place));
 
                 if (placeGroup.isEmpty()) {
                     MenuHelper.addMenuItem(this, "Edit place group", new PlaceGroupDialog(rootFrame, parent.getWorld(), place), "Edit the place group of this place");

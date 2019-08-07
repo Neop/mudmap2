@@ -21,7 +21,10 @@
  */
 package mudmap2.frontend.dialog;
 
-import java.awt.GridLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -33,9 +36,12 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import mudmap2.backend.PlaceGroup;
 import mudmap2.backend.Layer;
@@ -66,6 +72,9 @@ public class PlaceDialog extends ActionDialog {
     JComboBox<PlaceGroup> comboboxPlaceGroup;
     JComboBox<InformationColor> comboboxInfoColor;
     JSpinner spinnerRecLvlMin, spinnerRecLvlMax;
+    // comment box
+    JTextArea commentArea;
+    JScrollPane scrollPane;
 
     /**
      * Creates a dialog to modify a place
@@ -106,27 +115,41 @@ public class PlaceDialog extends ActionDialog {
      */
     @Override
     protected void create(){
-        setLayout(new GridLayout(0, 2, 4, 4));
+        setLayout(new GridBagLayout());
+        
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.insets = new Insets(4, 4, 4, 4);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 1.0;
 
-        add(new JLabel("Name"));
+        add(new JLabel("Name"), constraints);
+        constraints.gridx++;
         if(place != null) textfieldName = new JTextField(place.getName());
         else textfieldName = new JTextField();
-        add(textfieldName);
+        add(textfieldName, constraints);
 
         placeGroupNull = new PlaceGroup("none", null);
 
-        add(new JLabel("Place group"));
+        constraints.gridx = 0;
+        constraints.gridy++;
+        add(new JLabel("Place group"), constraints);
         comboboxPlaceGroup = new JComboBox<>();
         comboboxPlaceGroup.addItem(placeGroupNull);
         for(PlaceGroup a : world.getPlaceGroups()) comboboxPlaceGroup.addItem(a);
         if(place != null && place.getPlaceGroup() != null) comboboxPlaceGroup.setSelectedItem(place.getPlaceGroup());
-        add(comboboxPlaceGroup);
+        constraints.gridx++;
+        add(comboboxPlaceGroup, constraints);
 
-        add(new JLabel("Colored info ring"));
+        constraints.gridx = 0;
+        constraints.gridy++;
+        add(new JLabel("Colored info ring"), constraints);
         comboboxInfoColor = new JComboBox<>();
         for(InformationColor rl : world.getInformationColors()) comboboxInfoColor.addItem(rl);
         if(place != null && place.getInfoRing() != null) comboboxInfoColor.setSelectedItem(place.getInfoRing());
-        add(comboboxInfoColor);
+        constraints.gridx++;
+        add(comboboxInfoColor, constraints);
         
         Integer min_lvl = -1, max_lvl = -1;
         if(place != null){
@@ -134,14 +157,9 @@ public class PlaceDialog extends ActionDialog {
             max_lvl = place.getRecLevelMax();
         }
         
-        add(new JLabel("Minimal level"));
-        spinnerRecLvlMin = new JSpinner();
-        spinnerRecLvlMin.setModel(new SpinnerNumberModel(max(min_lvl, 0), 0, 1000, 1));
-        add(spinnerRecLvlMin);
-        if(min_lvl < 0) spinnerRecLvlMin.setEnabled(false);
-
-        add(new JLabel());
-        add(checkboxLvlMin = new JCheckBox("Show min level"));
+        constraints.gridx = 0;
+        constraints.gridy++;
+        add(checkboxLvlMin = new JCheckBox("Show minimum level:"), constraints);
         checkboxLvlMin.setSelected(min_lvl >= 0);
         checkboxLvlMin.addActionListener(new ActionListener() {
             @Override
@@ -149,15 +167,15 @@ public class PlaceDialog extends ActionDialog {
                 spinnerRecLvlMin.setEnabled(((JCheckBox) ae.getSource()).isSelected());
             }
         });
+        spinnerRecLvlMin = new JSpinner();
+        spinnerRecLvlMin.setModel(new SpinnerNumberModel(max(min_lvl, 0), 0, 1000, 1));
+        constraints.gridx++;
+        add(spinnerRecLvlMin, constraints);
+        if(min_lvl < 0) spinnerRecLvlMin.setEnabled(false);
 
-        add(new JLabel("Maximum level"));
-        spinnerRecLvlMax = new JSpinner();
-        spinnerRecLvlMax.setModel(new SpinnerNumberModel(max(max_lvl, 0), 0, 1000, 1));
-        add(spinnerRecLvlMax);
-        if(max_lvl < 0) spinnerRecLvlMax.setEnabled(false);
-
-        add(new JLabel());
-        add(checkboxLvlMax = new JCheckBox("Show max level"));
+        constraints.gridx = 0;
+        constraints.gridy++;
+        add(checkboxLvlMax = new JCheckBox("Show maximum level:"), constraints);
         checkboxLvlMax.setSelected(max_lvl >= 0);
         checkboxLvlMax.addActionListener(new ActionListener() {
             @Override
@@ -165,9 +183,39 @@ public class PlaceDialog extends ActionDialog {
                 spinnerRecLvlMax.setEnabled(((JCheckBox) ae.getSource()).isSelected());
             }
         });
+        spinnerRecLvlMax = new JSpinner();
+        spinnerRecLvlMax.setModel(new SpinnerNumberModel(max(max_lvl, 0), 0, 1000, 1));
+        constraints.gridx++;
+        add(spinnerRecLvlMax, constraints);
+        if(max_lvl < 0) spinnerRecLvlMax.setEnabled(false);
+        
+        
+        // comment box
+        commentArea = new JTextArea(place.getComments());
+        commentArea.setLineWrap(true);
+        commentArea.setWrapStyleWord(true);
+
+        scrollPane = new JScrollPane(commentArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); 
+        scrollPane.setPreferredSize(new Dimension(100, 200));
+        
+        constraints.gridx = 0;
+        constraints.gridy++;
+        constraints.gridwidth = 2;
+        add(new JLabel("Comments:"), constraints);
+        
+        constraints.gridy++;
+        constraints.weighty = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        add(scrollPane, constraints);
+        
+        constraints.gridwidth = 1;
+        constraints.weighty = 0;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
         
         JButton button_cancel = new JButton("Cancel");
-        add(button_cancel);
+        constraints.gridx = 0;
+        constraints.gridy++;
+        add(button_cancel, constraints);
         button_cancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -176,7 +224,8 @@ public class PlaceDialog extends ActionDialog {
         });
 
         JButton button_ok = new JButton("Ok");
-        add(button_ok);
+        constraints.gridx++;
+        add(button_ok, constraints);
         getRootPane().setDefaultButton(button_ok);
         button_ok.addActionListener(new ActionListener() {
             @Override
@@ -216,20 +265,27 @@ public class PlaceDialog extends ActionDialog {
                 if(place == null) layer.put(place = new Place(textfieldName.getText(), px, py, layer));
                 else place.setName(textfieldName.getText());
 
+                // set place group
                 PlaceGroup a = (PlaceGroup) comboboxPlaceGroup.getSelectedItem();
                 place.setPlaceGroup(a != placeGroupNull ? a : null); // replace null group with null
                 place.setInfoRing((InformationColor) comboboxInfoColor.getSelectedItem());
 
+                // set minimum level
                 if(checkboxLvlMin.isSelected()){
                     place.setRecLevelMin((Integer) spinnerRecLvlMin.getValue());
                 } else {
                     place.setRecLevelMin(-1);
                 }
+                
+                // set maximum level
                 if(checkboxLvlMax.isSelected()){
                     place.setRecLevelMax((Integer) spinnerRecLvlMax.getValue());
                 } else {
                     place.setRecLevelMax(-1);
                 }
+                
+                // set comments
+                place.setComments(commentArea.getText());
             } catch (Layer.PlaceNotInsertedException ex) {
                 Logger.getLogger(PlaceDialog.class.getName()).log(Level.SEVERE, null, ex);
             }

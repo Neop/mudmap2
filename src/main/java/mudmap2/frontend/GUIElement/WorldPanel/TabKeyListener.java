@@ -14,7 +14,6 @@ import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.frontend.dialog.PathConnectDialog;
-import mudmap2.frontend.dialog.PlaceCommentDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 import mudmap2.frontend.dialog.placeGroup.PlaceGroupDialog;
@@ -361,16 +360,6 @@ public class TabKeyListener implements KeyListener {
                             if (dlg.getPlacesRemoved()) {
                                 parent.placeGroupReset();
                             }
-                        }
-                    }
-                    break;
-                // edit place comments
-                case KeyEvent.VK_C:
-                    if (parent.isCursorEnabled()) {
-                        final Place place = parent.getSelectedPlace();
-                        if (place != null) {
-                            new PlaceCommentDialog(rootFrame, place).setVisible(true);
-                            parent.callStatusUpdateListeners();
                         }
                     }
                     break;
