@@ -192,6 +192,9 @@ public class PathColorListDialog extends ListDialog {
         // clear entries in world
         world.getPathColors().clear();
 
+        world.setPathColorStd(entryList.get(0).first);
+        world.setPathColorNstd(entryList.get(1).first);
+
         // start after second entry
         for(int i = 2; i < entryList.size(); ++i){
             Pair<Color, String> element = entryList.get(i);

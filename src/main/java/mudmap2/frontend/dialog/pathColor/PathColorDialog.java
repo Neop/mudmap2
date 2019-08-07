@@ -90,7 +90,7 @@ public class PathColorDialog extends ActionDialog {
         constraints.gridy = 0;
         constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        contentPanel.add(new JLabel("Description"), constraints);
+        contentPanel.add(new JLabel("Exit directions"), constraints);
         constraints.gridx = 1;
         constraints.gridwidth = 2;
 
@@ -113,13 +113,15 @@ public class PathColorDialog extends ActionDialog {
         colorChooserButton = new ColorChooserButton(getParent(), color);
         contentPanel.add(colorChooserButton, constraints);
 
-        constraints.gridy++;
-        constraints.weightx = 2;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        contentPanel.add(new JLabel("<html>Specify all exits you like to associate with this color in the text field<br>"
-                                    + "as a comma separated list. You may use '-' for one-way paths as well as<br>"
-                                    + "self-defined exits.<br>"
-                                    + "Example: n,se,nw,u,d"), constraints);
+        if(!lockTextEntry){
+            constraints.gridy++;
+            constraints.weightx = 2;
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            contentPanel.add(new JLabel("<html>Specify all exits you like to associate with this color in the text field<br>"
+                                        + "as a comma separated list. You may use '-' for one-way paths as well as<br>"
+                                        + "self-defined exits.<br>"
+                                        + "Example: n,se,nw,u,d"), constraints);
+        }
 
 
         final JPanel buttonPanel = new JPanel();
