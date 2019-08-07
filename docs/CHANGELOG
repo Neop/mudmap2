@@ -1,3 +1,4 @@
+- comment text is now shown on the place tile (suggestion #37)
 - changed place tile flags: Ch -> M (map child relation), Pa -> M (map parent relation), Co -> C (Comment)
 
 2.5.4

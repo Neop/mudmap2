@@ -55,6 +55,7 @@ public class MapPainterDefault implements MapPainter {
     static final int TILE_BORDER_WIDTH = 10;
     static final int EXIT_RADIUS = 5;
 
+    static final String STR_INFO_COMMENT = "C: ";
     static final String STR_INFO_MAP_LINK = "Map: ";
     static final String STR_INFO_LEVEL = "lvl: ";
 
@@ -594,9 +595,6 @@ public class MapPainterDefault implements MapPainter {
 
                     tilePositions.add(new Pair<>(placeXpx, placeYpx));
 
-                    // number of drawn text lines
-                    int lineNum = 0;
-
                     // draw place group color
                     if(curPlace.getPlaceGroup() != null){
                         g.setColor(curPlace.getPlaceGroup().getColor());
@@ -652,8 +650,9 @@ public class MapPainterDefault implements MapPainter {
                             text.add(levelString);
                         }
 
+                        // TODO: I wish I could use bold/italic formatting for the info strings...
                         // parents
-                        if(lineNum < maxLines && !curPlace.getParents().isEmpty()){
+                        if(!curPlace.getParents().isEmpty()){
                             int parentsNum = curPlace.getParents().size();
                             String paStr = STR_INFO_MAP_LINK;
 
@@ -666,7 +665,7 @@ public class MapPainterDefault implements MapPainter {
                         }
 
                         // children
-                        if(lineNum < maxLines && !curPlace.getChildren().isEmpty()){
+                        if(!curPlace.getChildren().isEmpty()){
                             int childrenNum = curPlace.getChildren().size();
                             String chStr = STR_INFO_MAP_LINK;
 
@@ -677,18 +676,21 @@ public class MapPainterDefault implements MapPainter {
                             }
                             text.add(chStr);
                         }
+                        
+                        // comments
+                        if(!curPlace.getComments().isEmpty()){
+                            text.add(STR_INFO_COMMENT + curPlace.getComments());
+                        }
 
                         // flags
-                        if(lineNum < maxLines){
-                            // place has comments
-                            if(!curPlace.getComments().isEmpty()) flags += STR_FLAG_COMMENT;
-                            if(!curPlace.getChildren().isEmpty() || !curPlace.getParents().isEmpty()) flags += STR_FLAG_MAP_LINK;
+                        // place has comments
+                        if(!curPlace.getComments().isEmpty()) flags += STR_FLAG_COMMENT;
+                        if(!curPlace.getChildren().isEmpty() || !curPlace.getParents().isEmpty()) flags += STR_FLAG_MAP_LINK;
 
-                            // other flags
-                            for(Map.Entry<String, Boolean> flag: curPlace.getFlags().entrySet()){
-                                if(flag.getValue()) flags += flag.getKey().toUpperCase();
-                                if(fm.stringWidth(flags) >= tileSize - 2 * tileBorderWidthScaled) break;
-                            }
+                        // other flags
+                        for(Map.Entry<String, Boolean> flag: curPlace.getFlags().entrySet()){
+                            if(flag.getValue()) flags += flag.getKey().toUpperCase();
+                            if(fm.stringWidth(flags) >= tileSize - 2 * tileBorderWidthScaled) break;
                         }
                     }
 
@@ -786,7 +788,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // draw exits
-                    if(tileSize >= 20 && (exitUp || exitDown) && drawText && lineNum <= maxLines){
+                    if(tileSize >= 20 && (exitUp || exitDown) && drawText){
                         // have some arrows: ⬆⬇ ↑↓
                         exits = "" + (exitnstd ? "+" : "") + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");
                     }
