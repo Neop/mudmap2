@@ -2,6 +2,7 @@
 - integrated place comment box into place dialog
 - changed place tile flags: Ch -> M (map child relation), Pa -> M (map parent relation), Co -> C (Comment)
 - fixed: path color dialog did not save changes for cardinal and non-cardinal direction entries
+- fixed: some translation / naming issues
 
 2.5.4
 - exits of each place can now be connected more than once

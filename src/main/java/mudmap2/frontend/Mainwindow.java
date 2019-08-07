@@ -179,9 +179,9 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
 
         //menu entries: World
         menuWorldEditWorld = MenuHelper.addMenuItem(menuWorld, "Edit World", "edit_world", this);
-        menuWorldPathColors = MenuHelper.addMenuItem(menuWorld, "Path colors", "path_colors", this);
+        menuWorldPathColors = MenuHelper.addMenuItem(menuWorld, "Path Colors", "path_colors", this);
         menuWorldPlaceGroups = MenuHelper.addMenuItem(menuWorld, "Place Groups", "place_group_dialog", this);
-        menuWorldRiskLevels = MenuHelper.addMenuItem(menuWorld, "Risk Levels", "risk_level_dialog", this);
+        menuWorldRiskLevels = MenuHelper.addMenuItem(menuWorld, "Info Ring Colors", "risk_level_dialog", this);
         menuWorld.addSeparator();
         menuWorldSetHomePosition = MenuHelper.addMenuItem(menuWorld, "Set Home Position", "set_home", this);
         menuWorldGotoHomePosition = MenuHelper.addMenuItem(menuWorld, "Go to Home Position", "goto_home", this);

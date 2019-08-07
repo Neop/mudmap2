@@ -53,7 +53,7 @@ public class InformationColorDialog extends ActionDialog {
      * @param world
      */
     public InformationColorDialog(JFrame parent, World world) {
-        super(parent, "Colored information rings", true);
+        super(parent, "Info ring colors", true);
         this.world = world;
         this.informationColor = null;
     }
