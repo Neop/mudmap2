@@ -55,6 +55,12 @@ public class MapPainterDefault implements MapPainter {
     static final int TILE_BORDER_WIDTH = 10;
     static final int EXIT_RADIUS = 5;
 
+    static final String STR_INFO_MAP_LINK = "Map: ";
+    static final String STR_INFO_LEVEL = "lvl: ";
+
+    static final String STR_FLAG_COMMENT = "C";
+    static final String STR_FLAG_MAP_LINK = "M";
+
     HashSet<Place> selectePlaces = null;
     WorldCoordinate placeSelectionBoxStart = null;
     WorldCoordinate placeSelectionBoxEnd = null;
@@ -642,14 +648,14 @@ public class MapPainterDefault implements MapPainter {
 
                         int reclvlmin = curPlace.getRecLevelMin(), reclvlmax = curPlace.getRecLevelMax();
                         if(reclvlmin > -1 || reclvlmax > -1){
-                            String levelString = "lvl " + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?");
+                            String levelString = STR_INFO_LEVEL + (reclvlmin > -1 ? reclvlmin : "?") + " - " + (reclvlmax > -1 ? reclvlmax : "?");
                             text.add(levelString);
                         }
 
                         // parents
                         if(lineNum < maxLines && !curPlace.getParents().isEmpty()){
                             int parentsNum = curPlace.getParents().size();
-                            String paStr = "Pa" + (parentsNum > 1 ? " (" + curPlace.getParents().size() + "): " : ": ");
+                            String paStr = STR_INFO_MAP_LINK;
 
                             boolean firstParent = true;
                             for(Place parent: curPlace.getParents()){
@@ -662,7 +668,7 @@ public class MapPainterDefault implements MapPainter {
                         // children
                         if(lineNum < maxLines && !curPlace.getChildren().isEmpty()){
                             int childrenNum = curPlace.getChildren().size();
-                            String chStr = "Ch" + (childrenNum > 1 ? " (" + curPlace.getChildren().size() + "): " : ": ");
+                            String chStr = STR_INFO_MAP_LINK;
 
                             boolean firstChild = true;
                             for(Place child: curPlace.getChildren()){
@@ -675,9 +681,8 @@ public class MapPainterDefault implements MapPainter {
                         // flags
                         if(lineNum < maxLines){
                             // place has comments
-                            if(!curPlace.getComments().isEmpty()) flags += "Co";
-                            if(!curPlace.getChildren().isEmpty()) flags += "Ch";
-                            if(!curPlace.getParents().isEmpty()) flags += "Pa";
+                            if(!curPlace.getComments().isEmpty()) flags += STR_FLAG_COMMENT;
+                            if(!curPlace.getChildren().isEmpty() || !curPlace.getParents().isEmpty()) flags += STR_FLAG_MAP_LINK;
 
                             // other flags
                             for(Map.Entry<String, Boolean> flag: curPlace.getFlags().entrySet()){
