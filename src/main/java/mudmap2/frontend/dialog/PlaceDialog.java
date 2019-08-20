@@ -191,7 +191,11 @@ public class PlaceDialog extends ActionDialog {
         
         
         // comment box
-        commentArea = new JTextArea(place.getComments());
+        if(place != null) {
+            commentArea = new JTextArea(place.getComments());
+        } else {
+            commentArea = new JTextArea();
+        }
         commentArea.setLineWrap(true);
         commentArea.setWrapStyleWord(true);
 

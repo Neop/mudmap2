@@ -1,3 +1,6 @@
+2.5.6
+- fixed bug introduced in 2.5.5: could not create new places
+
 2.5.5
 - comment text is now shown on the place tile (suggestion #37)
 - integrated place comment box into place dialog
