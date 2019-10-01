@@ -20,11 +20,10 @@ import java.io.File;
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JRadioButton;
 import javax.swing.filechooser.FileFilter;
 import mudmap2.backend.WorldFileReader.WorldFile;
 import mudmap2.backend.WorldFileReader.WorldFileFilterJSON;
-import mudmap2.backend.WorldFileReader.WorldFileFilterM2W;
+import mudmap2.backend.WorldFileReader.WorldFileFilterM2M;
 import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
 import mudmap2.frontend.WorldTab;
 
@@ -32,14 +31,14 @@ import mudmap2.frontend.WorldTab;
  *
  * @author neop
  */
-public class SaveWorldDialog extends JFileChooser {
+public class SaveMapDialog extends JFileChooser {
     private static final long serialVersionUID = 1L;
 
     WorldTab wt;
 
     ButtonGroup fileTypeGroup;
 
-    public SaveWorldDialog(JFrame parent, WorldTab wt){
+    public SaveMapDialog(JFrame parent, WorldTab wt){
         super();
         if(wt.getWorld().getWorldFile() != null &&
                 !wt.getWorld().getWorldFile().getFilename().isEmpty()){
@@ -49,7 +48,7 @@ public class SaveWorldDialog extends JFileChooser {
         setFileHidingEnabled(false);
 
         FileFilter filter;
-        addChoosableFileFilter(filter = new WorldFileFilterM2W());
+        addChoosableFileFilter(filter = new WorldFileFilterM2M());
         addChoosableFileFilter(new WorldFileFilterJSON());
 
         setFileFilter(filter);
@@ -60,9 +59,9 @@ public class SaveWorldDialog extends JFileChooser {
     public WorldFile getWorldFile(){
         String file = getSelectedFile().getAbsolutePath();
 
-        if(getFileFilter() instanceof WorldFileFilterM2W){
-            if(!file.endsWith(".m2w")){
-                file = file + ".m2w";
+        if(getFileFilter() instanceof WorldFileFilterM2M){
+            if(!file.endsWith(".m2m")){
+                file = file + ".m2m";
             }
         }
 

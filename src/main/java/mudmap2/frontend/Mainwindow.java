@@ -34,6 +34,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -55,10 +56,13 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import mudmap2.backend.Layer;
 
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileList;
 import mudmap2.backend.WorldFileList.WorldFileEntry;
+import mudmap2.backend.WorldFileReader.WorldFile;
+import mudmap2.backend.WorldFileReader.current.WorldFileJSON;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.GUIElement.WorldPanel.MapPainterDefault;
 import mudmap2.frontend.dialog.AboutDialog;
@@ -67,6 +71,7 @@ import mudmap2.frontend.dialog.ExportImageDialog;
 import mudmap2.frontend.dialog.KeyboardShortcutDialog;
 import mudmap2.frontend.dialog.OpenWorldDialog;
 import mudmap2.frontend.dialog.QuickHelpDialog;
+import mudmap2.frontend.dialog.SaveMapDialog;
 import mudmap2.frontend.dialog.SaveWorldDialog;
 import mudmap2.frontend.dialog.UpdateDialog;
 import mudmap2.frontend.dialog.pathColor.PathColorListDialog;
@@ -96,6 +101,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
     JMenuItem menuFileSave;
     JMenuItem menuFileSaveAs;
     JMenuItem menuFileSaveAsImage;
+    JMenuItem menuFileExportLayer;
+    JMenuItem menuFileImportLayer;
 
     JMenuItem menuWorldEditWorld;
     JMenuItem menuWorldPathColors;
@@ -163,9 +170,12 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
         MenuHelper.addMenuItem(menuFile, "Open", KeyEvent.VK_O, KeystrokeHelper.ctrl(KeyEvent.VK_O), new OpenWorldDialog(this));
         final JMenu menuFileOpenRecent = MenuHelper.addMenu(menuFile, "Open Recent World", KeyEvent.VK_R);
         menuFile.addSeparator();
-        menuFileSave = MenuHelper.addMenuItem(menuFile, "Save", "save_world", KeyEvent.VK_S, KeystrokeHelper.ctrl(KeyEvent.VK_S), this);
-        menuFileSaveAs = MenuHelper.addMenuItem(menuFile, "Save As...", "save_world_as", KeystrokeHelper.ctrlAlt(KeyEvent.VK_S), this);
-        menuFileSaveAsImage = MenuHelper.addMenuItem(menuFile, "Export As Image", "export_image", KeyEvent.VK_E, KeystrokeHelper.ctrl(KeyEvent.VK_E), this);
+        menuFileSave = MenuHelper.addMenuItem(menuFile, "Save World", "save_world", KeyEvent.VK_S, KeystrokeHelper.ctrl(KeyEvent.VK_S), this);
+        menuFileSaveAs = MenuHelper.addMenuItem(menuFile, "Save World As...", "save_world_as", KeystrokeHelper.ctrlAlt(KeyEvent.VK_S), this);
+        menuFile.addSeparator();
+        menuFileExportLayer = MenuHelper.addMenuItem(menuFile, "Export Map...", "export_map", this);
+        menuFileImportLayer = MenuHelper.addMenuItem(menuFile, "Import Map...", "import_map", this);
+        menuFileSaveAsImage = MenuHelper.addMenuItem(menuFile, "Export As Image...", "export_image", KeyEvent.VK_E, KeystrokeHelper.ctrl(KeyEvent.VK_E), this);
         menuFile.addSeparator();
         MenuHelper.addMenuItem(menuFile, "Quit", "quit", KeyEvent.VK_Q, KeystrokeHelper.ctrl(KeyEvent.VK_Q), this);
 
@@ -311,6 +321,8 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
         menuFileSave.setEnabled(enabled);
         menuFileSaveAs.setEnabled(enabled);
         menuFileSaveAsImage.setEnabled(enabled);
+        menuFileExportLayer.setEnabled(enabled);
+        menuFileImportLayer.setEnabled(enabled);
 
         //menuWorldCurvedPaths.setEnabled(enabled);
         menuWorldEditWorld.setEnabled(enabled);
@@ -348,7 +360,7 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
             break;
         case "save_world_as":
             if (wt != null) {
-                final SaveWorldDialog dlg = new SaveWorldDialog(Mainwindow.this, wt);
+                final SaveWorldDialog dlg = new SaveWorldDialog(this, wt);
                 final int ret = dlg.showSaveDialog(wt);
                 if (ret == JFileChooser.APPROVE_OPTION) {
                     wt.getWorld().setWorldFile(dlg.getWorldFile());
@@ -356,9 +368,30 @@ public final class Mainwindow extends JFrame implements KeyEventDispatcher, Acti
                 }
             }
             break;
+        case "export_map":
+            if(wt != null) {
+                final SaveMapDialog dlg = new SaveMapDialog(this, wt);
+                final int ret = dlg.showSaveDialog(wt);
+                if(ret == JFileChooser.APPROVE_OPTION) {
+                    WorldFile worldFile = dlg.getWorldFile();
+                    Layer layer = wt.getWorld().getLayer(wt.worldPanel.getPosition().getLayer());
+                    if(layer != null) {
+                        try {
+                            ((WorldFileJSON) worldFile).writeFile(layer);
+                        } catch (IOException ex) {
+                            Logger.getLogger(Mainwindow.class.getName()).log(Level.SEVERE, null, ex);
+                            final String message = "Could not save map: " + ex.getLocalizedMessage();
+                            JOptionPane.showMessageDialog(this, message, "MUD Map error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+            break;
+        case "import_map":
+            break;
         case "export_image":
             if (wt != null) {
-                final ExportImageDialog dlg = new ExportImageDialog(Mainwindow.this, wt);
+                final ExportImageDialog dlg = new ExportImageDialog(this, wt);
                 dlg.setVisible(true);
             }
             break;

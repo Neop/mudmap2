@@ -31,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldFileReader.WorldFileFilterJSON;
+import mudmap2.backend.WorldFileReader.WorldFileFilterM2M;
 import mudmap2.backend.WorldFileReader.WorldFileFilterM2W;
 import mudmap2.backend.WorldManager;
 import mudmap2.frontend.Mainwindow;
@@ -58,6 +59,7 @@ public class OpenWorldDialog implements ActionListener{
 
         FileFilter filter;
         filechooser.addChoosableFileFilter(filter = new WorldFileFilterM2W());
+        filechooser.addChoosableFileFilter(new WorldFileFilterM2M());
         filechooser.addChoosableFileFilter(new WorldFileFilterJSON());
         filechooser.setFileHidingEnabled(false);
 

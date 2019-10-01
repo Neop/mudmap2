@@ -23,18 +23,18 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author neop
  */
-public class WorldFileFilterM2W extends FileFilter {
+public class WorldFileFilterM2M extends FileFilter {
 
     @Override
     public boolean accept(File file) {
         if(file == null) return false;
         if(file.isDirectory()) return true;
-        return file.getName().endsWith(".m2w");
+        return file.getName().endsWith(".m2m");
     }
 
     @Override
     public String getDescription() {
-        return "MUD Map 2 World Files (.m2w)";
+        return "MUD Map 2 Map Files (.m2m)";
     }
 
 }
