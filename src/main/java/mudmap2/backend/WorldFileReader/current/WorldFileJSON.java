@@ -668,12 +668,12 @@ public class WorldFileJSON extends WorldFile {
 
                         JSONObject p1 = new JSONObject();
                         p1.put("p", path.getPlaces()[0].getId());
-                        p1.put("e", path.getExit(path.getPlaces()[0]));
+                        p1.put("e", path.getExitDirections()[0]);
                         pathObj.put(p1);
 
                         JSONObject p2 = new JSONObject();
                         p2.put("p", path.getPlaces()[1].getId());
-                        p2.put("e", path.getExit(path.getPlaces()[1]));
+                        p2.put("e", path.getExitDirections()[1]);
                         pathObj.put(p2);
 
                         pathsArray.put(pathObj);

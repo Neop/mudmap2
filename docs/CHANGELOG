@@ -1,3 +1,8 @@
+2.5.7
+- fixed: second exit not correctly saved if place is connected to itself
+- fixed: second exit not shown if place is connected to itself
+- fixed: path not drawn if place is connected to itself
+
 2.5.6
 - fixed bug introduced in 2.5.5: could not create new places
 

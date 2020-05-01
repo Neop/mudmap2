@@ -706,6 +706,16 @@ public class MapPainterDefault implements MapPainter {
                         for(Path path: curPlace.getPaths()){
                             Place otherPlace = path.getOtherPlace(curPlace);
 
+                            String localExit = path.getExit(curPlace);
+                            String remoteExit;
+                            boolean connectedToSamePlace = false;
+                            if(curPlace != otherPlace) {
+                                remoteExit = path.getExit(otherPlace);
+                            } else { // if place is connected to itself
+                                remoteExit = path.getExitDirections()[1];
+                                connectedToSamePlace = true;
+                            }
+
                             Color colorPlace1 = layer.getWorld().getPathColor(path.getExitDirections()[0]);
                             Color colorPlace2 = layer.getWorld().getPathColor(path.getExitDirections()[1]);
                             if(path.getPlaces()[0] != curPlace) {
@@ -713,12 +723,12 @@ public class MapPainterDefault implements MapPainter {
                                 colorPlace1 = colorPlace2;
                                 colorPlace2 = tmp;
                             }
-
+                            
                             // if both places of a path are on the same layer and at least one of the two places is on the screen
                             // usually the main place (path.getPlaces()[0]) draws the path. If it isn't on screen, the other place draws it
                             if(Objects.equals(otherPlace.getLayer().getId(), layer.getId()) && (path.getPlaces()[0] == curPlace || !isOnScreen(otherPlace))){
-                                Pair<Integer, Integer> exitOffset = getExitOffset(path.getExit(curPlace), tileBorderWidthScaled);
-                                Pair<Integer, Integer> exitOffsetOther = getExitOffset(path.getExit(otherPlace), tileBorderWidthScaled);
+                                Pair<Integer, Integer> exitOffset = getExitOffset(localExit, tileBorderWidthScaled);
+                                Pair<Integer, Integer> exitOffsetOther = getExitOffset(remoteExit, tileBorderWidthScaled);
 
                                 boolean drawCurves = getPathsCurved();
 
@@ -737,13 +747,14 @@ public class MapPainterDefault implements MapPainter {
                                 }
 
                                 if(drawCurves){
-                                    Pair<Double, Double> normal1 = getExitNormal(path.getExit(curPlace));
-                                    Pair<Double, Double> normal2 = getExitNormal(path.getExit(otherPlace));
+                                    Pair<Double, Double> normal1 = getExitNormal(localExit);
+                                    Pair<Double, Double> normal2 = getExitNormal(remoteExit);
 
                                     double dx = exit2x - exit1x;
                                     double dy = exit2y - exit1y;
 
-                                    if(drawCurves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tileSize){
+                                    drawCurves = Math.sqrt(dx * dx + dy * dy) >= 1.5 * tileSize;
+                                    if(drawCurves || connectedToSamePlace){
                                         CubicCurve2D c = new CubicCurve2D.Double();
                                         c.setCurve(// point 1
                                                 exit1x, exit1y,
@@ -765,8 +776,7 @@ public class MapPainterDefault implements MapPainter {
                             // draw exit dots, if tiles are larger than 20
                             if(tileSize >= 20){
                                 g.setColor(colorPlace1);
-                                String exit = path.getExit(curPlace);
-                                switch (exit) {
+                                switch (localExit) {
                                     case "u":
                                         exitUp = true;
                                         break;
@@ -774,7 +784,7 @@ public class MapPainterDefault implements MapPainter {
                                         exitDown = true;
                                         break;
                                     default:
-                                        Pair<Integer, Integer> exitOffset = getExitOffset(exit, tileBorderWidthScaled);
+                                        Pair<Integer, Integer> exitOffset = getExitOffset(localExit, tileBorderWidthScaled);
                                         if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
                                             int exitCircleRadius2 = getExitCircleRadius();
                                             g.fillOval(placeXpx + exitOffset.first - exitCircleRadius2, placeYpx + exitOffset.second - exitCircleRadius2, 2 * exitCircleRadius2, 2 * exitCircleRadius2);
@@ -782,6 +792,27 @@ public class MapPainterDefault implements MapPainter {
                                             exitnstd = true;
                                         }
                                         break;
+                                }
+                                
+                                // if place is connected to itself
+                                if(path.getPlaces()[0] == path.getPlaces()[1]){
+                                    switch (remoteExit) {
+                                        case "u":
+                                            exitUp = true;
+                                            break;
+                                        case "d":
+                                            exitDown = true;
+                                            break;
+                                        default:
+                                            Pair<Integer, Integer> exitOffset = getExitOffset(remoteExit, tileBorderWidthScaled);
+                                            if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
+                                                int exitCircleRadius2 = getExitCircleRadius();
+                                                g.fillOval(placeXpx + exitOffset.first - exitCircleRadius2, placeYpx + exitOffset.second - exitCircleRadius2, 2 * exitCircleRadius2, 2 * exitCircleRadius2);
+                                            } else { // non-standard exit
+                                                exitnstd = true;
+                                            }
+                                            break;
+                                    }
                                 }
                             }
                         }
