@@ -2,6 +2,7 @@
 - changed: context menu in maps side bar, maps can now be removed
 - fixed: buttons in connect-neighbors dialog were not equally sized
 - fixed: side bar in connect dialog was hidden
+- fixed: ScrollLabel now uses system foreground color
 
 2.5.7
 - fixed: second exit not correctly saved if place is connected to itself

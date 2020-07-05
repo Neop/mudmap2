@@ -189,7 +189,7 @@ public final class ScrollLabel extends JPanel implements Runnable{
                 }
             } else if(dtime > min_message_time) nextMessage();
 
-            g.setColor(Color.BLACK);
+            g.setColor(getForeground());
             g.drawString(current_text, x + border, y);
         }
 
