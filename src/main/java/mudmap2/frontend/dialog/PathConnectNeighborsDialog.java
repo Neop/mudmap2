@@ -64,6 +64,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.weightx = 1.0;
+        constraints.gridwidth = 2;
 
         Layer layer = place.getLayer();
         for(int x = -1; x <= 1; ++x){
@@ -88,6 +89,7 @@ public class PathConnectNeighborsDialog extends ActionDialog{
             }
         }
 
+        constraints.gridwidth = 1;
         constraints.gridy++;
         JButton button_cancel = new JButton("Cancel");
         add(button_cancel, constraints);
