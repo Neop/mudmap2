@@ -155,7 +155,7 @@ public class WorldTab extends JPanel implements LayerPanelListener,PlacePanelLis
                 JSplitPane.HORIZONTAL_SPLIT,
                 worldPanel, sidePanel);
         splitPaneCenter.setOneTouchExpandable(true);
-        splitPaneCenter.setDividerLocation(600);
+        splitPaneCenter.setDividerLocation(getWidth() - 100);
         splitPaneCenter.setResizeWeight(1.0);
         add(splitPaneCenter, BorderLayout.CENTER);
 

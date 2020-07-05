@@ -71,7 +71,6 @@ public class PathConnectDialog extends ActionDialog{
         setLayout(new GridBagLayout());
 
         worldtab = new WorldTab(parentFrame, place.getLayer().getWorld(), true);
-        worldtab.getWorldPanel().resetHistory(new WorldCoordinate(place.getLayer().getId(), place.getX(), place.getY()));
         worldtab.getWorldPanel().setCursorForced(true);
         worldtab.getWorldPanel().resetHistory(place.getCoordinate());
         worldtab.getWorldPanel().setFocusForced(false);
@@ -156,6 +155,7 @@ public class PathConnectDialog extends ActionDialog{
         });
 
         pack();
+        setSize(new Dimension(800, 600));
         setLocation(getParent().getX() + (getParent().getWidth() - getWidth()) / 2, getParent().getY() + (getParent().getHeight() - getHeight()) / 2);
     }
 

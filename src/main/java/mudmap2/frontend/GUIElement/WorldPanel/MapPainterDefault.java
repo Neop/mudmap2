@@ -248,9 +248,7 @@ public class MapPainterDefault implements MapPainter {
             case "w":
                 // west
                 ret.first = tileBorderWidthScaled;
-                ret.second = tileSize / else {
-            
-        } 2;
+                ret.second = tileSize / 2;
                 break;
             case "ne":
                 // north-east
