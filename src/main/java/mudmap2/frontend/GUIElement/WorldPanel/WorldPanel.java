@@ -613,12 +613,13 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
     @Override
     public void paintComponent(final Graphics g) {
+        final Layer layer = getWorld().getLayer(getPosition().getLayer());
+        
         mappainter.setSelectedPlaces(placeGroup, placeGroupBoxStart, placeGroupBoxEnd);
         mappainter.selectPlaceAt(getCursorX(), getCursorY());
         mappainter.setCursorVisible(isCursorEnabled());
-
-        final Layer layer = getWorld().getLayer(getPosition().getLayer());
-
+        mappainter.paint(g, (int) getTileSize(), getWidth(), getHeight(), layer, getPosition());
+        
         if (layer == null || layer.isEmpty()) {
             final FontMetrics fm = g.getFontMetrics();
 
@@ -630,8 +631,6 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
             final String strSidebar = "Use the side bar to go to other maps and places";
             g.drawString(strSidebar, (getWidth() - fm.stringWidth(strSidebar)) / 2, getHeight() / 2 + fm.getHeight() * 2);
-        } else {
-            mappainter.paint(g, (int) getTileSize(), getWidth(), getHeight(), layer, getPosition());
         }
     }
 
@@ -766,6 +765,14 @@ public class WorldPanel extends JPanel implements WorldChangeListener {
 
     @Override
     public void worldChanged(final Object source) {
+        Layer layer = world.getLayer(getPosition().getLayer());
+        
+        if(source instanceof Place && (layer == null || layer.isEmpty())){ // if place got added and current layer is empty or doesn't exist
+            pushPosition(((Place) source).getCoordinate());
+        } else if(layer == null) { // if layer got removed
+            gotoHome();
+        }
+        
         repaint();
     }
 

@@ -203,30 +203,7 @@ public class PlacePanel extends JPanel
     @Override
     public void worldChanged(Object source) {
         if(!useKeywords){ // don't update when keywords/search is in use
-            if(source instanceof Layer){
-                if(layerNodes.containsKey((Layer) source)){
-                    layerNodes.get((Layer) source).update();
-                } else { // new layer
-                    update();
-                }
-            } else if(source instanceof Place){
-                Place place = (Place) source;
-                if(placeNodes.containsKey(place)){
-                    placeNodes.get(place).update();
-                } else if(layerNodes.containsKey(place.getLayer())) { // new place
-                    HashSet<Place> places = place.getLayer().getPlaces();
-                    ArrayList<Place> placeList = new ArrayList<>(places);
-                    Collections.sort(placeList, new AlphanumComparator<>());
-
-                    Integer pos = placeList.indexOf(place);
-
-                    PlaceTreeNode placeNode = new PlaceTreeNode(place);
-                    placeNodes.put(place, placeNode);
-                    layerNodes.get(place.getLayer()).insert(placeNode, pos);
-
-                    ((DefaultTreeModel) tree.getModel()).reload();
-                }
-            }
+            update();
         }
     }
 

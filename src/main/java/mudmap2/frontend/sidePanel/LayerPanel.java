@@ -32,16 +32,18 @@ import java.util.HashSet;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import mudmap2.backend.Layer;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldChangeListener;
 import mudmap2.frontend.GUIElement.LayerPreviewPanel;
 import mudmap2.utils.AlphanumComparator;
+import mudmap2.utils.MenuHelper;
 
 /**
  *
@@ -51,6 +53,10 @@ public class LayerPanel extends JPanel
         implements ActionListener, KeyListener, WorldChangeListener {
     private static final long serialVersionUID = 1L;
 
+    static final String ACTION_CREATE_LAYER = "create_layer";
+    static final String ACTION_EDIT_LAYER = "edit_layer";
+    static final String ACTION_REMOVE_LAYER = "remove_layer";
+    
     final static Integer PREVIEW_WIDTH_X = 100;
     final static Integer PREVIEW_WIDTH_Y = 100;
 
@@ -61,6 +67,8 @@ public class LayerPanel extends JPanel
     HashSet<LayerPanelListener> layerListeners;
     HashMap<JPanel, Layer> panels;
 
+    Layer popupLayer = null;
+    
     public LayerPanel(World world){
         this.world = world;
 
@@ -69,7 +77,7 @@ public class LayerPanel extends JPanel
 
         setLayout(new BorderLayout());
 
-        JPanel south = new JPanel(new GridLayout(2, 1));
+        JPanel south = new JPanel(new GridLayout(1, 1));
 
         // search box
         textFieldSearch = new JTextField("Search maps");
@@ -82,12 +90,6 @@ public class LayerPanel extends JPanel
             }
         });
         textFieldSearch.addKeyListener(this);
-
-        // add button
-        JButton buttonAdd = new JButton("Add new map");
-        south.add(buttonAdd);
-        buttonAdd.setActionCommand("create_layer");
-        buttonAdd.addActionListener(this);
 
         add(south, BorderLayout.SOUTH);
 
@@ -130,7 +132,9 @@ public class LayerPanel extends JPanel
         Collections.sort(layerList, new AlphanumComparator<>());
 
         Boolean hasKeywords = keyword != null && !keyword.isEmpty();
-        String[] keywords = keyword.toLowerCase().split(" ");
+        String[] keywords;
+        if(keyword != null) keywords = keyword.toLowerCase().split(" ");
+        else keywords = new String[0];
 
         // add layers to content panel
         for(Layer layer: layerList){
@@ -160,11 +164,27 @@ public class LayerPanel extends JPanel
                                 for(LayerPanelListener listener: layerListeners){
                                     listener.layerSelected(layer);
                                 }
-                            } else {
-                                editLayer(layer);
                             }
                         } else if(e.getButton() == MouseEvent.BUTTON3){
-                            editLayer(layer);
+                            showPopupMenu(e, layer);
+                        }
+                    }
+                }
+            });
+            scrollPane.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if(e.getSource() instanceof JPanel && panels.containsKey((JPanel) e.getSource())){
+                        Layer layer = panels.get((JPanel) e.getSource());
+
+                        if(e.getButton() == MouseEvent.BUTTON1){
+                            if(e.getClickCount() == 1){
+                                for(LayerPanelListener listener: layerListeners){
+                                    listener.layerSelected(layer);
+                                }
+                            }
+                        } else if(e.getButton() == MouseEvent.BUTTON3){
+                            showPopupMenu(e, layer);
                         }
                     }
                 }
@@ -201,12 +221,17 @@ public class LayerPanel extends JPanel
         textFieldSearch.requestFocusInWindow();
     }
 
-    private void editLayer(Layer layer){
-        String name = JOptionPane.showInputDialog(this, "Map name", layer.getName());
-        if(name != null && !name.isEmpty()){
-            layer.setName(name);
-            update();
+    private void showPopupMenu(MouseEvent e, Layer layer){
+        popupLayer = layer;
+        
+        JPopupMenu menu = new JPopupMenu();
+        MenuHelper.addMenuItem(menu, "Create", ACTION_CREATE_LAYER, KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), this);
+        if(popupLayer != null){
+            MenuHelper.addMenuItem(menu, "Edit", ACTION_EDIT_LAYER, KeyStroke.getKeyStroke(KeyEvent.VK_E, 0), this);
+            MenuHelper.addMenuItem(menu, "Remove", ACTION_REMOVE_LAYER, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), this);
         }
+        
+        menu.show(e.getComponent(), e.getX(), e.getY());
     }
 
     /**
@@ -228,9 +253,29 @@ public class LayerPanel extends JPanel
     @Override
     public void actionPerformed(ActionEvent e) {
         switch(e.getActionCommand()){
-            case "create_layer":
+            case ACTION_CREATE_LAYER:
                 for(LayerPanelListener listener: layerListeners){
                     listener.createLayer();
+                }
+                break;
+            case ACTION_EDIT_LAYER:
+                if(popupLayer != null){
+                    String name = JOptionPane.showInputDialog(this, "Change map name", popupLayer.getName());
+                    if(name != null && !name.isEmpty()){
+                        popupLayer.setName(name);
+                        update();
+                    }
+                }
+                break;
+            case ACTION_REMOVE_LAYER:
+                if(popupLayer != null){
+                    int result = JOptionPane.showConfirmDialog(this, 
+                            "Do you really want to remove this map? This can not be undone!", 
+                            "Remove map",
+                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if(result == JOptionPane.YES_OPTION){
+                        world.deleteLayer(popupLayer);
+                    }
                 }
                 break;
         }
@@ -239,7 +284,7 @@ public class LayerPanel extends JPanel
     @Override
     public void worldChanged(Object source) {
         // only recreate panel on layer change
-        if(source instanceof Layer){
+        if(source == null || source instanceof Layer){
             update();
         } else {
             revalidate();
@@ -255,8 +300,6 @@ public class LayerPanel extends JPanel
 
     @Override
     public void keyReleased(KeyEvent ke) {
-        int keyCode = ke.getKeyCode();
-
         if(ke.getExtendedKeyCode() == KeyEvent.VK_ESCAPE){
             textFieldSearch.setText("");
             update();

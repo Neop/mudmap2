@@ -219,6 +219,19 @@ public class World implements BreadthSearchGraph {
         addChangeListener(layer);
         callListeners(layer);
     }
+    
+    /**
+     * Deletes a layer and all places on it
+     * @param layer
+     */
+    public void deleteLayer(Layer layer){
+        for(LayerElement elem: layer.getLayerElements()){
+            if(elem instanceof Place) ((Place) elem).removeConnections();
+            layer.remove(elem);
+        }
+        layers.remove(layer.id);
+        callListeners(null);
+    }
 
     /**
      * Creates a new and empty layer

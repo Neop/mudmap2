@@ -122,7 +122,9 @@ public class MapPainterDefault implements MapPainter {
 
                 int xMin = Math.min(x1, x2);
                 int xMax = Math.max(x1, x2);
-                int yMin = Math.min(y1, y2);
+                int yMin = Math.min else {
+            
+        }(y1, y2);
                 int yMax = Math.max(y1, y2);
 
                 if(place.getX() >= xMin && place.getX() <= xMax
@@ -246,7 +248,9 @@ public class MapPainterDefault implements MapPainter {
             case "w":
                 // west
                 ret.first = tileBorderWidthScaled;
-                ret.second = tileSize / 2;
+                ret.second = tileSize / else {
+            
+        } 2;
                 break;
             case "ne":
                 // north-east
@@ -564,6 +568,9 @@ public class MapPainterDefault implements MapPainter {
             g.setColor(backgroundColor);
             g.fillRect(0, 0, (int) graphicsWidth + 1, (int) graphicsHeight + 1);
         }
+        
+        // do not draw anything if layer does not exist or if it is empty
+        if(layer == null || layer.isEmpty()) return;
 
         // ------------------ draw the grid --------------------------------
         if(isGridEnabled()){
