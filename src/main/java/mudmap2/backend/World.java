@@ -51,6 +51,7 @@ public class World implements BreadthSearchGraph {
     // color of path lines and self-defined path colors
     Color pathColorCardinal = new Color(0, 255, 0);
     Color pathColorNonCardinal = new Color(0, 255, 0);
+    Color pathColorUnknown = new Color(255, 0, 0);
     Color tileCenterColor = new Color(207, 190, 134);
     final HashMap<String, Color> pathColors = new HashMap<>();
 
@@ -299,6 +300,14 @@ public class World implements BreadthSearchGraph {
     }
 
     /**
+     * Gets the color for exits to unknown targets
+     * @return path color
+     */
+    public Color getPathColorUnknown() {
+        return pathColorUnknown;
+    }
+    
+    /**
      * Gets the color of an exit direction
      * @param dir exit direction
      * @return path color
@@ -368,6 +377,14 @@ public class World implements BreadthSearchGraph {
 
         pathColorNonCardinal = color;
         callListeners(this);
+    }
+    
+    /**
+     * Sets the color for paths to unknown targets
+     * @param color 
+     */
+    public void setPathColorUnknown(Color color){
+        pathColorUnknown = color;
     }
 
     /**

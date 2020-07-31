@@ -52,8 +52,14 @@ import org.json.*;
 public class WorldFileJSON extends WorldFile {
 
     static Integer versionMajor = 2;
-    static Integer versionMinor = 0;
+    static Integer versionMinor = 1;
 
+    /**
+     * Version history:
+     * 2.0: initial version
+     * 2.1: added pathColUnknown
+     */
+    
     JSONObject fileRoot = null;
 
     HashMap<Integer, Integer> layerIDs;
@@ -166,6 +172,11 @@ public class WorldFileJSON extends WorldFile {
             // pathColNonCardinal
             if(root.has("pathColNonCardinal")){
                 world.setPathColorNstd(hexToCol(root.getString("pathColNonCardinal")));
+            }
+            
+            // pathColUnknown
+            if(root.has("pathColUnknown")){
+                world.setPathColorUnknown(hexToCol(root.getString("pathColUnknown")));
             }
 
             // pathColDefs
@@ -459,7 +470,7 @@ public class WorldFileJSON extends WorldFile {
      * @throws IOException
      */
     private void writeFile(World world, Layer exportLayer) throws IOException {
-        boolean singleLayer = (exportLayer != null);
+        boolean exportSingleLayer = (exportLayer != null);
 
         JSONObject root = new JSONObject();
 
@@ -477,7 +488,7 @@ public class WorldFileJSON extends WorldFile {
         // world name
         root.put("worldName", world.getName());
 
-        if(!singleLayer) {
+        if(!exportSingleLayer) {
             root.put("showPlaceID", world.getShowPlaceId());
 
             // tile center color
@@ -490,6 +501,9 @@ public class WorldFileJSON extends WorldFile {
             }
             if(world.getPathColorNstd() != null){
                 root.put("pathColNonCardinal", colToHex(world.getPathColorNstd()));
+            }
+            if(world.getPathColorUnknown() != null){
+                root.put("pathColUnknown", colToHex(world.getPathColorUnknown()));
             }
             // other path colors
             JSONArray pathColorsArray = new JSONArray();
@@ -507,7 +521,7 @@ public class WorldFileJSON extends WorldFile {
         // information colors
         // filter colors if single layer is exported
         HashSet<InformationColor> infoColsInUse = new HashSet<>();
-        if(singleLayer) {
+        if(exportSingleLayer) {
             for(Place place: exportLayer.getPlaces()){
                 infoColsInUse.add(place.getInfoRing());
             }
@@ -518,7 +532,7 @@ public class WorldFileJSON extends WorldFile {
         root.put("riskLevels", informationColors);
         for(InformationColor infoCol: world.getInformationColors()){
             // if single layer export: check if infoCol is used on layer
-            if(singleLayer && !infoColsInUse.contains(infoCol)) continue;
+            if(exportSingleLayer && !infoColsInUse.contains(infoCol)) continue;
 
             JSONObject rlo = new JSONObject();
             rlo.put("id", infoCol.getId());
@@ -530,7 +544,7 @@ public class WorldFileJSON extends WorldFile {
         // place groups (aka areas)
         // filter place groups if single layer is exported
         HashSet<PlaceGroup> areasInUse = new HashSet<>();
-        if(singleLayer) {
+        if(exportSingleLayer) {
             for(Place place: exportLayer.getPlaces()){
                 areasInUse.add(place.getPlaceGroup());
             }
@@ -558,7 +572,7 @@ public class WorldFileJSON extends WorldFile {
         root.put("areas", areas);
         for(PlaceGroup area: world.getPlaceGroups()){
             // if single layer export: check if area is used on layer
-            if(singleLayer && !areasInUse.contains(area)) continue;
+            if(exportSingleLayer && !areasInUse.contains(area)) continue;
 
             JSONObject areaObj = new JSONObject();
             areaObj.put("id", areaIDs.get(area));
@@ -576,7 +590,7 @@ public class WorldFileJSON extends WorldFile {
         root.put("layers", layers);
         for(Layer layer: world.getLayers()){
             // skip other layers
-            if(singleLayer && layer != exportLayer) continue;
+            if(exportSingleLayer && layer != exportLayer) continue;
 
             if(!layer.getPlaces().isEmpty()){
                 JSONObject layerObj = new JSONObject();
@@ -599,7 +613,7 @@ public class WorldFileJSON extends WorldFile {
         root.put("places", places);
         for(Layer layer: world.getLayers()){
             // skip other layers
-            if(singleLayer && layer != exportLayer) continue;
+            if(exportSingleLayer && layer != exportLayer) continue;
 
             for(Place place: layer.getPlaces()){
                 JSONObject placeObj = new JSONObject();
@@ -659,7 +673,7 @@ public class WorldFileJSON extends WorldFile {
         HashSet<Path> paths = new HashSet<>(); // paths that have already been added
         for(Layer layer: world.getLayers()){
             // skip other layers
-            if(singleLayer && layer != exportLayer) continue;
+            if(exportSingleLayer && layer != exportLayer) continue;
 
             for(Place place: layer.getPlaces()){
                 for(Path path: place.getPaths()){
@@ -683,7 +697,7 @@ public class WorldFileJSON extends WorldFile {
             }
         }
 
-        if(!singleLayer){
+        if(!exportSingleLayer){
             // home position
             WorldCoordinate home = world.getHome();
             JSONObject obj = new JSONObject();

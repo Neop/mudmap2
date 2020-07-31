@@ -68,6 +68,7 @@ public class PathColorListDialog extends ListDialog {
 
         entryList.add(new Pair<>(world.getPathColorStd(), "Cardinal color"));
         entryList.add(new Pair<>(world.getPathColorNstd(), "Non-cardinal color"));
+        entryList.add(new Pair<>(world.getPathColorUnknown(), "Unknown target"));
 
         for(Entry<Integer, String> entry: pathColorList){
             entryList.add(new Pair<>(new Color(entry.getKey()), entry.getValue()));
@@ -194,9 +195,10 @@ public class PathColorListDialog extends ListDialog {
 
         world.setPathColorStd(entryList.get(0).first);
         world.setPathColorNstd(entryList.get(1).first);
+        world.setPathColorUnknown(entryList.get(2).first);
 
-        // start after second entry
-        for(int i = 2; i < entryList.size(); ++i){
+        // start after the predefined entries
+        for(int i = 3; i < entryList.size(); ++i){
             Pair<Color, String> element = entryList.get(i);
             String[] split = element.second.split("[,;]");
             for(String exit: split){

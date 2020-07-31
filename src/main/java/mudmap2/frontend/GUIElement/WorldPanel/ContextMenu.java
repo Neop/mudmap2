@@ -23,6 +23,7 @@ import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.frontend.dialog.PathConnectDialog;
 import mudmap2.frontend.dialog.PathConnectNeighborsDialog;
+import mudmap2.frontend.dialog.PathConnectUnknownDialog;
 import mudmap2.frontend.dialog.PlaceDialog;
 import mudmap2.frontend.dialog.PlaceRemoveDialog;
 import mudmap2.frontend.dialog.PlaceSelectionDialog;
@@ -104,8 +105,10 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
             if (!parent.isPassive()) {
                 final JMenu mPathConnect = MenuHelper.addMenu(mPaths, "Connect", "Connect a path from this place to another one");
                 MenuHelper.addMenuItem(mPathConnect, "Select", KeystrokeHelper.ctrl(KeyEvent.VK_NUMPAD5), new PathConnectDialog(parent.getParentFrame(), place), "Select any place from the map");
-                MenuHelper.addMenuItem(mPathConnect, "Neighbors", new PathConnectNeighborsDialog(rootFrame, place), "Choose from surrounding places");
+                MenuHelper.addMenuItem(mPathConnect, "Neighbors...", new PathConnectNeighborsDialog(rootFrame, place), "Choose from surrounding places");
+                MenuHelper.addMenuItem(mPathConnect, "Unknown...", new PathConnectUnknownDialog(rootFrame, place), "Mark exits to unknown target");
 
+                // create the connect-neighbor menu items:
                 final LinkedList<Place> places = layer.getNeighbors(posX, posY, 1);
                 if (!places.isEmpty()) {
                     mPathConnect.addSeparator();
@@ -157,11 +160,15 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
 
                 for (final Path path : paths) {
                     final Place otherPlace = path.getOtherPlace(place);
-                    MenuHelper.addMenuItem(mPaths, StringHelper.join("Go to [", path.getExit(place), "] ", otherPlace.getName()), new GotoPlaceActionListener(parent, otherPlace));
+                    // handle paths to unknown places differently:
+                    String targetName;
+                    if(path.isTargetUnknown()) targetName = "<unknown place>";
+                    else targetName = otherPlace.getName();
+                    MenuHelper.addMenuItem(mPaths, StringHelper.join("Go to [", path.getExit(place), "] ", targetName), new GotoPlaceActionListener(parent, otherPlace));
 
                     if (!parent.isPassive()) {
                         final String dir = path.getExit(place);
-                        final JMenuItem miPathRemove = MenuHelper.addMenuItem(mPathRemove, StringHelper.join("Remove [", dir, "] ", otherPlace.getName()), new RemovePathActionListener(path));
+                        final JMenuItem miPathRemove = MenuHelper.addMenuItem(mPathRemove, StringHelper.join("Remove [", dir, "] ", targetName), new RemovePathActionListener(path));
 
                         // add accelerator
                         final int dirnum = Path.getDirNum(dir);

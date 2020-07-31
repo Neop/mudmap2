@@ -122,9 +122,7 @@ public class MapPainterDefault implements MapPainter {
 
                 int xMin = Math.min(x1, x2);
                 int xMax = Math.max(x1, x2);
-                int yMin = Math.min else {
-            
-        }(y1, y2);
+                int yMin = Math.min(y1, y2);
                 int yMax = Math.max(y1, y2);
 
                 if(place.getX() >= xMin && place.getX() <= xMax
@@ -729,9 +727,12 @@ public class MapPainterDefault implements MapPainter {
                                 colorPlace2 = tmp;
                             }
                             
+                            // Draw paths
                             // if both places of a path are on the same layer and at least one of the two places is on the screen
                             // usually the main place (path.getPlaces()[0]) draws the path. If it isn't on screen, the other place draws it
-                            if(Objects.equals(otherPlace.getLayer().getId(), layer.getId()) && (path.getPlaces()[0] == curPlace || !isOnScreen(otherPlace))){
+                            if(Objects.equals(otherPlace.getLayer().getId(), layer.getId())
+                                    && (path.getPlaces()[0] == curPlace || !isOnScreen(otherPlace))
+                                    && !path.isTargetUnknown()){
                                 Pair<Integer, Integer> exitOffset = getExitOffset(localExit, tileBorderWidthScaled);
                                 Pair<Integer, Integer> exitOffsetOther = getExitOffset(remoteExit, tileBorderWidthScaled);
 
@@ -780,13 +781,18 @@ public class MapPainterDefault implements MapPainter {
 
                             // draw exit dots, if tiles are larger than 20
                             if(tileSize >= 20){
-                                g.setColor(colorPlace1);
+                                if(path.isTargetUnknown())
+                                    g.setColor(layer.getWorld().getPathColorUnknown());
+                                else
+                                    g.setColor(colorPlace1);
                                 switch (localExit) {
                                     case "u":
                                         exitUp = true;
                                         break;
                                     case "d":
                                         exitDown = true;
+                                        break;
+                                    case "unknown":
                                         break;
                                     default:
                                         Pair<Integer, Integer> exitOffset = getExitOffset(localExit, tileBorderWidthScaled);
@@ -808,6 +814,8 @@ public class MapPainterDefault implements MapPainter {
                                         case "d":
                                             exitDown = true;
                                             break;
+                                        case "unknown":
+                                            break;
                                         default:
                                             Pair<Integer, Integer> exitOffset = getExitOffset(remoteExit, tileBorderWidthScaled);
                                             if(exitOffset.first != tileSize / 2 || exitOffset.second != tileSize / 2){
@@ -824,7 +832,7 @@ public class MapPainterDefault implements MapPainter {
                     }
 
                     // draw exits
-                    if(tileSize >= 20 && (exitUp || exitDown) && drawText){
+                    if(tileSize >= 20 && (exitnstd || exitUp || exitDown) && drawText){
                         // have some arrows: ⬆⬇ ↑↓
                         exits = "" + (exitnstd ? "+" : "") + (exitUp ? "↑" : "") + (exitDown ? "↓" : "");
                     }

@@ -34,6 +34,7 @@ public class Path {
 
     private final Place[] places;
     private final String[] exitdirections;
+    private final Boolean targetUnknown;
 
     /**
      * Constructs a new path between two places
@@ -51,6 +52,8 @@ public class Path {
         exitdirections = new String[2];
         exitdirections[0] = exitdir1;
         exitdirections[1] = exitdir2;
+        
+        targetUnknown = exitdir1.equals("unknown") || exitdir2.equals("unknown");
     }
 
     /**
@@ -211,5 +214,9 @@ public class Path {
         if(str.equals("u") || str.equals("d")) return false;
         for(String dir: directions) if(dir.equals(str)) return true;
         return false;
+    }
+    
+    public Boolean isTargetUnknown(){
+        return targetUnknown;
     }
 }

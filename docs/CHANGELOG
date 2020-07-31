@@ -1,3 +1,7 @@
+2.5.9
+- added: support for exits to unknown places
+- world file version increased to 2.1, new feature "pathColUnknown"
+
 2.5.8
 - changed: context menu in maps side bar, maps can now be removed
 - fixed: buttons in connect-neighbors dialog were not equally sized
