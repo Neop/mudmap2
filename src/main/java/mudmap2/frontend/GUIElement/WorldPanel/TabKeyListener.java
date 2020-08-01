@@ -93,81 +93,97 @@ public class TabKeyListener implements KeyListener {
 
                 case KeyEvent.VK_NUMPAD8:
                 case KeyEvent.VK_UP:
-                    //case KeyEvent.VK_W: // add path to direction 'n'
+                //case KeyEvent.VK_W: // add path to direction 'n'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX(), parent.getCursorY() + 1);
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("n").isEmpty() && other.getExit("s").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("n").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX(), parent.getCursorY() + 1);
+                        if(other != null && other.getExit("s").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "n", other, "s"));
+                        } else {
+                            place.connectPath(new Path(place, "n", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD9: // add path to direction 'ne'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY() + 1);
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("ne").isEmpty() && other.getExit("sw").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("ne").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY() + 1);
+                        if(other != null && other.getExit("sw").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "ne", other, "sw"));
+                        } else {
+                            place.connectPath(new Path(place, "ne", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD6:
                 case KeyEvent.VK_RIGHT:
-                    //case KeyEvent.VK_D: // add path to direction 'e'
+                //case KeyEvent.VK_D: // add path to direction 'e'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY());
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("e").isEmpty() && other.getExit("w").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("e").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY());
+                        if(other != null && other.getExit("w").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "e", other, "w"));
+                        } else {
+                            place.connectPath(new Path(place, "e", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD3: // add path to direction 'se'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY() - 1);
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("se").isEmpty() && other.getExit("nw").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("se").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() + 1, parent.getCursorY() - 1);
+                        if(other != null && other.getExit("nw").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "se", other, "nw"));
+                        } else {
+                            place.connectPath(new Path(place, "se", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD2:
                 case KeyEvent.VK_DOWN:
-                    //case KeyEvent.VK_S: // add path to direction 's'
+                //case KeyEvent.VK_S: // add path to direction 's'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX(), parent.getCursorY() - 1);
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("s").isEmpty() && other.getExit("n").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("s").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX(), parent.getCursorY() - 1);
+                        if(other != null && other.getExit("n").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "s", other, "n"));
+                        } else {
+                            place.connectPath(new Path(place, "s", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD1: // add path to direction 'sw'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY() - 1);
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("sw").isEmpty() && other.getExit("ne").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("sw").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY() - 1);
+                        if(other != null && other.getExit("ne").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "sw", other, "ne"));
+                        } else {
+                            place.connectPath(new Path(place, "sw", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD4:
                 case KeyEvent.VK_LEFT:
-                    //case KeyEvent.VK_A: // add path to direction 'w'
+                //case KeyEvent.VK_A: // add path to direction 'w'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY());
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("w").isEmpty() && other.getExit("e").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("w").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY());
+                        if(other != null && other.getExit("e").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "w", other, "e"));
+                        } else {
+                            place.connectPath(new Path(place, "w", place, "unknown"));
                         }
                     }
                     break;
                 case KeyEvent.VK_NUMPAD7: // add path to direction 'nw'
                     place = parent.getSelectedPlace();
-                    other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY() + 1);
-                    if (place != null && other != null) { // if places exist
-                        if (place.getExit("nw").isEmpty() && other.getExit("se").isEmpty()) { // if exits aren't occupied
+                    if(place != null && place.getExit("nw").isEmpty()) { // if place is selected and exit is not occupied
+                        other = parent.getWorld().getLayer(parent.getPosition().getLayer()).get(parent.getCursorX() - 1, parent.getCursorY() + 1);
+                        if(other != null && other.getExit("se").isEmpty()) { // if neighbor place exists and exit is not occupied
                             place.connectPath(new Path(place, "nw", other, "se"));
+                        } else {
+                            place.connectPath(new Path(place, "nw", place, "unknown"));
                         }
                     }
                     break;
