@@ -266,7 +266,6 @@ public class TabKeyListener implements KeyListener {
             }
         } else if (e.isAltDown() || e.isAltGraphDown()) { // alt or altgr key pressed
             final Place place = parent.getSelectedPlace();
-            HashSet<Path> paths;
 
             if (place != null) {
                 switch (e.getKeyCode()) {

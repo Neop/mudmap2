@@ -248,7 +248,7 @@ public class Place extends LayerElement implements Comparable<Place>, BreadthSea
      * @param paths set of paths
      */
     public void removePaths(final HashSet<Path> paths){
-        paths.removeAll(paths);
+        this.paths.removeAll(paths);
         for(Path path: paths){
             path.getOtherPlace(this).paths.remove(path);
         }
