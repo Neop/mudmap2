@@ -4,14 +4,21 @@ by Neop
 A mapping tool for text-based games like text adventures, MUDs and MUSHs.
 
 License: GPLv3
-Use it on your own risk!
+Use it at your own risk!
+
+![Screenshot](./docs/Screenshot.png)
+
+## Requirements:
+* a PC with Java JRE 7 or newer (tested with Linux and Windows)
 
 ## Links
 MUD Map v2 sources, information and binary packages: [https://github.com/Neop/mudmap2](https://github.com/Neop/mudmap2)
 
-MUD Map v1 sources, v1 + v2 binary packages: [https://sourceforge.net/projects/mudmap/](https://sourceforge.net/projects/mudmap/)
+## Quick start guide
+There is a quick start guide in the help menu explaining the basic features.
 
-MUD Map v1 user manual / quick start guide: [http://mudmap.sourceforge.net/](http://mudmap.sourceforge.net/)
+## Keyboard shortcuts
+You can find a list in the help menu or here: [docs/keyboard_shortcuts.md](docs/keyboard_shortcuts.md)
 
 ## Building MUD Map
 To build MUD Map from source you will need a Java 7 JDK and Maven. The following command compiles MUD Map and creates a JAR file in the 'target' directory:
@@ -34,5 +41,3 @@ java -jar mudmap2-2.x.x.jar
 ## Bugs and problems
 If you encounter any bugs or other problems please write a [bug report on Github](https://github.com/Neop/mudmap2/issues) or send me an e-mail so I can fix it.
 
-## Keyboard shortcuts
-See docs/keyboard_shortcuts.md

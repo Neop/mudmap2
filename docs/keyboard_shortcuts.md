@@ -27,6 +27,17 @@ Note: 'direction keys' are w/a/s/d, the arrow keys and the numberpad numbers (ex
 | direction keys          | move cursor                                  |
 
 
+## Map navigation
+| Key combination         | Effect                                       |
+| ----------------------- | -------------------------------------------- |
+| p                       | Enable / disable place selection cursor      |
+| right click             | Show context menu of the map tile pointed at |
+| context menu key        | Show context menu of selected place          |
+| +/- and page up/down    | Zoom in and out                              |
+| h / home / numpad 5     | Go to home position                          |
+| direction keys          | Move cursor                                  |
+| ctrl + f                | Focus search box in side bar                 |
+
 ## Map manipulation
 
 ### Place creation
@@ -48,7 +59,9 @@ Note: 'direction keys' are w/a/s/d, the arrow keys and the numberpad numbers (ex
 | alt + *direction keys*  | remove all paths to adjacent place         |
 
 ## Place selection
-Warning! copy / paste operations can not be undone! Be sure to save your world before using this.
+You can select several places at once to change a property to a common value or to move / copy them. Selected places are displayed in pale colors. If you cut or copied places blue place cursors will show you where each place will be inserted.
+
+Warning! copy / paste operations can not be undone! Make sure to save your world before using this!
 
 | Key combination          | Effect                                  |
 | ------------------------ | --------------------------------------- |
