@@ -522,6 +522,8 @@ public class MapPainterDefault implements MapPainter {
 
         tileFont = g.getFont();
 
+        if(tileSize <= 0) return; // Too small to draw
+        
         final float selectionStrokeWidth = getTileSelectionStrokeWidth();
         final int tileBorderWidthScaled = getTileBorderWidth();
 
