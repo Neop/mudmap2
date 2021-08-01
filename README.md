@@ -9,7 +9,7 @@ Use it at your own risk!
 ![Screenshot](./docs/Screenshot.png)
 
 ## Requirements:
-* a PC with Java JRE 7 or newer (tested with Linux and Windows)
+* a PC with Java JRE 8 or newer (tested with Linux and Windows)
 
 ## Links
 MUD Map v2 sources, information and binary packages: [https://github.com/Neop/mudmap2](https://github.com/Neop/mudmap2)
