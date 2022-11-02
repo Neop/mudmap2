@@ -582,7 +582,7 @@ public class World implements BreadthSearchGraph {
 
             for(Path pa: v.getPaths()){
                 Place vi = pa.getOtherPlace(v);
-                if(!vi.getBreadthSearchData().marked && vi != v){
+                if(!vi.getBreadthSearchData().marked && vi != v && !pa.getExit(v).equals("-")){
                     vi.getBreadthSearchData().marked = true;
                     vi.getBreadthSearchData().predecessor = v;
                     queue.addLast(vi);
