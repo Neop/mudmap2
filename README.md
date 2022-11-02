@@ -28,7 +28,7 @@ mvn package
 Note: The correct JAR file is 'mudmap2-2.x.x-jar-with-dependencies.jar', NOT 'mudmap2-2.x.x.jar'! The following description assumes that the former JAR got renamed to 'mudmap2-2.x.x.jar'.
 
 ## Installation
-You will need a Java 7 Runtime Environment (JRE) to run MUD Map and the MUD Map JAR file which you can download (see links above) or compile yourself. Place it wherever you like.
+You will need a [Java 8 Runtime Environment (JRE)](https://www.java.com/en/download/manual.jsp) to run MUD Map and the MUD Map JAR file which you can download (see links above) or compile yourself. Place it wherever you like.
 
 ## Starting MUD Map
 If your operating system is set up to associate JAR file with Java you will be able to start MUD Map with a double click on the JAR file.
