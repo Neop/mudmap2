@@ -6,6 +6,8 @@ A mapping tool for text-based games like text adventures, MUDs and MUSHs.
 License: GPLv3
 Use it at your own risk!
 
+Consider MUD map unmaintained since I don't have enough time and motivation to work on it. It is usable but I likely won't fix issues (unless they are trivial) or add new features. 
+
 ![Screenshot](./docs/Screenshot.png)
 
 ## Requirements:
