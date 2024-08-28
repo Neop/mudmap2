@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import mudmap2.utils.Pair;
 import mudmap2.backend.Layer;
+import mudmap2.backend.Layer.LayerImage;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.WorldCoordinate;
@@ -523,7 +524,7 @@ public class MapPainterDefault implements MapPainter {
         tileFont = g.getFont();
 
         if(tileSize <= 0) return; // Too small to draw
-        
+         
         final float selectionStrokeWidth = getTileSelectionStrokeWidth();
         final int tileBorderWidthScaled = getTileBorderWidth();
 
@@ -570,22 +571,35 @@ public class MapPainterDefault implements MapPainter {
         // do not draw anything if layer does not exist or if it is empty
         if(layer == null || layer.isEmpty()) return;
 
+        int tilesOnScreenX = g.getClipBounds().x / tileSize;
+        int tilesOnScreenY = g.getClipBounds().x / tileSize;
+        
+        // ------------------ draw background images -----------------------
+        for(LayerImage layerImage: layer.GetImages()) {
+            // TODO: alignment
+            int imgX = (int)layerImage.x; // TODO: scale and offset
+            int imgY = (int)layerImage.y;
+            int imgWidth = (int)(layerImage.x * layerImage.scale);
+            int imgHeight = (int)(layerImage.y * layerImage.scale);
+            g.drawImage(layerImage.image, imgX, imgY, imgX + imgWidth, imgY + imgHeight, null);
+        }
+         
         // ------------------ draw the grid --------------------------------
         if(isGridEnabled()){
             g.setColor(Color.lightGray);
-            for(int tileX = (g.getClipBounds().x / tileSize) - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
+            for(int tileX = tilesOnScreenX - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
                 final int x = (int) Math.round((tileX + placeXpxConst) * tileSize);
                 g.drawLine(x, 0, x, (int) graphicsHeight);
             }
-            for(int tileY = (g.getClipBounds().y / tileSize) - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
+            for(int tileY = tilesOnScreenY - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
                 final int y = (int) Math.round((tileY + placeYpxConst) * tileSize);
                 g.drawLine(0, y, (int) graphicsWidth, y);
             }
         }
 
         // ------------------ draw the tiles / places ----------------------
-        for(int tileX = (g.getClipBounds().x / tileSize) - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
-            for(int tileY = (g.getClipBounds().y / tileSize) - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
+        for(int tileX = tilesOnScreenX - 1; tileX < graphicsWidth / tileSize + 1; ++tileX){
+            for(int tileY = tilesOnScreenY - 1; tileY < graphicsHeight / tileSize + 1; ++tileY){
 
                 // place position on the map
                 final int placeX = tileX + placeXOffset;

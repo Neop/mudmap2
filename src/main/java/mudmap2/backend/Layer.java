@@ -23,7 +23,13 @@
 
 package mudmap2.backend;
 
+import java.awt.Image;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,9 +38,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.imageio.ImageIO;
 
 import mudmap2.backend.prquadtree.Quadtree;
 import mudmap2.utils.Pair;
+import org.json.JSONObject;
 
 /**
  * A layer stores places relatively to each other by position on the map.
@@ -49,6 +57,150 @@ public class Layer implements WorldChangeListener {
     String name;
     Quadtree<LayerElement> elements = new Quadtree<>();
 
+    // Describes at which point the image is anchored to the map
+    public enum ImageAlign {
+        Top, Center, Bottom, Left, Right
+    }
+    
+    /**
+     * This class describes where to draw an image on the layer
+     */
+    public class LayerImage {
+        // Image name / description
+        public String name;
+        // image data
+        public byte[] data;
+        // image object for drawing
+        public Image image;
+        
+        // Image scaling (normalized to 1 tile width)
+        public double scale = 1.0;
+        
+        // Image coordinate on the layer
+        public double x = 0, y = 0;
+        
+        // Alignment of the image
+        public ImageAlign horizontalAlign = ImageAlign.Center;
+        public ImageAlign verticalAlign = ImageAlign.Center;
+        
+        /**
+         * Constructs an image
+         * @param name image name / description
+         * @param sourceFile source file to load the image from
+         * @param scale image scaling
+         * @param x coordinate X
+         * @param y coordinate Y
+         * @param horAlign horizontal alignment
+         * @param verAlign vertical alignment
+         */
+        public LayerImage(String name, String sourceFile, double scale, double x, double y, ImageAlign horAlign, ImageAlign verAlign) throws IOException {
+           this.name = name;
+           this.scale = scale;
+           this.x = x;
+           this.y = y;
+           horizontalAlign = horAlign;
+           verticalAlign = verAlign;
+           // read file
+           data = Files.readAllBytes(java.nio.file.Path.of(sourceFile));
+           InputStream stream = new ByteArrayInputStream(data);
+           image = ImageIO.read(stream);
+        }
+        
+        /**
+         * Constructs an image from JSON
+         * @param json source JSON
+         * @throws java.io.IOException
+         */
+        public LayerImage(JSONObject json) throws IOException {
+            FromJSON(json);
+        }
+         
+        /**
+         * Updates the data of this image from a JSONObject
+         * @param json 
+         */
+        private void FromJSON(JSONObject json) throws IOException{
+            name = json.getString("name");
+            x = json.getFloat("x");
+            y = json.getFloat("y");
+            scale = json.getFloat("scale");
+            horizontalAlign = json.getEnum(ImageAlign.class, "hAlign");
+            verticalAlign = json.getEnum(ImageAlign.class, "vAlign");
+            data = Base64.getDecoder().decode(json.getString("data"));
+            InputStream stream = new ByteArrayInputStream(data);
+            image = ImageIO.read(stream);
+        }
+        
+        /**
+         * Creates a JSONObject describing this image
+         * @return 
+         */
+        public JSONObject ToJSON(){
+            JSONObject json = new JSONObject();
+            json.put("name", name);
+            json.put("x", x);
+            json.put("y", y);
+            json.put("vAlign", verticalAlign);
+            json.put("hAlign", horizontalAlign);
+            json.put("scale", scale);
+            json.put("data", Base64.getEncoder().encodeToString(data));
+            return json;
+        }
+        
+        /**
+         * Gets the width of the image on the map in tile widths
+         * @return 
+         */
+        public double GetWidth(){
+            return 1; // TODO
+        }
+        
+        /**
+         * Gets the height of the image on the map in tile heights
+         * @return 
+         */
+        public double GetHeight(){
+            return 1; // TODO
+        }
+    }
+    // List of images. The order defines the draw order!
+    LinkedList<LayerImage> images = new LinkedList<>();
+    
+    /**
+     * Gets all images of the current layer
+     * @return list of images or empty list
+     */
+    public LinkedList<LayerImage> GetImages() {return images;}
+    /**
+     * Gets all images at the given position
+     * @param tileX tile X position
+     * @param tileY tile Y position
+     * @return list of images or empty list
+     */
+    public LinkedList<LayerImage> GetImagesOnTile(double tileX, double tileY)
+    {
+        LinkedList<LayerImage> ret = new LinkedList<>();
+        for(LayerImage image: images) {
+            if(image.x <= tileX && image.x + image.GetWidth() >= tileX
+                    && image.y <= tileY && image.y + image.GetHeight() >= tileY)
+            {
+                ret.add(image);
+            }
+        }
+        return ret;
+    }
+    /**
+     * Adds an image to the layer
+     * @param image 
+     */
+    public void AddImage(LayerImage image) {images.add(image);}
+    /**
+     * Creates an image from JSON and adds it to the layer
+     * @param json
+     * @throws IOException 
+     */
+    public void AddImage(JSONObject json) throws IOException {images.add(new LayerImage(json));}
+    
     // for quadtree optimization
     int maxX = 0;
     int minX = 0;

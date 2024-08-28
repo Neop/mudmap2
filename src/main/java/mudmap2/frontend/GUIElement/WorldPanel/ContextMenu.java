@@ -45,6 +45,9 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
     private static final String ACTION_CONNECT_CHILD = "connect_child";
     private static final String ACTION_CREATE_CHILD_NEW_LAYER = "create_child_new_layer";
     private static final String ACTION_CREATE_PLACEHOLDER = "create_placeholder";
+    private static final String ACTION_CREATE_IMAGE = "create_image";
+    private static final String ACTION_EDIT_IMAGE = "edit_image";
+    private static final String ACTION_REMOVE_IMAGE = "remove_image";
     private static final String ACTION_EXPAND_ALL = "expand_all";
     private static final String ACTION_EXPAND_NORTH = "expand_north";
     private static final String ACTION_EXPAND_NORTHEAST = "expand_northeast";
@@ -227,7 +230,14 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
             MenuHelper.addMenuItem(this, "New place", KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), new PlaceDialog(rootFrame, parent.getWorld(), layer, posX, posY));
             MenuHelper.addMenuItem(this, "New placeholder", ContextMenu.ACTION_CREATE_PLACEHOLDER, KeyStroke.getKeyStroke(KeyEvent.VK_F, 0), this);
         }
-
+        
+        // adding images should always be possible
+        MenuHelper.addMenuItem(this, "New image", ContextMenu.ACTION_CREATE_IMAGE, KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), this);
+        if(!layer.GetImagesOnTile(posX, posY).isEmpty()) {
+            MenuHelper.addMenuItem(this, "Edit image", ContextMenu.ACTION_EDIT_IMAGE, KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), this);
+            MenuHelper.addMenuItem(this, "Remove image", ContextMenu.ACTION_REMOVE_IMAGE, KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), this);
+        }
+        
         //"Expand" menu
         addExpansionMenu();
 
@@ -446,6 +456,17 @@ public class ContextMenu extends JPopupMenu implements ActionListener {
                     }
                 }
                 break;
+                
+            case ContextMenu.ACTION_CREATE_IMAGE:
+                // TODO: show image creation dialog
+                break;
+            case ContextMenu.ACTION_EDIT_IMAGE:
+                // TODO: show image edit dialog
+                break;
+            case ContextMenu.ACTION_REMOVE_IMAGE:
+                // TODO: show image removal dialog
+                break;
+                
             default:
                 System.out.println(StringHelper.join("Invalid action command ", e.getActionCommand()));
                 JOptionPane.showMessageDialog(this, StringHelper.join("Runtime Error: Invalid action command ", e.getActionCommand()));

@@ -37,6 +37,7 @@ import mudmap2.backend.Layer;
 import mudmap2.backend.Path;
 import mudmap2.backend.Place;
 import mudmap2.backend.InformationColor;
+import mudmap2.backend.Layer.LayerImage;
 import mudmap2.backend.World;
 import mudmap2.backend.WorldCoordinate;
 import mudmap2.backend.WorldFileReader.WorldFile;
@@ -267,6 +268,21 @@ public class WorldFileJSON extends WorldFile {
                             // set layer name
                             l.setName(layer.getString("name"));
                         }
+                        
+                        // images
+                        if(layer.has("images")){
+                            JSONArray jsonImages = layer.getJSONArray("images");
+                            for(Integer imgNum = 0; imgNum < jsonImages.length(); imgNum++){
+                                try {
+                                    JSONObject jsonImage = jsonImages.getJSONObject(imgNum);
+                                    l.AddImage(jsonImage);
+                                } catch(IOException | JSONException ex) {
+                                    System.out.println(ex.getLocalizedMessage());
+                                    JOptionPane.showMessageDialog(null, "Could not load layer image, removing image", "Loading world", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        }
+                        
                         world.addLayer(l);
                     }
                 }
@@ -604,6 +620,16 @@ public class WorldFileJSON extends WorldFile {
                 layerObj.put("centerY", layer.getCenterY());
                 if(layer.hasName()) layerObj.put("name", layer.getName());
 
+                // images
+                if(!layer.GetImages().isEmpty()) {
+                    JSONArray jsonImages = new JSONArray();
+                    layerObj.put("images", jsonImages);
+                    
+                    for(LayerImage image: layer.GetImages()){
+                        jsonImages.put(image.ToJSON());
+                    }
+                }
+                
                 layers.put(layerObj);
             }
         }
